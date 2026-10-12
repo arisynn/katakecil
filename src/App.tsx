@@ -27,8 +27,12 @@ export default function App(){
     updatePrivacy();
     document.addEventListener('visibilitychange',updatePrivacy);
     window.addEventListener('pageshow',updatePrivacy);
+    // Android file picker can bring this page back to focus without a
+    // visibilitychange event. Never leave the privacy curtain stuck on.
+    const onFocus=()=>{updatePrivacy();window.setTimeout(updatePrivacy,150);};
+    window.addEventListener('focus',onFocus);
     window.addEventListener('quiet:navigate',updatePrivacy);
-    return ()=>{document.documentElement.classList.remove('kk-backgrounded');document.removeEventListener('visibilitychange',updatePrivacy);window.removeEventListener('pageshow',updatePrivacy);window.removeEventListener('quiet:navigate',updatePrivacy);};
+    return ()=>{document.documentElement.classList.remove('kk-backgrounded');document.removeEventListener('visibilitychange',updatePrivacy);window.removeEventListener('pageshow',updatePrivacy);window.removeEventListener('focus',onFocus);window.removeEventListener('quiet:navigate',updatePrivacy);};
   },[]);
   const isReader = path.startsWith('/baca/');
   const slug=isReader?decodeURIComponent(path.split('/')[2]||''):'';

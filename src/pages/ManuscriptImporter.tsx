@@ -15,6 +15,8 @@ const safeId=(value:string)=>slugify(value)||'cerita-baru';
 
 export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const [reading,setReading]=useState(false);
+ const [pickedName,setPickedName]=useState('');
+ const seenFiles=useRef<WeakSet<File>>(new WeakSet());
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
@@ -37,17 +39,32 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const selected=chapters.filter(c=>c.include);
  const dirty=chapters.some(c=>c.confidence==='periksa'&&c.include);
  const importFile=async(file?:File)=>{
-  if(!file)return;setError('');setSuccess('');setParsed(null);setStep('upload');setChapters([]);setReading(true);
+  if(!file)return;
+  setPickedName(file.name||'Berkas tanpa nama');
+  setError('');setSuccess('');setParsed(null);setStep('upload');setChapters([]);setReading(true);
   try{
    if(file.size>MAX_FILE)throw Error('Maksimal 18 MB untuk EPUB; 8 MB untuk Markdown/TXT.');
    const kind=file.name.toLowerCase();
+   const mime=file.type.toLowerCase();
    let result:ParsedManuscript;
-   if(kind.endsWith('.epub'))result=await parseEpubFile(file);
-   else if(/\.(md|txt)$/.test(kind))result=parsePlainManuscript(await file.text(),file.name);
+   if(kind.endsWith('.epub')||mime==='application/epub+zip')result=await parseEpubFile(file);
+   else if(/\.(md|txt)$/.test(kind)||mime==='text/markdown'||mime==='text/plain')result=parsePlainManuscript(await file.text(),file.name);
    else throw Error('Format yang didukung: .epub, .md, atau .txt.');
    if(!result.chapters.length)throw Error('Tidak ditemukan episode untuk diimpor.');
    setParsed(result);setChapters(result.chapters);setBookTitle(result.title);setStep('review');
   }catch(e){setError(errorText(e));}finally{setReading(false);}
+ };
+ // Android's system document picker may return an input event, a change event,
+ // or both. Process exactly once per File object and reset the field so choosing
+ // the very same file again still triggers a new selection.
+ const handleFileSelection=(event:React.FormEvent<HTMLInputElement>)=>{
+  const input=event.currentTarget;
+  const file=input.files?.item(0);
+  if(!file)return; // picker cancelled; keep the previous review intact
+  if(seenFiles.current.has(file))return;
+  seenFiles.current.add(file);
+  input.value='';
+  void importFile(file);
  };
  const update=(i:number,changes:Partial<ImportChapter>)=>setChapters(prev=>prev.map((x,index)=>index===i?{...x,...changes}:x));
  const autoNumber=()=>setChapters(prev=>assignEpisodeNumbers(prev,occupiedNumbers));
@@ -93,7 +110,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
    let refreshWarning='';
    try{await onChanged();}catch{refreshWarning=' Data berhasil disimpan, tetapi daftar novel belum berhasil dimuat ulang. Segarkan halaman Studio.';}
    setSuccess(`${Number(data?.imported_count??chosen.length)} episode disimpan sebagai draft di novel “${title}”.${coverWarning}${refreshWarning}`);
-   setChapters([]);setParsed(null);setStep('upload');
+   setChapters([]);setParsed(null);setStep('upload');setPickedName('');
    setDestination(bookId);
   }catch(e){setError(`${errorText(e)}${bookCreated?' Novel baru sudah dibuat sebagai privat, tetapi impor gagal. Buka novel tersebut untuk mengulang impor.':''}`);}
   finally{setSaving(false);}
@@ -104,9 +121,20 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
   <div className="v4-progress"><span className="active"><FileUp size={15}/> 1 · Unggah</span><ArrowRight size={16}/><span className={step==='review'?'active':''}><BookOpen size={15}/> 2 · Periksa</span><ArrowRight size={16}/><span><ShieldCheck size={15}/> 3 · Draft</span></div>
   {error&&<div className="studio-error" role="alert">{error}</div>}
   {success&&<div className="studio-success" role="status">{success} <button className="studio-light-button" onClick={()=>navigate(`/studio/cerita/${destination}`)}>Lihat novel <ArrowRight size={16}/></button></div>}
-  <section className="studio-panel v4-upload-panel">
-   <label className="v4-dropzone"><UploadCloud size={32}/><strong>{reading?'Menganalisis berkas…':parsed?'Ganti berkas':'Pilih EPUB, MD, atau TXT dari HP'}</strong><small>Maksimum EPUB 18 MB. Berkas diproses di browser. Draft tetap privat setelah disimpan.</small>
-    <input type="file" accept={ACCEPT} disabled={reading||saving} onChange={e=>{void importFile(e.target.files?.[0]);e.currentTarget.value='';}}/></label>
+  <section className="studio-panel v4-upload-panel" aria-label="Unggah berkas naskah">
+   <label className={`v4-dropzone${reading?' v4-upload-reading':''}`}>
+    <UploadCloud size={32} aria-hidden="true"/>
+    <strong>{reading?'Menganalisis naskah…':parsed?'Pilih berkas lain':'Pilih EPUB, MD, atau TXT dari HP'}</strong>
+    <small>{reading?`Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.`:'Maksimum 18 MB. Berkas dibaca di browser dan tidak otomatis diterbitkan.'}</small>
+    <input type="file" name="manuscript" aria-label="Pilih berkas EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading||saving} onInput={handleFileSelection} onChange={handleFileSelection}/>
+   </label>
+   <div className="v4-picker-status" role="status" aria-live="polite">
+    {reading?<><span className="v4-picker-spinner" aria-hidden="true"/> Sedang memproses {pickedName}. Tunggu sampai daftar episode muncul.</>
+      :parsed?<>✓ {pickedName} berhasil dibaca. Periksa hasilnya di bawah sebelum menyimpan.</>
+      :error&&pickedName?<>Berkas {pickedName} belum berhasil diproses. Lihat pesan kesalahan di atas; kamu boleh memilihnya lagi.</>
+      :success?<>Impor selesai. Kamu bisa memilih berkas berikutnya.</>
+      :<>Setelah memilih berkas, nama file dan progres pembacaan akan muncul di sini. Jika tidak, coba pilih dari aplikasi File/Files di HP.</>}
+   </div>
   </section>
   {parsed&&step==='review'&&<>
    <section className="studio-panel v4-metadata">

@@ -1,3 +1,7 @@
+# KataKecil V4.1.1
+
+**Perbaikan upload Android:** lihat [RELEASE_V4.1.1.md](RELEASE_V4.1.1.md) untuk instruksi dan hasil pengujian. Tidak perlu migrasi Supabase/ENV tambahan.
+
 # KataKecil V4.1 — Smart Manuscript Importer + Mobile Stability + Content Protection
 
 Website publikasi cerita pribadi berbasis React + Vite + Supabase. V4 meneruskan V1–V3 **tanpa merombak mesin Reader** dan tanpa menimpa jadwal novel pertama.

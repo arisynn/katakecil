@@ -1,7 +1,17 @@
 .v4-progress{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 22px;color:#a1a598;font-size:11px;font-weight:700}
 .v4-progress span{display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:20px;background:#f4f2ec}.v4-progress span.active{background:#e7eee4;color:#4d7559}
 .v4-upload-panel{padding:16px}.v4-dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;background:#fafbf7;border:2px dashed #cddbc9;border-radius:13px;padding:32px 18px;text-align:center;cursor:pointer;color:#779581;min-height:180px}
-.v4-dropzone strong{color:#45634e;font-size:14px}.v4-dropzone small{max-width:330px;line-height:1.8;color:#8d968a;font-size:11px}.v4-dropzone input{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden}.v4-dropzone:focus-within{outline:3px solid #b0cbb3}
+.v4-dropzone strong{color:#45634e;font-size:14px}.v4-dropzone small{max-width:330px;line-height:1.8;color:#8d968a;font-size:11px}.v4-dropzone{position:relative;isolation:isolate;overflow:hidden}
+/* Android Chrome: a 1px input inside a label can return from SAF picker
+   without reliably delivering file selection. The real native control now
+   fills the touch surface, while text and icons remain visible underneath. */
+.v4-dropzone input[type="file"]{display:block;position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;font-size:16px}
+.v4-dropzone input[type="file"]:disabled{cursor:wait}
+.v4-dropzone:has(input:focus-visible){outline:3px solid #b0cbb3;outline-offset:3px}
+.v4-upload-reading{opacity:.85}
+.v4-picker-status{margin-top:12px;border-radius:8px;background:#f5f8f3;padding:12px 14px;font-size:12px;line-height:1.7;color:#506d56;min-height:44px}
+.v4-picker-spinner{display:inline-block;width:12px;height:12px;border:2px solid #b8cdb9;border-top-color:#42654c;border-radius:50%;vertical-align:-2px;margin-right:6px;animation:v4-spin 800ms linear infinite}
+@keyframes v4-spin{to{transform:rotate(360deg)}}.v4-dropzone:focus-within{outline:3px solid #b0cbb3}
 .v4-metadata-grid{display:flex;align-items:flex-start;gap:20px}.v4-metadata-grid>div{display:flex;flex-direction:column;gap:9px}.v4-metadata-grid strong{font:24px Georgia,serif;color:#334b3a}.v4-metadata-grid small{font-size:11px;color:#8b9888}.v4-metadata-grid p{font-size:11px;color:#697767;line-height:1.7}.v4-cover{height:133px;width:91px;object-fit:cover;border-radius:5px;box-shadow:0 6px 14px #263a2a25;flex:none}
 .v4-warning{margin:13px 0;background:#fff7e9;border:1px solid #eedbc1;border-radius:10px;color:#997047;padding:12px;display:flex;gap:9px;align-items:flex-start;font-size:11px;line-height:1.7}
 .v4-target-fields{margin-top:16px;display:grid;gap:15px}.v4-target>.studio-label{margin-bottom:11px}.v4-actions{display:flex;flex-wrap:wrap;gap:8px;margin:17px 0}.v4-actions button{font-size:11px}
