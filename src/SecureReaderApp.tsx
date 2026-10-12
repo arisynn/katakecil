@@ -1,5 +1,6 @@
 import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {loadReaderSegment,loadReleasedIndex,type ReleasedEpisode,type ReaderSegment} from './data/secureReader';
+import {ReaderSegmentWindow} from './utils/readerSegmentWindow';
 import {ReaderPage,type ReaderGeometry} from './components/ReaderPage';
 import {PageMeasurer} from './components/PageMeasurer';
 import {ReaderControls} from './components/ReaderControls';
@@ -24,6 +25,8 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const bookmarkKey=`kk-secure-bookmarks-${bookId}`;
  const [index,setIndex]=useState<ReleasedEpisode[]>([]);
  const indexRef=useRef<ReleasedEpisode[]>([]);
+ // At most three 1,800-character segments are held in memory, never persisted.
+ const segments=useMemo(()=>new ReaderSegmentWindow<ReaderSegment>((ep,part)=>loadReaderSegment(bookId,ep,part),3),[bookId]);
  const [segment,setSegment]=useState<ReaderSegment|null>(null);
  const segmentRef=useRef<ReaderSegment|null>(null);
  const [error,setError]=useState('');
@@ -62,19 +65,31 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const storedPos=()=>readLocal<{ep:number;part:number;offset:number}|null>(progressKey,null);
  const persistProgress=(ep:number,part:number,offset:number)=>{try{localStorage.setItem(progressKey,JSON.stringify({ep,part,offset}));}catch{}};
 
+ // Once a segment is available, quietly prepare its neighbors before the reader needs them.
+ const prefetchNeighbors=useCallback((current:ReaderSegment)=>{
+  if(current.part+1<current.totalParts){segments.prefetch(current.episodeNumber,current.part+1);}
+  else {
+   const i=indexRef.current.findIndex(x=>x.episode_number===current.episodeNumber);
+   if(i>=0&&indexRef.current[i+1])segments.prefetch(indexRef.current[i+1].episode_number,0);
+  }
+  if(current.part>0)segments.prefetch(current.episodeNumber,current.part-1);
+ },[segments]);
  const loadPart=useCallback(async(ep:number,part:number,edge:'start'|'end'|'offset'='start',offset=0)=>{
   if(!indexRef.current.some(x=>x.episode_number===ep))return;
   const token=++requestRef.current;
-  setLoading(true);setError('');pendingEdge.current=edge;pendingOffset.current=offset;
+  // Fast-path: if the previous screen already prefetched it, never display loading.
+  const warmed=segments.peek(ep,part);
+  setLoading(!warmed);setError('');pendingEdge.current=edge;pendingOffset.current=offset;
   try{
-   const incoming=await loadReaderSegment(bookId,ep,part);
+   const incoming=await segments.get(ep,part);
    if(token!==requestRef.current)return;
    segmentRef.current=incoming;
    setSegment(incoming);setPages([]);setPageIndex(0);
    persistProgress(ep,part,edge==='offset'?offset:0);
+   prefetchNeighbors(incoming);
   }catch(e){if(token===requestRef.current)setError(e instanceof Error?e.message:'Tidak bisa memuat bagian cerita.');}
   finally{if(token===requestRef.current)setLoading(false);}
- },[bookId,progressKey]);
+ },[segments,prefetchNeighbors,progressKey]);
  useEffect(()=>{
   let active=true;
   void (async()=>{
@@ -90,8 +105,8 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
     await loadPart(wanted,useSaved?saved!.part:0,useSaved?'offset':'start',useSaved?saved!.offset:0);
    }catch(e){if(active){setError(e instanceof Error?e.message:'Daftar episode tidak tersedia.');setLoading(false);}}
   })();
-  return()=>{active=false;requestRef.current++;};
- },[bookId,episodeNumber,loadPart]);
+  return()=>{active=false;requestRef.current++;segments.clear();};
+ },[bookId,episodeNumber,loadPart,segments]);
  useEffect(()=>{
   const resize=()=>setDimensions(viewport());const full=()=>{setFullscreen(!!document.fullscreenElement);resize();};
   window.addEventListener('resize',resize);document.addEventListener('fullscreenchange',full);
