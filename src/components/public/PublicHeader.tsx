@@ -40,7 +40,12 @@ export default function PublicHeader({path,theme,preference,onPreferenceChange}:
       <nav className="site-nav kk-desktop-nav" aria-label="Navigasi pembaca">
         {links.map(link=><button key={link.to} type="button" onClick={()=>navigate(link.to)} className={`nav-item ${active(link.to)?'v53-nav-current':''}`} aria-current={active(link.to)?'page':undefined}>{link.label==='Penulis'?'Tentang Penulis':link.label}</button>)}
       </nav>
-      <div className="site-nav-right"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div>
+      <div className="site-nav-right">
+        <button type="button" className="site-studio-link" onClick={()=>navigate('/studio')} aria-label="Masuk ke Studio Penulis">
+          Studio Penulis
+        </button>
+        <ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/>
+      </div>
     </div></header>
     <nav className="kk-public-bottom-nav" aria-label="Navigasi publik mobile">
       {links.map(link=><button key={link.to} type="button" className={active(link.to)?'kk-public-active':''} aria-current={active(link.to)?'page':undefined} onClick={()=>navigate(link.to)}><link.icon size={20}/><span>{link.label}</span></button>)}

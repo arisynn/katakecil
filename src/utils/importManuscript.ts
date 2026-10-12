@@ -52,7 +52,7 @@ export function titleInfo(raw: string): {number: number | null; title: string; c
   const match = title.match(/^(?:episode|bab|chapter|chap\.?|bagian cerita)\s*(?:ke[- ]?)?(\d{1,4}|[IVXLCDM]{1,9})(?:\s*[.:—–-]\s*|\s+)?(.*)$/i);
   if (match) {
     let number = /^\d+$/.test(match[1]) ? Number(match[1]) : fromRoman(match[1]);
-    if (!Number.isSafeInteger(number) || number < 0 || number > 9999) number = null;
+    if (number === null || !Number.isSafeInteger(number) || number < 0 || number > 9999) number = null;
     return {number,title:title || 'Episode',confidence:number === null?'sedang':'tinggi',kind:'chapter'};
   }
   if (/^(?:prolog|epilog|interlude|interlud|prakata|pendahuluan|penutup)$/i.test(title)) return {number:null,title,confidence:'sedang',kind:'chapter'};
