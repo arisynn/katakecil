@@ -252,9 +252,16 @@
  .site-shell .library-card,.studio-app .studio-panel{transition:none!important}
  .site-shell .hero-grain{animation:none!important}
 }
-@media (max-width:767px) and (not (backdrop-filter:blur(1px))){
- .site-shell .site-header,.studio-app .studio-mobile-top,
- .studio-app .studio-bottom-nav,.v53-theme-toggle{backdrop-filter:none;-webkit-backdrop-filter:none}
+@media (max-width:767px){
+  @supports not (backdrop-filter: blur(1px)){
+    .site-shell .site-header,
+    .studio-app .studio-mobile-top,
+    .studio-app .studio-bottom-nav,
+    .v53-theme-toggle{
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+  }
 }
 /* Quiet decorative assets: original illustrations, never book covers. */
 .v53-library-scene,.v53-about-scene,.v53-studio-scene{display:none}
