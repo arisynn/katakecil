@@ -12,6 +12,8 @@ import BookSections from './BookSections';
 import TrashManager from './TrashManager';
 import {trashItem} from '../data/trash';
 import { toWibInput } from '../utils/releasePlanning';
+import ThemeToggle from '../components/ThemeToggle';
+import { useUiTheme, type UiTheme } from '../hooks/useUiTheme';
 
 const BOOK_STATUS: Record<Book['status'], string>={ongoing:'Berlangsung', completed:'Tamat', hiatus:'Jeda'};
 function B({children,to,className='',disabled=false}:{children:React.ReactNode;to?:string;className?:string;disabled?:boolean}){
@@ -19,30 +21,46 @@ function B({children,to,className='',disabled=false}:{children:React.ReactNode;t
 }
 const errMsg = (e:unknown)=>e instanceof Error?e.message:String(e);
 function Busy({text='Memuat Studio...'}:{text?:string}){return <div className="studio-busy"><div className="loading-orb"/><p>{text}</p></div>;}
-function Login({onSuccess}:{onSuccess:()=>void}){
+function Login({onSuccess,theme}:{onSuccess:()=>void;theme:UiTheme}){
   const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');
   const submit=async(e:React.FormEvent)=>{e.preventDefault();if(!supabase)return;setBusy(true);setError('');try{const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;onSuccess();}catch(e){setError(errMsg(e));}finally{setBusy(false);}};
-  return <div className="studio-login-wrap"><B to="/" className="studio-backlink"><ArrowLeft size={17}/> Kembali ke perpustakaan</B><form className="studio-login" onSubmit={submit}><div className="studio-login-icon"><Feather size={29}/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Selamat datang<br/><i>di Studio.</i></h1><p>Masuk untuk menulis, menyimpan draft, dan mengatur penerbitan ceritamu.</p>
+  return <div className="studio-login-wrap" data-kk-theme={theme}><B to="/" className="studio-backlink"><ArrowLeft size={17}/> Kembali ke perpustakaan</B><form className="studio-login" onSubmit={submit}><div className="studio-login-icon"><Feather size={29}/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Selamat datang<br/><i>di Studio.</i></h1><p>Masuk untuk menulis, menyimpan draft, dan mengatur penerbitan ceritamu.</p>
    <label>Email<input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="email@contoh.com"/></label><label>Kata sandi<input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••"/></label>
    {error&&<div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy} type="submit">{busy?'Masuk…':'Masuk ke Studio'} <ArrowRight size={17}/></button><small><LockKeyhole size={13}/> Hanya akun penulis yang diizinkan.</small></form></div>;
 }
-function Nav({path}:{path:string}) {
+function Nav({path,theme,onToggle}:{path:string;theme:UiTheme;onToggle:()=>void}) {
  const [menu,setMenu]=useState(false);
+ const [more,setMore]=useState(false);
  const tabs=[{p:'/studio',label:'Beranda',icon:House},{p:'/studio/cerita',label:'Karya',icon:Library},{p:'/studio/impor',label:'Impor',icon:UploadCloud},{p:'/studio/jadwal',label:'Jadwal',icon:CalendarDays},{p:'/studio/database',label:'Data',icon:Database},{p:'/studio/sampah',label:'Sampah',icon:Trash2}];
- useEffect(()=>{setMenu(false);},[path]);
+ useEffect(()=>{setMenu(false);setMore(false);},[path]);
+ useEffect(()=>{
+  if(!more)return;
+  const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setMore(false);};
+  document.addEventListener('keydown',onKey);
+  return ()=>document.removeEventListener('keydown',onKey);
+ },[more]);
  const active=(p:string)=>p==='/studio'?path===p:path.startsWith(p);
  return <><aside className={`studio-sidebar ${menu?'studio-sidebar-visible':''}`}>
   <B to="/" className="studio-logo"><span><Feather size={20}/></span>KataKecil.</B><div className="studio-sidebar-label">RUANG KARISYONO</div><div className="studio-side-nav">{tabs.map(tab=><B key={tab.p} to={tab.p} className={`studio-nav-link ${active(tab.p)?'studio-nav-active':''}`}><tab.icon size={18}/>{tab.label}{active(tab.p)&&<span className="studio-nav-active-dot"/>}</B>)}</div>
   <div className="studio-sidebar-bottom"><B to="/" className="studio-nav-link"><BookOpen size={18}/>Lihat website <ArrowRight size={15}/></B></div>
- </aside><div className="studio-mobile-top"><B to="/studio" className="studio-logo"><span><Feather size={18}/></span>Studio KataKecil.</B><div className="studio-mobile-actions"><button className="studio-menu-icon" onClick={()=>void supabase?.auth.signOut()} aria-label="Keluar dari Studio"><LogOut size={20}/></button><button className="studio-menu-icon" onClick={()=>setMenu(!menu)} aria-label={menu?"Tutup navigasi":"Buka navigasi"}>{menu?<X size={20}/>:<Menu size={20}/>}</button></div></div>
-  <nav className="studio-bottom-nav" aria-label="Navigasi Studio">{tabs.map(tab=><B key={tab.p} to={tab.p} className={active(tab.p)?'studio-bottom-active':''}><tab.icon size={21}/><span>{tab.label}</span></B>)}</nav>
+ </aside><div className="studio-mobile-top"><B to="/studio" className="studio-logo"><span><Feather size={18}/></span>Studio KataKecil.</B><div className="studio-mobile-actions"><ThemeToggle theme={theme} onToggle={onToggle}/><button className="studio-menu-icon" onClick={()=>void supabase?.auth.signOut()} aria-label="Keluar dari Studio"><LogOut size={20}/></button><button className="studio-menu-icon" onClick={()=>setMenu(!menu)} aria-label={menu?"Tutup navigasi":"Buka navigasi"}>{menu?<X size={20}/>:<Menu size={20}/>}</button></div></div>
+  <nav className="studio-bottom-nav" aria-label="Navigasi Studio">{tabs.slice(0,4).map(tab=><B key={tab.p} to={tab.p} className={active(tab.p)?'studio-bottom-active':''}><tab.icon size={21}/><span>{tab.label}</span></B>)}
+   <button type="button" aria-label="Menu lainnya" aria-haspopup="dialog" aria-expanded={more} className={more||tabs.slice(4).some(t=>active(t.p))?'studio-bottom-active':''} onClick={()=>setMore(previous=>!previous)}><Menu size={21}/><span>Lainnya</span></button>
+  </nav>
+  {more&&<div className="v53-more-backdrop" role="presentation" onClick={()=>setMore(false)}>
+    <section role="dialog" aria-modal="true" aria-label="Menu Studio lainnya" className="v53-more-sheet" onClick={e=>e.stopPropagation()}>
+      <div className="v53-more-head"><strong>Kelola Studio</strong><button type="button" aria-label="Tutup menu" onClick={()=>setMore(false)}><X size={20}/></button></div>
+      {tabs.slice(4).map(tab=><B key={tab.p} to={tab.p} className="v53-more-link"><tab.icon size={19}/>{tab.label}<ChevronRight size={18}/></B>)}
+      <B to="/" className="v53-more-link"><BookOpen size={19}/>Lihat website<ChevronRight size={18}/></B>
+    </section>
+  </div>}
  </>;
 }
 function Pill({episode}:{episode:Episode}){const status=episodeStatus(episode);return <span className={`studio-pill ${status==='Terbit'?'pill-live':status==='Terjadwal'?'pill-scheduled':'pill-draft'}`}>{status}</span>}
 function Dashboard({books,episodes,user}:{books:Book[];episodes:Episode[];user:User}){
  const draft=episodes.filter(e=>episodeStatus(e)==='Draft');const live=episodes.filter(e=>episodeStatus(e)==='Terbit');const scheduled=episodes.filter(e=>episodeStatus(e)==='Terjadwal').sort((a,b)=>new Date(a.release_at!).getTime()-new Date(b.release_at!).getTime());
  const recent=draft.sort((a,b)=>new Date(b.updated_at).getTime()-new Date(a.updated_at).getTime())[0];const recentBook=books.find(b=>b.id===recent?.book_id);
- return <><div className="studio-page-head"><span className="studio-kicker">STUDIO KARISYONO</span><h1>Halo, <i>Karisyono.</i></h1><p>Semua ceritamu, dalam satu ruang yang tenang.</p></div>
+ return <><div className="studio-page-head"><span className="studio-kicker">STUDIO KARISYONO</span><h1>Halo, <i>Karisyono.</i></h1><p>Semua ceritamu, dalam satu ruang yang tenang.</p><div className="v53-studio-scene" aria-hidden="true"/></div>
  <div className="studio-stats"><div><strong>{books.length.toString().padStart(2,'0')}</strong><span>Novel</span><Library size={19}/></div><div><strong>{draft.length.toString().padStart(2,'0')}</strong><span>Draft</span><FilePenLine size={19}/></div><div><strong>{live.length.toString().padStart(2,'0')}</strong><span>Terbit</span><BookOpen size={19}/></div></div>
  <div className="studio-dashboard-grid"><section className="studio-panel studio-continue"><div className="studio-panel-top"><h2>Lanjutkan menulis</h2><FilePenLine size={19}/></div>
  {recent&&recentBook?<><p className="studio-panel-eyebrow">DRAFT TERAKHIR</p><h3>Episode {recent.episode_number} — {recent.title}</h3><p className="studio-muted">{recentBook.title}</p><B to={`/studio/editor/${recent.id}`} className="studio-primary">Buka editor <ArrowRight size={18}/></B></>:<><div className="studio-panel-empty"><Feather size={27}/><p>Belum ada draft. Mulai dari ide pertamamu.</p></div><B to="/studio/impor" className="studio-primary">Impor naskah <ArrowRight size={17}/></B></>}
@@ -139,6 +157,7 @@ function Schedule({books,episodes}:{books:Book[];episodes:Episode[]}){
  return <><div className="studio-page-head"><span className="studio-kicker">KALENDER PUBLIKASI</span><h1>Jadwal <i>terbit.</i></h1><p>Semua waktu ditampilkan dalam WIB (UTC+7).</p></div><div className="studio-panel studio-schedule"><div className="studio-panel-top"><h2>Episode berikutnya</h2><CalendarDays size={19}/></div>{upcoming.length?upcoming.map(ep=><B to={`/studio/editor/${ep.id}`} key={ep.id} className="studio-schedule-row"><div className="studio-schedule-icon"><CalendarDays size={21}/></div><div><strong>{ep.title}</strong><small>{books.find(b=>b.id===ep.book_id)?.title}</small><em>{formatWib(ep.release_at)}</em></div><ChevronRight size={18}/></B>):<div className="studio-panel-empty"><Clock3 size={32}/><p>Belum ada jadwal terbit. Buka editor episode dan pilih waktu rilis.</p></div>}</div></>;
 }
 export default function Studio({path}:{path:string}) {
+ const {theme,toggleTheme}=useUiTheme();
  const userIdRef=useRef<string|null>(null);
  const [user,setUser]=useState<User|null>(null);const [authorized,setAuthorized]=useState(false);const [authLoading,setAuthLoading]=useState(true);const [books,setBooks]=useState<Book[]>([]);const [episodes,setEpisodes]=useState<Episode[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState('');
  const refresh=useCallback(async()=>{try{const result=await getStudioLibrary();setBooks(result.books);setEpisodes(result.episodes);setError('');}catch(e){setError(errMsg(e));}finally{setLoading(false);}},[]);
@@ -185,11 +204,11 @@ export default function Studio({path}:{path:string}) {
  }catch(e){setError(errMsg(e));}};
  if(!isConfigured)return <div className="studio-unavailable"><Feather size={36}/><h1>Hubungkan Studio ke Supabase</h1><p>Untuk mengaktifkan login dan publikasi, isi variabel VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY, lalu jalankan migrasi V2 dan daftarkan akun penulis.</p><B to="/" className="studio-primary">Kembali ke perpustakaan</B></div>;
  if(authLoading)return <Busy text="Memverifikasi akses Karisyono…"/>;
- if(!user)return <Login onSuccess={()=>void checkAuth()}/>;
+ if(!user)return <Login theme={theme} onSuccess={()=>void checkAuth()}/>;
  if(!authorized)return <div className="studio-unavailable"><LockKeyhole size={35}/><h1>Akun belum memiliki izin penulis</h1><p>Masuk dengan akun yang sudah terdaftar di tabel qr_author_members. Keanggotaan harus diberikan oleh admin database, bukan lewat browser.</p>{error&&<p className="studio-error">{error}</p>}<button className="studio-light-button" onClick={()=>void supabase?.auth.signOut()}>Keluar akun</button></div>;
  const sections=path.split('/').filter(Boolean);const book=sections[1]==='cerita'&&sections[2]&&sections[2]!=='baru'?books.find(b=>b.id===decodeURIComponent(sections[2])):undefined;
  const editorEpisode=sections[1]==='editor'?episodes.find(e=>e.id===sections[2]):undefined;
- return <div className="studio-app"><Nav path={path}/><div className="studio-page"><div className="studio-toolbar"><span>Ruang menulis yang tenang</span><div><span className="studio-auth-indicator"><span/>Karisyono</span><button onClick={()=>void supabase?.auth.signOut()} title="Keluar" aria-label="Keluar akun"><LogOut size={18}/></button></div></div>
+ return <div className="studio-app" data-kk-theme={theme}><Nav path={path} theme={theme} onToggle={toggleTheme}/><div className="studio-page"><div className="studio-toolbar"><span>Ruang menulis yang tenang</span><div><ThemeToggle theme={theme} onToggle={toggleTheme}/><span className="studio-auth-indicator"><span/>Karisyono</span><button onClick={()=>void supabase?.auth.signOut()} title="Keluar" aria-label="Keluar akun"><LogOut size={18}/></button></div></div>
  <main className="studio-content">{error&&<div className="studio-error" role="alert">{error}</div>}{loading?<Busy/>:sections[1]==='impor'?<ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='jadwal'?<ScheduleManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='database'?<DatabaseManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='sampah'?<TrashManager onChanged={refresh}/>:sections[1]==='editor'?(editorEpisode?<Editor key={editorEpisode.id} ep={editorEpisode} book={books.find(b=>b.id===editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={()=>moveToTrash('episode',editorEpisode.id,editorEpisode.title)}/>:<p>Episode tidak ditemukan.</p>):sections[1]==='cerita'&&sections[2]==='baru'?<><B className="studio-backlink" to="/studio/cerita"><ArrowLeft size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></>:sections[1]==='cerita'&&sections[2]?(book?<BookDetails key={book.id} book={book} episodes={episodes} onNew={()=>void createEpisode(book.id)} onNewZero={()=>void createEpisode(book.id,true)} onUpdate={onUpdateBook} onDelete={()=>moveToTrash('book',book.id,book.title)}/>:<p>Novel tidak ditemukan.</p>):sections[1]==='cerita'?<Books books={books} episodes={episodes} onCreate={()=>navigate('/studio/cerita/baru')}/>:<Dashboard books={books} episodes={episodes} user={user}/>}
  </main></div></div>;
 }

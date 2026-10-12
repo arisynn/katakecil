@@ -12,3 +12,5 @@ story/
 manuscript-private/
 private-manuscripts/
 naskah-pribadi/
+.aistudio/
+.env

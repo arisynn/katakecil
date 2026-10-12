@@ -16,6 +16,7 @@ import './studio-v41.css';
 import './content-protection.css';
 import './secure-reader.css';
 import './mist-blue.css';
+import './design/v53-mobile.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
