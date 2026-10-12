@@ -1,14 +1,14 @@
 import type { ThemeColors, ThemeMode, ReadingSettings } from '../types/reader';
 
 export const THEMES: Record<ThemeMode, ThemeColors> = {
-  white: { name: 'white', label: 'Kertas', bg: '#FAFAF8', pageBg: '#FAFAF8', text: '#232824', secondaryText: '#7A8079', border: '#E5E8E2', barBg: 'rgba(250,250,248,.97)', accent: '#496C58', accentHover: '#36523F', hoverBg: '#F0F2ED', cardBg: '#F0F2ED', selectionBg: '#DCE8DD' },
-  sepia: { name: 'sepia', label: 'Hangat', bg: '#F5F0E7', pageBg: '#F5F0E7', text: '#3B342C', secondaryText: '#8D8171', border: '#E5DCD0', barBg: 'rgba(245,240,231,.97)', accent: '#746249', accentHover: '#5D4C37', hoverBg: '#EBE2D5', cardBg: '#EBE2D5', selectionBg: '#E2D3B9' },
-  night: { name: 'night', label: 'Senja', bg: '#202623', pageBg: '#202623', text: '#DCE1DA', secondaryText: '#9CA99F', border: '#36413A', barBg: 'rgba(32,38,35,.97)', accent: '#ACC5AC', accentHover: '#BDD4B9', hoverBg: '#2C3530', cardBg: '#2C3530', selectionBg: '#425C4C' },
-  black: { name: 'black', label: 'OLED', bg: '#080909', pageBg: '#080909', text: '#E1E3E0', secondaryText: '#898D88', border: '#242824', barBg: 'rgba(8,9,9,.97)', accent: '#BBC9B5', accentHover: '#D6DED0', hoverBg: '#181B18', cardBg: '#181B18', selectionBg: '#314236' },
+  white: { name:'white',label:'Mist Paper',bg:'#F5F7F4',pageBg:'#FCFCF8',text:'#243447',secondaryText:'#63758A',border:'#DBE4E7',barBg:'rgba(252,252,248,.97)',accent:'#5B7FA6',accentHover:'#47698E',hoverBg:'#EBF0F1',cardBg:'#EDF2F0',selectionBg:'#D7E5EC' },
+  sepia: { name:'sepia',label:'Sepia Classic',bg:'#F3E8D0',pageBg:'#FAF1DF',text:'#3E3528',secondaryText:'#7C6B53',border:'#E3D2B5',barBg:'rgba(250,241,223,.97)',accent:'#846B49',accentHover:'#655136',hoverBg:'#EFE2CA',cardBg:'#F0E4CF',selectionBg:'#E5D2AD' },
+  night: { name:'night',label:'Night Blue',bg:'#08192D',pageBg:'#102A43',text:'#E6EEF8',secondaryText:'#ABC2D9',border:'#274763',barBg:'rgba(16,42,67,.97)',accent:'#75A9D6',accentHover:'#A0CAEB',hoverBg:'#1B3B57',cardBg:'#1A3852',selectionBg:'#294C6E' },
+  black: { name:'black',label:'OLED Dark',bg:'#05080D',pageBg:'#0B111A',text:'#EAF2FF',secondaryText:'#B0BCCB',border:'#243243',barBg:'rgba(11,17,26,.97)',accent:'#8FB8DE',accentHover:'#B7D5F2',hoverBg:'#182534',cardBg:'#152231',selectionBg:'#24435F' },
 };
 
 export const DEFAULT_SETTINGS: ReadingSettings = {
-  theme: 'sepia',
+  theme: 'white',
   fontFamily: 'literata',
   fontSize: 100,
   lineHeight: 'normal',

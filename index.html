@@ -2,11 +2,27 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="theme-color" content="#F8F1E3" />
+    <meta name="theme-color" content="#F5F9FD" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <style>
+      :root { color-scheme: light dark; --app-background:#F5F9FD; --app-foreground:#243447; }
+      @media (prefers-color-scheme:dark) { :root { --app-background:#08192D; --app-foreground:#E6EEF8; } }
+      html[data-app-theme="light"] { color-scheme:light; --app-background:#F5F9FD; --app-foreground:#243447; }
+      html[data-app-theme="dark"] { color-scheme:dark; --app-background:#08192D; --app-foreground:#E6EEF8; }
+      html,body,#root {background:var(--app-background);color:var(--app-foreground);min-height:100%;margin:0}
+      .kk-boot-loader{display:flex;min-height:65vh;align-items:center;justify-content:center;flex-direction:column;gap:11px;color:var(--app-foreground);font-family:Georgia,serif}
+      .kk-boot-loader strong{font-size:27px;font-weight:500}.kk-boot-loader small{color:var(--app-foreground);opacity:.72;font:12px system-ui,sans-serif}
+    </style>
+    <script>
+      (function(){try{var pref=localStorage.getItem('appThemePreference')||localStorage.getItem('katakecil_ui_theme_v53')||'system';
+        var mode=pref==='dark'||pref==='light'?pref:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+        document.documentElement.setAttribute('data-app-theme',mode);
+        document.querySelector('meta[name="theme-color"]').setAttribute('content',mode==='dark'?'#08192D':'#F5F9FD');
+      }catch(e){ /* CSS media preference is the fallback. */ }})();
+    </script>
     <title>KataKecil — Perpustakaan Cerita</title>
     <meta name="description" content="Perpustakaan cerita pribadi dengan pengalaman membaca yang tenang dan nyaman." />
-    <meta property="og:title" content="Quiet Reader" />
+    <meta property="og:title" content="KataKecil Reader" />
     <meta property="og:description" content="Perpustakaan cerita pribadi dengan pengalaman membaca yang tenang dan nyaman." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -15,7 +31,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="kk-boot-loader" role="status"><strong>KataKecil</strong><small>Membuka cerita…</small></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

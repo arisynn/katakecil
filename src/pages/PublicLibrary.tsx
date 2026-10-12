@@ -6,6 +6,7 @@ import { isConfigured } from '../data/supabase';
 import { navigate } from '../utils/nav';
 import PublicHeader from '../components/public/PublicHeader';
 import { useUiTheme } from '../hooks/useUiTheme';
+import ThemeLoading from '../components/ThemeLoading';
 
 const date = new Date('2026-10-01').toISOString();
 // Visually labeled examples ONLY, never treated as real published manuscripts.
@@ -71,19 +72,19 @@ function Detail({book,episodes,demo}:{book:Book;episodes:EpisodeSummary[];demo:b
    <div className="detail-actions">{rows.length&&!demo?<button className="btn-primary" onClick={()=>navigate(`/baca/${book.slug}`)}>Mulai membaca <BookOpen size={18}/></button>:<button className="btn-primary" disabled>Belum ada episode <Clock3 size={17}/></button>}<button className="btn-outline" onClick={()=>navigate('/cerita')}>Cerita lainnya <ArrowRight size={16}/></button></div>
   </div></section>
   <section className="episode-section"><SectionHeading eyebrow="PERJALANAN CERITA" title="Daftar episode"/><div className="episode-list">
-    {rows.length?rows.slice(0,showAll?undefined:16).map(ep=><button key={ep.episode_number} className="episode-row" onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}><div className="episode-num">{String(ep.episode_number).padStart(2,'0')}</div><div className="episode-row-body"><strong>{ep.title}</strong><small>{ep.arc_title||'Episode'}</small></div><span className="episode-chevron"><ChevronRight size={19}/></span></button>):<div className="episode-none">{demo?'Ini hanya contoh tata letak. Karya sungguhan akan muncul setelah Supabase dikonfigurasi.':'Episode pertama belum diterbitkan.'}</div>}
+    {rows.length?rows.slice(0,showAll?undefined:16).map(ep=><button key={ep.episode_number} className="episode-row" onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}><div className="episode-num">{String(ep.episode_number).padStart(2,'0')}</div><div className="episode-row-body"><strong>{ep.title}</strong><small>{ep.arc_title||'Episode'}{ep.is_finale?' · Finale':''}</small></div><span className="episode-chevron"><ChevronRight size={19}/></span></button>):<div className="episode-none">{demo?'Ini hanya contoh tata letak. Karya sungguhan akan muncul setelah Supabase dikonfigurasi.':'Episode pertama belum diterbitkan.'}</div>}
     {rows.length>16&&!showAll&&<button className="show-more" onClick={()=>setShowAll(true)}>Tampilkan semua episode <ArrowRight size={16}/></button>}
   </div></section></main>;
 }
 function About() { return <main className="public-main inner-page about-page"><div className="about-flower"><Feather size={48} strokeWidth={1.1}/></div><div className="v53-about-scene" aria-hidden="true"/><div className="eyebrow">DARI PENULIS, UNTUK PEMBACA</div><h1 className="page-heading">Halo, selamat <i>datang.</i></h1><p>Ini adalah ruang untuk cerita-cerita yang kutulis. Beberapa mungkin akan terasa akrab, beberapa lainnya membawa kita ke dunia yang sama sekali berbeda.</p><p>Aku ingin setiap pembaca bisa menemukan cerita dengan mudah dan menikmatinya senyaman mungkin—tanpa kebisingan di sekelilingnya.</p><p className="about-signature">Sampai jumpa di halaman berikutnya. ✦</p><LinkButton to="/cerita" className="btn-primary">Jelajahi perpustakaan <ArrowRight size={17}/></LinkButton></main>; }
 export default function PublicLibrary({path}:{path:string}) {
  const {books,episodes,loading,error,demo}=useLibrary();
- const {theme,toggleTheme}=useUiTheme();
+ const {theme,preference,setPreference}=useUiTheme();
  const slug=path.startsWith('/cerita/')?decodeURIComponent(path.split('/')[2]||''):null;
  const book=slug?books.find(b=>b.slug===slug):undefined;
  useEffect(()=>{document.title = `${book?.title ? book.title + ' · ' : path==='/cerita'?'Perpustakaan · ':path==='/tentang'?'Tentang Penulis · ':''}KataKecil`;},[book?.title,path]);
- return <div className="site-shell" data-kk-theme={theme}><PublicHeader path={path} theme={theme} onToggle={toggleTheme}/>{demo&&<div className="demo-banner"><Sparkles size={15}/> Mode contoh desain · Sambungkan Supabase untuk menampilkan novel aslimu.</div>}
+ return <div className="site-shell" data-kk-theme={theme}><PublicHeader path={path} theme={theme} preference={preference} onPreferenceChange={setPreference}/>{demo&&<div className="demo-banner"><Sparkles size={15}/> Mode contoh desain · Sambungkan Supabase untuk menampilkan novel aslimu.</div>}
  {error&&<div className="error-banner" role="alert">{error}</div>}
- {loading?<main className="public-main page-loading"><div className="loading-orb"/><p>Sedang membuka rak cerita…</p></main>:path==='/tentang'?<About/>:slug?(book?<Detail book={book} episodes={episodes} demo={demo}/>:<main className="public-main inner-page"><h1 className="page-heading">Cerita tidak ditemukan.</h1><LinkButton to="/cerita" className="btn-primary">Kembali ke perpustakaan</LinkButton></main>):path==='/cerita'?<Listing books={books} episodes={episodes} demo={demo}/>:<Home books={books} episodes={episodes} demo={demo}/>}
+ {loading?<ThemeLoading context="public" text="Sedang membuka rak cerita…"/>:path==='/tentang'?<About/>:slug?(book?<Detail book={book} episodes={episodes} demo={demo}/>:<main className="public-main inner-page"><h1 className="page-heading">Cerita tidak ditemukan.</h1><LinkButton to="/cerita" className="btn-primary">Kembali ke perpustakaan</LinkButton></main>):path==='/cerita'?<Listing books={books} episodes={episodes} demo={demo}/>:<Home books={books} episodes={episodes} demo={demo}/>}
  </div>;
 }

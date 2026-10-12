@@ -13,14 +13,16 @@ import TrashManager from './TrashManager';
 import {trashItem} from '../data/trash';
 import { toWibInput } from '../utils/releasePlanning';
 import ThemeToggle from '../components/ThemeToggle';
-import { useUiTheme, type UiTheme } from '../hooks/useUiTheme';
+import { useUiTheme, type UiTheme, type AppThemePreference } from '../hooks/useUiTheme';
+import ThemeLoading from '../components/ThemeLoading';
+import {bulkPublishDrafts} from '../data/bulkPublishing';
 
 const BOOK_STATUS: Record<Book['status'], string>={ongoing:'Berlangsung', completed:'Tamat', hiatus:'Jeda'};
 function B({children,to,className='',disabled=false}:{children:React.ReactNode;to?:string;className?:string;disabled?:boolean}){
  return <button disabled={disabled} className={className} onClick={()=>to&&navigate(to)}>{children}</button>;
 }
 const errMsg = (e:unknown)=>e instanceof Error?e.message:String(e);
-function Busy({text='Memuat Studio...'}:{text?:string}){return <div className="studio-busy"><div className="loading-orb"/><p>{text}</p></div>;}
+function Busy({text='Memuat Studio...'}:{text?:string}){return <ThemeLoading context="studio" text={text}/>;}
 function Login({onSuccess,theme}:{onSuccess:()=>void;theme:UiTheme}){
   const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');
   const submit=async(e:React.FormEvent)=>{e.preventDefault();if(!supabase)return;setBusy(true);setError('');try{const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;onSuccess();}catch(e){setError(errMsg(e));}finally{setBusy(false);}};
@@ -28,11 +30,10 @@ function Login({onSuccess,theme}:{onSuccess:()=>void;theme:UiTheme}){
    <label>Email<input type="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="email@contoh.com"/></label><label>Kata sandi<input type="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••"/></label>
    {error&&<div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy} type="submit">{busy?'Masuk…':'Masuk ke Studio'} <ArrowRight size={17}/></button><small><LockKeyhole size={13}/> Hanya akun penulis yang diizinkan.</small></form></div>;
 }
-function Nav({path,theme,onToggle}:{path:string;theme:UiTheme;onToggle:()=>void}) {
- const [menu,setMenu]=useState(false);
+function Nav({path,theme,preference,onPreferenceChange}:{path:string;theme:UiTheme;preference:AppThemePreference;onPreferenceChange:(next:AppThemePreference)=>void}) {
  const [more,setMore]=useState(false);
  const tabs=[{p:'/studio',label:'Beranda',icon:House},{p:'/studio/cerita',label:'Karya',icon:Library},{p:'/studio/impor',label:'Impor',icon:UploadCloud},{p:'/studio/jadwal',label:'Jadwal',icon:CalendarDays},{p:'/studio/database',label:'Data',icon:Database},{p:'/studio/sampah',label:'Sampah',icon:Trash2}];
- useEffect(()=>{setMenu(false);setMore(false);},[path]);
+ useEffect(()=>{setMore(false);},[path]);
  useEffect(()=>{
   if(!more)return;
   const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setMore(false);};
@@ -40,10 +41,10 @@ function Nav({path,theme,onToggle}:{path:string;theme:UiTheme;onToggle:()=>void}
   return ()=>document.removeEventListener('keydown',onKey);
  },[more]);
  const active=(p:string)=>p==='/studio'?path===p:path.startsWith(p);
- return <><aside className={`studio-sidebar ${menu?'studio-sidebar-visible':''}`}>
+ return <><aside className="studio-sidebar">
   <B to="/" className="studio-logo"><span><Feather size={20}/></span>KataKecil.</B><div className="studio-sidebar-label">RUANG KARISYONO</div><div className="studio-side-nav">{tabs.map(tab=><B key={tab.p} to={tab.p} className={`studio-nav-link ${active(tab.p)?'studio-nav-active':''}`}><tab.icon size={18}/>{tab.label}{active(tab.p)&&<span className="studio-nav-active-dot"/>}</B>)}</div>
   <div className="studio-sidebar-bottom"><B to="/" className="studio-nav-link"><BookOpen size={18}/>Lihat website <ArrowRight size={15}/></B></div>
- </aside><div className="studio-mobile-top"><B to="/studio" className="studio-logo"><span><Feather size={18}/></span>Studio KataKecil.</B><div className="studio-mobile-actions"><ThemeToggle theme={theme} onToggle={onToggle}/><button className="studio-menu-icon" onClick={()=>void supabase?.auth.signOut()} aria-label="Keluar dari Studio"><LogOut size={20}/></button><button className="studio-menu-icon" onClick={()=>setMenu(!menu)} aria-label={menu?"Tutup navigasi":"Buka navigasi"}>{menu?<X size={20}/>:<Menu size={20}/>}</button></div></div>
+ </aside><div className="studio-mobile-top"><B to="/studio" className="studio-logo"><span><Feather size={18}/></span><span className="kk-studio-wordmark">Studio KataKecil</span></B><div className="studio-mobile-actions"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/><B to="/" className="kk-back-public" ><House size={19}/><span>Publik</span></B></div></div>
   <nav className="studio-bottom-nav" aria-label="Navigasi Studio">{tabs.slice(0,4).map(tab=><B key={tab.p} to={tab.p} className={active(tab.p)?'studio-bottom-active':''}><tab.icon size={21}/><span>{tab.label}</span></B>)}
    <button type="button" aria-label="Menu lainnya" aria-haspopup="dialog" aria-expanded={more} className={more||tabs.slice(4).some(t=>active(t.p))?'studio-bottom-active':''} onClick={()=>setMore(previous=>!previous)}><Menu size={21}/><span>Lainnya</span></button>
   </nav>
@@ -51,7 +52,8 @@ function Nav({path,theme,onToggle}:{path:string;theme:UiTheme;onToggle:()=>void}
     <section role="dialog" aria-modal="true" aria-label="Menu Studio lainnya" className="v53-more-sheet" onClick={e=>e.stopPropagation()}>
       <div className="v53-more-head"><strong>Kelola Studio</strong><button type="button" aria-label="Tutup menu" onClick={()=>setMore(false)}><X size={20}/></button></div>
       {tabs.slice(4).map(tab=><B key={tab.p} to={tab.p} className="v53-more-link"><tab.icon size={19}/>{tab.label}<ChevronRight size={18}/></B>)}
-      <B to="/" className="v53-more-link"><BookOpen size={19}/>Lihat website<ChevronRight size={18}/></B>
+      <B to="/" className="v53-more-link"><BookOpen size={19}/>Beranda publik<ChevronRight size={18}/></B>
+      <button type="button" className="v53-more-link" onClick={()=>{setMore(false);void supabase?.auth.signOut()}}><LogOut size={19}/>Keluar akun<ChevronRight size={18}/></button>
     </section>
   </div>}
  </>;
@@ -73,7 +75,7 @@ function Dashboard({books,episodes,user}:{books:Book[];episodes:Episode[];user:U
 }
 function Books({books,episodes,onCreate}:{books:Book[];episodes:Episode[];onCreate:()=>void}){
  return <><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA SEMUA KARYA</span><h1>Rak <i>ceritamu.</i></h1><p>Kelola novel, sampul, dan episode dalam satu tempat.</p></div><button onClick={onCreate} className="studio-primary"><Plus size={17}/> Novel baru</button></div>
- {books.length?<div className="studio-manage-list">{books.map(b=><B key={b.id} to={`/studio/cerita/${b.id}`} className="studio-manage-item"><Cover book={b} size="mini"/><span><strong>{b.title}</strong><small>{b.genre} · {episodes.filter(e=>e.book_id===b.id).length} episode</small><em>{b.is_published?'Tayang di perpustakaan':'Disimpan privat'} · {BOOK_STATUS[b.status]}</em></span><ChevronRight size={20}/></B>)}</div>:<div className="studio-big-empty"><Library size={30}/><h2>Sebuah dunia menunggu ditulis.</h2><p>Mulailah dengan membuat novel pertama.</p><button onClick={onCreate} className="studio-primary"><Plus size={18}/> Buat novel</button></div>}
+ {books.length?<div className="studio-manage-list">{books.map(b=><B key={b.id} to={`/studio/cerita/${b.id}`} className="studio-manage-item"><Cover book={b} size="mini"/><span><strong>{b.title}</strong><small>{b.genre} · {episodes.filter(e=>e.book_id===b.id).length} episode</small><em>{b.is_published?'Tayang di perpustakaan':'Draft (privat)'} · {BOOK_STATUS[b.status]}</em></span><ChevronRight size={20}/></B>)}</div>:<div className="studio-big-empty"><Library size={30}/><h2>Sebuah dunia menunggu ditulis.</h2><p>Mulailah dengan membuat novel pertama.</p><button onClick={onCreate} className="studio-primary"><Plus size={18}/> Buat novel</button></div>}
  </>;
 }
 function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=>void}){
@@ -101,13 +103,45 @@ function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=>void})
  </div><div className="studio-cover-fields"><span className="studio-label-text">Sampul cerita</span><div className="studio-cover-preview"><Cover book={{id:slug||'new',title:title||'Judul ceritamu',genre,cover_url:previewUrl||cover}} size="large"/></div><label className="studio-upload"><ImagePlus size={18}/>{upload?upload.name:'Pilih sampul dari HP'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setUpload(e.target.files?.[0]||null)}/></label><p className="studio-small-muted">JPG, PNG, WebP · maks. 5 MB</p><label className="studio-label">Atau URL sampul<input value={cover} onChange={e=>setCover(e.target.value)} type="url" placeholder="https://..."/></label></div></div>
  {error&&<div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy||!slug||!title.trim()} type="submit"><Save size={17}/>{busy?'Menyimpan…':existing?'Simpan perubahan':'Buat novel'}</button></form>;
 }
-function BookDetails({book,episodes,onNew,onNewZero,onUpdate,onDelete}:{book:Book;episodes:Episode[];onNew:()=>void;onNewZero:()=>void;onUpdate:(value:Book)=>void;onDelete:()=>Promise<void>}){
+function BookDetails({book,episodes,onNew,onNewZero,onUpdate,onDelete,onChanged}:{book:Book;episodes:Episode[];onNew:()=>void;onNewZero:()=>void;onUpdate:(value:Book)=>void;onDelete:()=>Promise<void>;onChanged:()=>Promise<void>}){
  const local=episodes.filter(e=>e.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number);
- return <><B to="/studio/cerita" className="studio-backlink"><ArrowLeft size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published?'Tayang di perpustakaan':'Privat'}</p></div><button onClick={onNew} className="studio-primary"><Plus size={16}/> Episode baru</button></div>
- <div className="studio-detail-tabs"><a href="#episodes">Daftar episode</a><a href="#book-sections">Halaman buku</a><a href="#settings">Pengaturan novel</a></div>
+ const drafts=local.filter(e=>episodeStatus(e)==='Draft');
+ const blankDrafts=drafts.filter(e=>!e.content_md.trim());
+ const [publishing,setPublishing]=useState(false);
+ const [publishError,setPublishError]=useState('');
+ const [publishNotice,setPublishNotice]=useState('');
+ const publish=async(markCompleted:boolean)=>{
+   if(publishing)return;
+   const count=drafts.length;
+   const question=markCompleted
+     ? `Tandai “${book.title}” sebagai TAMAT dan terbitkan ${count} episode draft sekarang?\n\nNovel akan tampil di perpustakaan. Jadwal episode yang sudah terbit/terjadwal tidak diubah. Episode terakhir diberi tanda Finale.`
+     : `Terbitkan SEMUA ${count} episode draft “${book.title}” sekarang?\n\nNovel akan ditampilkan di perpustakaan. Episode yang sudah terbit/terjadwal tidak diubah.`;
+   if(!window.confirm(question))return;
+   setPublishing(true);setPublishError('');setPublishNotice('');
+   try{
+     const result=await bulkPublishDrafts(book.id,count,markCompleted);
+     await onChanged();
+     setPublishNotice(`${result.published_count} episode berhasil diterbitkan${markCompleted?' dan cerita ditandai Tamat':''}.`);
+   }catch(e){setPublishError(errMsg(e));}
+   finally{setPublishing(false);}
+ };
+ return <><B to="/studio/cerita" className="studio-backlink"><ArrowLeft size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published?'Tayang di perpustakaan':'Draft (privat)'}</p></div><button onClick={onNew} className="studio-primary"><Plus size={16}/> Episode baru</button></div>
+ <div className="studio-detail-tabs"><a href="#bulk-publish">Penerbitan cepat</a><a href="#episodes">Daftar episode</a><a href="#book-sections">Halaman buku</a><a href="#settings">Pengaturan novel</a></div>
+ <section className="studio-panel kk-bulk-panel" id="bulk-publish" aria-label="Penerbitan episode sekaligus">
+   <div className="studio-panel-top"><h2>Terbitkan sekaligus</h2><Send size={19}/></div>
+   <p className="studio-muted">{drafts.length} draft dari {local.length} episode. Terbitkan seluruh draft novel tamat tanpa membuka editor satu per satu. Episode terjadwal tetap mengikuti jadwalnya.</p>
+   {blankDrafts.length>0&&<p className="studio-warning" role="alert">Ada {blankDrafts.length} draft tanpa isi. Lengkapi semuanya sebelum terbit massal.</p>}
+   {publishError&&<div className="studio-error" role="alert">{publishError}</div>}
+   {publishNotice&&<div className="studio-success" role="status">{publishNotice}</div>}
+   <div className="kk-bulk-actions">
+     <button type="button" className="studio-light-button" disabled={publishing||!drafts.length||!!blankDrafts.length} onClick={()=>void publish(false)}><Send size={16}/> {publishing?'Menerbitkan…':`Terbitkan semua ${drafts.length} draft`}</button>
+     <button type="button" className="studio-primary" disabled={publishing||!local.length||!!blankDrafts.length} onClick={()=>void publish(true)}><Check size={16}/> {publishing?'Memproses…':'Tandai Tamat & Terbitkan Draft'}</button>
+   </div>
+   <small className="studio-muted">Hanya setelah konfirmasi. Jika proses gagal, transaksi database membatalkan seluruh perubahan.</small>
+ </section>
  <section className="studio-panel" id="episodes"><div className="studio-panel-top"><h2>Daftar episode</h2><B to={`/studio/impor?book=${encodeURIComponent(book.id)}`} className="studio-text-button"><UploadCloud size={16}/> Impor EPUB / MD</B></div>
  
- {local.length?<div className="studio-episode-stack">{local.map(ep=><B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{String(ep.episode_number).padStart(2,'0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title||'Tanpa arc'}{episodeStatus(ep)==='Terjadwal'?` · ${formatWib(ep.release_at)}`:''}</small></span><Pill episode={ep}/><ChevronRight size={17}/></B>)}</div>:<p className="studio-muted">Belum ada episode. Buat episode baru atau impor EPUB/Markdown melalui Smart Import Studio.</p>}
+ {local.length?<div className="studio-episode-stack">{local.map(ep=><B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{String(ep.episode_number).padStart(2,'0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title||'Tanpa arc'}{ep.is_finale?' · Finale':''}{episodeStatus(ep)==='Terjadwal'?` · ${formatWib(ep.release_at)}`:''}</small></span><Pill episode={ep}/><ChevronRight size={17}/></B>)}</div>:<p className="studio-muted">Belum ada episode. Buat episode baru atau impor EPUB/Markdown melalui Smart Import Studio.</p>}
  <button onClick={onNew} className="studio-light-button"><FilePlus2 size={16}/> Tambah episode</button> {!local.some(e=>e.episode_number===0)&&<button onClick={onNewZero} className="studio-light-button"><FilePlus2 size={16}/> Buat Episode 0</button>}</section>
  <BookSections bookId={book.id}/><div id="settings"><BookForm existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={()=>void onDelete()}><Trash2 size={16}/> Pindahkan novel ke Sampah</button></section></>;
 }
@@ -117,7 +151,7 @@ function Editor({ep,book,onUpdate,onDelete}:{ep:Episode;book:Book;onUpdate:(valu
  useEffect(()=>()=>{mounted.current=false;},[]);
  const dirty=title!==lastSaved.current.title||arc!==lastSaved.current.arc||body!==lastSaved.current.body;
  const save=useCallback(async()=>{if(!supabase)return;const snapshot={title,arc,body};if(snapshot.title===lastSaved.current.title&&snapshot.arc===lastSaved.current.arc&&snapshot.body===lastSaved.current.body)return queue.current;
-  setStatus('Menyimpan…');const action=async()=>{const {data,error}=await supabase!.from('qr_episodes').update({title:snapshot.title.trim()||`Episode ${ep.episode_number}`,arc_title:snapshot.arc,content_md:snapshot.body}).eq('id',ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();if(error)throw error;lastSaved.current=snapshot;onUpdate({...data,content_md:snapshot.body} as Episode);if(mounted.current)setStatus('Tersimpan');};
+  setStatus('Menyimpan…');const action=async()=>{const {data,error}=await supabase!.from('qr_episodes').update({title:snapshot.title.trim()||`Episode ${ep.episode_number}`,arc_title:snapshot.arc,content_md:snapshot.body}).eq('id',ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();if(error)throw error;lastSaved.current=snapshot;onUpdate({...data,content_md:snapshot.body,is_finale:ep.is_finale} as Episode);if(mounted.current)setStatus('Tersimpan');};
   const run=queue.current.catch(()=>{}).then(action);queue.current=run;try{await run;}catch(e){if(mounted.current){setError(errMsg(e));setStatus('Gagal menyimpan');}};
  },[title,arc,body,ep.id,ep.episode_number,onUpdate]);
  const latestSave=useRef(save);
@@ -129,7 +163,7 @@ function Editor({ep,book,onUpdate,onDelete}:{ep:Episode;book:Book;onUpdate:(valu
   let release_at:string|null=null;let is_enabled=false;
   if(mode==='now'){release_at=new Date().toISOString();is_enabled=true;}
   if(mode==='schedule'){if(!schedule)throw new Error('Pilih tanggal dan jam rilis terlebih dahulu.');const when=new Date(`${schedule}:00+07:00`);if(Number.isNaN(when.getTime())||when.getTime()<=Date.now())throw new Error('Jadwal harus di masa depan (WIB).');release_at=when.toISOString();is_enabled=true;if(ep.is_enabled&&ep.release_at&&ep.release_at!==release_at&&!window.confirm('Episode ini sudah memiliki jadwal. Yakin ingin mengganti tanggal rilis lama?'))return;}
-  const {data,error}=await supabase.from('qr_episodes').update({release_at,is_enabled}).eq('id',ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();if(error)throw error;onUpdate({...data,content_md:body} as Episode);setStatus(mode==='now'?'Diterbitkan':mode==='schedule'?'Terjadwal':'Menjadi draft');
+  const {data,error}=await supabase.from('qr_episodes').update({release_at,is_enabled}).eq('id',ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();if(error)throw error;onUpdate({...data,content_md:body,is_finale:ep.is_finale} as Episode);setStatus(mode==='now'?'Diterbitkan':mode==='schedule'?'Terjadwal':'Menjadi draft');
  }catch(e){setError(errMsg(e));}finally{setPublishing(false);}};
  const importOne=async(file?:File)=>{if(!file)return;if(file.size>2_000_000){setError('File Markdown maksimal 2 MB.');return;}setBody(await file.text());setStatus('Belum disimpan');};
  const makePreview=()=>({id:`preview-${ep.id}`,title:book.title,path:'',content:`# ${book.title}\n\n${arc?`## ${arc}\n\n`:''}### ${title||`Episode ${ep.episode_number}`}\n\n${body||'Belum ada isi episode.'}`});
@@ -157,7 +191,7 @@ function Schedule({books,episodes}:{books:Book[];episodes:Episode[]}){
  return <><div className="studio-page-head"><span className="studio-kicker">KALENDER PUBLIKASI</span><h1>Jadwal <i>terbit.</i></h1><p>Semua waktu ditampilkan dalam WIB (UTC+7).</p></div><div className="studio-panel studio-schedule"><div className="studio-panel-top"><h2>Episode berikutnya</h2><CalendarDays size={19}/></div>{upcoming.length?upcoming.map(ep=><B to={`/studio/editor/${ep.id}`} key={ep.id} className="studio-schedule-row"><div className="studio-schedule-icon"><CalendarDays size={21}/></div><div><strong>{ep.title}</strong><small>{books.find(b=>b.id===ep.book_id)?.title}</small><em>{formatWib(ep.release_at)}</em></div><ChevronRight size={18}/></B>):<div className="studio-panel-empty"><Clock3 size={32}/><p>Belum ada jadwal terbit. Buka editor episode dan pilih waktu rilis.</p></div>}</div></>;
 }
 export default function Studio({path}:{path:string}) {
- const {theme,toggleTheme}=useUiTheme();
+ const {theme,preference,setPreference}=useUiTheme();
  const userIdRef=useRef<string|null>(null);
  const [user,setUser]=useState<User|null>(null);const [authorized,setAuthorized]=useState(false);const [authLoading,setAuthLoading]=useState(true);const [books,setBooks]=useState<Book[]>([]);const [episodes,setEpisodes]=useState<Episode[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState('');
  const refresh=useCallback(async()=>{try{const result=await getStudioLibrary();setBooks(result.books);setEpisodes(result.episodes);setError('');}catch(e){setError(errMsg(e));}finally{setLoading(false);}},[]);
@@ -208,7 +242,7 @@ export default function Studio({path}:{path:string}) {
  if(!authorized)return <div className="studio-unavailable"><LockKeyhole size={35}/><h1>Akun belum memiliki izin penulis</h1><p>Masuk dengan akun yang sudah terdaftar di tabel qr_author_members. Keanggotaan harus diberikan oleh admin database, bukan lewat browser.</p>{error&&<p className="studio-error">{error}</p>}<button className="studio-light-button" onClick={()=>void supabase?.auth.signOut()}>Keluar akun</button></div>;
  const sections=path.split('/').filter(Boolean);const book=sections[1]==='cerita'&&sections[2]&&sections[2]!=='baru'?books.find(b=>b.id===decodeURIComponent(sections[2])):undefined;
  const editorEpisode=sections[1]==='editor'?episodes.find(e=>e.id===sections[2]):undefined;
- return <div className="studio-app" data-kk-theme={theme}><Nav path={path} theme={theme} onToggle={toggleTheme}/><div className="studio-page"><div className="studio-toolbar"><span>Ruang menulis yang tenang</span><div><ThemeToggle theme={theme} onToggle={toggleTheme}/><span className="studio-auth-indicator"><span/>Karisyono</span><button onClick={()=>void supabase?.auth.signOut()} title="Keluar" aria-label="Keluar akun"><LogOut size={18}/></button></div></div>
- <main className="studio-content">{error&&<div className="studio-error" role="alert">{error}</div>}{loading?<Busy/>:sections[1]==='impor'?<ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='jadwal'?<ScheduleManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='database'?<DatabaseManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='sampah'?<TrashManager onChanged={refresh}/>:sections[1]==='editor'?(editorEpisode?<Editor key={editorEpisode.id} ep={editorEpisode} book={books.find(b=>b.id===editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={()=>moveToTrash('episode',editorEpisode.id,editorEpisode.title)}/>:<p>Episode tidak ditemukan.</p>):sections[1]==='cerita'&&sections[2]==='baru'?<><B className="studio-backlink" to="/studio/cerita"><ArrowLeft size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></>:sections[1]==='cerita'&&sections[2]?(book?<BookDetails key={book.id} book={book} episodes={episodes} onNew={()=>void createEpisode(book.id)} onNewZero={()=>void createEpisode(book.id,true)} onUpdate={onUpdateBook} onDelete={()=>moveToTrash('book',book.id,book.title)}/>:<p>Novel tidak ditemukan.</p>):sections[1]==='cerita'?<Books books={books} episodes={episodes} onCreate={()=>navigate('/studio/cerita/baru')}/>:<Dashboard books={books} episodes={episodes} user={user}/>}
+ return <div className="studio-app" data-kk-theme={theme}><Nav path={path} theme={theme} preference={preference} onPreferenceChange={setPreference}/><div className="studio-page"><div className="studio-toolbar"><span>Ruang menulis yang tenang</span><div><ThemeToggle theme={theme} preference={preference} onPreferenceChange={setPreference}/><span className="studio-auth-indicator"><span/>Karisyono</span><button onClick={()=>void supabase?.auth.signOut()} title="Keluar" aria-label="Keluar akun"><LogOut size={18}/></button></div></div>
+ <main className="studio-content">{error&&<div className="studio-error" role="alert">{error}</div>}{loading?<Busy/>:sections[1]==='impor'?<ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='jadwal'?<ScheduleManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='database'?<DatabaseManager books={books} episodes={episodes} onChanged={refresh}/>:sections[1]==='sampah'?<TrashManager onChanged={refresh}/>:sections[1]==='editor'?(editorEpisode?<Editor key={editorEpisode.id} ep={editorEpisode} book={books.find(b=>b.id===editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={()=>moveToTrash('episode',editorEpisode.id,editorEpisode.title)}/>:<p>Episode tidak ditemukan.</p>):sections[1]==='cerita'&&sections[2]==='baru'?<><B className="studio-backlink" to="/studio/cerita"><ArrowLeft size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></>:sections[1]==='cerita'&&sections[2]?(book?<BookDetails key={book.id} book={book} episodes={episodes} onNew={()=>void createEpisode(book.id)} onNewZero={()=>void createEpisode(book.id,true)} onUpdate={onUpdateBook} onDelete={()=>moveToTrash('book',book.id,book.title)} onChanged={refresh}/>:<p>Novel tidak ditemukan.</p>):sections[1]==='cerita'?<Books books={books} episodes={episodes} onCreate={()=>navigate('/studio/cerita/baru')}/>:<Dashboard books={books} episodes={episodes} user={user}/>}
  </main></div></div>;
 }

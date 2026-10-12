@@ -1,4 +1,4 @@
-// No browser or network needed. Protect Reader implementation & project boundaries.
+// No browser/network needed. V5.4 rebaselines only intentional palette + branding edits.
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -8,8 +8,8 @@ const readerBaseline = {
   'src/ReaderApp.tsx': '3b00e0a0a0b15f9eb54fb7552c2b3d53e557c2d3372a48c74b685ea2f598ad9e',
   'src/components/ReaderPage.tsx': '7c452bf2771afb7036b910d9e166584573ad73f43123b6f24163f60085947aa8',
   'src/components/ReaderControls.tsx': '29a0541b04ddfc10dc8a2323c912dcab47727710c1df330f6a3c0796308bde27',
-  'src/components/ReaderPanels.tsx': 'dd2c248daa8c079ee1bb6597b57db09db8f7599ff7bc542475705767767ec5eb',
-  'src/components/ReadingSettingsModal.tsx': '93eed2cae72dfeff51efd90a226077007a530d528a0070e0f06a3dd8a64c63c0',
+  'src/components/ReaderPanels.tsx': '94fa66988e8b77e7a177c9185459a0a2f8c4b95a7640b2dea733ed2c37e29108',
+  'src/components/ReadingSettingsModal.tsx': 'ffdc6b1f2fa56d565841e65b2834468f70a4af8fd40a0b21c3372ddaf688a350',
   'src/components/PageMeasurer.tsx': '1f858e48cbfb23ba2353572f0f31ae7e58bf0cf50a2b484a70f4a308271dee7c',
   'src/utils/pagination.ts': '965a272af1ad77804a0b8468ef581dfc653338e9e0b9af588265f86e60a0c81c',
   'src/secure-reader.css': 'ff8e351cda000f690c61e1395fadcc3d09a2343068b203e7c43fdf17cbf75ced',
@@ -48,4 +48,4 @@ for(const mode of ['light','dark']){
    assert.ok(statSync(file).size>3000 && statSync(file).size<60000, `Missing/compressed asset: ${file}`);
  }
 }
-console.log('PASS V5.3: reader byte-for-byte preserved; mobile-only CSS; public/writer navigation separated; light/dark assets present.');
+console.log('PASS V5.3 base: reader core preserved, palette/branding allowlisted; mobile-only CSS; public/writer navigation separated; light/dark assets present.');

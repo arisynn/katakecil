@@ -1,37 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import { BookOpen, Feather, Menu, X } from 'lucide-react';
+import React,{useEffect,useRef,useState} from 'react';
+import {BookOpen, Feather, House, UserRound} from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
-import type { UiTheme } from '../../hooks/useUiTheme';
-import { navigate } from '../../utils/nav';
+import type {UiTheme,AppThemePreference} from '../../hooks/useUiTheme';
+import {navigate} from '../../utils/nav';
 
-const links = [
-  {to:'/', label:'Beranda'},
-  {to:'/cerita', label:'Perpustakaan'},
-  {to:'/tentang', label:'Tentang Penulis'},
+const links=[
+  {to:'/',label:'Beranda',icon:House},
+  {to:'/cerita',label:'Perpustakaan',icon:BookOpen},
+  {to:'/tentang',label:'Penulis',icon:UserRound},
 ];
-export default function PublicHeader({path, theme, onToggle}: {path:string;theme:UiTheme;onToggle:()=>void}) {
-  const [menu, setMenu] = useState(false);
-  useEffect(()=>setMenu(false),[path]);
+export default function PublicHeader({path,theme,preference,onPreferenceChange}: {
+  path:string;theme:UiTheme;preference:AppThemePreference;onPreferenceChange:(next:AppThemePreference)=>void;
+}) {
+  const [hidden,setHidden]=useState(false);
+  const lastScroll=useRef(0);
   useEffect(()=>{
-    if (!menu) return;
-    const onKey=(event: KeyboardEvent)=>{if(event.key==='Escape')setMenu(false);};
-    document.addEventListener('keydown',onKey);
-    return ()=>document.removeEventListener('keydown',onKey);
-  },[menu]);
-  const go=(to:string)=>{setMenu(false);navigate(to);};
-  return <header className="site-header"><div className="site-header-inner">
-    <button type="button" className="site-brand" onClick={()=>go('/')} aria-label="KataKecil — Beranda">
-      <span className="brand-mark"><Feather size={20}/></span><span>KataKecil<span className="brand-dot">.</span></span>
-    </button>
-    <nav id="public-navigation" className={menu?'site-nav site-nav-open':'site-nav'} aria-label="Navigasi pembaca">
-      {links.map(link=><button key={link.to} type="button" onClick={()=>go(link.to)}
-        className={`nav-item ${path===link.to||link.to==='/cerita'&&path.startsWith('/cerita/')?'v53-nav-current':''}`}
-        aria-current={path===link.to?'page':undefined}>{link.label}</button>)}
+    let raf=0;
+    const onScroll=()=>{
+      if(raf)return;
+      raf=requestAnimationFrame(()=>{
+        raf=0;
+        const current=Math.max(0,window.scrollY);
+        const delta=current-lastScroll.current;
+        if(current<72||delta< -7)setHidden(false);
+        else if(current>140&&delta>7)setHidden(true);
+        lastScroll.current=current;
+      });
+    };
+    window.addEventListener('scroll',onScroll,{passive:true});
+    return()=>{window.removeEventListener('scroll',onScroll);cancelAnimationFrame(raf)};
+  },[]);
+  useEffect(()=>setHidden(false),[path]);
+  const active=(to:string)=>path===to||(to==='/cerita'&&path.startsWith('/cerita/'));
+  return <>
+    <header className={`site-header kk-public-header ${hidden?'kk-header-hidden':''}`}><div className="site-header-inner">
+      <button type="button" className="site-brand" onClick={()=>navigate('/')} aria-label="KataKecil — Beranda">
+        <span className="brand-mark"><Feather size={20}/></span><span>KataKecil<span className="brand-dot">.</span></span>
+      </button>
+      <nav className="site-nav kk-desktop-nav" aria-label="Navigasi pembaca">
+        {links.map(link=><button key={link.to} type="button" onClick={()=>navigate(link.to)} className={`nav-item ${active(link.to)?'v53-nav-current':''}`} aria-current={active(link.to)?'page':undefined}>{link.label==='Penulis'?'Tentang Penulis':link.label}</button>)}
+      </nav>
+      <div className="site-nav-right"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div>
+    </div></header>
+    <nav className="kk-public-bottom-nav" aria-label="Navigasi publik mobile">
+      {links.map(link=><button key={link.to} type="button" className={active(link.to)?'kk-public-active':''} aria-current={active(link.to)?'page':undefined} onClick={()=>navigate(link.to)}><link.icon size={20}/><span>{link.label}</span></button>)}
     </nav>
-    <div className="site-nav-right"><span className="v53-desktop-header-spacer" aria-hidden="true"/><ThemeToggle theme={theme} onToggle={onToggle}/>
-      <button type="button" aria-controls="public-navigation" aria-expanded={menu}
-        aria-label={menu?'Tutup menu pembaca':'Buka menu pembaca'} className="mobile-menu-toggle"
-        onClick={()=>setMenu(previous=>!previous)}>{menu?<X size={22}/>:<Menu size={22}/>}</button>
-    </div>
-  </div></header>;
+  </>;
 }

@@ -17,6 +17,8 @@ import './content-protection.css';
 import './secure-reader.css';
 import './mist-blue.css';
 import './design/v53-mobile.css';
+import './design/v54.css';
+import ThemeLoading from './components/ThemeLoading';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
@@ -51,7 +53,7 @@ export default function App(){
     }).finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
   },[slug,isReader]);
-  if(isReader) return loading?<div className="reader-route-loading">Menyiapkan halaman cerita…</div>:readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/cerita/${readerBook.slug}`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
+  if(isReader) return loading?<ThemeLoading context="reader" text="Menyiapkan halaman cerita…"/>:readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/cerita/${readerBook.slug}`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
   if(path.startsWith('/studio')) return <StudioErrorBoundary><Studio path={path}/></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;
 }

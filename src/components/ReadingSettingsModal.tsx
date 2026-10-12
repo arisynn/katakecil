@@ -44,12 +44,8 @@ export const ReadingSettingsModal: React.FC<ReadingSettingsModalProps> = ({
     { id: 'mono', label: 'Monospace', sample: 'Typewriter mono', className: 'font-mono' },
   ];
 
-  const themeOptions: { id: ThemeMode; label: string; bg: string; text: string; border: string }[] = [
-    { id: 'white', label: 'Kertas', bg: '#FAFAF8', text: '#232824', border: '#E5E8E2' },
-    { id: 'sepia', label: 'Hangat', bg: '#F5F0E7', text: '#3B342C', border: '#E5DCD0' },
-    { id: 'night', label: 'Senja', bg: '#202623', text: '#DCE1DA', border: '#36413A' },
-    { id: 'black', label: 'Hitam OLED', bg: '#080909', text: '#E1E3E0', border: '#242824' },
-  ];
+  const themeOptions: { id: ThemeMode; label: string; bg: string; text: string; border: string }[] =
+    (['white','sepia','night','black'] as ThemeMode[]).map(id=>({id,label:THEMES[id].label,bg:THEMES[id].pageBg,text:THEMES[id].text,border:THEMES[id].border}));
 
   const handleDecreaseFont = () => {
     if (settings.fontSize > 70) {

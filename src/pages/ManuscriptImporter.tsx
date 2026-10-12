@@ -33,6 +33,8 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
+ const [readPhase,setReadPhase]=useState('');
+ const [importReport,setImportReport]=useState<{cover:boolean;parts:number;episodes:number;pages:number;saved:boolean}|null>(null);
  const [parsed,setParsed]=useState<ParsedManuscript|null>(null);
  const [chapters,setChapters]=useState<ImportChapter[]>([]);
  const initialBook = new URLSearchParams(window.location.search).get('book')||'';
@@ -57,19 +59,19 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
   pendingNewId.current=null;
   setPickerOpen(false);setPickerStatus('Berkas diterima, menyiapkan analisis…');
   setPickedName(file.name||'Berkas tanpa nama');
-  setError('');setSuccess('');setParsed(null);setStep('upload');setChapters([]);setReading(true);
+  setError('');setSuccess('');setParsed(null);setImportReport(null);setStep('upload');setChapters([]);setReading(true);setReadPhase('Membaca berkas…');
   try{
    if(file.size>MAX_FILE)throw Error('Ukuran EPUB maksimal 18 MB.');
    if(!file.name.toLowerCase().endsWith('.epub')&&file.size>8_000_000)throw Error('Markdown/TXT maksimal 8 MB.');
    const kind=file.name.toLowerCase();
    const mime=file.type.toLowerCase();
    let result:ParsedManuscript;
-   if(kind.endsWith('.epub')||mime==='application/epub+zip')result=await parseEpubFile(file);
-   else if(/\.(md|txt)$/.test(kind)||mime==='text/markdown'||mime==='text/plain')result=parsePlainManuscript(await file.text(),file.name);
+   if(kind.endsWith('.epub')||mime==='application/epub+zip'){setReadPhase('Membaca EPUB dan mencari struktur episode…');result=await parseEpubFile(file);}
+   else if(/\.(md|txt)$/.test(kind)||mime==='text/markdown'||mime==='text/plain'){setReadPhase('Mengenali pembagian episode…');result=parsePlainManuscript(await file.text(),file.name);}
    else throw Error('Format yang didukung: .epub, .md, atau .txt.');
    if(!result.chapters.length)throw Error('Tidak ditemukan bagian yang bisa disimpan.');
    result.chapters=result.chapters.map(c=>c.section_type?{...c,include:c.section_type==='frontmatter'&&meaningfulFrontmatter(c.title),episode_number:null}:c);
-   setParsed(result);setChapters(result.chapters);setBookTitle(result.title);setStep('review');setPickerStatus('Analisis selesai, periksa episode dan halaman buku.');
+   setImportReport({cover:Boolean(result.cover),parts:result.chapters.length,episodes:result.chapters.filter(c=>!c.section_type).length,pages:result.chapters.filter(c=>!!c.section_type).length,saved:false});setParsed(result);setChapters(result.chapters);setBookTitle(result.title);setStep('review');setPickerStatus('Analisis selesai, periksa episode dan halaman buku.');
   }catch(e){setError(errorText(e));setPickerStatus('Analisis gagal, baca pesan kesalahan di atas.');}finally{setReading(false);}
  };
  // A single change handler is more reliable than racing input/change handlers
@@ -169,7 +171,8 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
    setSaveStage('Memuat ulang Studio…');
    let refreshWarning='';
    try{await onChanged();}catch{refreshWarning=' Muat ulang halaman Studio untuk melihat hasilnya.';}
-   setSuccess(`Terverifikasi: ${payload.length} episode draft + ${pages.length} halaman buku tersimpan di “${title}”.${coverWarning}${refreshWarning}`);
+   setImportReport({cover:Boolean(parsed.cover),parts:chapters.length,episodes:payload.length,pages:pages.length,saved:true});
+   setSuccess(`Impor berhasil: ${payload.length} episode draft + ${pages.length} halaman buku tersimpan di “${title}”.${coverWarning}${refreshWarning}`);
    pendingNewId.current=null;
    setChapters([]);setParsed(null);setStep('upload');setPickedName('');setDestination(bookId);
   }catch(e){setError(errorText(e));}
@@ -181,6 +184,17 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
   <div className="v4-progress"><span className="active"><FileUp size={15}/> 1 · Unggah</span><ArrowRight size={16}/><span className={step==='review'?'active':''}><BookOpen size={15}/> 2 · Periksa</span><ArrowRight size={16}/><span><ShieldCheck size={15}/> 3 · Draft</span></div>
   {error&&<div className="studio-error" role="alert">{error}</div>}
   {saveStage&&<div className="v5-import-stage" role="status" aria-live="polite"><span className="v4-picker-spinner"/> {saveStage}</div>}
+  {(reading||importReport)&&<section className="studio-panel kk-import-progress" aria-label="Tahapan pemrosesan impor" aria-live="polite">
+    <div className="studio-panel-top"><h2>Progres impor</h2><BookOpen size={17}/></div>
+    {reading&&<p className="studio-muted">{readPhase}</p>}
+    {importReport&&<ul className="kk-import-checklist">
+      <li><CheckCircle2 size={17}/>Berkas {parsed?.format.toUpperCase()||pickedName.split('.').pop()?.toUpperCase()||'naskah'} berhasil dibaca</li>
+      <li><CheckCircle2 size={17}/>{importReport.cover?'Sampul ditemukan':'Tidak ada sampul terdeteksi — bisa ditambahkan nanti'}</li>
+      <li><CheckCircle2 size={17}/>{importReport.parts} bagian ditemukan ({importReport.episodes} calon episode, {importReport.pages} halaman buku)</li>
+      {importReport.saved&&<li><CheckCircle2 size={17}/>{importReport.episodes} episode draft berhasil dibuat</li>}
+      {importReport.saved&&<li><CheckCircle2 size={17}/>Penyimpanan database berhasil diverifikasi</li>}
+    </ul>}
+  </section>}
   {success&&<div className="studio-success" role="status">{success} <button className="studio-light-button" onClick={()=>navigate(`/studio/cerita/${destination}`)}>Lihat novel <ArrowRight size={16}/></button></div>}
   <section className="studio-panel v4-upload-panel" aria-label="Unggah berkas naskah">
    <label className={`v4-dropzone${reading?' v4-upload-reading':''}`}>
@@ -190,7 +204,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
     <input type="file" name="manuscript" aria-label="Pilih berkas EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading||saving} onClick={()=>{setPickerOpen(true);setPickerStatus('Menunggu berkas dari pemilih file Android…');}} onChange={handleFileSelection}/>
    </label>
    <div className="v4-picker-status" role="status" aria-live="polite">
-    {reading?<><span className="v4-picker-spinner" aria-hidden="true"/> Sedang memproses {pickedName}. Tunggu sampai daftar episode muncul.</>
+    {reading?<><span className="v4-picker-spinner" aria-hidden="true"/> {readPhase} Berkas: {pickedName}.</>
       :parsed?<>✓ {pickedName} berhasil dibaca. Periksa hasilnya di bawah sebelum menyimpan.</>
       :error&&pickedName?<>Berkas {pickedName} belum berhasil diproses. Lihat pesan kesalahan di atas; kamu boleh memilihnya lagi.</>
       :success?<>Impor selesai. Kamu bisa memilih berkas berikutnya.</>
