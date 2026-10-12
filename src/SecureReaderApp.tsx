@@ -56,6 +56,9 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  },[dimensions,settings.marginWidth,spread]);
  const parsed=useMemo(()=>parseMarkdown(segment?`# ${bookTitle}\n\n### ${segment.title}\n\n${segment.content}`:''),[segment,bookTitle]);
  const chapter=parsed.chapters[0];
+ // Stable array identity: an inline [chapter] causes PageMeasurer's layout effect
+ // to run on every render, triggering an endless measure/setPages loop.
+ const measuredChapters=useMemo(()=>chapter?[chapter]:[],[chapter]);
  const storedPos=()=>readLocal<{ep:number;part:number;offset:number}|null>(progressKey,null);
  const persistProgress=(ep:number,part:number,offset:number)=>{try{localStorage.setItem(progressKey,JSON.stringify({ep,part,offset}));}catch{}};
 
@@ -101,7 +104,8 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   measuringNode.current=nodes[0]||null;
   const count=counts[0]||1;
   const active=segmentRef.current;
-  setPages(Array.from({length:count},(_,i)=>i));
+  setPages(previous => previous.length === count && previous.every((value,i)=>value===i)
+   ? previous : Array.from({length:count},(_,i)=>i));
   if(pendingEdge.current==='end')setPageIndex(count-1);
   else if(pendingEdge.current==='offset'&&active&&nodes[0]){
    const ch=parseMarkdown(`# ${bookTitle}\n\n### ${active.title}\n\n${active.content}`).chapters[0];
@@ -179,7 +183,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const setSettingsSafe=(next:Partial<ReadingSettings>)=>{pendingOffset.current=offsetRef.current;pendingEdge.current='offset';setSettings(prev=>({...prev,...next}));};
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
  return <div className="quiet-app reader-protected" style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-  {chapter&&<PageMeasurer chapters={[chapter]} settings={settings} geometry={geometry} onMeasured={onMeasured} hideIntro={!!segment&&segment.part>0}/>}
+  {chapter&&<PageMeasurer chapters={measuredChapters} settings={settings} geometry={geometry} onMeasured={onMeasured} hideIntro={!!segment&&segment.part>0}/>}
   <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>e.preventDefault()} onCut={e=>e.preventDefault()} onDragStart={e=>e.preventDefault()} onContextMenu={e=>e.preventDefault()} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
    <div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
     {first!==undefined&&chapter?<ReaderPage chapter={chapter} columnIndex={first} pageNumber={pageIndex+1} totalPages={pages.length} settings={settings} theme={theme} geometry={geometry} hideIntro={!!segment&&segment.part>0}/>:<div className="loading-text" style={{color:theme.secondaryText}}>{loading?'Memuat bagian cerita…':error||'Menata halaman…'}</div>}
