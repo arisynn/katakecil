@@ -1,3 +1,31 @@
+# KataKecil V4.2 — Secure Reader + Upload Android + Karisyono
+
+**PENTING: Jangan langsung menimpa production dengan seluruh berkas dan menjalankan semua SQL.**
+Migrasi V4.2 dibagi menjadi dua tahap untuk menghindari putusnya pembacaan novel yang sedang berjalan. Baca [DEPLOY_V4.2.md](./DEPLOY_V4.2.md) dan jalankan `--check` dahulu.
+
+V4.2 menambahkan:
+- Reader publik yang hanya meminta potongan Markdown kecil melalui Supabase Edge Function (bukan seluruh naskah terbit melalui browser).
+- Lockdown hak SELECT `content_md` pada tabel `qr_episodes` **setelah** frontend baru siap (migrasi tahap 2).
+- Author-only `qr_author_get_episodes` RPC agar Studio dapat membuka seluruh naskah dan membuat backup.
+- Studio tidak lagi remount saat navigasi. Verifikasi sesi tidak diulang pada token refresh ketika file picker Android dibuka.
+- Input file Android satu event `change`, status file picker dan pesan pemulihan.
+- Branding Halo, Karisyono dan Memverifikasi akses Karisyono.
+- Anticopy, antiprint, watermark **Karisyono** di reader publik tetap aktif.
+
+Keamanan: chunking dan watermark adalah hambatan scraping, **bukan DRM absolut**. Teks yang sampai ke browser tetap dapat direkam/diambil melalui perangkat atau otomasi. Pengaturan layar putih saat tab tidak aktif hanya berlaku bagi reader, bukan Studio.
+
+Di reader, tampilan halaman, tema, ukuran huruf, swipe dan fullscreen tetap berbasis komponen yang sama. **Perubahan perilaku:** indikator jumlah halaman dihitung untuk *potongan aktif*, dan pencarian teks saat ini hanya pada potongan aktif. Navigasi episode, penanda baca, serta posisi terakhir memakai identitas potongan. Peningkatan pencarian lintas episode dapat dilakukan kemudian dengan API yang membatasi hasil.
+
+Tidak ada naskah atau password disertakan dalam ZIP. Jangan simpan Service Role Key, DATABASE_URL atau READER_RATE_SALT dalam variabel `VITE_*` ataupun GitHub.
+
+## Pengujian
+
+`npm install && npm run test:v2 && npm run test:v3 && npm run test:v4 && npm run test:v42 && npm run lint && npm run build`
+
+Tes sintaks, utilitas impor, simulasi Edge Function dan ukuran chunk sudah dijalankan. **Build produksi penuh, deploy Edge Function, dan uji riil Android belum selesai di lingkungan pembuatan paket**, sehingga preview wajib sebelum production.
+
+---
+
 # KataKecil V4.1.1
 
 **Perbaikan upload Android:** lihat [RELEASE_V4.1.1.md](RELEASE_V4.1.1.md) untuk instruksi dan hasil pengujian. Tidak perlu migrasi Supabase/ENV tambahan.

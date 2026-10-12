@@ -12,6 +12,7 @@ interface ReaderPageProps {
   settings: ReadingSettings;
   theme: ThemeColors;
   geometry: ReaderGeometry;
+  hideIntro?: boolean;
 }
 
 export function textStyles(settings: ReadingSettings): React.CSSProperties {
@@ -30,11 +31,11 @@ export function textStyles(settings: ReadingSettings): React.CSSProperties {
   };
 }
 
-export function ReaderPage({ chapter, columnIndex, pageNumber, totalPages, settings, theme, geometry }: ReaderPageProps) {
+export function ReaderPage({ chapter, columnIndex, pageNumber, totalPages, settings, theme, geometry, hideIntro=false }: ReaderPageProps) {
   return <article className="reader-leaf" style={{ width: geometry.leafWidth, height: geometry.pageHeight, backgroundColor: theme.pageBg, color: theme.text, paddingInline: geometry.paddingX, paddingTop: geometry.paddingTop, paddingBottom: geometry.paddingBottom }} aria-label={`Halaman ${pageNumber} dari ${totalPages}`}>
     <div className="reader-text-viewport" style={{ width: geometry.bodyWidth, height: geometry.bodyHeight }}>
       <div className="reader-columns" style={{ ...textStyles(settings), width: geometry.bodyWidth, height: geometry.bodyHeight, columnWidth: geometry.bodyWidth, transform: `translate3d(-${columnIndex * geometry.bodyWidth}px, 0, 0)` }}>
-        <ChapterText chapter={chapter}/>
+        <ChapterText chapter={chapter} hideIntro={hideIntro}/>
       </div>
     </div>
     <footer className="reader-folio reader-folio-bottom" style={{ color: theme.secondaryText, height: geometry.footerHeight, marginTop: geometry.footerGap }} aria-label={`Halaman ${pageNumber} dari ${totalPages}`}>

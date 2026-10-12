@@ -31,7 +31,7 @@ export async function getStudioLibrary() {
   // to prevent V3 database / schedule screens from silently omitting later episodes.
   const books: Book[] = [];
   const episodes: Episode[] = [];
-  const size = 300;
+  const size = 200;
   for (let start = 0; start < 6000; start += size) {
     const { data, error } = await supabase.from('qr_books').select('*').order('updated_at', { ascending: false }).range(start, start + size - 1);
     if (error) throw error;
@@ -39,7 +39,7 @@ export async function getStudioLibrary() {
     if ((data ?? []).length < size) break;
   }
   for (let start = 0; start < 6000; start += size) {
-    const { data, error } = await supabase.from('qr_episodes').select('*').order('book_id').order('episode_number').range(start, start + size - 1);
+    const { data, error } = await supabase.rpc('qr_author_get_episodes', {p_offset:start, p_limit:size});
     if (error) throw error;
     episodes.push(...((data ?? []) as Episode[]));
     if ((data ?? []).length < size) break;

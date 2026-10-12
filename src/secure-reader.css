@@ -1,0 +1,3 @@
+.secure-reader-error{position:fixed;z-index:60;top:14%;left:5%;width:90%;max-width:560px;padding:20px;border:1px solid #bd9177;border-radius:12px;box-shadow:0 8px 35px #0002;}
+.secure-reader-error button{border:1px solid #a9b1a8;border-radius:7px;padding:7px 12px;margin-left:8px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}

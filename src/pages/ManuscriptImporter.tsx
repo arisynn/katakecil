@@ -16,7 +16,9 @@ const safeId=(value:string)=>slugify(value)||'cerita-baru';
 export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const [reading,setReading]=useState(false);
  const [pickedName,setPickedName]=useState('');
- const seenFiles=useRef<WeakSet<File>>(new WeakSet());
+ const lastFileRef=useRef<File|null>(null);
+ const [pickerOpen,setPickerOpen]=useState(false);
+ const [pickerStatus,setPickerStatus]=useState('');
  const [saving,setSaving]=useState(false);
  const [error,setError]=useState('');
  const [success,setSuccess]=useState('');
@@ -40,6 +42,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const dirty=chapters.some(c=>c.confidence==='periksa'&&c.include);
  const importFile=async(file?:File)=>{
   if(!file)return;
+  setPickerOpen(false);setPickerStatus('Berkas diterima, menyiapkan analisis…');
   setPickedName(file.name||'Berkas tanpa nama');
   setError('');setSuccess('');setParsed(null);setStep('upload');setChapters([]);setReading(true);
   try{
@@ -51,21 +54,36 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
    else if(/\.(md|txt)$/.test(kind)||mime==='text/markdown'||mime==='text/plain')result=parsePlainManuscript(await file.text(),file.name);
    else throw Error('Format yang didukung: .epub, .md, atau .txt.');
    if(!result.chapters.length)throw Error('Tidak ditemukan episode untuk diimpor.');
-   setParsed(result);setChapters(result.chapters);setBookTitle(result.title);setStep('review');
-  }catch(e){setError(errorText(e));}finally{setReading(false);}
+   setParsed(result);setChapters(result.chapters);setBookTitle(result.title);setStep('review');setPickerStatus('Analisis selesai, periksa daftar episode.');
+  }catch(e){setError(errorText(e));setPickerStatus('Analisis gagal, baca pesan kesalahan di atas.');}finally{setReading(false);}
  };
- // Android's system document picker may return an input event, a change event,
- // or both. Process exactly once per File object and reset the field so choosing
- // the very same file again still triggers a new selection.
- const handleFileSelection=(event:React.FormEvent<HTMLInputElement>)=>{
+ // A single change handler is more reliable than racing input/change handlers
+ // on Android, especially if the same File object fires both events.
+ const handleFileSelection=(event:React.ChangeEvent<HTMLInputElement>)=>{
   const input=event.currentTarget;
   const file=input.files?.item(0);
-  if(!file)return; // picker cancelled; keep the previous review intact
-  if(seenFiles.current.has(file))return;
-  seenFiles.current.add(file);
+  setPickerOpen(false);
+  if(!file){setPickerStatus('Tidak ada berkas baru. Coba pilih lagi.');return;}
+  if(lastFileRef.current===file)return;
+  lastFileRef.current=file;
   input.value='';
   void importFile(file);
  };
+ useEffect(()=>{
+  if(!pickerOpen)return;
+  const resume=()=>{
+   if(document.visibilityState!=='visible')return;
+   // Give the Android content picker a moment to dispatch the change event.
+   window.setTimeout(()=>setPickerOpen(open=>{
+    if(open)setPickerStatus('Kembali dari pemilih berkas. Jika belum muncul nama berkas, tekan Pilih lagi.');
+    return false;
+   }),900);
+  };
+  window.addEventListener('pageshow',resume);
+  window.addEventListener('focus',resume);
+  document.addEventListener('visibilitychange',resume);
+  return()=>{window.removeEventListener('pageshow',resume);window.removeEventListener('focus',resume);document.removeEventListener('visibilitychange',resume);};
+ },[pickerOpen]);
  const update=(i:number,changes:Partial<ImportChapter>)=>setChapters(prev=>prev.map((x,index)=>index===i?{...x,...changes}:x));
  const autoNumber=()=>setChapters(prev=>assignEpisodeNumbers(prev,occupiedNumbers));
  const split=(i:number)=>{setChapters(prev=>splitChapter(prev,i,splitAt));setExpanded(null);setSplitAt(0);};
@@ -126,14 +144,14 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
     <UploadCloud size={32} aria-hidden="true"/>
     <strong>{reading?'Menganalisis naskah…':parsed?'Pilih berkas lain':'Pilih EPUB, MD, atau TXT dari HP'}</strong>
     <small>{reading?`Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.`:'Maksimum 18 MB. Berkas dibaca di browser dan tidak otomatis diterbitkan.'}</small>
-    <input type="file" name="manuscript" aria-label="Pilih berkas EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading||saving} onInput={handleFileSelection} onChange={handleFileSelection}/>
+    <input type="file" name="manuscript" aria-label="Pilih berkas EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading||saving} onClick={()=>{setPickerOpen(true);setPickerStatus('Menunggu berkas dari pemilih file Android…');}} onChange={handleFileSelection}/>
    </label>
    <div className="v4-picker-status" role="status" aria-live="polite">
     {reading?<><span className="v4-picker-spinner" aria-hidden="true"/> Sedang memproses {pickedName}. Tunggu sampai daftar episode muncul.</>
       :parsed?<>✓ {pickedName} berhasil dibaca. Periksa hasilnya di bawah sebelum menyimpan.</>
       :error&&pickedName?<>Berkas {pickedName} belum berhasil diproses. Lihat pesan kesalahan di atas; kamu boleh memilihnya lagi.</>
       :success?<>Impor selesai. Kamu bisa memilih berkas berikutnya.</>
-      :<>Setelah memilih berkas, nama file dan progres pembacaan akan muncul di sini. Jika tidak, coba pilih dari aplikasi File/Files di HP.</>}
+      :<>{pickerOpen?'Memilih berkas…':pickerStatus||'Setelah memilih berkas, nama file dan progres pembacaan akan muncul di sini.'}</>}
    </div>
   </section>
   {parsed&&step==='review'&&<>

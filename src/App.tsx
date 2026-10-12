@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReaderApp from './ReaderApp';
+import SecureReaderApp from './SecureReaderApp';
 import PublicLibrary from './pages/PublicLibrary';
 import Studio from './pages/Studio';
 import StudioErrorBoundary from './components/StudioErrorBoundary';
@@ -13,6 +13,7 @@ import './studio.css';
 import './studio-v4.css';
 import './studio-v41.css';
 import './content-protection.css';
+import './secure-reader.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
@@ -21,7 +22,7 @@ export default function App(){
   useEffect(()=>{const update=()=>setPath(window.location.pathname); window.addEventListener('popstate',update);window.addEventListener('quiet:navigate',update);return()=>{window.removeEventListener('popstate',update);window.removeEventListener('quiet:navigate',update);};},[]);
   useEffect(()=>{
     const updatePrivacy=()=>{
-      const sensitiveRoute=window.location.pathname.startsWith('/baca/') || window.location.pathname.startsWith('/studio');
+      const sensitiveRoute=window.location.pathname.startsWith('/baca/');
       document.documentElement.classList.toggle('kk-backgrounded', sensitiveRoute && document.visibilityState !== 'visible');
     };
     updatePrivacy();
@@ -47,7 +48,7 @@ export default function App(){
     }).finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
   },[slug,isReader]);
-  if(isReader) return loading?<div className="reader-route-loading">Menyiapkan halaman cerita…</div>:readerBook?<ReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={Number(new URLSearchParams(window.location.search).get('episode'))||undefined}/>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
-  if(path.startsWith('/studio')) return <StudioErrorBoundary key={path}><Studio path={path}/></StudioErrorBoundary>;
+  if(isReader) return loading?<div className="reader-route-loading">Menyiapkan halaman cerita…</div>:readerBook?<SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={Number(new URLSearchParams(window.location.search).get('episode'))||undefined}/>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
+  if(path.startsWith('/studio')) return <StudioErrorBoundary><Studio path={path}/></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { emptyStory, fetchPublishedFingerprint, loadPublishedStory } from './data/storyLoader';
+import { emptyStory } from './data/storyLoader';
 import type { StoryFile } from './types/reader';
 import { ReaderPage, type ReaderGeometry } from './components/ReaderPage';
 import { PageMeasurer } from './components/PageMeasurer';
@@ -32,7 +32,6 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const [story, setStory] = useState(() => previewStory ?? emptyStory(bookId, bookTitle));
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(previewStory ? 'ready' : 'loading');
   const [loadError, setLoadError] = useState('');
-  const fingerprintRef = useRef<string | null>(null);
   const parsed = useMemo(() => parseMarkdown(story.content), [story.content]);
   const chapters = parsed.chapters;
   const [settings, setSettings] = useState<ReadingSettings>(() => ({ ...DEFAULT_SETTINGS, ...readJson('quiet_reader_settings', {}) }));
@@ -79,52 +78,11 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   useEffect(() => { try { localStorage.setItem(bookmarkKey(story.id), JSON.stringify(bookmarks)); } catch { /* browser storage unavailable */ } }, [bookmarks, story.id]);
   useEffect(() => { if (!status) return; const timer = window.setTimeout(() => setStatus(''), 2000); return () => window.clearTimeout(timer); }, [status]);
 
-  useEffect(() => {
-    let active = true;
-    let inFlight = false;
-    const load = async (initial: boolean) => {
-      if (inFlight) return;
-      inFlight = true;
-      try {
-        if (previewStory) return;
-        if (!initial) {
-          const nextFingerprint = await fetchPublishedFingerprint(bookId);
-          if (!active || nextFingerprint === fingerprintRef.current) return;
-        }
-        const latest = await loadPublishedStory(bookId, bookTitle);
-        if (!active) return;
-        const alreadyLoaded = fingerprintRef.current !== null;
-        const wasDifferent = latest.fingerprint !== fingerprintRef.current;
-        fingerprintRef.current = latest.fingerprint;
-        setStory(latest.story);
-        setLoadState('ready');
-        setLoadError('');
-        if (alreadyLoaded && wasDifferent) setStatus('Episode baru tersedia');
-      } catch (error) {
-        if (!active) return;
-        if (initial) {
-          setLoadState('error');
-          setLoadError(error instanceof Error ? error.message : 'Tidak dapat memuat episode.');
-        } else {
-          // A temporary connection failure must not erase the chapter being read.
-          console.warn('Pemeriksaan episode tertunda:', error);
-        }
-      } finally {
-        inFlight = false;
-      }
-    };
-    void load(true);
-    const poll = () => { if (document.visibilityState === 'visible') void load(false); };
-    const timer = window.setInterval(poll, 60_000);
-    window.addEventListener('focus', poll);
-    document.addEventListener('visibilitychange', poll);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-      window.removeEventListener('focus', poll);
-      document.removeEventListener('visibilitychange', poll);
-    };
-  }, [bookId, bookTitle, previewStory]);
+  // This component is reserved for author previews in V4.2. Public access
+  // uses SecureReaderApp and never requests whole released episodes.
+  useEffect(()=>{
+    if(!previewStory){setLoadState('error');setLoadError('Gunakan Secure Reader untuk membaca cerita publik.');}
+  },[previewStory]);
 
   const onMeasured = useCallback((counts: number[], nodes: HTMLElement[]) => {
     nodesRef.current = nodes;
