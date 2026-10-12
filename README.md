@@ -1,3 +1,5 @@
+> **KataKecil V5:** lihat [START_HERE_V5.md](START_HERE_V5.md) dan [RELEASE_V5.md](RELEASE_V5.md) sebelum migrasi/deploy. Bagian README lama di bawah tetap disimpan sebagai dokumentasi historis.
+
 # KataKecil V4.2 — Secure Reader + Upload Android + Karisyono
 
 **PENTING: Jangan langsung menimpa production dengan seluruh berkas dan menjalankan semua SQL.**

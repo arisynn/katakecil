@@ -2,7 +2,7 @@ import React, {useEffect,useMemo,useState} from 'react';
 import {ArrowLeft,ArrowRight,BookOpen,CalendarDays,CheckCircle2,ChevronLeft,ChevronRight,Clock3,Database,Download,History,FileText,FileUp,RefreshCw,Search,ShieldCheck,SlidersHorizontal,Sparkles} from 'lucide-react';
 import type {Book,Episode} from '../data/library';
 import {episodeStatus,formatWib} from '../data/library';
-import {applyReleasePlan,getPublicationLogs,getImportBatches,getReleaseRules,saveReleaseRule,type PublicationLog} from '../data/publishing';
+import {applyReleasePlan,getPublicationLogs,getImportBatches,getReleaseRules,saveReleaseRule,type PublicationLog,type ImportBatch} from '../data/publishing';
 import {fromWib,makeReleasePlan,monthDays,toWibDate,type PlannedRelease,type ReleaseRule} from '../utils/releasePlanning';
 import {navigate} from '../utils/nav';
 const WEEK=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
@@ -67,7 +67,7 @@ export function DatabaseManager({books,episodes,onChanged}:{books:Book[];episode
  <section className="studio-panel"><div className="studio-panel-top"><h2>Riwayat impor naskah</h2><button className="studio-text-button" onClick={()=>navigate('/studio/impor')}><FileUp size={16}/> Impor lagi</button></div>
  <p className="studio-muted">Hanya nama berkas, asal novel, tanggal, dan jumlah episode yang dicatat. Isi naskah tidak disimpan dalam riwayat.</p>
  {importError&&<p className="studio-warning">{importError}</p>}
- {imports.length?imports.map(item=><div className="v3-event" key={item.id}><span><strong>{item.source_name} · {item.imported_count} episode</strong><small>{books.find(b=>b.id===item.book_id)?.title??item.book_id} · {item.source_format.toUpperCase()}</small><em>{new Intl.DateTimeFormat('id-ID',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Jakarta'}).format(new Date(item.created_at))} WIB</em></span><FileText size={17}/></div>):<p className="studio-muted">Belum ada impor V4 yang tercatat.</p>}</section>
+ {imports.length?imports.map(item=><div className="v3-event" key={item.id}><span><strong>{item.source_name} · {item.imported_count} episode{item.sections_count?` + ${item.sections_count} halaman buku`:""}</strong><small>{books.find(b=>b.id===item.book_id)?.title??item.book_id} · {item.source_format.toUpperCase()}</small><em>{new Intl.DateTimeFormat('id-ID',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Jakarta'}).format(new Date(item.created_at))} WIB</em></span><FileText size={17}/></div>):<p className="studio-muted">Belum ada impor V4 yang tercatat.</p>}</section>
  <div className="v3-actions"><button className="studio-light-button" onClick={()=>void onChanged()}><RefreshCw size={16}/> Muat ulang data</button><button className="studio-light-button" onClick={()=>navigate('/studio/jadwal')}><CalendarDays size={16}/> Kelola jadwal</button></div>
  <p className="studio-footnote"><ShieldCheck size={16}/> Semua data berasal dari akun Studio yang diautentikasi. Hak akses tetap dikendalikan RLS Supabase.</p>
  </>;

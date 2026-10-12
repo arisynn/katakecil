@@ -24,7 +24,7 @@ REVOKE SELECT ON TABLE public.qr_episodes FROM PUBLIC, anon, authenticated;
 -- Preserve public metadata reads used by library cards, contents and reader.
 GRANT SELECT (
   id, book_id, episode_number, arc_title, title,
-  release_at, is_enabled, created_at, updated_at
+  release_at, is_enabled, created_at, updated_at, deleted_at
 ) ON TABLE public.qr_episodes TO anon, authenticated;
 -- RLS remains active: non-authors can read only released rows of published books.
 COMMIT;

@@ -15,6 +15,7 @@ import './studio-v4.css';
 import './studio-v41.css';
 import './content-protection.css';
 import './secure-reader.css';
+import './mist-blue.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
@@ -41,7 +42,7 @@ export default function App(){
   useEffect(()=>{let active=true; if(!isReader){setReaderBook(null);return;} if(!supabase){setReaderBook(null);return;}
     setLoading(true);
     // Public reader can open only a published book. V1 legacy fallback only when V2 tables aren't migrated.
-    supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).maybeSingle().then(({data,error})=>{
+    supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle().then(({data,error})=>{
       if(!active)return;
       if(!error&&data)setReaderBook(data as Book);
       else if(error&&slug===legacyBookId)setReaderBook({id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''});

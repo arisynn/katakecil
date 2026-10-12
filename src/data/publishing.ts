@@ -26,10 +26,10 @@ export async function getPublicationLogs(limit=60):Promise<PublicationLog[]>{
   return (data??[]) as PublicationLog[];
 }
 
-export type ImportBatch={id:string;book_id:string;source_name:string;source_format:'epub'|'md'|'txt';detected_title:string;imported_count:number;created_at:string};
+export type ImportBatch={id:string;book_id:string;source_name:string;source_format:'epub'|'md'|'txt';detected_title:string;imported_count:number;sections_count?:number;created_at:string};
 export async function getImportBatches(limit=40):Promise<ImportBatch[]>{
   if(!supabase)throw Error('Supabase belum dikonfigurasi.');
-  const {data,error}=await supabase.from('qr_import_batches').select('id,book_id,source_name,source_format,detected_title,imported_count,created_at').order('created_at',{ascending:false}).limit(limit);
+  const {data,error}=await supabase.from('qr_import_batches').select('id,book_id,source_name,source_format,detected_title,imported_count,sections_count,created_at').order('created_at',{ascending:false}).limit(limit);
   if(error)throw error;
   return (data??[]) as ImportBatch[];
 }
