@@ -11,6 +11,7 @@ export type ImportChapter = {
   confidence: Confidence;
   include: boolean;
   origin: string;
+  section_type?: 'frontmatter' | 'arc';
 };
 export type ParsedManuscript = {
   name: string;
@@ -24,6 +25,21 @@ export type ParsedManuscript = {
 };
 
 export const MAX_IMPORT_EPISODES = 120;
+/** EPUB often carries navigation, legal notices, and author pages in its spine.
+ * Excluded by default, but kept in the review screen so the author may opt in.
+ * Prologue/Epilogue are narrative chapters; don't discard them automatically.
+ */
+export function classifyEpubSection(title:string,source=''): 'frontmatter'|'arc'|'episode' {
+  const name=cleanText(title).replace(/[.:—–\-]+$/,'').replace(/\s+/g,' ').toLowerCase();
+  const path=source.replace(/^.*\//,'').replace(/\.(?:xhtml|html|htm)$/i,'').replace(/[_\-]+/g,' ').trim().toLowerCase();
+  if (/^(?:arc|bagian|part|jilid|volume)\s+[ivxlcdm\d]+\b/i.test(name)) return 'arc';
+  if (/^(?:episode|bab|chapter|chap\.?|prolog|prologue|epilog|epilogue|interlude|interlud)\b/i.test(name)) return 'episode';
+  const nonStory=/^(?:daftar isi|table of contents|contents|toc|copyright|hak cipta|halaman hak cipta|tentang penulis|about the author|about author|front matter|frontmatter|half title|halftitlepage|cover|sampul|cover page|title page|halaman judul|acknowledg(?:e)?ments?|ucapan terima kasih|dedication|dedikasi|persembahan|prakata|kata pengantar|pengantar|preface|foreword|penerbit|publisher|isbn|kolofon|colophon|bibliografi|bibliography|index|indeks|daftar gambar|daftar tabel|legal notices?|legal|imprint|disclaimer|catatan penerbit|credits?|kredit)(?:\s*[:—–-]\s*.*)?$/i;
+  if(nonStory.test(name)) return 'frontmatter';
+  if(nonStory.test(path)) return 'frontmatter';
+  return 'episode';
+}
+
 export function cleanText(value: string): string {
   return value.normalize('NFC').replace(/[\u200b\ufeff]/g, '').trim();
 }
@@ -36,7 +52,7 @@ export function titleInfo(raw: string): {number: number | null; title: string; c
   const match = title.match(/^(?:episode|bab|chapter|chap\.?|bagian cerita)\s*(?:ke[- ]?)?(\d{1,4}|[IVXLCDM]{1,9})(?:\s*[.:—–-]\s*|\s+)?(.*)$/i);
   if (match) {
     let number = /^\d+$/.test(match[1]) ? Number(match[1]) : fromRoman(match[1]);
-    if (!Number.isSafeInteger(number) || number < 1 || number > 9999) number = null;
+    if (!Number.isSafeInteger(number) || number < 0 || number > 9999) number = null;
     return {number,title:title || 'Episode',confidence:number === null?'sedang':'tinggi',kind:'chapter'};
   }
   if (/^(?:prolog|epilog|interlude|interlud|prakata|pendahuluan|penutup)$/i.test(title)) return {number:null,title,confidence:'sedang',kind:'chapter'};
@@ -74,7 +90,7 @@ export function validateImport(chapters:ImportChapter[], existing: {episode_numb
     if(!chapter.content_md.trim()) errors.push(`Naskah “${chapter.title}” kosong.`);
     if(chapter.content_md.length > 1_000_000) errors.push(`Episode “${chapter.title}” melebihi 1 juta karakter.`);
     if(chapter.episode_number!==null){
-      if(!Number.isInteger(chapter.episode_number)||chapter.episode_number<1||chapter.episode_number>9999) errors.push(`Nomor episode “${chapter.title}” tidak valid.`);
+      if(!Number.isInteger(chapter.episode_number)||chapter.episode_number<0||chapter.episode_number>9999) errors.push(`Nomor episode “${chapter.title}” tidak valid.`);
       if(numbers.has(chapter.episode_number))errors.push(`Nomor episode ${chapter.episode_number} berulang dalam impor.`);
       if(existingNumbers.has(chapter.episode_number))errors.push(`Episode ${chapter.episode_number} sudah ada di novel. Nomor lama tidak akan ditimpa.`);
       numbers.add(chapter.episode_number);

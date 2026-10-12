@@ -2,7 +2,7 @@
  * only Markdown/plain text can leave this module. Never inject EPUB HTML into the DOM.
  */
 import JSZip from 'jszip';
-import {cleanText,titleInfo} from './importManuscript';
+import {cleanText,titleInfo,classifyEpubSection} from './importManuscript';
 import type {ImportChapter, ParsedManuscript} from './importManuscript';
 
 const MAX_ARCHIVE = 18_000_000;
@@ -218,11 +218,14 @@ export async function parseEpubFile(file:File):Promise<ParsedManuscript> {
     const label=entries[0]?.title||'';
     const arc=entries.find(t=>t.arc)?.arc||'';
     const parsed=splitDocument(doc,item.path,label,arc,i,warnings,entries);
+    const semanticTags=[getBody(doc),...elements(getBody(doc),'section')].map(el=>el.getAttribute('epub:type')||el.getAttributeNS('http://www.idpf.org/2007/ops','type')||'').join(' ');
+    const isKnownNonStory=/(?:^|\s)(?:frontmatter|cover|titlepage|halftitlepage|copyright-page|toc|dedication|acknowledgments|colophon|imprint)(?:$|\s)/i.test(semanticTags);
     for(const part of parsed){
-      if(/^(?:daftar isi|table of contents|copyright|hak cipta|tentang penulis|about the author|cover|sampul|title page|halaman judul|acknowledgements|ucapan terima kasih)$/i.test(part.title)){
+      const sectionType=isKnownNonStory?'frontmatter':classifyEpubSection(part.title,item.path);
+      if(sectionType!=='episode'){
         part.include=false;part.confidence='periksa';
+        part.section_type=sectionType;
       }
-      if(arcName.test(part.title))part.include=false;
       totalText+=part.content_md.length;
       if(totalText>MAX_TEXT)throw Error('Isi naskah terlalu panjang untuk sekali impor (maks. 12 juta karakter).');
       chapterList.push(part);
@@ -232,7 +235,9 @@ export async function parseEpubFile(file:File):Promise<ParsedManuscript> {
   if(chapterList.length>240)throw Error('Terlalu banyak bagian ditemukan. Pecah EPUB sebelum mengimpor.');
   if(omittedImages)warnings.push(`${omittedImages} ilustrasi ditemukan. Gambar di dalam episode belum dipindahkan ke Markdown; tinjau naskah sebelum impor.`);
   if(!toc.length)warnings.push('Tidak ditemukan daftar isi EPUB; beberapa judul mungkin perlu dikoreksi.');
-  if(chapterList.some(x=>x.confidence==='periksa'))warnings.push('Sebagian batas/judul episode masih belum pasti. Periksa daftar sebelum menyimpan.');
+  const exclusions=chapterList.filter(x=>x.section_type==='frontmatter').length;
+  if(exclusions)warnings.push(`${exclusions} halaman non-episode dikecualikan otomatis (misalnya sampul, daftar isi, atau hak cipta). Halaman tersebut tetap bisa ditinjau dan dicentang secara manual.`);
+  if(chapterList.some(x=>x.confidence==='periksa'&&x.include))warnings.push('Sebagian batas/judul episode masih belum pasti. Periksa daftar sebelum menyimpan.');
   let cover:ParsedManuscript['cover'];
   const coverID=elements(opf,'meta').find(x=>getAttr(x,'name')==='cover')?.getAttribute('content');
   const coverItem=(coverID&&items.get(coverID))||Array.from(items.values()).find(x=>x.props.split(/\s+/).includes('cover-image'));

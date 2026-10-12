@@ -118,3 +118,7 @@ Setelah V4, aksi impor memilih novel yang ada atau membuat novel privat baru; se
 ## Migrasi lewat Termux
 
 Untuk Android/Termux tersedia `migrate-katakecil-termux.sh` dan panduan lengkap di `TERMUX_MIGRATION.md`. Jalankan `--check` dahulu, baru `--apply` setelah backup. Skrip tidak memasukkan password atau service role ke source/frontend.
+
+## Versi V4.3 — Episode Reader dan EPUB
+
+Lihat [`RELEASE_V4.3.md`](RELEASE_V4.3.md) untuk **urutan deploy aman**: migrasi nomor Episode 0 (tanpa mengubah episode lama), deploy fungsi `secure-episode`, uji Vercel Preview, kemudian Production. Reader mengunduh satu episode terbit dan memaginasi tanpa request antarhalaman; parser EPUB mengecualikan frontmatter yang dikenali dengan review manual. Hindari Stage 2 sampai sistem baru diuji menyeluruh.

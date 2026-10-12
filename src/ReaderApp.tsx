@@ -99,7 +99,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   // Optional deep link to an episode from the public episode listing.
   // Uses the actual released episode sequence so gaps in numbering remain safe.
   useEffect(() => {
-    if (!episodeNumber || deepLinkAppliedRef.current || !pages.length || !story.episodeNumbers?.length) return;
+    if (episodeNumber === undefined || deepLinkAppliedRef.current || !pages.length || !story.episodeNumbers?.length) return;
     const chapterIdx = story.episodeNumbers.indexOf(episodeNumber);
     if (chapterIdx < 0 || !chapters[chapterIdx]) return;
     deepLinkAppliedRef.current = true;

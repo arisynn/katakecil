@@ -33,3 +33,20 @@ export async function loadReaderSegment(bookId:string,episodeNumber:number,part:
   if(!data || !Number.isInteger(data.totalParts) || typeof data.content!=='string')throw Error('Respons Secure Reader tidak valid.');
   return data as ReaderSegment;
 }
+
+/** V4.3: one released episode per request, never the full novel.
+ * Keep the body in React memory only; do not persist to browser storage.
+ */
+export type ReaderEpisode = {
+  episodeNumber:number; title:string; arc:string; content:string;
+};
+export async function loadReaderEpisode(bookId:string,episodeNumber:number):Promise<ReaderEpisode> {
+  if(!supabase)throw Error('Supabase belum dikonfigurasi.');
+  const {data,error}=await supabase.functions.invoke('secure-episode',{
+    body:{bookId,episodeNumber},
+  });
+  if(error)throw Error('Episode tidak bisa diambil dari server. Pastikan Secure Episode V4.3 sudah aktif.');
+  if(!data||data.episodeNumber!==episodeNumber||typeof data.content!=='string'||typeof data.title!=='string')
+    throw Error('Respons episode dari server tidak valid.');
+  return data as ReaderEpisode;
+}
