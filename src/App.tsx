@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReaderApp from './ReaderApp';
 import PublicLibrary from './pages/PublicLibrary';
 import Studio from './pages/Studio';
+import StudioErrorBoundary from './components/StudioErrorBoundary';
 import { isConfigured, supabase } from './data/supabase';
 import { legacyBookId, legacyBookTitle } from './data/storyLoader';
 import { type Book } from './data/library';
@@ -10,12 +11,25 @@ import './index.css';
 import './site.css';
 import './studio.css';
 import './studio-v4.css';
+import './studio-v41.css';
+import './content-protection.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
   const [readerBook,setReaderBook]=useState<Book|null>(null);
   const [loading,setLoading]=useState(false);
   useEffect(()=>{const update=()=>setPath(window.location.pathname); window.addEventListener('popstate',update);window.addEventListener('quiet:navigate',update);return()=>{window.removeEventListener('popstate',update);window.removeEventListener('quiet:navigate',update);};},[]);
+  useEffect(()=>{
+    const updatePrivacy=()=>{
+      const sensitiveRoute=window.location.pathname.startsWith('/baca/') || window.location.pathname.startsWith('/studio');
+      document.documentElement.classList.toggle('kk-backgrounded', sensitiveRoute && document.visibilityState !== 'visible');
+    };
+    updatePrivacy();
+    document.addEventListener('visibilitychange',updatePrivacy);
+    window.addEventListener('pageshow',updatePrivacy);
+    window.addEventListener('quiet:navigate',updatePrivacy);
+    return ()=>{document.documentElement.classList.remove('kk-backgrounded');document.removeEventListener('visibilitychange',updatePrivacy);window.removeEventListener('pageshow',updatePrivacy);window.removeEventListener('quiet:navigate',updatePrivacy);};
+  },[]);
   const isReader = path.startsWith('/baca/');
   const slug=isReader?decodeURIComponent(path.split('/')[2]||''):'';
   useEffect(()=>{let active=true; if(!isReader){setReaderBook(null);return;} if(!supabase){setReaderBook(null);return;}
@@ -30,6 +44,6 @@ export default function App(){
     return()=>{active=false;};
   },[slug,isReader]);
   if(isReader) return loading?<div className="reader-route-loading">Menyiapkan halaman cerita…</div>:readerBook?<ReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={Number(new URLSearchParams(window.location.search).get('episode'))||undefined}/>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
-  if(path.startsWith('/studio')) return <Studio path={path}/>;
+  if(path.startsWith('/studio')) return <StudioErrorBoundary key={path}><Studio path={path}/></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;
 }

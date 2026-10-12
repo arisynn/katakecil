@@ -7,6 +7,7 @@ import { formatWib, getStudioLibrary, episodeStatus, slugify, type Book, type Ep
 import { isConfigured, supabase } from '../data/supabase';
 import { navigate } from '../utils/nav';
 import { DatabaseManager, ScheduleManager } from './StudioManagement';
+import ManuscriptImporter from './ManuscriptImporter';
 import { toWibInput } from '../utils/releasePlanning';
 
 const BOOK_STATUS: Record<Book['status'], string>={ongoing:'Berlangsung', completed:'Tamat', hiatus:'Jeda'};

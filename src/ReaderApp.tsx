@@ -279,9 +279,9 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
 
   const first = pages[safeIndex];
   const second = spread ? pages[safeIndex + 1] : undefined;
-  return <div className="quiet-app" style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
+  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
     {chapters.length > 0 && <PageMeasurer chapters={chapters} settings={settings} geometry={geometry} onMeasured={onMeasured}/>}
-    <main className={`reader-stage ${controls ? 'showing-controls' : ''}`} onClick={onCanvasClick} aria-label="Halaman pembaca, ketuk tengah untuk menu">
+    <main className={`reader-stage ${controls ? 'showing-controls' : ''}`} onCopy={e=>{if(!previewStory)e.preventDefault();}} onCut={e=>{if(!previewStory)e.preventDefault();}} onContextMenu={e=>{if(!previewStory)e.preventDefault();}} onDragStart={e=>{if(!previewStory)e.preventDefault();}} onClick={onCanvasClick} aria-label="Halaman pembaca, ketuk tengah untuk menu">
       <div className={`reader-book ${spread ? 'reader-book-spread' : ''}`} style={{ background: theme.pageBg, gap: spread ? 16 : 0 }}>
         {first && chapters[first.chapterIndex] ? <ReaderPage key={`left-${first.chapterIndex}`} chapter={chapters[first.chapterIndex]} columnIndex={first.columnIndex} pageNumber={safeIndex + 1} totalPages={pages.length} settings={settings} theme={theme} geometry={geometry}/> : <div className="loading-text" style={{ color: theme.secondaryText }}>{chapters.length ? 'Menata halaman…' : loadState === 'loading' ? 'Memuat episode…' : loadState === 'error' ? loadError : 'Belum ada episode terbit.'}</div>}
         {spread && second && chapters[second.chapterIndex] && <ReaderPage key={`right-${second.chapterIndex}`} chapter={chapters[second.chapterIndex]} columnIndex={second.columnIndex} pageNumber={safeIndex + 2} totalPages={pages.length} settings={settings} theme={theme} geometry={geometry}/>}

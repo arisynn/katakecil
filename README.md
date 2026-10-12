@@ -1,6 +1,8 @@
-# KataKecil V4 — Smart Manuscript Importer
+# KataKecil V4.1 — Smart Manuscript Importer + Mobile Stability + Content Protection
 
 Website publikasi cerita pribadi berbasis React + Vite + Supabase. V4 meneruskan V1–V3 **tanpa merombak mesin Reader** dan tanpa menimpa jadwal novel pertama.
+
+> **Pembaruan V4.1:** perbaikan Studio mobile dan tab Impor, error boundary, serta perlindungan konten dengan watermark **Karisyono**. Lihat [RELEASE_V4.1.md](./RELEASE_V4.1.md) untuk batasan keamanan, panduan deploy, dan hasil pengujian. Tidak ada migrasi database baru.
 
 ## Fitur V4
 
@@ -43,7 +45,7 @@ VITE_BOOK_TITLE=Novel Pertama
 
 **Tidak perlu API key AI baru.** Analisis EPUB berbasis metadata/heading, bukan AI online. Jangan tempatkan `service_role`, secret key, kredensial SQL, database password, atau naskah pribadi ke `VITE_*` maupun source publik.
 
-**Dependensi baru:** `jszip@3.10.1`, versi exact di `package.json` (untuk memproses berkas EPUB). Kunci dependensi `bun.lock` merupakan warisan V3; bila memakai Bun, regenerasi lock melalui `bun install`. Bila memakai npm, `npm install` akan menghasilkan `package-lock.json` yang perlu disimpan di Git bersama proyek.
+**Dependensi EPUB:** `jszip@3.10.1`. Proyek V4.1 menggunakan npm. Jalankan `npm install` dan commit `package-lock.json` baru agar dependensi produksi konsisten; lock Bun lama sengaja dikeluarkan karena isinya tidak sinkron dengan `package.json`.
 
 ## Migrasi Supabase tanpa merusak jadwal lama
 
@@ -80,3 +82,7 @@ Setelah V4, aksi impor memilih novel yang ada atau membuat novel privat baru; se
 - V2: perpustakaan multi-novel, halaman detail, Studio mobile-first.
 - V3: kalender rilis, pengelolaan database, perencanaan jadwal massal tanpa overwrite.
 - V4: EPUB/Markdown smart importer dan riwayat impor privat.
+
+## Migrasi lewat Termux
+
+Untuk Android/Termux tersedia `migrate-katakecil-termux.sh` dan panduan lengkap di `TERMUX_MIGRATION.md`. Jalankan `--check` dahulu, baru `--apply` setelah backup. Skrip tidak memasukkan password atau service role ke source/frontend.
