@@ -18,7 +18,8 @@
     "test:v421": "node scripts/test-v421-reader.mjs",
     "test:v43": "node scripts/test-v43.mjs",
     "test:v45": "node scripts/test-v45.mjs",
-    "test:v5": "node scripts/test-v5.mjs"
+    "test:v5": "node scripts/test-v5.mjs",
+    "test:v51": "node scripts/test-v51.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

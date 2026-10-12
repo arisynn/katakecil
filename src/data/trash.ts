@@ -17,3 +17,12 @@ export async function restoreItem(kind:'book'|'episode'|'section',id:string){
  const {error}=await supabase.rpc('qr_restore_item',{p_kind:kind,p_id:id});
  if(error)throw error;
 }
+
+/** Irreversible server-side deletion: only a previously trashed item can be removed. */
+export async function permanentlyDeleteItem(kind:'book'|'episode'|'section',id:string,confirmation:string){
+ if(!supabase)throw Error('Supabase belum dikonfigurasi.');
+ const {data,error}=await supabase.rpc('qr_permanently_delete_item',{p_kind:kind,p_id:id,p_confirmation:confirmation});
+ if(error)throw error;
+ if(!data?.deleted)throw Error('Server tidak mengonfirmasi penghapusan permanen.');
+ return data as {deleted:boolean;kind:string;id:string;episodes:number;sections:number;storage_cleanup_required:boolean};
+}

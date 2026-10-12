@@ -13,12 +13,21 @@ type Props={books:Book[];episodes:Episode[];onChanged:()=>Promise<void>};
 const ACCEPT='.epub,.md,.txt,application/epub+zip,text/plain,text/markdown';
 const MAX_FILE=18_000_000;
 const safeId=(value:string)=>slugify(value)||'cerita-baru';
+// Database IDs must remain unique even if an older novel with the same title is in Trash.
+// Keep the generated ID stable across retries for one file/title to avoid duplicate imports
+// when the network response is lost after the transaction commits.
+const newImportId=(title:string)=>{
+ const base=safeId(title).slice(0,58).replace(/-+$/,'')||'cerita-baru';
+ const suffix=crypto.randomUUID().replace(/-/g,'').slice(0,12);
+ return `${base}-${suffix}`;
+};
 const meaningfulFrontmatter=(title:string)=>/(?:kata pengantar|prakata|pengantar|preface|foreword|dedikasi|persembahan|ucapan terima kasih|acknowledgment|about the author|tentang penulis|catatan penulis)/i.test(title);
 
 export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const [reading,setReading]=useState(false);
  const [pickedName,setPickedName]=useState('');
  const lastFileRef=useRef<File|null>(null);
+ const pendingNewId=useRef<{title:string;id:string}|null>(null);
  const [pickerOpen,setPickerOpen]=useState(false);
  const [pickerStatus,setPickerStatus]=useState('');
  const [saving,setSaving]=useState(false);
@@ -45,6 +54,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
  const dirty=chapters.some(c=>c.confidence==='periksa'&&c.include);
  const importFile=async(file?:File)=>{
   if(!file)return;
+  pendingNewId.current=null;
   setPickerOpen(false);setPickerStatus('Berkas diterima, menyiapkan analisis…');
   setPickedName(file.name||'Berkas tanpa nama');
   setError('');setSuccess('');setParsed(null);setStep('upload');setChapters([]);setReading(true);
@@ -108,19 +118,35 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
   if(!window.confirm(`Simpan ${chosen.length} episode dan ${sections.length} halaman buku ke “${title}”?\n\nEpisode baru tetap DRAFT, tanpa mengubah jadwal yang sudah ada.`))return;
   setSaving(true);setSaveStage('Memvalidasi tujuan penyimpanan…');
   try{
-   const bookId=destination==='new'?safeId(bookTitle):destination;
-   if(destination==='new'&&books.some(b=>b.id===bookId||b.slug===bookId))throw Error('Judul/slug sudah digunakan.');
+   // Title is not an identifier: a soft-deleted novel still reserves its primary key.
+   // Reuse this ID on retry, but generate a fresh ID for another manuscript/title.
+   if(destination==='new'&&(!pendingNewId.current||pendingNewId.current.title!==bookTitle.trim()))
+    pendingNewId.current={title:bookTitle.trim(),id:newImportId(bookTitle)};
+   let bookId=destination==='new'?pendingNewId.current!.id:destination;
    const {data:sectionsOld,error:sectionsError}=destination==='new'?{data:[],error:null}:await supabase.from('qr_book_sections').select('position').eq('book_id',bookId).order('position',{ascending:false}).limit(1);
    if(sectionsError)throw sectionsError;
    const maxPosition=sectionsOld?.[0]?.position??0;
    const payload=chosen.map(c=>({episode_number:c.episode_number,title:c.title.trim(),arc_title:c.arc_title.trim(),content_md:c.content_md.trim()}));
    const pages=sections.map((c,i)=>({position:maxPosition+i+1,section_type:c.section_type,title:c.title.trim(),content_md:c.content_md.trim()}));
    setSaveStage('Menyimpan novel, halaman, dan episode dalam satu transaksi…');
-   const {data,error:dbError}=await supabase.rpc('qr_import_manuscript_v5',{
-    p_book_id:bookId,p_new_title:destination==='new'?bookTitle.trim():'',p_new_genre:bookGenre.trim()||'Fiksi',
+   const rpcImport=(candidateId:string)=>supabase!.rpc('qr_import_manuscript_v5',{
+    p_book_id:candidateId,p_new_title:destination==='new'?bookTitle.trim():'',p_new_genre:bookGenre.trim()||'Fiksi',
     p_source_name:parsed.name,p_format:parsed.format,p_title_detected:parsed.title,p_episodes:payload,p_sections:pages,
    });
-   if(dbError)throw new Error(`${dbError.message}. Pastikan migrasi database V5 sudah diterapkan.`);
+   let {data,error:dbError}=await rpcImport(bookId);
+   // A soft-deleted book reserves its ID. On the specific book-PK conflict,
+   // retry twice with a new random ID; do not retry ambiguous network errors.
+   for(let retry=0;destination==='new'&&retry<2&&dbError?.code==='23505'&&/qr_books_pkey/.test(dbError.message||'');retry++){
+    bookId=newImportId(bookTitle);
+    pendingNewId.current={title:bookTitle.trim(),id:bookId};
+    setSaveStage('ID karya sudah dipakai. Membuat identitas baru dengan aman…');
+    ({data,error:dbError}=await rpcImport(bookId));
+   }
+   if(dbError){
+    if(dbError.code==='23505')throw Error('Identitas novel atau nomor episode sudah digunakan. Data lama tetap aman. Periksa Studio sebelum mengulangi impor.');
+    if(dbError.code==='PGRST202'||dbError.code==='42883')throw Error('Fungsi impor V5 belum tersedia di database. Periksa migrasi Supabase.');
+    throw new Error(dbError.message);
+   }
    // Never announce full success solely from the RPC result; check recorded metadata.
    setSaveStage('Memeriksa bahwa isi benar-benar tersimpan…');
    const {data:batch,error:batchError}=await supabase.from('qr_import_batches')
@@ -144,6 +170,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
    let refreshWarning='';
    try{await onChanged();}catch{refreshWarning=' Muat ulang halaman Studio untuk melihat hasilnya.';}
    setSuccess(`Terverifikasi: ${payload.length} episode draft + ${pages.length} halaman buku tersimpan di “${title}”.${coverWarning}${refreshWarning}`);
+   pendingNewId.current=null;
    setChapters([]);setParsed(null);setStep('upload');setPickedName('');setDestination(bookId);
   }catch(e){setError(errorText(e));}
   finally{setSaving(false);setSaveStage('');}
@@ -178,7 +205,7 @@ export default function ManuscriptImporter({books,episodes,onChanged}:Props){
    </section>
    <section className="studio-panel v4-target"><div className="studio-panel-top"><h2>Tujuan penyimpanan</h2><Library size={19}/></div>
     <label className="studio-label">Simpan ke novel<select value={destination} onChange={e=>setDestination(e.target.value)}><option value="new">+ Novel baru (privat)</option>{books.map(b=><option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
-    {destination==='new'&&<div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e=>setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e=>setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat privat. Sinopsis bisa diisi kemudian.</p>{parsed.cover&&<label className="studio-check"><input type="checkbox" checked={useCover} onChange={e=>setUseCover(e.target.checked)}/><span><strong>Gunakan sampul EPUB</strong><small>Perhatian: sampul akan disimpan di bucket Storage publik, walaupun novel masih privat.</small></span></label>}</div>}
+    {destination==='new'&&<div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e=>setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e=>setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat privat dengan ID unik, termasuk jika judul sama pernah digunakan atau berada di Sampah. Sinopsis bisa diisi kemudian.</p>{parsed.cover&&<label className="studio-check"><input type="checkbox" checked={useCover} onChange={e=>setUseCover(e.target.checked)}/><span><strong>Gunakan sampul EPUB</strong><small>Perhatian: sampul akan disimpan di bucket Storage publik, walaupun novel masih privat.</small></span></label>}</div>}
     {destination!=='new'&&<p className="studio-muted">Ditemukan {currentEpisodes.length} episode lama. Nomor dan isi duplikat akan ditolak; seluruh jadwal yang sudah ada tetap utuh.</p>}
    </section>
    <section className="studio-panel v4-review"><div className="studio-panel-top"><h2>Periksa isi buku</h2><span className="v3-counter">{selected.length} dipilih</span></div>
