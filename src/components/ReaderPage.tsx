@@ -39,9 +39,7 @@ export function ReaderPage({ chapter, columnIndex, pageNumber, totalPages, setti
       </div>
     </div>
     <footer className="reader-folio reader-folio-bottom" style={{ color: theme.secondaryText, height: geometry.footerHeight, marginTop: geometry.footerGap }} aria-label={`Halaman ${pageNumber} dari ${totalPages}`}>
-      <span className="folio-gesture folio-left" aria-hidden="true">← Swipe →</span>
       <span className="folio-counter tabular-nums">{pageNumber} / {totalPages}</span>
-      <span className="folio-gesture folio-right" aria-hidden="true">Pinch for menu</span>
     </footer>
   </article>;
 }

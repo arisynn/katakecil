@@ -1,15 +1,17 @@
-# KataKecil V6.9 — Writer Studio Redesign
+# KataKecil V6.10 — Reader Experience Redesign
 
-KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk satu penulis**, menggunakan React, TypeScript, Vite, CSS, dan Supabase. Tema global tetap **Arctic Blue** (terang) dan **Midnight Sapphire** (gelap).
+KataKecil adalah aplikasi membaca cerita publik dan **Studio privat untuk satu penulis** berbasis React, TypeScript, Vite, dan Supabase. Dua tema global tetap **Arctic Blue** (terang) dan **Midnight Sapphire** (gelap).
 
-V6.9 memprioritaskan pengalaman menulis: dashboard yang langsung menuju draft terakhir, editor kanvas dengan mode fokus dan autosave, pemeriksaan sebelum publikasi, pencarian/filter bab, alur upload tiga langkah, dan navigasi empat tab utama. Seluruh fitur publik V6.8.1 tetap dipertahankan, termasuk Hero Carousel, Lanjut Membaca ringkas, maksimal dua Bab Baru, serta jadwal bab yang benar-benar tersedia.
+V6.10 menyempurnakan pengalaman pembaca: halaman teks tanpa ilustrasi latar, kontrol ringkas yang muncul saat diminta, pemisahan navigasi halaman dan bab, pengaturan membaca berbentuk bottom sheet, serta pencarian nomor/judul bab dan panel penanda. Fullscreen hanya diaktifkan atas pilihan pembaca. Reader publik tetap menggunakan endpoint aman yang hanya memuat episode terbit, satu episode per permintaan. Konten belum terbit dan naskah pribadi tidak menjadi bagian dari payload publik.
+
+Perubahan ini melanjutkan Beranda minimalis V6.8.1 dan Writer Studio V6.9 tanpa merombak kedua area tersebut.
 
 ## Menjalankan
 
 ```bash
 npm install
 cp .env.example .env.local
-# Isi URL dan publishable key Supabase pada .env.local
+# Isi URL dan publishable key Supabase di .env.local
 npm run dev
 ```
 
@@ -22,25 +24,24 @@ npm run lint
 npm run build
 ```
 
-Pemeriksaan visual opsional menggunakan Python Playwright + Chromium:
+`npm run test:v610` menjalankan tes regresi khusus Reader. Tes historis yang menyimpan hash file telah diperbarui ke baseline V6.10 untuk file Reader yang memang berubah; hash modul Supabase, proteksi konten, dan engine pagination tetap mengacu pada baseline sebelumnya.
 
-```bash
-python scripts/fixtures/render-v69.py
-```
+## Komponen Reader
 
-Fixture hanya menggunakan konten contoh untuk mengecek CSS, bukan data Supabase. Untuk integrasi sebenarnya, uji dengan akun penulis di staging.
+- `src/SecureReaderApp.tsx` — akses dan posisi membaca episode publik yang telah terbit.
+- `src/ReaderApp.tsx` — pratinjau naskah di Studio.
+- `src/components/ReaderControls.tsx` — navigasi ringkas dan menu utilitas.
+- `src/components/ReadingSettingsModal.tsx` — dua tema global, tipografi, dan layout.
+- `src/components/ReaderPanels.tsx` — daftar isi, penanda, dan pencarian teks.
+- `src/hooks/useReaderDialogFocus.ts` — fokus keyboard pada panel modal.
+- `src/design/v610-reader-experience.css` — styling Reader untuk kedua tema.
 
-## Struktur utama
+## Keamanan dan deployment
 
-- `src/features/studio/components/` — dashboard, navigasi, editor, pengelolaan karya.
-- `src/pages/ManuscriptImporter.tsx` — importer EPUB/MD/TXT yang menjaga draft dan konflik nomor bab.
-- `src/design/v69-writer-studio.css` — penyesuaian Studio untuk dua tema global.
-- `src/SecureReaderApp.tsx` — engine Secure Reader lama yang dipertahankan.
-- `supabase/` — migrasi, RLS, dan Edge Functions asli.
+- Studio tetap dibatasi oleh Supabase Auth dan otorisasi penulis. Jangan memasukkan service-role key ke frontend.
+- Tidak ada migrasi database baru untuk V6.10.
+- Jika fitur jadwal bab publik V6.8 belum aktif, migrasi V6.8 masih perlu diterapkan.
+- Tidak ada cover, naskah, atau data Supabase yang diganti oleh rilis ini.
+- **Uji di staging** sebelum deployment: pinch, swipe, tap, pergantian bab, rotasi, pagination setelah perubahan font, pemulihan posisi, penanda, serta pratinjau Studio.
 
-## Catatan penting
-
-- Studio hanya untuk anggota `qr_author_members` yang terautentikasi. Jangan menaruh service-role key dalam frontend.
-- V6.9 **tidak menambah migrasi database**. Untuk jadwal bab publik dari V6.8, migrasi `20261013010000_public_next_chapter_schedule_v68.sql` masih diperlukan bila belum dijalankan.
-- Tidak ada naskah atau cover asli yang diganti, dan tidak ada cerita demo yang dimasukkan ke Supabase.
-- [Catatan Rilis V6.9](docs/RELEASE_V6.9.md) · [Arsitektur](docs/architecture/README.md) · [Deployment](docs/deployment/README.md)
+[Catatan Rilis V6.10](docs/RELEASE_V6.10.md) · [Arsitektur](docs/architecture/README.md) · [Deployment](docs/deployment/README.md)

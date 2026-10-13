@@ -33,7 +33,10 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const [error,setError]=useState('');
  const [loading,setLoading]=useState(true);
  const {theme:appTheme,setPreference:setAppTheme}=useUiTheme();
- const [settings,setSettings]=useState<ReadingSettings>(()=>({...DEFAULT_SETTINGS,...readLocal('quiet_reader_settings',{})}));
+ const [settings,setSettings]=useState<ReadingSettings>(()=>{
+  const saved=readLocal('quiet_reader_settings',{}) as Partial<ReadingSettings>;
+  return {...DEFAULT_SETTINGS,...saved,fontSize:Math.max(90,Math.min(160,Number(saved.fontSize)||100))};
+ });
  const [dimensions,setDimensions]=useState(viewport);
  const [pages,setPages]=useState<number[]>([]);
  const [pageIndex,setPageIndex]=useState(0);
@@ -48,9 +51,8 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const pendingEdge=useRef<'start'|'end'|'offset'>('start');
  const pendingOffset=useRef(0);
  const requestRef=useRef(0);
- const touch=useRef<{x:number;y:number;moved:boolean;pinch:boolean}|null>(null);
+ const touch=useRef<{x:number;y:number;moved:boolean;pinch:boolean;distance?:number}|null>(null);
  const ignoreClick=useRef(false);
- const focusTried=useRef(false);
  const effectiveReaderTheme=readerModeFor(appTheme);
  const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveReaderTheme}),[settings,effectiveReaderTheme]);
  const theme=THEMES[effectiveReaderTheme]||THEMES.white;
@@ -72,7 +74,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const loadEpisode=useCallback(async(ep:number,edge:'start'|'end'|'offset'='start',offset=0)=>{
   if(!indexRef.current.some(x=>x.episode_number===ep))return;
   const token=++requestRef.current;
-  setLoading(true);setError('');pendingEdge.current=edge;pendingOffset.current=offset;
+  setLoading(true);setError('');pendingEdge.current=edge;pendingOffset.current=offset;offsetRef.current=offset;
   try{
    const incoming=await loadReaderEpisode(bookId,ep);
    if(token!==requestRef.current)return;
@@ -113,8 +115,15 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   const active=segmentRef.current;
   setPages(previous => previous.length === count && previous.every((value,i)=>value===i)
    ? previous : Array.from({length:count},(_,i)=>i));
-  if(pendingEdge.current==='end')setPageIndex(count-1);
+  if(pendingEdge.current==='end'){
+   setPageIndex(count-1);
+   if(active&&chapter&&nodes[0]){
+    const at=columnAnchor(nodes[0],chapter,count-1,geometry.bodyWidth).offset;
+    offsetRef.current=at;pendingOffset.current=at;persistProgress(active.episodeNumber,at);
+   }
+  }
   else if(pendingEdge.current==='offset'&&active&&nodes[0]){
+   offsetRef.current=pendingOffset.current;
    if(chapter)setPageIndex(Math.min(count-1,anchorColumn(nodes[0],chapter,pendingOffset.current,geometry.bodyWidth)));
   }else setPageIndex(0);
   pendingEdge.current='offset';
@@ -137,11 +146,8 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   if(loading)return;
   if(n<0){nextEpisode(-1);return;}
   if(n>=pages.length){nextEpisode(1);return;}
-  if(n>pageIndex&&!focusTried.current&&!document.fullscreenElement&&!controls){
-   focusTried.current=true;try{void document.documentElement.requestFullscreen?.({navigationUI:'hide'}).catch(()=>{});}catch{}
-  }
   setPageIndex(n);saveAt(n);
- },[pages,pageIndex,loading,nextEpisode,controls,saveAt]);
+ },[pages,loading,nextEpisode,saveAt]);
  const jumpTo=useCallback((anchor:TextAnchor)=>{
   const decoded=readMarker(anchor.chapterId);
   if(!decoded)return;
@@ -150,9 +156,10 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   if(current?.episodeNumber===decoded.ep&&chapter){
    pendingOffset.current=anchor.offset;
    const col=anchorColumn(measuringNode.current,chapter,anchor.offset,geometry.bodyWidth);
-   setPageIndex(Math.min(pages.length-1,col));saveAt(col);
+   setPageIndex(Math.min(pages.length-1,col));
+   offsetRef.current=anchor.offset;persistProgress(decoded.ep,anchor.offset);
   }else void loadEpisode(decoded.ep,'offset',anchor.offset);
- },[loadEpisode,chapter,geometry.bodyWidth,pages.length,saveAt]);
+ },[loadEpisode,chapter,geometry.bodyWidth,pages.length,progressKey]);
  const jumpEpisode=(num:number)=>{const s=segmentRef.current;if(s)setReturnAt({ep:s.episodeNumber,offset:offsetRef.current});void loadEpisode(num);};
  const currentIndex=index.findIndex(e=>e.episode_number===segment?.episodeNumber);
  const bookmarkAnchor=segment?{chapterId:marker(segment.episodeNumber),offset:offsetRef.current}:null;
@@ -171,14 +178,41 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   const r=e.currentTarget.getBoundingClientRect(),ratio=(e.clientX-r.left)/r.width;
   if(ratio<.26)goTo(pageIndex-1);else if(ratio>.74)goTo(pageIndex+(spread?2:1));else setControls(true);
  };
- const onTouchStart=(e:React.TouchEvent)=>{if(modal!=='none')return;if(e.touches.length===2){touch.current={x:0,y:0,moved:true,pinch:true};return;}if(e.touches.length===1)touch.current={x:e.touches[0].clientX,y:e.touches[0].clientY,moved:false,pinch:false};};
+ const touchDistance=(a:React.Touch,b:React.Touch)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+ const onTouchStart=(e:React.TouchEvent)=>{
+  if(modal!=='none')return;
+  if(e.touches.length===2){
+   touch.current={x:0,y:0,moved:true,pinch:false,distance:touchDistance(e.touches[0],e.touches[1])};
+  }else if(e.touches.length===1){
+   touch.current={x:e.touches[0].clientX,y:e.touches[0].clientY,moved:false,pinch:false};
+  }
+ };
+ const onTouchMove=(e:React.TouchEvent)=>{
+  const gesture=touch.current;
+  if(!gesture||modal!=='none')return;
+  if(e.touches.length===2&&gesture.distance!==undefined){
+   const delta=touchDistance(e.touches[0],e.touches[1])-gesture.distance;
+   if(!gesture.pinch&&Math.abs(delta)>30){
+    gesture.pinch=true;ignoreClick.current=true;setControls(true);
+   }
+  }else if(e.touches.length===1){
+   gesture.moved=gesture.moved||Math.abs(e.touches[0].clientX-gesture.x)>12||Math.abs(e.touches[0].clientY-gesture.y)>12;
+  }
+ };
  const onTouchEnd=(e:React.TouchEvent)=>{
-  const t=touch.current;touch.current=null;
-  if(!t||modal!=='none')return;
-  if(t.pinch){setControls(true);ignoreClick.current=true;return;}
+  const gesture=touch.current;
+  if(!gesture||e.touches.length>0)return;
+  touch.current=null;
+  if(modal!=='none')return;
+  if(gesture.pinch){ignoreClick.current=true;window.setTimeout(()=>{ignoreClick.current=false;},350);return;}
+  if(gesture.distance!==undefined)return;
   if(!e.changedTouches.length)return;
-  const dx=e.changedTouches[0].clientX-t.x,dy=e.changedTouches[0].clientY-t.y;
-  if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.2){ignoreClick.current=true;goTo(pageIndex+(dx<0?(spread?2:1):-(spread?2:1)));}
+  const dx=e.changedTouches[0].clientX-gesture.x,dy=e.changedTouches[0].clientY-gesture.y;
+  if(Math.abs(dx)>52&&Math.abs(dx)>Math.abs(dy)*1.35){
+   ignoreClick.current=true;
+   goTo(pageIndex+(dx<0?(spread?2:1):-(spread?2:1)));
+   window.setTimeout(()=>{ignoreClick.current=false;},350);
+  }
  };
  useEffect(()=>{
   const key=(e:KeyboardEvent)=>{if((e.target as HTMLElement).closest('input,textarea,button,[contenteditable]'))return;if(e.key==='Escape'){setModal('none');setControls(false);}else if(modal==='none'&&(e.key==='ArrowRight'||e.key==='PageDown'))goTo(pageIndex+1);else if(modal==='none'&&(e.key==='ArrowLeft'||e.key==='PageUp'))goTo(pageIndex-1);};
@@ -199,7 +233,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   return()=>{delete document.documentElement.dataset.readerTheme;};
  },[effectiveReaderTheme,theme.pageBg]);
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
- return <div className="quiet-app reader-protected" data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+ return <div className="quiet-app reader-protected" data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
   {chapter&&<PageMeasurer chapters={measuredChapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured} hideIntro={false}/>}
   <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>e.preventDefault()} onCut={e=>e.preventDefault()} onDragStart={e=>e.preventDefault()} onContextMenu={e=>e.preventDefault()} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
    <div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
@@ -208,7 +242,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
    </div>
   </main>
   <div className={`controls-shell ${controls?'controls-open':''}`} aria-hidden={!controls}>
-   <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={segment?.title||''} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>
+   {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={segment?.title||''} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>}
   </div>
   {loading&&segment&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>Membuka episode berikutnya…</div>}
   {!loading&&error&&<div className="secure-reader-error" role="alert" style={{background:theme.barBg,color:theme.text}}>{error} <button onClick={()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}}>Coba lagi</button></div>}

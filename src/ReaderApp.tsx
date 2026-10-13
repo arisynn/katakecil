@@ -36,7 +36,10 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const [loadError, setLoadError] = useState('');
   const parsed = useMemo(() => parseMarkdown(story.content), [story.content]);
   const chapters = parsed.chapters;
-  const [settings, setSettings] = useState<ReadingSettings>(() => ({ ...DEFAULT_SETTINGS, ...readJson('quiet_reader_settings', {}) }));
+  const [settings, setSettings] = useState<ReadingSettings>(() => {
+    const saved = readJson<Partial<ReadingSettings>>('quiet_reader_settings', {});
+    return { ...DEFAULT_SETTINGS, ...saved, fontSize: Math.max(90, Math.min(160, Number(saved.fontSize) || 100)) };
+  });
   const {theme:appTheme,setPreference:setAppTheme}=useUiTheme();
   const effectiveTheme=readerModeFor(appTheme);
   const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveTheme}),[settings,effectiveTheme]);
@@ -58,7 +61,6 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const anchorRef = useRef<TextAnchor>(readJson(anchorKey(story.id), { chapterId: chapters[0]?.id ?? 'chapter-1', offset: 0 }));
   const deepLinkAppliedRef = useRef(false);
   const ignoreClickRef = useRef(false);
-  const focusAttemptedRef = useRef(false);
   const touchRef = useRef<{ x: number; y: number; distance?: number; pinch: boolean; moved: boolean } | null>(null);
 
   const spread = settings.spreadMode === 'spread' && viewSize.width >= 1024;
@@ -134,29 +136,14 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     const found = pages.findIndex(loc => loc.chapterIndex === idx && loc.columnIndex === col);
     return found >= 0 ? found : Math.max(0, pages.findIndex(loc => loc.chapterIndex === idx));
   }, [chapters, geometry.bodyWidth, pages]);
-  // Browsers permit entering fullscreen only during a direct gesture (tap/swipe/key).
-  // Try once on the first forward page turn; never keep prompting after rejection.
-  const enterFocusOnNextPage = useCallback(() => {
-    if (focusAttemptedRef.current || document.fullscreenElement || modal !== 'none' || controls) return;
-    if (window.matchMedia?.('(display-mode: standalone)').matches) return;
-    focusAttemptedRef.current = true;
-    if (typeof document.documentElement.requestFullscreen !== 'function') return;
-    try {
-      void document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {
-        // Browser denied fullscreen; keep the ordinary reader working silently.
-      });
-    } catch { /* Some mobile browsers do not implement fullscreen. */ }
-  }, [modal, controls]);
-
   const goTo = useCallback((index: number, jump = false) => {
     if (!pages.length) return;
     const target = Math.max(0, Math.min(pages.length - 1, index));
     if (jump && target !== safeIndex) setReturnAnchor(pageAnchor(pages[safeIndex]));
-    if (target > safeIndex && target >= 1) enterFocusOnNextPage();
     setPageIndex(target);
     anchorRef.current = pageAnchor(pages[target]);
     try { localStorage.setItem(anchorKey(story.id), JSON.stringify(anchorRef.current)); } catch { /* privacy mode */ }
-  }, [pages, safeIndex, pageAnchor, story.id, enterFocusOnNextPage]);
+  }, [pages, safeIndex, pageAnchor, story.id]);
   const goToAnchor = useCallback((anchor: TextAnchor, jump = true) => {
     if (jump && pages.length) setReturnAnchor(pageAnchor(pages[safeIndex]));
     anchorRef.current = anchor;
@@ -218,7 +205,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     if (!t || modal !== 'none') return;
     if (e.touches.length === 2 && t.distance !== undefined) {
       const change = touchDistance(e.touches[0], e.touches[1]) - t.distance;
-      if (!t.pinch && Math.abs(change) > 30) { setControls(change < 0); t.pinch = true; ignoreClickRef.current = true; }
+      if (!t.pinch && Math.abs(change) > 30) { setControls(true); t.pinch = true; ignoreClickRef.current = true; }
     } else if (e.touches.length === 1 && (Math.abs(e.touches[0].clientX - t.x) > 12 || Math.abs(e.touches[0].clientY - t.y) > 12)) t.moved = true;
   };
   const touchEnd = (e: React.TouchEvent) => {
@@ -255,7 +242,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
       </div>
     </main>
     <div className={`controls-shell ${controls ? 'controls-open' : ''}`} aria-hidden={!controls}>
-      <ReaderControls onExit={onExit} theme={theme} title={parsed.title} chapterTitle={chapter?.title ?? ''} page={currentNumber} total={pages.length || 1} isBookmarked={activeBookmarks.length > 0} fullscreen={isFullscreen} canReturn={!!returnAnchor} onContents={() => setModal('contents')} onSettings={() => setModal('settings')} onSearch={() => setModal('search')} onBookmark={toggleBookmark} onFullscreen={toggleFullscreen} onClose={() => setControls(false)} onReturn={() => { if (returnAnchor) goToAnchor(returnAnchor, false); setReturnAnchor(null); }} onPage={n => goTo(n - 1)} onPrevChapter={() => goChapter(chapterIndex - 1)} onNextChapter={() => goChapter(chapterIndex + 1)} prevChapter={chapterIndex > 0} nextChapter={chapterIndex < chapters.length - 1}/>
+      {controls && <ReaderControls onExit={onExit} theme={theme} title={parsed.title} chapterTitle={chapter?.title ?? ''} page={currentNumber} total={pages.length || 1} isBookmarked={activeBookmarks.length > 0} fullscreen={isFullscreen} canReturn={!!returnAnchor} onContents={() => setModal('contents')} onSettings={() => setModal('settings')} onSearch={() => setModal('search')} onBookmark={toggleBookmark} onFullscreen={toggleFullscreen} onClose={() => setControls(false)} onReturn={() => { if (returnAnchor) goToAnchor(returnAnchor, false); setReturnAnchor(null); }} onPage={n => goTo(n - 1)} onPrevChapter={() => goChapter(chapterIndex - 1)} onNextChapter={() => goChapter(chapterIndex + 1)} prevChapter={chapterIndex > 0} nextChapter={chapterIndex < chapters.length - 1} progressScope="story"/>}
     </div>
     {status && <div className="quiet-status" role="status" style={{ background: theme.barBg, color: theme.secondaryText }}>{status}</div>}
     {modal === 'contents' && <ContentsPanel onClose={() => setModal('none')} chapters={chapters.map((ch, i) => ({...ch, startPageIndex: Math.max(0, pages.findIndex(p => p.chapterIndex === i))}))} currentChapterId={chapter?.id ?? ''} bookmarks={bookmarks} onChapter={ch => goChapter(chapters.findIndex(c => c.id === ch.id))} onBookmark={at => goToAnchor(at)} onDeleteBookmark={id => setBookmarks(prev => prev.filter(b => b.id !== id))} theme={theme}/>}

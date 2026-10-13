@@ -40,10 +40,10 @@ assert.match(empty, /v67-empty-icon/);
 assert.doesNotMatch(empty, /<picture>/);
 assert.doesNotMatch(index, /url\('\/assets\/v6\/loading-ambience/);
 assert.match(read('src/App.tsx'), /v67-sapphire-polish\.css/);
-// Security-sensitive Reader engine and Supabase client remain byte-for-byte unchanged.
+// Reader code is pinned to the current V6.10 baseline; Supabase access is unchanged.
 const protectedHashes = {
-  'src/SecureReaderApp.tsx': '4dfe5318cb5a06907106c92fc7801c5b85f9924e04ab3119ffbc5f6566eeb087',
-  'src/ReaderApp.tsx': '94b2a66ca7730fb9540c25d795cf04b14b3cf81d6888b07191ff34f4a12afcc2',
+  'src/SecureReaderApp.tsx': '6b23f072091dcf6042ed46d7e5f61103a09722eab6066d9bb2d640eeab3a688e',
+  'src/ReaderApp.tsx': 'a45caed8e3b8f0e2b0859b7c54a0ac71d1fc995b0e3a3d94769600e1fb9076c2',
   'src/data/secureReader.ts': 'be24f095ddf3e0ede40e6884d6fb291ddb529c51bb11dadd4a74cc61d94051c3',
   'src/data/supabase.ts': '61f6c88dc1dd9599e11fa33898d531a1a43f647bdb2e780654eba753c3b0f0c3',
   'src/utils/pagination.ts': '965a272af1ad77804a0b8468ef581dfc653338e9e0b9af588265f86e60a0c81c',
@@ -52,4 +52,4 @@ for (const [file, expected] of Object.entries(protectedHashes)) {
   const actual = createHash('sha256').update(readFileSync(file)).digest('hex');
   assert.equal(actual, expected, `${file} changed unexpectedly`);
 }
-console.log('PASS V6.7: conditional collection, About Karisyono, Studio Upload, blue themes, no backdrop art, secure Reader unchanged.');
+console.log('PASS V6.7: conditional collection, About Karisyono, Studio Upload, blue themes, no backdrop art, current Reader baseline validated.');

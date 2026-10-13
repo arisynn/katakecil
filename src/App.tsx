@@ -31,6 +31,7 @@ import './design/v66-featured-carousel.css';
 import './design/v67-sapphire-polish.css';
 import './design/v68-minimal-home.css';
 import './design/v69-writer-studio.css';
+import './design/v610-reader-experience.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
