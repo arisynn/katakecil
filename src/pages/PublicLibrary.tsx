@@ -98,7 +98,6 @@ function Home({ books, episodes, schedules, demo }: {
         [books, episodes, demo],
     );
     const availableBooks = books.filter(book => demo || countFor(episodes, book) > 0);
-    const genres = [...new Set(availableBooks.map(book => book.genre).filter(Boolean))].slice(0, 6);
     const continuation = demo ? undefined : availableBooks.find(book => {
         const progress = readProgress(book);
         return progress !== null && episodes.some(
@@ -147,18 +146,6 @@ function Home({ books, episodes, schedules, demo }: {
                     </button>)}
                 </div>
             </section>}
-            {genres.length > 0 && <section className="v68-genres" aria-label="Jelajahi genre">
-                <Heading title="Jelajahi Genre"/>
-                <div className="v68-genre-pills">
-                    <Action to="/cerita" className="v68-genre-pill v68-genre-all">Semua Cerita</Action>
-                    {genres.map(genre => <Action
-                        key={genre}
-                        to={`/cerita?genre=${encodeURIComponent(genre)}`}
-                        className="v68-genre-pill"
-                    >{genre}</Action>)}
-                </div>
-            </section>}
-            <footer className="v6-footer">KataKecil © {new Date().getFullYear()} <span>Setiap cerita punya tempat untuk kembali.</span></footer>
         </div>
     </main>;
 }

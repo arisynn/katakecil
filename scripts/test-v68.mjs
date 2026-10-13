@@ -26,10 +26,12 @@ assert.match(data, /supabase\.rpc\('qr_public_next_chapters'\)/);
 assert.match(data, /timeZone: 'Asia\/Jakarta'/);
 assert.match(data, /return \[\]/);
 
-// Homepage is only carousel + compact continuation + recent chapters + genre pills.
+// Homepage is only carousel + compact continuation + two recent chapters.
 assert.match(home, /v68-continue-card/);
 assert.match(home, /v68-new-chapters/);
-assert.match(home, /v68-genre-pills/);
+assert.doesNotMatch(home, /v68-genre-pills/);
+assert.doesNotMatch(home, /Jelajahi Genre/);
+assert.doesNotMatch(home, /<footer className="v6-footer"/);
 assert.match(home, /selectRecentChapters\(books, episodes\)/);
 assert.match(home, /continuation && episode !== null/);
 assert.doesNotMatch(home, /<section className="v6-featured"/);
@@ -59,6 +61,7 @@ const items = selectRecentChapters(
 );
 assert.deepEqual(items.map(item=>item.episode.episode_number), [1,2]);
 assert.equal(selectRecentChapters([book('public')],[ep('public',1,-1)],now,30,0).length,0);
+assert.deepEqual(selectRecentChapters([book('public')], [ep('public',1,-1), ep('public',2,-2), ep('public',3,-3)], now).map(item => item.episode.episode_number), [1,2], 'Homepage must show at most two chapters');
 
 // Security-critical files are byte-identical to the audited V6.7 baseline.
 const hashes = {
@@ -70,4 +73,4 @@ const hashes = {
 for (const [file, expected] of Object.entries(hashes)) {
   assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'), expected);
 }
-console.log('PASS V6.8: compact homepage, safe schedule metadata, blue token styling, unchanged Secure Reader.');
+console.log('PASS V6.8.1: carousel, compact continuation, two chapters, no genre section, unchanged Secure Reader.');

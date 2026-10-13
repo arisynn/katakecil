@@ -15,13 +15,6 @@
   font: 650 clamp(19px, 2.4vw, 25px)/1.2 Georgia, serif;
   letter-spacing: -.025em;
 }
-.v6-public .v68-home .v6-footer {
-  margin: 2px 0 0;
-  padding: 12px 0;
-  color: var(--kk-muted) !important;
-  border-color: var(--kk-border) !important;
-}
-
 /* One action per row. The entire compact continuation card is clickable. */
 .v68-continue-card {
   display: flex;
@@ -108,29 +101,6 @@
 }
 .v68-chapter-copy small { color: var(--kk-muted); font-size: 11px; }
 
-/* Genre links are simple pills, not another large promotional card. */
-.v68-genre-pills { display: flex; flex-wrap: wrap; gap: 9px; }
-.v6-public .v68-genre-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 10px 15px;
-  border: 1px solid var(--kk-border);
-  border-radius: 999px;
-  background: var(--kk-surface);
-  color: var(--kk-text);
-  font-size: 12px;
-  font-weight: 650;
-  cursor: pointer;
-}
-.v6-public .v68-genre-pill:hover { background: var(--kk-surface-2); }
-.v6-public .v68-genre-pill.v68-genre-all {
-  border-color: var(--kk-amber);
-  background: var(--kk-amber);
-  color: var(--kk-amber-text);
-}
-
 /* Public schedule badges: no false countdown, no future chapter title. */
 .v6-public .v67-hero-card .v68-hero-schedule {
   display: flex;
@@ -183,8 +153,7 @@
 .v6-studio-app .studio-bottom-nav button:not(.studio-bottom-active) { color: var(--kk-muted) !important; }
 .v6-studio-app .studio-bottom-nav button.studio-bottom-active { color: var(--kk-amber) !important; }
 
-.v6-public .v68-home button:focus-visible,
-.v6-public .v68-home .v68-genre-pill:focus-visible {
+.v6-public .v68-home button:focus-visible {
   outline: 2px solid var(--kk-amber);
   outline-offset: 3px;
 }
@@ -217,7 +186,7 @@
   .v68-continue-info strong { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .v68-continue-card, .v68-chapter-item, .v68-genre-pill { transition: none !important; }
+  .v68-continue-card, .v68-chapter-item { transition: none !important; }
 }
 
 /* Native cover artwork should not sit inside a second decorative frame. */

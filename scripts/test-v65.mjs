@@ -33,7 +33,7 @@ assert.ok(publicUi.includes('features/public/components/LibraryUI'));
 assert.doesNotMatch(studio, /function (?:Nav|Dashboard|Editor|BookDetails)\(/, 'Extracted components must not remain duplicated');
 assert.ok(readdirSync('docs/archive').filter(name => name.endsWith('.md')).length >= 26);
 assert.ok(!existsSync('_implement_v63.py') && !existsSync('_preview_v63.py'));
-assert.ok(['6.5.0', '6.6.0', '6.7.0', '6.8.0'].includes(JSON.parse(readFileSync('package.json', 'utf8')).version));
+assert.ok(['6.5.0', '6.6.0', '6.7.0', '6.8.0', '6.8.1'].includes(JSON.parse(readFileSync('package.json', 'utf8')).version));
 for (const file of ['src/studio.css', 'src/site.css', 'src/design/v6.css']) {
   const longest = Math.max(...readFileSync(file, 'utf8').split('\n').map(line => line.length));
   assert.ok(longest < 200, `${file} still contains unusually long lines (${longest})`);

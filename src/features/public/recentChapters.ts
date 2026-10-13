@@ -9,7 +9,7 @@ export type RecentChapter = {
 /** Latest released chapters from public books, no future or draft records. */
 export function selectRecentChapters(
   books: Book[], episodes: EpisodeSummary[],
-  now = Date.now(), days = 30, limit = 3,
+  now = Date.now(), days = 30, limit = 2,
 ): RecentChapter[] {
   const publicBooks = new Map(books
     .filter(book => book.is_published && !book.deleted_at)

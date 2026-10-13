@@ -1,8 +1,8 @@
-# KataKecil V6.8 — Minimal Homepage & Jadwal Bab
+# KataKecil V6.8.1 — Beranda Ringkas & Jadwal Bab
 
 KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk penulis**, dibangun menggunakan React, TypeScript, Vite, Tailwind/CSS, dan Supabase. Desain mobile-first menggunakan dua tema global: **Arctic Blue** dan **Midnight Sapphire**.
 
-Beranda V6.8 berisi empat bagian yang adaptif terhadap data: carousel cerita terbit, Lanjut Membaca yang ringkas, Bab Baru (maksimal tiga episode yang terbit dalam 30 hari terakhir), dan Jelajahi Genre. Jika tidak ada data yang relevan, bagian tersebut disembunyikan.
+Beranda V6.8.1 hanya menampilkan carousel cerita terbit, Lanjut Membaca yang ringkas (jika ada progres), dan Bab Baru (maksimal **dua** episode yang terbit dalam 30 hari terakhir). Tidak ada bagian Jelajahi Genre maupun kartu tambahan setelah Bab Baru. Genre dan pencarian tetap tersedia di halaman Perpustakaan.
 
 Jadwal **bab berikutnya** muncul pada carousel dan Informasi Cerita hanya ketika ada episode aktif yang sudah dijadwalkan di Supabase. Yang ditampilkan hanya nomor bab dan waktu terbit WIB, bukan isi atau judul draft.
 
