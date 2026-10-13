@@ -6,7 +6,7 @@ body { overflow-x: hidden; }
 button { cursor: pointer; }
 button:disabled { cursor: default; opacity: .28; }
 button:focus-visible, input:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
-::selection { background: rgba(165,140,104,.32); }
+::selection { background: color-mix(in srgb, var(--kk-primary) 25%, transparent); color: var(--kk-text); }
 .quiet-app { position: fixed; inset: 0; z-index: 100; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; touch-action: pan-y; }
 .reader-stage { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; user-select: text; -webkit-user-select: text; }
 .reader-book { display: flex; align-items: center; justify-content: center; height: 100%; max-width: 100%; transform-origin: center center; transition: transform 260ms cubic-bezier(.24,.8,.3,1), border-radius 260ms, box-shadow 260ms; border: 0; overflow: hidden; }

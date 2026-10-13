@@ -28,11 +28,13 @@ import './design/v62-theme.css';
 import './design/v63-ios.css';
 import './design/v64-unified-theme.css';
 import './design/v66-featured-carousel.css';
+import './design/sapphire-tokens.css';
 import './design/v67-sapphire-polish.css';
 import './design/v68-minimal-home.css';
 import './design/v69-writer-studio.css';
 import './design/v610-reader-experience.css';
 import './design/v611-immersive-reader.css';
+import './design/v612-reader-layout.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

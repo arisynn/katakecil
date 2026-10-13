@@ -16,15 +16,15 @@
 }
 
 .v66-hero {
-  --v66-hero-ink: #fff7ed;
-  --v66-hero-muted: #e6dce0;
-  --v66-hero-kicker: #f5d4a1;
+  --v66-hero-ink: var(--kk-text);
+  --v66-hero-muted: var(--kk-muted);
+  --v66-hero-kicker: var(--kk-primary);
   position: relative;
   isolation: isolate;
   overflow: hidden;
   width: 100%;
   height: clamp(510px, 67vh, 700px);
-  background: #15233a;
+  background: var(--kk-surface);
   border-radius: 0 0 28px 28px;
   color: var(--v66-hero-ink);
   box-shadow: 0 20px 45px rgba(9, 16, 28, .14);
@@ -160,8 +160,8 @@
   padding: 12px 24px;
   border: 0;
   border-radius: 999px;
-  background: var(--kk-amber, #f0c98b);
-  color: var(--kk-amber-text, #172238);
+  background: var(--kk-primary);
+  color: var(--kk-on-primary);
   box-shadow: 0 9px 28px rgba(7, 15, 26, .22);
   font: 750 14px/1.25 -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   cursor: pointer;

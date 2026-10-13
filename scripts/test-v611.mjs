@@ -49,8 +49,10 @@ for (const source of [secure,preview]) {
 assert.match(controls,/v611-page-step/);
 assert.match(controls,/v610-chapter-nav/);
 assert.match(controls,/aria-label="Daftar isi dan penanda"/);
-assert.match(css,/showing-controls \.reader-book/);
-assert.match(css,/scale\(\.64\)/);
+const responsive = read('src/design/v612-reader-layout.css');
+assert.match(responsive,/showing-controls \.reader-book/);
+assert.match(responsive,/--reader-menu-scale/);
+assert.doesNotMatch(css,/translateY\(-7dvh\)/);
 assert.match(css,/\.chapter-intro/);
 assert.match(css,/\.v610-drawer/);
 assert.match(css,/prefers-reduced-motion: reduce/);

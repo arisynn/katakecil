@@ -1,9 +1,13 @@
 import type { ThemeColors, ThemeMode, ReadingSettings } from '../types/reader';
 
 /** Visual reading surfaces are derived exclusively from the global theme. */
+import { SAPPHIRE_PALETTE } from '../design/sapphirePalette';
+const light = SAPPHIRE_PALETTE.light;
+const dark = SAPPHIRE_PALETTE.dark;
+
 export const THEMES: Record<ThemeMode, ThemeColors> = {
-  white: { name:'white',label:'Terang',bg:'#F4F8FD',pageBg:'#FFFFFF',text:'#172C48',secondaryText:'#506781',border:'#D5E3F2',barBg:'rgba(255,255,255,.97)',accent:'#235DB4',accentHover:'#19498F',hoverBg:'#E9F2FC',cardBg:'#E9F2FC',selectionBg:'#D5E8FF' },
-  night: { name:'night',label:'Gelap',bg:'#081425',pageBg:'#10243D',text:'#EFF6FF',secondaryText:'#B2C5DA',border:'#294665',barBg:'rgba(16,36,61,.97)',accent:'#9BC9FF',accentHover:'#C4E1FF',hoverBg:'#173251',cardBg:'#173251',selectionBg:'#294665' },
+  white: { name:'white',label:'Terang',bg:light.background,pageBg:light.surface,text:light.text,secondaryText:light.muted,border:light.border,barBg:'rgba(255,255,255,.97)',accent:light.accent,accentHover:light.accentHover,hoverBg:light.raised,cardBg:light.raised,selectionBg:light.selection },
+  night: { name:'night',label:'Gelap',bg:dark.background,pageBg:dark.surface,text:dark.text,secondaryText:dark.muted,border:dark.border,barBg:'rgba(16,36,61,.97)',accent:dark.accent,accentHover:dark.accentHover,hoverBg:dark.raised,cardBg:dark.raised,selectionBg:dark.selection },
 };
 
 export const DEFAULT_SETTINGS: ReadingSettings = {

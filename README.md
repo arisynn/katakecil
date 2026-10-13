@@ -48,3 +48,7 @@ npm run build
 - **Uji di staging** sebelum deployment: pinch, swipe, tap, pergantian bab, rotasi, pagination setelah perubahan font, pemulihan posisi, penanda, serta pratinjau Studio.
 
 [Catatan Rilis V6.11](docs/RELEASE_V6.11.md) · [Arsitektur](docs/architecture/README.md) · [Deployment](docs/deployment/README.md)
+
+## V6.12 — Adaptive Reader
+
+Perbaikan viewport/pinch, loading episode, dan palet Sapphire global. Detail perubahan dan batasan pengujian terdapat pada `docs/RELEASE_V6.12.md`. Tes regresi: `npm run test:current`; audit warna: `npm run audit:colors:v612`.

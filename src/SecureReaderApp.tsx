@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {loadReaderEpisode,loadReleasedIndex,type ReleasedEpisode,type ReaderEpisode} from './data/secureReader';
-import {ReaderPage,type ReaderGeometry} from './components/ReaderPage';
+import {ReaderPage} from './components/ReaderPage';
+import { ReaderEpisodeLoading } from './components/ReaderEpisodeLoading';
 import {PageMeasurer} from './components/PageMeasurer';
 import {ReaderControls} from './components/ReaderControls';
 import {ContentsPanel,SearchPanel} from './components/ReaderPanels';
@@ -14,12 +15,11 @@ import { useUiTheme } from './hooks/useUiTheme';
 import { readerModeFor } from './utils/globalTheme';
 import { pinchAction } from './utils/readerGesture';
 import { readerHeading } from './utils/readerHeading';
+import { useReaderViewport } from './hooks/useReaderViewport';
+import { useReaderMenuPlacement } from './hooks/useReaderMenuPlacement';
+import { readerGeometry } from './utils/readerLayout';
 
 function readLocal<T>(key:string,fallback:T):T {try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
-function viewport(){
- const el=document.createElement('div');el.style.cssText='position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';document.body.appendChild(el);
- const st=getComputedStyle(el);const top=parseFloat(st.paddingTop)||0,bottom=parseFloat(st.paddingBottom)||0;el.remove();return {width:innerWidth,height:innerHeight,safeTop:top,safeBottom:bottom};
-}
 function marker(ep:number){return `secure-episode-${ep}-part-0`;}
 function readMarker(id:string){const m=/^secure-episode-(\d+)-part-(\d+)$/.exec(id);return m?{ep:Number(m[1]),part:Number(m[2])}:null;}
 
@@ -39,7 +39,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   const saved=readLocal('quiet_reader_settings',{}) as Partial<ReadingSettings>;
   return {...DEFAULT_SETTINGS,...saved,fontSize:Math.max(90,Math.min(160,Number(saved.fontSize)||100))};
  });
- const [dimensions,setDimensions]=useState(viewport);
+ const dimensions=useReaderViewport();
  const [pages,setPages]=useState<number[]>([]);
  const [pageIndex,setPageIndex]=useState(0);
  const [controls,setControls]=useState(false);
@@ -59,12 +59,14 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveReaderTheme}),[settings,effectiveReaderTheme]);
  const theme=THEMES[effectiveReaderTheme]||THEMES.white;
  const spread=settings.spreadMode==='spread'&&dimensions.width>=1024;
- const geometry=useMemo<ReaderGeometry>(()=>{
-  const maxWidth=Math.min(dimensions.width,spread?1230:820),leafWidth=Math.max(1,spread?(maxWidth-16)/2:maxWidth),mobile=dimensions.width<600;
-  const paddingX=Math.min(72,Math.round((mobile?16:35)*({narrow:.8,normal:1,wide:1.4}[settings.marginWidth])));
-  const paddingTop=Math.max(mobile?12:18,dimensions.safeTop),paddingBottom=Math.max(4,dimensions.safeBottom),footerHeight=16,footerGap=3;
-  return {leafWidth,bodyWidth:Math.max(1,leafWidth-2*paddingX),bodyHeight:Math.max(96,dimensions.height-paddingTop-paddingBottom-footerHeight-footerGap),pageHeight:dimensions.height,paddingX,paddingTop,paddingBottom,footerHeight,footerGap};
- },[dimensions,settings.marginWidth,spread]);
+ const geometry=useMemo(()=>readerGeometry(dimensions,settings),[dimensions,settings.marginWidth,settings.spreadMode]);
+ const menuPlacement=useReaderMenuPlacement(controls,dimensions.width,dimensions.height,geometry.leafWidth*(spread?2:1)+(spread?16:0));
+ const layoutVars={
+  '--reader-viewport-height':`${dimensions.height}px`,
+  '--reader-viewport-width':`${dimensions.width}px`,
+  '--reader-menu-scale':String(menuPlacement.scale),
+  '--reader-menu-offset-y':`${menuPlacement.offsetY}px`,
+ } as React.CSSProperties;
  const chapter=useMemo(()=>segment?chapterFromEpisode(segment.episodeNumber,segment.title,segment.arc,segment.content):undefined,[segment]);
  // Stable array identity: an inline [chapter] causes PageMeasurer's layout effect
  // to run on every render, triggering an endless measure/setPages loop.
@@ -76,7 +78,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const loadEpisode=useCallback(async(ep:number,edge:'start'|'end'|'offset'='start',offset=0)=>{
   if(!indexRef.current.some(x=>x.episode_number===ep))return;
   const token=++requestRef.current;
-  setLoading(true);setError('');pendingEdge.current=edge;pendingOffset.current=offset;offsetRef.current=offset;
+  setLoading(true);setControls(false);setError('');pendingEdge.current=edge;pendingOffset.current=offset;offsetRef.current=offset;
   try{
    const incoming=await loadReaderEpisode(bookId,ep);
    if(token!==requestRef.current)return;
@@ -104,9 +106,9 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   return()=>{active=false;requestRef.current++;};
  },[bookId,episodeNumber,loadEpisode]);
  useEffect(()=>{
-  const resize=()=>setDimensions(viewport());const full=()=>{setFullscreen(!!document.fullscreenElement);resize();};
-  window.addEventListener('resize',resize);document.addEventListener('fullscreenchange',full);
-  return()=>{window.removeEventListener('resize',resize);document.removeEventListener('fullscreenchange',full);};
+  const full=()=>setFullscreen(!!document.fullscreenElement);
+  document.addEventListener('fullscreenchange',full);
+  return()=>document.removeEventListener('fullscreenchange',full);
  },[]);
  useEffect(()=>{try{localStorage.setItem('quiet_reader_settings',JSON.stringify(effectiveSettings));}catch{}},[effectiveSettings]);
  useEffect(()=>{try{localStorage.setItem(bookmarkKey,JSON.stringify(bookmarks));}catch{}},[bookmarks,bookmarkKey]);
@@ -173,6 +175,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  };
  const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,displayNumber:ep.episode_number,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
  const onTap=(e:React.MouseEvent)=>{
+  if(loading||!!error||!pages.length)return;
   if((e.target as HTMLElement).closest('button,input,textarea,a'))return;
   if(ignoreClick.current){ignoreClick.current=false;return;}
   if(controls){setControls(false);return;}
@@ -182,7 +185,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  };
  const touchDistance=(a:React.Touch,b:React.Touch)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
  const onTouchStart=(e:React.TouchEvent)=>{
-  if(modal!=='none')return;
+  if(modal!=='none'||loading||!!error||!pages.length)return;
   if(e.touches.length===2){
    touch.current={x:0,y:0,moved:true,pinch:false,distance:touchDistance(e.touches[0],e.touches[1])};
   }else if(e.touches.length===1){
@@ -237,19 +240,17 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const displayedHeading=readerHeading(segment?.title||'',segment?.episodeNumber);
  const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
- return <div className="quiet-app reader-protected" data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+ return <div className="quiet-app reader-protected" data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text,...layoutVars}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
   {chapter&&<PageMeasurer chapters={measuredChapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured} hideIntro={false}/>}
   <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>e.preventDefault()} onCut={e=>e.preventDefault()} onDragStart={e=>e.preventDefault()} onContextMenu={e=>e.preventDefault()} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
-   <div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
-    {first!==undefined&&chapter?<ReaderPage chapter={chapter} columnIndex={first} pageNumber={pageIndex+1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>:<div className="loading-text" style={{color:theme.secondaryText}}>{loading?'Memuat episode…':error||'Menata halaman…'}</div>}
-    {spread&&second!==undefined&&chapter&&<ReaderPage chapter={chapter} columnIndex={second} pageNumber={pageIndex+2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
-   </div>
+   {chapter&&pages.length>0&&!loading?<div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
+    {first!==undefined&&<ReaderPage chapter={chapter} columnIndex={first} pageNumber={pageIndex+1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
+    {spread&&second!==undefined&&<ReaderPage chapter={chapter} columnIndex={second} pageNumber={pageIndex+2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
+   </div>:<ReaderEpisodeLoading phase={error?'error':loading?'fetch':!index.length?'empty':'layout'} storyTitle={bookTitle} message={error||undefined} onRetry={error?()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}:undefined}/>}
   </main>
   <div className={`controls-shell ${controls?'controls-open':''}`} aria-hidden={!controls}>
    {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>}
   </div>
-  {loading&&segment&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>Membuka episode berikutnya…</div>}
-  {!loading&&error&&<div className="secure-reader-error" role="alert" style={{background:theme.barBg,color:theme.text}}>{error} <button onClick={()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}}>Coba lagi</button></div>}
   {status&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>{status}</div>}
   {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}
   {modal==='search'&&<SearchPanel onClose={()=>setModal('none')} chapters={chapter?[chapter]:[]} onResult={at=>{if(chapter){const col=anchorColumn(measuringNode.current,chapter,at.offset,geometry.bodyWidth);setPageIndex(col);saveAt(col);}}} theme={theme}/>}

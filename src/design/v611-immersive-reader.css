@@ -1,17 +1,13 @@
 /* KataKecil V6.11 — one Sapphire palette for the public app, Studio,
    Reader, boot screen and recovery states. Kept after legacy CSS imports. */
-html[data-app-theme='light'] {
-  --kk-boot-bg: var(--kk-bg); --kk-boot-card: var(--kk-surface);
-  --kk-boot-ink: var(--kk-text); --kk-boot-muted: var(--kk-muted);
-  --kk-boot-blue: var(--kk-amber); --kk-boot-border: var(--kk-border);
+html[data-app-theme] {
+  --kk-boot-bg: var(--kk-bg);
+  --kk-boot-card: var(--kk-surface);
+  --kk-boot-ink: var(--kk-text);
+  --kk-boot-muted: var(--kk-muted);
+  --kk-boot-blue: var(--kk-primary);
+  --kk-boot-border: var(--kk-border);
 }
-html[data-app-theme='dark'] {
-  --kk-boot-bg: var(--kk-bg); --kk-boot-card: var(--kk-surface);
-  --kk-boot-ink: var(--kk-text); --kk-boot-muted: var(--kk-muted);
-  --kk-boot-blue: var(--kk-amber); --kk-boot-border: var(--kk-border);
-}
-html[data-app-theme='light'] ::selection { background: rgba(35,93,180,.24); color: #172C48; }
-html[data-app-theme='dark'] ::selection { background: rgba(155,201,255,.30); color: #EFF6FF; }
 
 /* Pre-React boot and React loading share the same semantic structure. */
 .kk-v611-loader {
@@ -59,17 +55,7 @@ html[data-app-theme='dark'] ::selection { background: rgba(155,201,255,.30); col
   min-height: min(55dvh, 460px); border: 1px solid var(--kk-border); border-radius: 20px;
 }
 
-/* Visual-only pinch reduction: keep page dimensions and measured columns intact. */
-.quiet-app .reader-stage.showing-controls {
-  background: radial-gradient(ellipse at 50% 36%, var(--r-raised), var(--r-bg) 76%);
-}
-.quiet-app .reader-stage.showing-controls .reader-book,
-.quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
-  transform: translateY(-6dvh) scale(.66) !important;
-  border-radius: 21px !important;
-  box-shadow: 0 20px 65px var(--r-shadow) !important;
-}
-.quiet-app .reader-book { will-change: transform; }
+/* The responsive pinch transform is owned by v612-reader-layout.css. */
 .quiet-app .chapter-intro {
   margin: clamp(40px, 8vh, 80px) 0 1.85em;
   text-align: center;
@@ -138,36 +124,17 @@ html[data-app-theme='dark'] ::selection { background: rgba(155,201,255,.30); col
 .quiet-app .v610-drawer .panel-heading { position: relative; }
 .quiet-app .v610-drawer .panel-tabs button.selected { border-bottom: 2px solid var(--r-accent); }
 
-/* Reader loading, recovery and theme switch never reveal old beige/amber. */
-.quiet-app .loading-text::before {
-  background: var(--r-raised) !important;
-  color: var(--r-accent) !important;
-  border-color: var(--r-border) !important;
-  content: '···'; font-size: 28px; line-height: 48px;
-}
-.quiet-app .loading-text::after { background: linear-gradient(90deg, var(--r-accent) 40%, var(--r-border) 40%) !important; background-size: 250% 100% !important; }
+/* Recovery and theme swatches retain Sapphire tokens. */
 html[data-app-theme] .reader-recovery { background: var(--kk-bg); color: var(--kk-text); }
 html[data-app-theme] .reader-recovery-card { background: var(--kk-surface); color: var(--kk-text); border-color: var(--kk-border); }
 html[data-app-theme] .reader-recovery-actions button { background: var(--kk-surface-2); color: var(--kk-text); border-color: var(--kk-border); min-height: 44px; }
 html[data-app-theme] .reader-recovery-actions button:focus-visible { outline: 2px solid var(--kk-amber); outline-offset: 3px; }
-html[data-app-theme] .v6-reader-settings .v64-theme-swatch-light { color: #235DB4; background: #E9F2FC; }
-html[data-app-theme] .v6-reader-settings .v64-theme-swatch-dark { color: #9BC9FF; background: #10243D; }
+html[data-app-theme] .v6-reader-settings .v64-theme-swatch-light { color: var(--kk-light-accent); background: var(--kk-light-soft); }
+html[data-app-theme] .v6-reader-settings .v64-theme-swatch-dark { color: var(--kk-dark-accent); background: var(--kk-dark-surface); }
 
 @media (max-width: 600px) {
-  .quiet-app .reader-stage.showing-controls .reader-book,
-  .quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
-    transform: translateY(-7dvh) scale(.64) !important;
-  }
-  .quiet-app .reader-control-header { top: calc(8px + env(safe-area-inset-top)); }
-  .quiet-app .reader-control-footer { bottom: calc(8px + env(safe-area-inset-bottom)); }
   .quiet-app .v610-footer-inner { padding: 8px 12px 6px; }
   .quiet-app .v610-progress-label { font-size: 10px; }
-}
-@media (max-width: 600px) and (max-height: 690px) {
-  .quiet-app .reader-stage.showing-controls .reader-book,
-  .quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
-    transform: translateY(-6dvh) scale(.55) !important;
-  }
 }
 @media (min-width: 820px) {
   .quiet-app .v610-panel-scrim { align-items: center; }

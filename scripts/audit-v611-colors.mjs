@@ -11,7 +11,7 @@ const walk = dir => readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
 const views=walk('src').filter(file=>/\.(?:tsx|jsx)$/.test(file));
 const offenders=views.filter(file=>/#[0-9a-f]{3,8}\b/i.test(readFileSync(file,'utf8')));
 assert.deepEqual(offenders,[],`Component literals should use global semantic tokens: ${offenders.join(', ')}`);
-const global=readFileSync('src/design/v67-sapphire-polish.css','utf8');
+const global=readFileSync('src/design/sapphire-tokens.css','utf8');
 for(const hex of ['#F4F8FD','#081425','#FFFFFF','#10243D','#E9F2FC','#173251','#172C48','#EFF6FF','#506781','#B2C5DA','#235DB4','#9BC9FF']) {
   assert.ok(global.includes(hex),`Missing palette color ${hex}`);
 }

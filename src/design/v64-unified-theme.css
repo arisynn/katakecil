@@ -73,10 +73,10 @@ html {
   border:1px solid rgba(127,127,127,.2);
 }
 .v6-reader-settings .v64-theme-swatch-light {
-  color:#805321;background:linear-gradient(145deg,#FFFCF7,#E9D8BD);
+  color:var(--kk-light-accent);background:var(--kk-light-soft);
 }
 .v6-reader-settings .v64-theme-swatch-dark {
-  color:#F0C98B;background:linear-gradient(145deg,#21344E,#0D1729);
+  color:var(--kk-dark-accent);background:var(--kk-dark-surface);
 }
 .v6-reader-settings .v64-theme-note {
   margin:11px 1px 0;font-size:11px;line-height:1.65;color:var(--reader-ui-muted);
@@ -87,24 +87,24 @@ html {
 
 /* Reader stage, page, controls, panels and error states share the same palette. */
 .quiet-app.reader-protected[data-reader-theme='night'],
-.quiet-app.reader-author-preview[data-reader-theme='night'] {background:#0D1729;color:#F6EFE5;}
+.quiet-app.reader-author-preview[data-reader-theme='night'] {background:var(--kk-bg);color:var(--kk-text);}
 .quiet-app.reader-protected[data-reader-theme='night'] .reader-stage,
-.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-stage {background:#0D1729;}
+.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-stage {background:var(--kk-bg);}
 .quiet-app.reader-protected[data-reader-theme='white'] .reader-stage,
-.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-stage {background:#F8F4EE;}
+.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-stage {background:var(--kk-bg);}
 .quiet-app.reader-protected[data-reader-theme='night'] .reader-leaf,
-.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-leaf {background:#15243B;color:#F6EFE5;}
+.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-leaf {background:var(--kk-surface);color:var(--kk-text);}
 .quiet-app.reader-protected[data-reader-theme='white'] .reader-leaf,
-.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-leaf {background:#FFFCF7;color:#302C29;}
+.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-leaf {background:var(--kk-surface);color:var(--kk-text);}
 .quiet-app[data-reader-theme='night'] .drawer-panel,
-.quiet-app[data-reader-theme='night'] .search-panel {background:#0D1729;color:#F6EFE5;}
+.quiet-app[data-reader-theme='night'] .search-panel {background:var(--kk-bg);color:var(--kk-text);}
 .quiet-app[data-reader-theme='white'] .drawer-panel,
-.quiet-app[data-reader-theme='white'] .search-panel {background:#F8F4EE;color:#302C29;}
-.quiet-app[data-reader-theme='night'] .search-line input {color:#F6EFE5;}
-.quiet-app[data-reader-theme='white'] .search-line input {color:#302C29;}
-html[data-app-theme='dark'] .reader-recovery {background:#0D1729;color:#F6EFE5;}
-html[data-app-theme='dark'] .reader-recovery-card {background:#15243B;border-color:#3A4D66;}
-html[data-app-theme='dark'] .reader-recovery-actions button {background:#21344E;border-color:#3A4D66;color:#F6EFE5;}
+.quiet-app[data-reader-theme='white'] .search-panel {background:var(--kk-bg);color:var(--kk-text);}
+.quiet-app[data-reader-theme='night'] .search-line input {color:var(--kk-text);}
+.quiet-app[data-reader-theme='white'] .search-line input {color:var(--kk-text);}
+html[data-app-theme='dark'] .reader-recovery {background:var(--kk-bg);color:var(--kk-text);}
+html[data-app-theme='dark'] .reader-recovery-card {background:var(--kk-surface);border-color:var(--kk-border);}
+html[data-app-theme='dark'] .reader-recovery-actions button {background:var(--kk-surface-2);border-color:var(--kk-border);color:var(--kk-text);}
 
 /* The legacy CSS defines separate sepia/calm/OLED selectors; no element receives
    those data attributes after the V6.4 migration. */

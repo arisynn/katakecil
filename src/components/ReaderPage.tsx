@@ -24,7 +24,7 @@ export function textStyles(settings: ReadingSettings): React.CSSProperties {
   }[settings.fontFamily];
   return {
     fontFamily: family,
-    fontSize: `${(17 * settings.fontSize / 100).toFixed(2)}px`,
+    fontSize: `clamp(${(16 * settings.fontSize / 100).toFixed(2)}px, calc(${(15 * settings.fontSize / 100).toFixed(2)}px + ${(0.5 * settings.fontSize / 100).toFixed(2)}vw), ${(19 * settings.fontSize / 100).toFixed(2)}px)`,
     lineHeight: { compact: 1.48, normal: 1.7, loose: 1.92 }[settings.lineHeight],
     textAlign: settings.textAlign,
     overflowWrap: 'break-word',

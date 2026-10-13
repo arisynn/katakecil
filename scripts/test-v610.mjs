@@ -39,8 +39,8 @@ assert.match(panels, /chapter\.estimatedMinutes > 0/);
 assert.match(panels, /Cari dalam bab ini/);
 assert.doesNotMatch(page, /Swipe|Pinch for menu/);
 assert.match(page, /folio-counter/);
-assert.match(css, /--r-bg: #F4F8FD/);
-assert.match(css, /--r-bg: #081425/);
+assert.match(css, /--r-bg: var\(--kk-bg\)/);
+assert.match(css, /--r-accent: var\(--kk-primary\)/);
 assert.match(css, /prefers-reduced-motion: reduce/);
 assert.doesNotMatch(css, /background-image:\s*url\(/);
 for (const reader of [secure, preview]) {

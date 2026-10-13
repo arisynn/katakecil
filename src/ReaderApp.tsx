@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { emptyStory } from './data/storyLoader';
 import type { StoryFile } from './types/reader';
-import { ReaderPage, type ReaderGeometry } from './components/ReaderPage';
+import { ReaderPage } from './components/ReaderPage';
+import { ReaderEpisodeLoading } from './components/ReaderEpisodeLoading';
 import { PageMeasurer } from './components/PageMeasurer';
 import { ReaderControls } from './components/ReaderControls';
 import { ContentsPanel, SearchPanel } from './components/ReaderPanels';
@@ -14,23 +15,14 @@ import { useUiTheme } from './hooks/useUiTheme';
 import { readerModeFor } from './utils/globalTheme';
 import { pinchAction } from './utils/readerGesture';
 import { readerHeading } from './utils/readerHeading';
+import { useReaderViewport } from './hooks/useReaderViewport';
+import { useReaderMenuPlacement } from './hooks/useReaderMenuPlacement';
+import { readerGeometry } from './utils/readerLayout';
 
 const readJson = <T,>(key: string, fallback: T): T => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
 const anchorKey = (id: string) => `quiet_reader_anchor_${id}`;
 const bookmarkKey = (id: string) => `quiet_reader_bookmarks_${id}`;
 
-
-/** Measure device cutout insets so the reader never clips text in fullscreen. */
-const readViewport = () => {
-  const probe = document.createElement('div');
-  probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
-  document.body.appendChild(probe);
-  const style = getComputedStyle(probe);
-  const safeTop = Number.parseFloat(style.paddingTop) || 0;
-  const safeBottom = Number.parseFloat(style.paddingBottom) || 0;
-  probe.remove();
-  return { width: window.innerWidth, height: window.innerHeight, safeTop, safeBottom };
-};
 
 export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, episodeNumber }: { bookId: string; bookTitle: string; onExit: () => void; previewStory?: StoryFile; episodeNumber?: number }) {
   const [story, setStory] = useState(() => previewStory ?? emptyStory(bookId, bookTitle));
@@ -50,7 +42,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     const {theme:unusedTheme,...readingOnly}=next;
     setSettings(prev=>({...prev,...readingOnly}));
   };
-  const [viewSize, setViewSize] = useState(() => ({ width: window.innerWidth, height: window.innerHeight, safeTop: 0, safeBottom: 0 }));
+  const viewSize = useReaderViewport();
   const [pages, setPages] = useState<PageLocation[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [controls, setControls] = useState(false);
@@ -66,26 +58,19 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const touchRef = useRef<{ x: number; y: number; distance?: number; pinch: boolean; moved: boolean } | null>(null);
 
   const spread = settings.spreadMode === 'spread' && viewSize.width >= 1024;
-  const geometry = useMemo<ReaderGeometry>(() => {
-    const maxWidth = Math.min(viewSize.width, spread ? 1230 : 820);
-    const leafWidth = Math.max(1, spread ? (maxWidth - 16) / 2 : maxWidth);
-    const mobile = viewSize.width < 600;
-    const paddingX = Math.min(72, Math.round((mobile ? 16 : 35) * ({ narrow: .8, normal: 1, wide: 1.4 }[settings.marginWidth])));
-    const paddingTop = Math.max(mobile ? 12 : 18, viewSize.safeTop);
-    const paddingBottom = Math.max(4, viewSize.safeBottom);
-    const footerHeight = 16;
-    const footerGap = 3;
-    const bodyHeight = Math.max(96, viewSize.height - paddingTop - paddingBottom - footerHeight - footerGap);
-    return { leafWidth, bodyWidth: Math.max(1, leafWidth - 2 * paddingX), bodyHeight, pageHeight: viewSize.height, paddingX, paddingTop, paddingBottom, footerHeight, footerGap };
-  }, [viewSize, settings.marginWidth, spread]);
+  const geometry = useMemo(() => readerGeometry(viewSize,settings), [viewSize,settings.marginWidth,settings.spreadMode]);
+  const menuPlacement = useReaderMenuPlacement(controls,viewSize.width,viewSize.height,geometry.leafWidth*(spread?2:1)+(spread?16:0));
+  const layoutVars = {
+    '--reader-viewport-height':`${viewSize.height}px`,
+    '--reader-viewport-width':`${viewSize.width}px`,
+    '--reader-menu-scale':String(menuPlacement.scale),
+    '--reader-menu-offset-y':`${menuPlacement.offsetY}px`,
+  } as React.CSSProperties;
 
   useEffect(() => {
-    const onResize = () => setViewSize(readViewport());
-    const onFullscreen = () => { setIsFullscreen(!!document.fullscreenElement); onResize(); };
-    onResize();
-    window.addEventListener('resize', onResize);
+    const onFullscreen = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFullscreen);
-    return () => { window.removeEventListener('resize', onResize); document.removeEventListener('fullscreenchange', onFullscreen); };
+    return () => document.removeEventListener('fullscreenchange', onFullscreen);
   }, []);
   useEffect(() => { try { localStorage.setItem('quiet_reader_settings', JSON.stringify(effectiveSettings)); } catch { /* browser storage unavailable */ } }, [effectiveSettings]);
   useEffect(() => { try { localStorage.setItem(bookmarkKey(story.id), JSON.stringify(bookmarks)); } catch { /* browser storage unavailable */ } }, [bookmarks, story.id]);
@@ -198,7 +183,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
 
   const touchDistance = (a: React.Touch, b: React.Touch) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
   const touchStart = (e: React.TouchEvent) => {
-    if (modal !== 'none') return;
+    if (modal !== 'none' || !pages.length) return;
     if (e.touches.length === 2) touchRef.current = { x: 0, y: 0, distance: touchDistance(e.touches[0], e.touches[1]), pinch: false, moved: true };
     else if (e.touches.length === 1) touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, pinch: false, moved: false };
   };
@@ -239,13 +224,13 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
   const first = pages[safeIndex];
   const second = spread ? pages[safeIndex + 1] : undefined;
-  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} data-reader-view={modal !== 'none' ? 'panel' : controls ? 'menu' : 'reading'} data-reader-theme={effectiveTheme} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
+  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} data-reader-view={modal !== 'none' ? 'panel' : controls ? 'menu' : 'reading'} data-reader-theme={effectiveTheme} style={{ backgroundColor: theme.bg, color: theme.text, ...layoutVars }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
     {chapters.length > 0 && <PageMeasurer chapters={chapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured}/>}
     <main className={`reader-stage ${controls ? 'showing-controls' : ''}`} onCopy={e=>{if(!previewStory)e.preventDefault();}} onCut={e=>{if(!previewStory)e.preventDefault();}} onContextMenu={e=>{if(!previewStory)e.preventDefault();}} onDragStart={e=>{if(!previewStory)e.preventDefault();}} onClick={onCanvasClick} aria-label="Halaman pembaca, ketuk tengah untuk menu">
-      <div className={`reader-book ${spread ? 'reader-book-spread' : ''}`} style={{ background: theme.pageBg, gap: spread ? 16 : 0 }}>
-        {first && chapters[first.chapterIndex] ? <ReaderPage key={`left-${first.chapterIndex}`} chapter={chapters[first.chapterIndex]} columnIndex={first.columnIndex} pageNumber={safeIndex + 1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry}/> : <div className="loading-text" style={{ color: theme.secondaryText }}>{chapters.length ? 'Menata halaman…' : loadState === 'loading' ? 'Memuat episode…' : loadState === 'error' ? loadError : 'Belum ada episode terbit.'}</div>}
+      {first && chapters[first.chapterIndex] ? <div className={`reader-book ${spread ? 'reader-book-spread' : ''}`} style={{ background: theme.pageBg, gap: spread ? 16 : 0 }}>
+        <ReaderPage key={`left-${first.chapterIndex}`} chapter={chapters[first.chapterIndex]} columnIndex={first.columnIndex} pageNumber={safeIndex + 1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry}/>
         {spread && second && chapters[second.chapterIndex] && <ReaderPage key={`right-${second.chapterIndex}`} chapter={chapters[second.chapterIndex]} columnIndex={second.columnIndex} pageNumber={safeIndex + 2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry}/>}
-      </div>
+      </div> : <ReaderEpisodeLoading phase={chapters.length?'layout':loadState==='loading'?'fetch':loadState==='error'?'error':'empty'} storyTitle={parsed.title} message={loadError||undefined}/>}
     </main>
     <div className={`controls-shell ${controls ? 'controls-open' : ''}`} aria-hidden={!controls}>
       {controls && <ReaderControls onExit={onExit} theme={theme} title={parsed.title} chapterTitle={displayedTitle} page={currentNumber} total={pages.length || 1} isBookmarked={activeBookmarks.length > 0} fullscreen={isFullscreen} canReturn={!!returnAnchor} onContents={() => setModal('contents')} onSettings={() => setModal('settings')} onSearch={() => setModal('search')} onBookmark={toggleBookmark} onFullscreen={toggleFullscreen} onClose={() => setControls(false)} onReturn={() => { if (returnAnchor) goToAnchor(returnAnchor, false); setReturnAnchor(null); }} onPage={n => goTo(n - 1)} onPrevChapter={() => goChapter(chapterIndex - 1)} onNextChapter={() => goChapter(chapterIndex + 1)} prevChapter={chapterIndex > 0} nextChapter={chapterIndex < chapters.length - 1} progressScope="story"/>}

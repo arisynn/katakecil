@@ -1,30 +1,17 @@
 /* KataKecil V6.10 — Reader-first presentation. All surfaces share the two
    global Sapphire themes. No reader engine, access policy or schema changes. */
-.quiet-app[data-reader-theme='white'],
-.v610-settings-sheet[data-reader-settings-theme='light'] {
-  --r-bg: #F4F8FD;
-  --r-paper: #FFFFFF;
-  --r-surface: #FFFFFF;
-  --r-raised: #E9F2FC;
-  --r-ink: #172C48;
-  --r-muted: #506781;
-  --r-border: #D5E3F2;
-  --r-accent: #235DB4;
-  --r-on-accent: #FFFFFF;
-  --r-shadow: rgba(23,44,72,.13);
-}
-.quiet-app[data-reader-theme='night'],
-.v610-settings-sheet[data-reader-settings-theme='dark'] {
-  --r-bg: #081425;
-  --r-paper: #10243D;
-  --r-surface: #10243D;
-  --r-raised: #173251;
-  --r-ink: #EFF6FF;
-  --r-muted: #B2C5DA;
-  --r-border: #294665;
-  --r-accent: #9BC9FF;
-  --r-on-accent: #081425;
-  --r-shadow: rgba(0,0,0,.38);
+/* Reader uses the same two global theme surfaces as Public and Studio. */
+.quiet-app, .v610-settings-sheet {
+  --r-bg: var(--kk-bg);
+  --r-paper: var(--kk-surface);
+  --r-surface: var(--kk-surface);
+  --r-raised: var(--kk-surface-2);
+  --r-ink: var(--kk-text);
+  --r-muted: var(--kk-muted);
+  --r-border: var(--kk-border);
+  --r-accent: var(--kk-primary);
+  --r-on-accent: var(--kk-on-primary);
+  --r-shadow: var(--kk-shadow);
 }
 .quiet-app {
   color: var(--r-ink);
@@ -33,12 +20,7 @@
 }
 .quiet-app .reader-stage { background: var(--r-bg); }
 .quiet-app .reader-book { border-radius: 0; box-shadow: none; }
-.quiet-app .reader-stage.showing-controls .reader-book,
-.quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
-  transform: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
+/* Minimized reader placement is computed from measured controls in V6.12. */
 .quiet-app .reader-leaf.v6-reader-leaf {
   box-shadow: none !important;
   background-image: none !important;
@@ -356,8 +338,8 @@
   place-items: center;
   border-radius: 12px;
 }
-.v610-theme-light { background: #E9F2FC; color: #235DB4; }
-.v610-theme-dark { background: #10243D; color: #9BC9FF; }
+.v610-theme-light { background: var(--kk-light-soft); color: var(--kk-light-accent); }
+.v610-theme-dark { background: var(--kk-dark-surface); color: var(--kk-dark-accent); }
 .v610-settings-sheet .v610-size-slider { gap: 9px; }
 .v610-settings-sheet .v610-size-slider input { accent-color: var(--r-accent); }
 .v610-settings-sheet .v6-settings-segments button {

@@ -1125,16 +1125,16 @@ html[data-app-theme='dark'] {
 /*Reader chrome uses the same global mode as the public app.*/
 
 .quiet-app.reader-protected {
-  --v63-reader-float:rgba(255,249,239,.91);
-  --v63-reader-border:rgba(132,108,79,.23);
-  --v63-reader-shadow:0 10px 30px rgba(59,43,28,.16);
+  --v63-reader-float:var(--kk-overlay);
+  --v63-reader-border:var(--kk-border);
+  --v63-reader-shadow:0 10px 30px var(--kk-shadow);
 }
 
 .quiet-app.reader-protected[data-reader-theme='night'],
 .quiet-app.reader-protected[data-reader-theme='black'] {
-  --v63-reader-float:rgba(16,28,47,.90);
-  --v63-reader-border:rgba(194,207,225,.23);
-  --v63-reader-shadow:0 10px 30px rgba(0,5,16,.37);
+  --v63-reader-float:var(--kk-overlay);
+  --v63-reader-border:var(--kk-border);
+  --v63-reader-shadow:0 10px 30px var(--kk-shadow);
 }
 
 .quiet-app.reader-protected .reader-control-header {

@@ -1,0 +1,147 @@
+/* V6.12 — actual viewport geometry, menu-centered book, and episode loader.
+   Kept as the only layout override for V6.11 Reader transforms. */
+.quiet-app {
+  height: var(--reader-viewport-height, 100dvh);
+  width: var(--reader-viewport-width, 100%);
+  overscroll-behavior: none;
+  touch-action: pan-y;
+}
+.quiet-app .reader-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.quiet-app .reader-book {
+  height: var(--reader-viewport-height, 100dvh);
+  width: max-content;
+  max-width: 100%;
+  flex-shrink: 0;
+  transform-origin: center center;
+}
+.quiet-app .reader-stage.showing-controls .reader-book,
+.quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
+  transform: translate3d(0, var(--reader-menu-offset-y, 0px), 0) scale(var(--reader-menu-scale, .68));
+  border-radius: clamp(12px, 2.5vw, 22px);
+  box-shadow: 0 18px 48px var(--r-shadow);
+}
+.quiet-app .reader-control-header,
+.quiet-app .reader-control-footer {
+  width: auto;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
+}
+.quiet-app .reader-control-header {
+  top: calc(8px + env(safe-area-inset-top));
+  left: max(12px, calc((100% - 850px) / 2));
+  right: max(12px, calc((100% - 850px) / 2));
+}
+.quiet-app .reader-control-footer {
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: max(12px, calc((100% - 670px) / 2));
+  right: max(12px, calc((100% - 670px) / 2));
+}
+.quiet-app .chapter-content p {
+  word-spacing: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.quiet-app .chapter-intro {
+  margin: clamp(36px, 7dvh, 76px) 0 1.85em;
+  text-align: center;
+}
+.quiet-app .chapter-intro .chapter-arc,
+.quiet-app .chapter-intro h2 { text-align: center; }
+.quiet-app .reader-folio-bottom { flex-shrink: 0; }
+
+/* Fullscreen loading replaces the page instead of drawing a blank reader leaf. */
+.quiet-app .kk-reader-load {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100%;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  background: var(--r-bg);
+  color: var(--r-ink);
+  text-align: center;
+  z-index: 3;
+}
+.quiet-app .kk-reader-load__content {
+  width: min(100%, 320px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.quiet-app .kk-reader-load__eyebrow {
+  max-width: 100%;
+  margin: 0 0 22px;
+  color: var(--r-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.quiet-app .kk-reader-load__symbol {
+  width: 78px;
+  height: 78px;
+  border-radius: 23px;
+  display: grid;
+  place-items: center;
+  color: var(--r-accent);
+  background: var(--r-raised);
+  border: 1px solid var(--r-border);
+  box-shadow: 0 12px 32px var(--r-shadow);
+}
+.quiet-app .kk-reader-load__symbol svg { width: 44px; height: 44px; }
+.quiet-app .kk-reader-load__page { transform-origin: 32px 22px; animation: kk-reader-turn 2.4s ease-in-out infinite; }
+.quiet-app .kk-reader-load__title {
+  margin: 25px 0 0;
+  color: var(--r-ink);
+  font: 650 clamp(18px, 4.5vw, 22px)/1.4 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.quiet-app .kk-reader-load__detail {
+  margin: 9px 0 0;
+  color: var(--r-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.quiet-app .kk-reader-load__activity { display: flex; gap: 8px; margin-top: 25px; }
+.quiet-app .kk-reader-load__activity span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--r-accent);
+  animation: kk-reader-pulse 1.3s ease-in-out infinite;
+}
+.quiet-app .kk-reader-load__activity span:nth-child(2) { animation-delay: .17s; }
+.quiet-app .kk-reader-load__activity span:nth-child(3) { animation-delay: .34s; }
+.quiet-app .kk-reader-load__retry {
+  margin-top: 24px;
+  min-height: 44px;
+  padding: 10px 24px;
+  border: 1px solid var(--r-border);
+  border-radius: 999px;
+  color: var(--r-on-accent);
+  background: var(--r-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+@keyframes kk-reader-turn { 0%,20%,100% { transform: scaleX(1); } 52% { transform: scaleX(.25); } }
+@keyframes kk-reader-pulse { 0%,75%,100% { opacity: .32; transform: scale(.85); } 35% { opacity: 1; transform: scale(1.08); } }
+@media (max-height: 570px) {
+  .quiet-app .v610-progress-label { display: none; }
+  .quiet-app .v610-footer-inner { padding-block: 6px; }
+  .quiet-app .reader-control-header .v610-control-inner { height: 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiet-app .kk-reader-load__page,
+  .quiet-app .kk-reader-load__activity span { animation: none; }
+  .quiet-app .reader-book { transition: none !important; }
+}
