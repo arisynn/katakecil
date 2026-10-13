@@ -4,7 +4,7 @@ import { APP_THEME_KEY, readGlobalTheme, readerModeFor, saveGlobalTheme, type Gl
 export type UiTheme = GlobalTheme;
 export type AppThemePreference = GlobalTheme;
 export { APP_THEME_KEY };
-export const themeMetaColors = { light: '#F8F4EE', dark: '#0D1729' } as const;
+export const themeMetaColors = { light: '#F4F8FD', dark: '#081425' } as const;
 
 export function getThemePreference(): AppThemePreference { return readGlobalTheme(); }
 export function resolveAppTheme(preference: AppThemePreference): UiTheme { return preference; }
@@ -30,7 +30,7 @@ export function useUiTheme() {
     document.documentElement.dataset.appTheme = theme;
     document.documentElement.dataset.readerTheme = readerModeFor(theme);
     const metaColor = window.location.pathname.startsWith('/baca/')
-      ? (theme === 'dark' ? '#15243B' : '#FFFCF7') : themeMetaColors[theme];
+      ? (theme === 'dark' ? '#10243D' : '#FFFFFF') : themeMetaColors[theme];
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', metaColor);
   }, [theme]);
   return { theme, preference: theme, setPreference, toggleTheme };

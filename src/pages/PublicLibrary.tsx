@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, ChevronDown, ChevronRight, Clock3, Search, Sparkles, X } from 'lucide-react';
-import { Cover, fallbackCover, fallbackCoverMobile } from '../components/Cover';
+import { ArrowLeft, ArrowRight, BookOpen, Bookmark, ChevronDown, ChevronRight, Clock3, Feather, Search, Sparkles, X } from 'lucide-react';
+import { Cover } from '../components/Cover';
 import { getPublicLibrary, type Book, type EpisodeSummary } from '../data/library';
 import { isConfigured } from '../data/supabase';
 import { navigate } from '../utils/nav';
@@ -160,12 +160,18 @@ function Listing({ books, episodes, demo, collection = false }: {
         window.addEventListener('quiet:navigate', sync);
         return () => window.removeEventListener('quiet:navigate', sync);
     }, []);
-    const genres = useMemo(() => ['Semua', ...new Set(books.map(b => b.genre).filter(Boolean))], [books]);
+    const genres = useMemo(() => ['Semua', ...new Set(books.filter(b => !collection || ids.includes(b.id)).map(b => b.genre).filter(Boolean))], [books, collection, ids]);
     const shown = useMemo(() => {
         const term = q.toLocaleLowerCase('id-ID');
         const results = books.filter(b => (!collection || ids.includes(b.id)) && (filter === 'Semua' || b.genre === filter) && `${b.title} ${b.synopsis} ${b.genre}`.toLocaleLowerCase('id-ID').includes(term));
         return [...results].sort((a, b) => sort === 'judul' ? a.title.localeCompare(b.title, 'id') : new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
     }, [books, ids, collection, filter, q, sort]);
+    if (collection && !books.some(book => ids.includes(book.id))) {
+        return <main className="v6-library-page v67-empty-collection">
+            <div className="v6-library-intro"><h1>Koleksi</h1><p>Cerita yang kamu simpan untuk dibaca kembali.</p></div>
+            <EmptyLibrary collection/>
+        </main>;
+    }
     return <main className="v6-library-page"><div className="v6-library-intro"><span className="v63-eyebrow">✦ &nbsp; JELAJAHI CERITA</span><h1>{collection ? 'Koleksi' : 'Perpustakaan'}</h1><p>{collection ? 'Cerita yang kamu simpan untuk dibaca kembali.' : 'Ribuan kata, satu tempat untuk kembali.'}</p></div>
     <div className="v6-library-tools"><div className="v6-library-search"><Search size={19}/><input ref={input} type="search" aria-label="Cari cerita, penulis, atau genre" placeholder="Cari cerita, penulis, atau genre..." value={q} onChange={e => setQ(e.target.value)}/>{q && <button aria-label="Hapus pencarian" onClick={() => setQ('')}><X size={16}/></button>}</div><div className="v6-genre-pills">{genres.map(g => <button key={g} className={filter === g ? 'selected' : ''} aria-pressed={filter === g} onClick={() => setFilter(g)}>{g}</button>)}</div><label className="v6-sort">Urutkan <ChevronDown size={13}/><select aria-label="Urutkan cerita" value={sort} onChange={e => setSort(e.target.value)}><option value="terbaru">Terbaru</option><option value="judul">Judul A–Z</option></select></label></div>
     {shown.length ? <div className="v6-library-grid">{shown.map(b => <BookCard key={b.id} book={b} count={countFor(episodes, b)} demo={demo}/>)}</div> : !q && filter === 'Semua' && (!books.length || collection) ? <EmptyLibrary collection={collection}/> : <div className="v6-filter-empty"><Search size={24}/><h2>Tidak ada cerita yang cocok</h2><p>Coba kata kunci atau genre lain.</p><button onClick={() => { setQ(''); setFilter('Semua'); }}>Hapus filter</button></div>}
@@ -178,8 +184,7 @@ function Detail({ book, episodes, demo }: {
 }) {
     const rows = episodes.filter(e => e.book_id === book.id).sort((a, b) => a.episode_number - b.episode_number);
     const [showAll, setShowAll] = useState(false);
-    const image = book.cover_url || fallbackCover(book);
-    return <main className="v6-detail-page"><div className="v6-detail-backdrop" aria-hidden="true"><picture><source media="(max-width: 600px)" srcSet={book.cover_url || fallbackCoverMobile(book)}/><img src={image} alt="" loading="eager" decoding="async" onError={e => { e.currentTarget.style.display = 'none'; }}/></picture></div>
+    return <main className="v6-detail-page">
     <div className="v6-detail-content"><Action to="/cerita" className="v6-detail-back"><ArrowLeft size={17}/><span>Perpustakaan</span></Action>
       <section className="v6-detail-hero"><div className="v6-detail-cover"><Cover book={book} size="large" eager/><BookmarkButton book={book}/></div><div className="v6-detail-info"><h1>{book.title}</h1><div className="v6-detail-tags"><span>{book.genre || 'Fiksi'}</span><span>{book.status === 'completed' ? 'Tamat' : book.status === 'hiatus' ? 'Jeda' : 'Berlangsung'}</span></div><div className="v6-detail-numbers"><span><BookOpen size={16}/>{demo ? 'Contoh' : `${rows.length} Bab`}</span><span><Clock3 size={16}/>{book.status === 'completed' ? 'Selesai' : 'Bersambung'}</span></div><p>{book.synopsis || 'Sinopsis belum ditambahkan oleh penulis.'}</p><div className="v6-detail-actions">{rows.length && !demo ? <Action className="v6-button v6-button-gold" to={`/baca/${book.slug}`}>Mulai Membaca <ArrowRight size={17}/></Action> : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}</div></div></section>
       <div className="v6-detail-bottom"><section className="v6-chapters"><div className="v6-chapters-title"><h2>Daftar Bab</h2><span>Urut: Terbaru tersedia</span></div>{rows.length ? rows.slice(0, showAll ? undefined : 18).map((ep, i) => <button className="v6-chapter" key={ep.episode_number} onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}><span>{i + 1}.</span><div><strong>{ep.title}</strong><small>{ep.arc_title || `Bab ${ep.episode_number}`}</small></div><span className="v6-chapter-date">{ep.release_at ? new Date(ep.release_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span><ChevronRight size={16}/></button>) : <div className="v6-no-chapters">{demo ? 'Ini hanya pratinjau visual. Hubungkan Supabase untuk membaca cerita asli.' : 'Bab pertama belum diterbitkan.'}</div>}{rows.length > 18 && !showAll && <button className="v6-show-chapters" onClick={() => setShowAll(true)}>Lihat semua bab <ArrowRight size={16}/></button>}</section>
@@ -187,18 +192,37 @@ function Detail({ book, episodes, demo }: {
     </div>
   </main>;
 }
-function About() { return <main className="v6-about"><div><span>✦ TENTANG KATAKECIL</span><h1>Cerita yang terasa dekat, bahkan setelah halaman terakhir.</h1><p>KataKecil adalah ruang baca pribadi untuk cerita yang ditulis dengan sepenuh hati. Di sini, pembaca bisa menemukan kisah, menyimpan favorit, dan menikmati setiap bab tanpa gangguan.</p><Action to="/cerita" className="v6-button v6-button-gold">Masuk perpustakaan <ArrowRight size={16}/></Action></div></main>; }
+function About() {
+    return <main className="v6-about v67-about">
+        <section className="v67-about-intro">
+            <span className="v67-kicker"><Feather size={15}/> MENGENAL KATAKECIL</span>
+            <h1>Ruang kecil untuk <em>cerita yang berarti.</em></h1>
+            <p>KataKecil adalah perpustakaan cerita pribadi yang dibuat agar setiap kisah punya tempat untuk dibaca, disimpan, dan dikunjungi kembali.</p>
+        </section>
+        <section className="v67-about-author" aria-label="Tentang penulis">
+            <div className="v67-author-avatar" aria-hidden="true">K</div>
+            <div><span className="v67-kicker">PENULIS KATAKECIL</span><h2>Karisyono</h2><p>Cerita-cerita di KataKecil ditulis dan dikelola oleh Karisyono. Selamat datang, dan selamat menemukan kisah yang ingin kamu baca.</p></div>
+        </section>
+        <section className="v67-about-features" aria-label="Apa yang bisa dilakukan di KataKecil">
+            <article><BookOpen size={22}/><h3>Baca dengan nyaman</h3><p>Pilih tema terang atau gelap, atur tipografi, dan lanjutkan bacaanmu.</p></article>
+            <article><Bookmark size={22}/><h3>Simpan cerita</h3><p>Tandai cerita favoritmu. Koleksi tersimpan pada browser perangkat ini.</p></article>
+        </section>
+        <Action to="/cerita" className="v67-about-cta">Jelajahi perpustakaan <ArrowRight size={17}/></Action>
+    </main>;
+}
 export default function PublicLibrary({ path }: {
     path: string;
 }) {
     const { books, episodes, loading, error, demo } = useLibrary();
     const { theme } = useUiTheme();
+    const { ids: collectionIds } = useCollection();
+    const showCollection = books.some(book => collectionIds.includes(book.id));
     const slug = path.startsWith('/cerita/') ? decodeURIComponent(path.split('/')[2] || '') : null;
     const book = slug ? books.find(b => b.slug === slug) : undefined;
-    useEffect(() => { document.title = `${book?.title ? `${book.title} · ` : path === '/cerita' ? 'Perpustakaan · ' : path === '/koleksi' ? 'Koleksi · ' : ''}KataKecil`; }, [book?.title, path]);
+    useEffect(() => { document.title = `${book?.title ? `${book.title} · ` : path === '/cerita' ? 'Perpustakaan · ' : path === '/koleksi' ? 'Koleksi · ' : path === '/tentang' ? 'Tentang · ' : ''}KataKecil`; }, [book?.title, path]);
     if (loading)
         return <ThemeLoading context="public" text="Membuka perpustakaan…"/>;
-    return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path}/>
+    return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path} showCollection={showCollection}/>
     {demo && <div className="v6-demo-notice"><Sparkles size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error && <div className="v6-error" role="alert">{error}</div>}
     {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>) : path === '/cerita' ? <Listing books={books} episodes={episodes} demo={demo}/> : <Home books={books} episodes={episodes} demo={demo}/>}

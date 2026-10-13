@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "6.6.0",
+  "version": "6.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,9 +21,10 @@
     "test:v5": "node scripts/test-v5.mjs",
     "test:v51": "node scripts/test-v51.mjs",
     "test:v64": "node scripts/test-v64.mjs",
-    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v65.mjs && node scripts/test-v66.mjs",
+    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v65.mjs && node scripts/test-v66.mjs && node scripts/test-v67.mjs",
     "test:v65": "node scripts/test-v65.mjs",
-    "test:v66": "node scripts/test-v66.mjs",
+    "test:v66": "node scripts/test-v66.mjs && node scripts/test-v67.mjs",
+    "test:v67": "node scripts/test-v67.mjs",
     "check:structure": "node scripts/quality/check-structure.mjs"
   },
   "dependencies": {

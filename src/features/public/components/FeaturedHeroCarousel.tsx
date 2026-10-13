@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react';
-import { fallbackCover, fallbackCoverMobile } from '../../../components/Cover';
+import { Cover } from '../../../components/Cover';
 import { navigate } from '../../../utils/nav';
 import type { FeaturedStory } from '../featuredStories';
 
@@ -24,55 +24,13 @@ function useReducedMotion() {
   return reduced;
 }
 
-/** Never replace a published author's cover with a sample illustration. */
-function StoryBackdrop({ story, priority }: { story: FeaturedStory; priority: boolean }) {
-  const { book } = story;
-  const [failed, setFailed] = useState(false);
-  const hasOriginal = Boolean(book.cover_url) && !failed;
-
-  return (
-    <picture>
-      {!hasOriginal && (
-        <source
-          media="(max-width: 600px)"
-          srcSet={fallbackCoverMobile(book)}
-          type="image/webp"
-        />
-      )}
-      <img
-        src={hasOriginal ? book.cover_url! : fallbackCover(book)}
-        alt=""
-        aria-hidden="true"
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding="async"
-        onError={() => setFailed(true)}
-      />
-    </picture>
-  );
-}
-
-/** The welcome artwork is only shown if no genuinely published stories exist. */
+/** A clean, illustration-free welcome card appears when no published stories exist. */
 function DefaultHero() {
   return (
-    <section className="v66-hero v66-hero-default" aria-label="Selamat datang di KataKecil">
-      <div className="v66-hero-media" aria-hidden="true">
-        <picture>
-          <source
-            media="(max-width: 600px)"
-            srcSet="/assets/v6/hero-library-sunset-mobile.webp"
-            type="image/webp"
-          />
-          <img
-            src="/assets/v6/hero-library-sunset.webp"
-            alt=""
-            fetchPriority="high"
-          />
-        </picture>
-      </div>
-      <div className="v66-hero-overlay" aria-hidden="true" />
-      <div className="v66-hero-copy">
-        <span className="v66-hero-kicker">✦ &nbsp; TEMPAT CERITA BERMULA</span>
+    <section className="v66-hero v66-hero-default v67-hero-card" aria-label="Selamat datang di KataKecil">
+
+      <div className="v66-hero-copy v67-welcome-copy">
+        <span className="v66-hero-kicker">TEMPAT CERITA BERMULA</span>
         <h1>Cerita yang Tinggal Lebih Lama</h1>
         <p>
           Temukan kisah yang menemani harimu, dalam kata-kata yang selalu punya
@@ -175,7 +133,7 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
 
   return (
     <section
-      className="v66-hero v66-hero-carousel"
+      className="v66-hero v66-hero-carousel v67-hero-card"
       role="region"
       aria-roledescription="carousel"
       aria-label="Cerita terbaru di KataKecil"
@@ -191,7 +149,8 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
         selectSlide(activeIndex + (event.key === 'ArrowRight' ? 1 : -1));
       }}
     >
-      <div className="v66-hero-media" aria-hidden="true">
+      <div className="v67-hero-layout">
+      <div className="v66-hero-media" aria-label="Sampul cerita unggulan">
         <div
           className={`v66-hero-track ${skipTransition ? 'is-resetting' : ''}`}
           style={{ transform: `translate3d(-${trackPosition * 100}%, 0, 0)` }}
@@ -207,12 +166,11 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
         >
           {trackStories.map((story, index) => (
             <div className="v66-hero-art" key={`${story.book.id}-${index}`}>
-              <StoryBackdrop story={story} priority={stories.length === 1 || index === 1} />
+              <Cover book={story.book} eager={stories.length === 1 || index === 1}/>
             </div>
           ))}
         </div>
       </div>
-      <div className="v66-hero-overlay" aria-hidden="true" />
       <div className="v66-hero-copy" key={book.id}>
         <span className="v66-hero-kicker">✦ &nbsp; TERBARU DI KATAKECIL</span>
         <div className="v66-hero-meta">
@@ -231,6 +189,7 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
         >
           Mulai Membaca <ArrowRight size={18} aria-hidden="true" />
         </button>
+      </div>
       </div>
       {stories.length > 1 && (
         <div className="v66-hero-navigation">

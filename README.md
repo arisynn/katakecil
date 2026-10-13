@@ -1,6 +1,6 @@
-# KataKecil V6.6
+# KataKecil V6.7
 
-KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk penulis**, dibangun menggunakan React, TypeScript, Vite, Tailwind/CSS, dan Supabase. Desain iOS mobile-first dan dua tema global tetap dipertahankan. Beranda V6.6 menggunakan hero carousel otomatis berdasarkan cerita yang sudah terbit.
+KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk penulis**, dibangun menggunakan React, TypeScript, Vite, Tailwind/CSS, dan Supabase. Desain iOS mobile-first dan dua tema global tetap dipertahankan. V6.7 memperbarui desain menjadi **Arctic Blue / Midnight Sapphire**: hero carousel menggunakan cover utuh (bukan wallpaper), halaman Tentang menampilkan Karisyono, tab Koleksi tampil hanya saat ada cerita tersimpan, dan navigasi Studio menempatkan Upload sebagai tab utama.
 
 ## Mulai
 
@@ -27,6 +27,7 @@ npm run build
 - [Arsitektur V6.5](docs/architecture/README.md)
 - [Panduan deployment](docs/deployment/README.md)
 - [Riwayat versi dan migrasi](docs/archive/README.md)
+- [Catatan rilis V6.7](docs/RELEASE_V6.7.md)
 - [Catatan rilis V6.6](docs/RELEASE_V6.6.md)
 - [Riwayat V6.5](docs/RELEASE_V6.5.md)
 

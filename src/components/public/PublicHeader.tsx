@@ -10,7 +10,8 @@ const links = [
   {to:'/koleksi',label:'Koleksi',icon:Bookmark},
   {to:'/tentang',label:'Tentang',icon:Info},
 ];
-export default function PublicHeader({path}:{path:string}) {
+export default function PublicHeader({path,showCollection}:{path:string;showCollection:boolean}) {
+  const visibleLinks = links.filter(link => link.to !== '/koleksi' || showCollection);
   const [search,setSearch] = useState('');
   const [menuOpen,setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -24,7 +25,7 @@ export default function PublicHeader({path}:{path:string}) {
     <header className="v6-public-header">
       <div className="v6-header-inner">
         <span className="v6-brand"><span className="v6-brand-symbol"><Feather size={19}/></span>KataKecil</span>
-        <nav className="v6-desktop-links" aria-label="Navigasi publik desktop">{links.filter(l=>l.to!=='/koleksi').map(l=><button key={l.to} aria-current={active(l.to)?'page':undefined} className={active(l.to)?'is-active':''} onClick={()=>navigate(l.to)}>{l.label}</button>)}</nav>
+        <nav className="v6-desktop-links" aria-label="Navigasi publik desktop">{visibleLinks.map(l=><button key={l.to} aria-current={active(l.to)?'page':undefined} className={active(l.to)?'is-active':''} onClick={()=>navigate(l.to)}>{l.label}</button>)}</nav>
         <div className="v6-header-actions">
           {!hasPageSearch&&<form className="v6-header-search" role="search" onSubmit={submit}><Search size={15}/><input aria-label="Cari cerita" placeholder="Cari cerita..." value={search} onChange={e=>setSearch(e.target.value)}/><button aria-label="Jalankan pencarian" type="submit"><ArrowRight size={15}/></button></form>}
           {!hasPageSearch&&<button className="v6-mobile-search" aria-label="Cari cerita" onClick={()=>navigate('/cerita?focus=1')}><Search size={19}/></button>}
@@ -44,6 +45,6 @@ export default function PublicHeader({path}:{path:string}) {
         </div>
       </div>
     </header>
-    <nav className="v6-public-bottom" aria-label="Navigasi publik mobile">{links.map(l=><button key={l.to} className={active(l.to)?'active':''} aria-current={active(l.to)?'page':undefined} onClick={()=>navigate(l.to)}><l.icon size={20}/><span>{l.label}</span></button>)}</nav>
+    <nav className="v6-public-bottom" data-items={visibleLinks.length} aria-label="Navigasi publik mobile">{visibleLinks.map(l=><button key={l.to} className={active(l.to)?'active':''} aria-current={active(l.to)?'page':undefined} onClick={()=>navigate(l.to)}><l.icon size={20}/><span>{l.label}</span></button>)}</nav>
   </>;
 }

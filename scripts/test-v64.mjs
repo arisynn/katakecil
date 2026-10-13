@@ -45,7 +45,7 @@ for(const [saved,oldReader,expected] of [[null,'night','dark'],[null,'sepia','li
  assert.equal(attrs['data-app-theme'],expected);
  assert.equal(attrs['data-reader-theme'],expected==='dark'?'night':'white');
  assert.equal(values.get('appThemePreference'),expected);
- assert.equal(attrs.meta,expected==='dark'?'#15243B':'#FFFCF7');
+ assert.equal(attrs.meta,expected==='dark'?'#10243D':'#FFFFFF');
 }
 const modal=read('src/components/ReadingSettingsModal.tsx');
 const publicHeader=read('src/components/public/PublicHeader.tsx');

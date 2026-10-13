@@ -2,8 +2,8 @@ import type { ThemeColors, ThemeMode, ReadingSettings } from '../types/reader';
 
 /** Visual reading surfaces are derived exclusively from the global theme. */
 export const THEMES: Record<ThemeMode, ThemeColors> = {
-  white: { name:'white',label:'Terang',bg:'#F8F4EE',pageBg:'#FFFCF7',text:'#302C29',secondaryText:'#786D63',border:'#D5C9BC',barBg:'rgba(255,252,247,.96)',accent:'#805321',accentHover:'#6B4319',hoverBg:'#F0E8DE',cardBg:'#F0E8DE',selectionBg:'#E8D5B6' },
-  night: { name:'night',label:'Gelap',bg:'#0D1729',pageBg:'#15243B',text:'#F6EFE5',secondaryText:'#B6C4D6',border:'#3A4D66',barBg:'rgba(21,36,59,.96)',accent:'#F0C98B',accentHover:'#FFE0AC',hoverBg:'#21344E',cardBg:'#21344E',selectionBg:'#3A4D66' },
+  white: { name:'white',label:'Terang',bg:'#F4F8FD',pageBg:'#FFFFFF',text:'#172C48',secondaryText:'#506781',border:'#D5E3F2',barBg:'rgba(255,255,255,.97)',accent:'#235DB4',accentHover:'#19498F',hoverBg:'#E9F2FC',cardBg:'#E9F2FC',selectionBg:'#D5E8FF' },
+  night: { name:'night',label:'Gelap',bg:'#081425',pageBg:'#10243D',text:'#EFF6FF',secondaryText:'#B2C5DA',border:'#294665',barBg:'rgba(16,36,61,.97)',accent:'#9BC9FF',accentHover:'#C4E1FF',hoverBg:'#173251',cardBg:'#173251',selectionBg:'#294665' },
 };
 
 export const DEFAULT_SETTINGS: ReadingSettings = {
