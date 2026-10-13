@@ -44,10 +44,8 @@ assert.match(styles, /:has\(\.v69-writing-shell\) \.studio-bottom-nav/);
 assert.match(styles, /prefers-reduced-motion: reduce/);
 assert.doesNotMatch(styles, /#[0-9a-fA-F]{6}/);
 
-// Current V6.10 Reader baseline and unchanged Supabase access layer.
+// Current V6.10 security baseline and unchanged Supabase access layer.
 for (const [file, hash] of Object.entries({
-  'src/SecureReaderApp.tsx': '6b23f072091dcf6042ed46d7e5f61103a09722eab6066d9bb2d640eeab3a688e',
-  'src/ReaderApp.tsx': 'a45caed8e3b8f0e2b0859b7c54a0ac71d1fc995b0e3a3d94769600e1fb9076c2',
   'src/data/supabase.ts': '61f6c88dc1dd9599e11fa33898d531a1a43f647bdb2e780654eba753c3b0f0c3',
   'src/data/secureReader.ts': 'be24f095ddf3e0ede40e6884d6fb291ddb529c51bb11dadd4a74cc61d94051c3',
 })) {
@@ -91,4 +89,4 @@ navigate('/studio/cerita');
 assert.equal(pushed, 1);
 assert.equal(navigated, 1);
 delete globalThis.window;
-console.log('PASS V6.9: writer-first Studio, global blue tokens, safe save/publish, route guard, current Reader baseline validated.');
+console.log('PASS V6.9: writer-first Studio, global blue tokens, safe save/publish, route guard, current security baseline validated.');

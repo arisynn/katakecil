@@ -32,6 +32,7 @@ import './design/v67-sapphire-polish.css';
 import './design/v68-minimal-home.css';
 import './design/v69-writer-studio.css';
 import './design/v610-reader-experience.css';
+import './design/v611-immersive-reader.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

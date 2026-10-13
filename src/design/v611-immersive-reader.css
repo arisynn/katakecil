@@ -1,0 +1,179 @@
+/* KataKecil V6.11 — one Sapphire palette for the public app, Studio,
+   Reader, boot screen and recovery states. Kept after legacy CSS imports. */
+html[data-app-theme='light'] {
+  --kk-boot-bg: var(--kk-bg); --kk-boot-card: var(--kk-surface);
+  --kk-boot-ink: var(--kk-text); --kk-boot-muted: var(--kk-muted);
+  --kk-boot-blue: var(--kk-amber); --kk-boot-border: var(--kk-border);
+}
+html[data-app-theme='dark'] {
+  --kk-boot-bg: var(--kk-bg); --kk-boot-card: var(--kk-surface);
+  --kk-boot-ink: var(--kk-text); --kk-boot-muted: var(--kk-muted);
+  --kk-boot-blue: var(--kk-amber); --kk-boot-border: var(--kk-border);
+}
+html[data-app-theme='light'] ::selection { background: rgba(35,93,180,.24); color: #172C48; }
+html[data-app-theme='dark'] ::selection { background: rgba(155,201,255,.30); color: #EFF6FF; }
+
+/* Pre-React boot and React loading share the same semantic structure. */
+.kk-v611-loader {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: calc(54px + env(safe-area-inset-top)) 24px calc(54px + env(safe-area-inset-bottom));
+  background: var(--kk-bg) !important;
+  color: var(--kk-text) !important;
+  overflow: hidden;
+  isolation: isolate;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.kk-v611-loader::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -30%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 48%, color-mix(in srgb, var(--kk-amber) 10%, transparent), transparent 49%);
+}
+.kk-v611-loader__content { display: flex; flex-direction: column; align-items: center; width: min(100%, 370px); text-align: center; }
+.kk-v611-loader__eyebrow { font-size: 10px; line-height: 1.4; font-weight: 700; letter-spacing: .19em; color: var(--kk-amber); margin-bottom: 27px; }
+.kk-v611-loader__symbol {
+  display: grid; place-items: center;
+  width: 100px; height: 100px; margin-bottom: 27px;
+  border: 1px solid var(--kk-border); border-radius: 28px;
+  background: var(--kk-surface); color: var(--kk-amber);
+  box-shadow: 0 16px 45px var(--kk-shadow);
+}
+.kk-v611-loader__symbol svg { width: 58px; height: 58px; }
+.kk-v611-loader__turn { transform-origin: 32px 22px; animation: kk-v611-turn 2.7s ease-in-out infinite; }
+.kk-v611-loader__brand { font: 600 clamp(34px, 6vw, 42px)/1.12 Georgia, serif; letter-spacing: -.045em; color: var(--kk-text); }
+.kk-v611-loader__tagline { margin: 12px 0 0; font-size: 12px; line-height: 1.65; color: var(--kk-muted); }
+.kk-v611-loader__dots { display: flex; gap: 9px; margin-top: 30px; align-items: center; justify-content: center; }
+.kk-v611-loader__dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--kk-amber); animation: kk-v611-pulse 1.3s ease-in-out infinite; }
+.kk-v611-loader__dots span:nth-child(2) { animation-delay: .18s; }
+.kk-v611-loader__dots span:nth-child(3) { animation-delay: .36s; }
+.kk-v611-loader__message { margin: 13px 0 0; font-size: 12px; line-height: 1.5; color: var(--kk-muted); }
+@keyframes kk-v611-turn { 0%,20%,100% { transform: scaleX(1); } 52% { transform: scaleX(.22); } 72% { transform: scaleX(1); } }
+@keyframes kk-v611-pulse { 0%,75%,100% { opacity: .35; transform: scale(.82); } 35% { opacity: 1; transform: scale(1.1); } }
+.v6-studio-app .studio-content .kk-v611-loader {
+  min-height: min(55dvh, 460px); border: 1px solid var(--kk-border); border-radius: 20px;
+}
+
+/* Visual-only pinch reduction: keep page dimensions and measured columns intact. */
+.quiet-app .reader-stage.showing-controls {
+  background: radial-gradient(ellipse at 50% 36%, var(--r-raised), var(--r-bg) 76%);
+}
+.quiet-app .reader-stage.showing-controls .reader-book,
+.quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
+  transform: translateY(-6dvh) scale(.66) !important;
+  border-radius: 21px !important;
+  box-shadow: 0 20px 65px var(--r-shadow) !important;
+}
+.quiet-app .reader-book { will-change: transform; }
+.quiet-app .chapter-intro {
+  margin: clamp(40px, 8vh, 80px) 0 1.85em;
+  text-align: center;
+  break-inside: avoid;
+  break-after: avoid;
+}
+.quiet-app .chapter-intro .chapter-arc {
+  margin: 0 0 .9em;
+  color: var(--r-muted);
+  opacity: 1;
+  font-size: .63em;
+  font-weight: 700;
+  letter-spacing: .14em;
+}
+.quiet-app .chapter-intro h2 {
+  margin: 0;
+  font-size: 1.35em;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--r-ink);
+  overflow-wrap: anywhere;
+}
+.quiet-app .reader-control-header,
+.quiet-app .reader-control-footer {
+  border-radius: 17px;
+  background: var(--r-surface) !important;
+  color: var(--r-ink) !important;
+  border-color: var(--r-border) !important;
+}
+.quiet-app .reader-control-header .v610-control-inner { gap: 3px; }
+.quiet-app .reader-control-header .control-subtitle { display: block; }
+.quiet-app .v610-more-menu { max-height: min(60dvh, 400px); overflow-y: auto; }
+.quiet-app .v610-more-menu .v610-chapter-nav {
+  display: flex; flex-direction: column; align-items: stretch; gap: 0;
+  padding-top: 7px; margin-top: 4px;
+}
+.quiet-app .v610-more-menu .v610-chapter-nav button { justify-content: flex-start; font-size: 13px; padding: 10px 12px; }
+.quiet-app .v610-progress-row { gap: 9px; }
+.quiet-app .v611-page-step {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; flex: 0 0 44px;
+  border: 0; border-radius: 50%;
+  color: var(--r-accent); background: var(--r-raised);
+}
+.quiet-app .v611-page-step:disabled { opacity: .38; }
+.quiet-app .v611-page-summary {
+  text-align: center; font-size: 12px; font-weight: 650;
+  font-variant-numeric: tabular-nums; color: var(--r-muted); padding: 1px 0 2px;
+}
+.quiet-app .v610-progress-label { margin-bottom: 0; }
+.quiet-app .v610-footer-inner { padding: 9px 12px 7px; }
+
+/* Table of contents and bookmarks are mobile bottom sheets, like Settings. */
+.quiet-app .v610-panel-scrim { align-items: flex-end; justify-content: center; }
+.quiet-app .v610-drawer {
+  width: min(100%, 600px); height: min(78dvh, 760px);
+  padding-top: 0; padding-bottom: env(safe-area-inset-bottom);
+  border: 1px solid var(--r-border); border-radius: 24px 24px 0 0;
+  box-shadow: 0 -15px 55px var(--r-shadow);
+}
+.quiet-app .v610-drawer .panel-heading { padding-top: 13px; }
+.quiet-app .v610-drawer .panel-heading::before {
+  content: ''; width: 37px; height: 5px; border-radius: 9px;
+  position: absolute; left: calc(50% - 18px); top: 9px; background: var(--r-border);
+}
+.quiet-app .v610-drawer .panel-heading { position: relative; }
+.quiet-app .v610-drawer .panel-tabs button.selected { border-bottom: 2px solid var(--r-accent); }
+
+/* Reader loading, recovery and theme switch never reveal old beige/amber. */
+.quiet-app .loading-text::before {
+  background: var(--r-raised) !important;
+  color: var(--r-accent) !important;
+  border-color: var(--r-border) !important;
+  content: '···'; font-size: 28px; line-height: 48px;
+}
+.quiet-app .loading-text::after { background: linear-gradient(90deg, var(--r-accent) 40%, var(--r-border) 40%) !important; background-size: 250% 100% !important; }
+html[data-app-theme] .reader-recovery { background: var(--kk-bg); color: var(--kk-text); }
+html[data-app-theme] .reader-recovery-card { background: var(--kk-surface); color: var(--kk-text); border-color: var(--kk-border); }
+html[data-app-theme] .reader-recovery-actions button { background: var(--kk-surface-2); color: var(--kk-text); border-color: var(--kk-border); min-height: 44px; }
+html[data-app-theme] .reader-recovery-actions button:focus-visible { outline: 2px solid var(--kk-amber); outline-offset: 3px; }
+html[data-app-theme] .v6-reader-settings .v64-theme-swatch-light { color: #235DB4; background: #E9F2FC; }
+html[data-app-theme] .v6-reader-settings .v64-theme-swatch-dark { color: #9BC9FF; background: #10243D; }
+
+@media (max-width: 600px) {
+  .quiet-app .reader-stage.showing-controls .reader-book,
+  .quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
+    transform: translateY(-7dvh) scale(.64) !important;
+  }
+  .quiet-app .reader-control-header { top: calc(8px + env(safe-area-inset-top)); }
+  .quiet-app .reader-control-footer { bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .quiet-app .v610-footer-inner { padding: 8px 12px 6px; }
+  .quiet-app .v610-progress-label { font-size: 10px; }
+}
+@media (max-width: 600px) and (max-height: 690px) {
+  .quiet-app .reader-stage.showing-controls .reader-book,
+  .quiet-app.reader-protected .reader-stage.showing-controls .reader-book {
+    transform: translateY(-6dvh) scale(.55) !important;
+  }
+}
+@media (min-width: 820px) {
+  .quiet-app .v610-panel-scrim { align-items: center; }
+  .quiet-app .v610-drawer { height: min(780px, 88dvh); border-radius: 24px; padding-bottom: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kk-v611-loader__turn, .kk-v611-loader__dots span { animation: none !important; transform: none !important; opacity: 1 !important; }
+  .quiet-app .reader-book { transition: none !important; }
+}

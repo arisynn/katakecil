@@ -33,6 +33,8 @@ export interface Chapter {
   id: string;
   title: string;
   arc?: string;
+  /** Episode number for the displayed heading; never used to renumber stored data. */
+  displayNumber?: number;
   paragraphs: string[];
   plainParagraphs: string[];
   plainText: string;

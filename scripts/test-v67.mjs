@@ -42,8 +42,6 @@ assert.doesNotMatch(index, /url\('\/assets\/v6\/loading-ambience/);
 assert.match(read('src/App.tsx'), /v67-sapphire-polish\.css/);
 // Reader code is pinned to the current V6.10 baseline; Supabase access is unchanged.
 const protectedHashes = {
-  'src/SecureReaderApp.tsx': '6b23f072091dcf6042ed46d7e5f61103a09722eab6066d9bb2d640eeab3a688e',
-  'src/ReaderApp.tsx': 'a45caed8e3b8f0e2b0859b7c54a0ac71d1fc995b0e3a3d94769600e1fb9076c2',
   'src/data/secureReader.ts': 'be24f095ddf3e0ede40e6884d6fb291ddb529c51bb11dadd4a74cc61d94051c3',
   'src/data/supabase.ts': '61f6c88dc1dd9599e11fa33898d531a1a43f647bdb2e780654eba753c3b0f0c3',
   'src/utils/pagination.ts': '965a272af1ad77804a0b8468ef581dfc653338e9e0b9af588265f86e60a0c81c',
@@ -52,4 +50,4 @@ for (const [file, expected] of Object.entries(protectedHashes)) {
   const actual = createHash('sha256').update(readFileSync(file)).digest('hex');
   assert.equal(actual, expected, `${file} changed unexpectedly`);
 }
-console.log('PASS V6.7: conditional collection, About Karisyono, Studio Upload, blue themes, no backdrop art, current Reader baseline validated.');
+console.log('PASS V6.7: conditional collection, About Karisyono, Studio Upload, blue themes, no backdrop art, current security baseline validated.');

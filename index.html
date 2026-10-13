@@ -2,72 +2,31 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="theme-color" content="#F8F4EE" />
+    <meta name="theme-color" content="#F4F8FD" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <style>
-      :root {color-scheme:light dark;--app-background:#F5F9FD;--app-foreground:#243447;}
-      @media (prefers-color-scheme:dark){:root{--app-background:#08192D;--app-foreground:#E6EEF8;}}
-      html[data-app-theme="light"]{color-scheme:light;--app-background:#F5F9FD;--app-foreground:#243447;}
-      html[data-app-theme="dark"]{color-scheme:dark;--app-background:#08192D;--app-foreground:#E6EEF8;}
-      html,body,#root{margin:0;min-height:100%;background:#F4F8FD;color:#172C48;}
-      html[data-app-theme="dark"],html[data-app-theme="dark"] body,html[data-app-theme="dark"] #root{background:#081425;color:#EFF6FF;}
-      html[data-kk-boot-context="reader"],html[data-kk-boot-context="reader"] body,html[data-kk-boot-context="reader"] #root{background:#FFF5E6;color:#44372D;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"],html[data-kk-boot-context="reader"][data-reader-theme="night"] body,html[data-kk-boot-context="reader"][data-reader-theme="night"] #root{background:#081425;color:#EFF6FF;}
-      .kk-boot-loader{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;overflow:hidden;min-height:100dvh;padding:60px 24px;background:#101c31;color:#fff1db;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;}
-      .kk-boot-loader::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#091426b8,#111c30d8),none center/cover no-repeat;}
-      .kk-boot-content{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(100%,380px);}
-      .kk-boot-mark{display:grid;place-items:center;width:83px;height:83px;margin-bottom:8px;border:1px solid #ffe5b469;border-radius:24px;background:#f8dfaa19;color:#f7d69c;box-shadow:0 0 38px #e8b87126;}
-      .kk-boot-brand{font:500 clamp(35px,6vw,45px)/1.1 Georgia,serif;letter-spacing:-.045em;color:#fff1db;}
-      .kk-boot-tagline{font-size:12px;line-height:1.6;color:#e4d9d1;margin:0;}
-      .kk-boot-track{width:145px;height:3px;position:relative;overflow:hidden;border-radius:20px;background:#ffffff36;margin-top:17px;}
-      .kk-boot-track::after{content:"";position:absolute;top:0;bottom:0;width:42%;border-radius:20px;background:#f7d69c;animation:kk-boot-progress 1.65s ease-in-out infinite alternate;}
-      .kk-boot-message{font-size:12px;color:#d2d6df;margin:2px 0 0;}
-      @keyframes kk-boot-progress{from{transform:translateX(0)}to{transform:translateX(205%)}}
-      html[data-kk-boot-context="reader"] .kk-boot-loader{background:#f8eedc;color:#40342c;}
-      html[data-kk-boot-context="reader"] .kk-boot-loader::before{background:linear-gradient(#f8eedce8,#f8eedce8),none center/cover;}
-      html[data-kk-boot-context="reader"] .kk-boot-mark{background:#fff6e7;border-color:#a7895b70;color:#a57c49;box-shadow:none;}
-      html[data-kk-boot-context="reader"] .kk-boot-brand{color:#40342c;}
-      html[data-kk-boot-context="reader"] .kk-boot-tagline,html[data-kk-boot-context="reader"] .kk-boot-message{color:#75675a;}
-      html[data-kk-boot-context="reader"] .kk-boot-track{background:#b19b7b4d;}
-      html[data-kk-boot-context="reader"] .kk-boot-track::after{background:#a57c49;}
-      html[data-app-theme="light"] .kk-boot-loader{background:#F4F8FD;color:#172C48;}
-      html[data-app-theme="light"] .kk-boot-loader::before{background-image:linear-gradient(#F8F4EEE8,#F8F4EEF2),none;}
-      html[data-app-theme="light"] .kk-boot-brand,html[data-app-theme="light"] .kk-boot-tagline,html[data-app-theme="light"] .kk-boot-message{color:#26364B;}
-      html[data-app-theme="light"] .kk-boot-mark{background:#FFFCF7;border-color:#D5C9BC;color:#805321;box-shadow:none;}
-      html[data-app-theme="light"] .kk-boot-track{background:#D5C9BC;}
-      html[data-app-theme="light"] .kk-boot-track::after{background:#805321;}
-      html[data-kk-boot-context="reader"] .kk-boot-loader{background:#FFF5E6;color:#44372D;}
-      html[data-kk-boot-context="reader"] .kk-boot-brand{color:#44372D;}
-      html[data-kk-boot-context="reader"] .kk-boot-tagline,html[data-kk-boot-context="reader"] .kk-boot-message{color:#75675A;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"] .kk-boot-loader,
-      html[data-kk-boot-context="reader"][data-reader-theme="black"] .kk-boot-loader{background:#081425;color:#EFF6FF;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"] .kk-boot-loader::before,
-      html[data-kk-boot-context="reader"][data-reader-theme="black"] .kk-boot-loader::before{background-image:linear-gradient(#0D1729E8,#0D1729F2),none;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"] .kk-boot-mark,
-      html[data-kk-boot-context="reader"][data-reader-theme="black"] .kk-boot-mark{background:#21344E;border-color:#3A4D66;color:#F0C98B;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"] :is(.kk-boot-brand,.kk-boot-tagline,.kk-boot-message),
-      html[data-kk-boot-context="reader"][data-reader-theme="black"] :is(.kk-boot-brand,.kk-boot-tagline,.kk-boot-message){color:#F6EFE5;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"] .kk-boot-track::after,
-      html[data-kk-boot-context="reader"][data-reader-theme="black"] .kk-boot-track::after{background:#F0C98B;}
-      @media(max-width:600px){.kk-boot-loader::before{background-image:linear-gradient(180deg,#091426b8,#111c30d8),none;}.kk-boot-content{gap:11px;}.kk-boot-mark{width:73px;height:73px;}}
-      @media(max-width:600px){html[data-kk-boot-context="reader"] .kk-boot-loader::before{background-image:linear-gradient(#f8eedce8,#f8eedce8),none;}}
-      @media(max-width:600px){html[data-app-theme="light"]:not([data-kk-boot-context="reader"]) .kk-boot-loader::before{background-image:linear-gradient(#F8F4EEE8,#F8F4EEF2),none;}
-        html[data-kk-boot-context="reader"][data-reader-theme="night"] .kk-boot-loader::before,html[data-kk-boot-context="reader"][data-reader-theme="black"] .kk-boot-loader::before{background-image:linear-gradient(#0D1729E8,#0D1729F2),none;}}
-      @media(prefers-reduced-motion:reduce){.kk-boot-track::after{animation:none;left:29%;}}
-      /* V6.7: sapphire boot, no background artwork. */
-      html[data-app-theme="light"] .kk-boot-loader,
-      html[data-kk-boot-context="reader"][data-app-theme="light"] .kk-boot-loader {background:#F4F8FD;color:#172C48;}
-      html[data-app-theme="dark"] .kk-boot-loader,
-      html[data-kk-boot-context="reader"][data-app-theme="dark"] .kk-boot-loader {background:#081425;color:#EFF6FF;}
-      .kk-boot-loader::before,
-      html[data-app-theme] .kk-boot-loader::before,
-      html[data-kk-boot-context="reader"] .kk-boot-loader::before {background:none!important;background-image:none!important;}
-      html[data-app-theme="light"] .kk-boot-mark {background:#E9F2FC;border-color:#D5E3F2;color:#235DB4;}
-      html[data-app-theme="dark"] .kk-boot-mark {background:#173251;border-color:#294665;color:#9BC9FF;}
-      html[data-app-theme="light"] :is(.kk-boot-brand,.kk-boot-tagline,.kk-boot-message){color:#172C48;}
-      html[data-app-theme="dark"] :is(.kk-boot-brand,.kk-boot-tagline,.kk-boot-message){color:#EFF6FF;}
-      html[data-app-theme="light"] .kk-boot-track::after{background:#235DB4;}
-      html[data-app-theme="dark"] .kk-boot-track::after{background:#9BC9FF;}
+      :root { color-scheme:light; --kk-boot-bg:#F4F8FD; --kk-boot-card:#FFFFFF; --kk-boot-ink:#172C48; --kk-boot-muted:#506781; --kk-boot-blue:#235DB4; --kk-boot-border:#D5E3F2; }
+      @media (prefers-color-scheme:dark) { :root:not([data-app-theme]) { color-scheme:dark; --kk-boot-bg:#081425; --kk-boot-card:#10243D; --kk-boot-ink:#EFF6FF; --kk-boot-muted:#B2C5DA; --kk-boot-blue:#9BC9FF; --kk-boot-border:#294665; } }
+      html[data-app-theme="light"] { color-scheme:light; --kk-boot-bg:#F4F8FD; --kk-boot-card:#FFFFFF; --kk-boot-ink:#172C48; --kk-boot-muted:#506781; --kk-boot-blue:#235DB4; --kk-boot-border:#D5E3F2; }
+      html[data-app-theme="dark"] { color-scheme:dark; --kk-boot-bg:#081425; --kk-boot-card:#10243D; --kk-boot-ink:#EFF6FF; --kk-boot-muted:#B2C5DA; --kk-boot-blue:#9BC9FF; --kk-boot-border:#294665; }
+      html,body,#root { margin:0;min-height:100%;background:var(--kk-boot-bg);color:var(--kk-boot-ink); }
+      .kk-v611-loader { box-sizing:border-box;position:relative;isolation:isolate;overflow:hidden;display:grid;place-items:center;min-height:100dvh;width:100%;padding:calc(54px + env(safe-area-inset-top)) 24px calc(54px + env(safe-area-inset-bottom));background:var(--kk-boot-bg);color:var(--kk-boot-ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;text-align:center; }
+      .kk-v611-loader::before { content:"";position:absolute;z-index:-1;inset:-30%;background:radial-gradient(ellipse at 50% 48%,color-mix(in srgb,var(--kk-boot-blue) 10%,transparent),transparent 49%);pointer-events:none; }
+      .kk-v611-loader__content { display:flex;flex-direction:column;align-items:center;gap:0;width:min(100%,370px); }
+      .kk-v611-loader__eyebrow { font-size:10px;line-height:1.4;font-weight:700;letter-spacing:.19em;color:var(--kk-boot-blue);margin-bottom:27px; }
+      .kk-v611-loader__symbol { width:100px;height:100px;display:grid;place-items:center;border-radius:28px;border:1px solid var(--kk-boot-border);background:var(--kk-boot-card);color:var(--kk-boot-blue);box-shadow:0 16px 45px color-mix(in srgb,var(--kk-boot-ink) 9%,transparent);margin-bottom:27px; }
+      .kk-v611-loader__symbol svg { width:58px;height:58px; }
+      .kk-v611-loader__turn { transform-origin:32px 22px;animation:kk-v611-turn 2.7s ease-in-out infinite; }
+      .kk-v611-loader__brand { font:600 clamp(34px,6vw,42px)/1.12 Georgia,serif;letter-spacing:-.045em;color:var(--kk-boot-ink); }
+      .kk-v611-loader__tagline { margin:12px 0 0;font-size:12px;line-height:1.65;color:var(--kk-boot-muted); }
+      .kk-v611-loader__dots { display:flex;gap:9px;margin-top:30px;align-items:center;justify-content:center; }
+      .kk-v611-loader__dots span { display:block;width:7px;height:7px;border-radius:50%;background:var(--kk-boot-blue);animation:kk-v611-pulse 1.3s ease-in-out infinite; }
+      .kk-v611-loader__dots span:nth-child(2) { animation-delay:.18s; }
+      .kk-v611-loader__dots span:nth-child(3) { animation-delay:.36s; }
+      .kk-v611-loader__message { margin:13px 0 0;color:var(--kk-boot-muted);font-size:12px;line-height:1.5; }
+      @keyframes kk-v611-turn { 0%,20%,100% {transform:scaleX(1);} 52% {transform:scaleX(.22);} 72% {transform:scaleX(1);} }
+      @keyframes kk-v611-pulse { 0%,75%,100% {opacity:.35;transform:scale(.82);} 35% {opacity:1;transform:scale(1.1);} }
+      @media (prefers-reduced-motion:reduce) { .kk-v611-loader__turn,.kk-v611-loader__dots span { animation:none;opacity:1;transform:none; } }
     </style>
     <script>
       (function(){var context=location.pathname.startsWith('/baca/')?'reader':location.pathname.startsWith('/studio')?'studio':'public';
@@ -89,7 +48,7 @@
           document.documentElement.setAttribute('data-app-theme',mode);
           document.documentElement.setAttribute('data-reader-theme',mode==='dark'?'night':'white');
           document.querySelector('meta[name="theme-color"]').setAttribute('content',context==='reader'?(mode==='dark'?'#10243D':'#FFFFFF'):(mode==='dark'?'#081425':'#F4F8FD'));
-        }catch(e){ /* Private browsing: preserve a readable light fallback. */ }
+        }catch(e){var fallback=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-app-theme',fallback);document.documentElement.setAttribute('data-reader-theme',fallback==='dark'?'night':'white');}
       })();
     </script>
     <title>KataKecil — Perpustakaan Cerita</title>
@@ -103,17 +62,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"><div class="kk-boot-loader" role="status" aria-live="polite" aria-busy="true">
-      <div class="kk-boot-content">
-        <div class="kk-boot-mark" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18V5a1 1 0 0 1 1-1h3a5 5 0 0 1 5 5 5 5 0 0 1 5-5h3a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3a5 5 0 0 0-5 2 5 5 0 0 0-5-2H4a1 1 0 0 1-1-1z"/></svg></div>
-        <strong class="kk-boot-brand">KataKecil</strong>
-        <p class="kk-boot-tagline">Setiap cerita punya tempat untuk kembali.</p>
-        <div class="kk-boot-track" aria-hidden="true"></div>
-        <p class="kk-boot-message">Membuka perpustakaan…</p>
+    <div id="root"><div class="kk-v611-loader kk-boot-loader" role="status" aria-live="polite" aria-busy="true">
+      <div class="kk-v611-loader__content">
+        <span class="kk-v611-loader__eyebrow">PERPUSTAKAAN DIGITAL</span>
+        <div class="kk-v611-loader__symbol" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 17v31M32 22C25 16 17 16 9 19v28c9-3 17-2 23 3"/><path class="kk-v611-loader__turn" d="M32 22c7-6 15-6 23-3v28c-9-3-17-2-23 3"/></svg></div>
+        <strong class="kk-v611-loader__brand">KataKecil</strong>
+        <p class="kk-v611-loader__tagline">Setiap cerita punya tempat untuk kembali.</p>
+        <div class="kk-v611-loader__dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p class="kk-v611-loader__message">Membuka perpustakaan…</p>
       </div>
     </div></div>
     <script>
-      (function(){var context=document.documentElement.getAttribute('data-kk-boot-context');var message=context==='reader'?'Menyiapkan halaman cerita…':context==='studio'?'Memverifikasi akses Studio…':'Membuka perpustakaan…';var loader=document.querySelector('.kk-boot-loader');if(loader){loader.setAttribute('aria-label',message);var label=loader.querySelector('.kk-boot-message');if(label)label.textContent=message;}})();
+      (function(){var context=document.documentElement.getAttribute('data-kk-boot-context');var message=context==='reader'?'Menyiapkan halaman cerita…':context==='studio'?'Memverifikasi akses Studio…':'Membuka perpustakaan…';var loader=document.querySelector('.kk-boot-loader');if(loader){loader.setAttribute('aria-label',message);var label=loader.querySelector('.kk-v611-loader__message');if(label)label.textContent=message;var eyebrow=loader.querySelector('.kk-v611-loader__eyebrow');if(eyebrow)eyebrow.textContent=context==='reader'?'RUANG MEMBACA':context==='studio'?'RUANG PENULIS':'PERPUSTAKAAN DIGITAL';}})();
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

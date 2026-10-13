@@ -12,6 +12,8 @@ import type { Bookmark, PageLocation, ReadingSettings, TextAnchor } from './type
 import './index.css';
 import { useUiTheme } from './hooks/useUiTheme';
 import { readerModeFor } from './utils/globalTheme';
+import { pinchAction } from './utils/readerGesture';
+import { readerHeading } from './utils/readerHeading';
 
 const readJson = <T,>(key: string, fallback: T): T => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
 const anchorKey = (id: string) => `quiet_reader_anchor_${id}`;
@@ -35,7 +37,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(previewStory ? 'ready' : 'loading');
   const [loadError, setLoadError] = useState('');
   const parsed = useMemo(() => parseMarkdown(story.content), [story.content]);
-  const chapters = parsed.chapters;
+  const chapters = useMemo(() => parsed.chapters.map((ch, i) => ({...ch, displayNumber: story.episodeNumbers?.[i] ?? i + 1})), [parsed, story.episodeNumbers]);
   const [settings, setSettings] = useState<ReadingSettings>(() => {
     const saved = readJson<Partial<ReadingSettings>>('quiet_reader_settings', {});
     return { ...DEFAULT_SETTINGS, ...saved, fontSize: Math.max(90, Math.min(160, Number(saved.fontSize) || 100)) };
@@ -204,8 +206,10 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     const t = touchRef.current;
     if (!t || modal !== 'none') return;
     if (e.touches.length === 2 && t.distance !== undefined) {
-      const change = touchDistance(e.touches[0], e.touches[1]) - t.distance;
-      if (!t.pinch && Math.abs(change) > 30) { setControls(true); t.pinch = true; ignoreClickRef.current = true; }
+      if (!t.pinch) {
+        const action = pinchAction(t.distance, touchDistance(e.touches[0], e.touches[1]), controls);
+        if (action) { setControls(action === 'open'); t.pinch = true; ignoreClickRef.current = true; }
+      }
     } else if (e.touches.length === 1 && (Math.abs(e.touches[0].clientX - t.x) > 12 || Math.abs(e.touches[0].clientY - t.y) > 12)) t.moved = true;
   };
   const touchEnd = (e: React.TouchEvent) => {
@@ -222,18 +226,20 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   };
   const onCanvasClick = (e: React.MouseEvent) => {
     if (ignoreClickRef.current || modal !== 'none') return;
+    if (controls) { setControls(false); return; }
     if (!(e.target as Element).closest('.reader-book')) return;
     if ((e.target as Element).closest('button,input,a,[role="button"]')) return;
     if (window.getSelection()?.toString().trim()) return;
-    if (controls) { setControls(false); return; }
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - rect.left) / rect.width;
     if (ratio < .26) prev(); else if (ratio > .74) next(); else setControls(true);
   };
 
+  const displayedHeading=readerHeading(chapter?.title||'',chapter?.displayNumber);
+  const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
   const first = pages[safeIndex];
   const second = spread ? pages[safeIndex + 1] : undefined;
-  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} data-reader-theme={effectiveTheme} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
+  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} data-reader-view={modal !== 'none' ? 'panel' : controls ? 'menu' : 'reading'} data-reader-theme={effectiveTheme} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
     {chapters.length > 0 && <PageMeasurer chapters={chapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured}/>}
     <main className={`reader-stage ${controls ? 'showing-controls' : ''}`} onCopy={e=>{if(!previewStory)e.preventDefault();}} onCut={e=>{if(!previewStory)e.preventDefault();}} onContextMenu={e=>{if(!previewStory)e.preventDefault();}} onDragStart={e=>{if(!previewStory)e.preventDefault();}} onClick={onCanvasClick} aria-label="Halaman pembaca, ketuk tengah untuk menu">
       <div className={`reader-book ${spread ? 'reader-book-spread' : ''}`} style={{ background: theme.pageBg, gap: spread ? 16 : 0 }}>
@@ -242,7 +248,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
       </div>
     </main>
     <div className={`controls-shell ${controls ? 'controls-open' : ''}`} aria-hidden={!controls}>
-      {controls && <ReaderControls onExit={onExit} theme={theme} title={parsed.title} chapterTitle={chapter?.title ?? ''} page={currentNumber} total={pages.length || 1} isBookmarked={activeBookmarks.length > 0} fullscreen={isFullscreen} canReturn={!!returnAnchor} onContents={() => setModal('contents')} onSettings={() => setModal('settings')} onSearch={() => setModal('search')} onBookmark={toggleBookmark} onFullscreen={toggleFullscreen} onClose={() => setControls(false)} onReturn={() => { if (returnAnchor) goToAnchor(returnAnchor, false); setReturnAnchor(null); }} onPage={n => goTo(n - 1)} onPrevChapter={() => goChapter(chapterIndex - 1)} onNextChapter={() => goChapter(chapterIndex + 1)} prevChapter={chapterIndex > 0} nextChapter={chapterIndex < chapters.length - 1} progressScope="story"/>}
+      {controls && <ReaderControls onExit={onExit} theme={theme} title={parsed.title} chapterTitle={displayedTitle} page={currentNumber} total={pages.length || 1} isBookmarked={activeBookmarks.length > 0} fullscreen={isFullscreen} canReturn={!!returnAnchor} onContents={() => setModal('contents')} onSettings={() => setModal('settings')} onSearch={() => setModal('search')} onBookmark={toggleBookmark} onFullscreen={toggleFullscreen} onClose={() => setControls(false)} onReturn={() => { if (returnAnchor) goToAnchor(returnAnchor, false); setReturnAnchor(null); }} onPage={n => goTo(n - 1)} onPrevChapter={() => goChapter(chapterIndex - 1)} onNextChapter={() => goChapter(chapterIndex + 1)} prevChapter={chapterIndex > 0} nextChapter={chapterIndex < chapters.length - 1} progressScope="story"/>}
     </div>
     {status && <div className="quiet-status" role="status" style={{ background: theme.barBg, color: theme.secondaryText }}>{status}</div>}
     {modal === 'contents' && <ContentsPanel onClose={() => setModal('none')} chapters={chapters.map((ch, i) => ({...ch, startPageIndex: Math.max(0, pages.findIndex(p => p.chapterIndex === i))}))} currentChapterId={chapter?.id ?? ''} bookmarks={bookmarks} onChapter={ch => goChapter(chapters.findIndex(c => c.id === ch.id))} onBookmark={at => goToAnchor(at)} onDeleteBookmark={id => setBookmarks(prev => prev.filter(b => b.id !== id))} theme={theme}/>}

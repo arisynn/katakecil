@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ArrowLeft, Bookmark, BookmarkCheck, BookOpen, ChevronLeft, ChevronRight, Maximize2, Minimize2, MoreHorizontal,
-  Search, Undo2, X,
+  ArrowLeft, Bookmark, BookmarkCheck, BookOpen, ChevronLeft, ChevronRight, Maximize2, Minimize2, Menu,
+  Search, Settings2, Undo2, X,
 } from 'lucide-react';
 import type { ThemeColors } from '../types/reader';
 
@@ -75,17 +75,19 @@ export function ReaderControls({
         <button type="button" className="control-icon" onClick={onBookmark} aria-label={isBookmarked ? 'Hapus penanda' : 'Simpan penanda'} title="Penanda">
           {isBookmarked ? <BookmarkCheck size={20} fill="currentColor" /> : <Bookmark size={20} />}
         </button>
-        <button type="button" className="control-icon" onClick={onContents} aria-label="Daftar isi dan penanda" title="Daftar isi">
-          <BookOpen size={20} />
-        </button>
-        <button type="button" className="control-typography" onClick={onSettings} aria-label="Pengaturan membaca" title="Pengaturan membaca">Aa</button>
         <div className="v610-more-wrap" ref={menuRef}>
           <button type="button" className="control-icon" aria-label="Opsi pembaca lainnya" aria-expanded={moreOpen} aria-haspopup="menu" onClick={() => setMoreOpen(open => !open)}>
-            <MoreHorizontal size={21} />
+            <Menu size={21} />
           </button>
           {moreOpen && <div className="v610-more-menu" role="menu" style={{ background: theme.barBg, borderColor: theme.border, color: theme.text }}>
+            <button type="button" role="menuitem" aria-label="Daftar isi dan penanda" onClick={() => runMenuAction(onContents)}><BookOpen size={18} /> Daftar isi dan penanda</button>
+            <button type="button" role="menuitem" onClick={() => runMenuAction(onSettings)}><Settings2 size={18} /> Pengaturan membaca</button>
             <button type="button" role="menuitem" onClick={() => runMenuAction(onSearch)}><Search size={18} /> Cari teks dalam bab</button>
             {canReturn && <button type="button" role="menuitem" onClick={() => runMenuAction(onReturn)}><Undo2 size={18} /> Kembali ke posisi tadi</button>}
+            <div className="v610-chapter-nav" role="group" aria-label="Navigasi bab">
+              <button type="button" role="menuitem" disabled={!prevChapter} onClick={() => runMenuAction(onPrevChapter)}><ChevronLeft size={18} /> Bab sebelumnya</button>
+              <button type="button" role="menuitem" disabled={!nextChapter} onClick={() => runMenuAction(onNextChapter)}>Bab berikutnya <ChevronRight size={18} /></button>
+            </div>
             <button type="button" role="menuitem" onClick={() => runMenuAction(onFullscreen)}>
               {fullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
               {fullscreen ? 'Keluar layar penuh' : 'Layar penuh'}
@@ -102,20 +104,16 @@ export function ReaderControls({
           <span className="v610-progress-percent">{percent}% {progressScope === 'chapter' ? 'bab ini' : 'naskah'}</span>
         </div>
         <div className="v610-progress-row">
-          <span className="v610-page-label">{page} / {total}</span>
+          <button type="button" className="v611-page-step" onClick={() => onPage(page - 1)} disabled={page <= 1} aria-label="Halaman sebelumnya"><ChevronLeft size={20}/></button>
           <input
             type="range" min={1} max={Math.max(1, total)} value={page}
             onChange={event => onPage(Number(event.target.value))}
             aria-label={`Posisi halaman, ${page} dari ${total}`}
             style={{ accentColor: theme.accent }}
           />
-          <span className="v610-page-suffix">halaman</span>
+          <button type="button" className="v611-page-step" onClick={() => onPage(page + 1)} disabled={page >= total} aria-label="Halaman berikutnya"><ChevronRight size={20}/></button>
         </div>
-        {(prevChapter || nextChapter) && <div className="v610-chapter-nav" aria-label="Navigasi bab">
-          <button type="button" disabled={!prevChapter} onClick={onPrevChapter} aria-label="Buka bab sebelumnya"><ChevronLeft size={17} /> Bab sebelumnya</button>
-          <span aria-hidden="true">BAB</span>
-          <button type="button" disabled={!nextChapter} onClick={onNextChapter} aria-label="Buka bab berikutnya">Bab berikutnya <ChevronRight size={17} /></button>
-        </div>}
+        <div className="v611-page-summary" aria-live="off">{page} / {total}</div>
       </div>
     </footer>
   </>;

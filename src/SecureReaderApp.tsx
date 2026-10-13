@@ -12,6 +12,8 @@ import type {Bookmark,Chapter,ReadingSettings,TextAnchor} from './types/reader';
 import './index.css';
 import { useUiTheme } from './hooks/useUiTheme';
 import { readerModeFor } from './utils/globalTheme';
+import { pinchAction } from './utils/readerGesture';
+import { readerHeading } from './utils/readerHeading';
 
 function readLocal<T>(key:string,fallback:T):T {try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
 function viewport(){
@@ -169,7 +171,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   if(activeBookmarks.length){const ids=new Set(activeBookmarks.map(b=>b.id));setBookmarks(old=>old.filter(b=>!ids.has(b.id)));setStatus('Penanda dihapus');}
   else{const at={...bookmarkAnchor};setBookmarks(old=>[{id:`bk-${Date.now()}`,anchor:at,chapterTitle:segment.title,snippet:'Penanda bacaan',createdAt:new Date().toLocaleDateString('id-ID')},...old]);setStatus('Penanda tersimpan');}
  };
- const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
+ const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,displayNumber:ep.episode_number,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
  const onTap=(e:React.MouseEvent)=>{
   if((e.target as HTMLElement).closest('button,input,textarea,a'))return;
   if(ignoreClick.current){ignoreClick.current=false;return;}
@@ -191,9 +193,9 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   const gesture=touch.current;
   if(!gesture||modal!=='none')return;
   if(e.touches.length===2&&gesture.distance!==undefined){
-   const delta=touchDistance(e.touches[0],e.touches[1])-gesture.distance;
-   if(!gesture.pinch&&Math.abs(delta)>30){
-    gesture.pinch=true;ignoreClick.current=true;setControls(true);
+   if(!gesture.pinch){
+    const action=pinchAction(gesture.distance,touchDistance(e.touches[0],e.touches[1]),controls);
+    if(action){gesture.pinch=true;ignoreClick.current=true;setControls(action==='open');}
    }
   }else if(e.touches.length===1){
    gesture.moved=gesture.moved||Math.abs(e.touches[0].clientX-gesture.x)>12||Math.abs(e.touches[0].clientY-gesture.y)>12;
@@ -232,8 +234,10 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme.pageBg);
   return()=>{delete document.documentElement.dataset.readerTheme;};
  },[effectiveReaderTheme,theme.pageBg]);
+ const displayedHeading=readerHeading(segment?.title||'',segment?.episodeNumber);
+ const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
- return <div className="quiet-app reader-protected" data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+ return <div className="quiet-app reader-protected" data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
   {chapter&&<PageMeasurer chapters={measuredChapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured} hideIntro={false}/>}
   <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>e.preventDefault()} onCut={e=>e.preventDefault()} onDragStart={e=>e.preventDefault()} onContextMenu={e=>e.preventDefault()} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
    <div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
@@ -242,7 +246,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
    </div>
   </main>
   <div className={`controls-shell ${controls?'controls-open':''}`} aria-hidden={!controls}>
-   {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={segment?.title||''} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>}
+   {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>}
   </div>
   {loading&&segment&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>Membuka episode berikutnya…</div>}
   {!loading&&error&&<div className="secure-reader-error" role="alert" style={{background:theme.barBg,color:theme.text}}>{error} <button onClick={()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}}>Coba lagi</button></div>}

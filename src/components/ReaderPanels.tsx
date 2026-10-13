@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Bookmark as BookmarkIcon, BookOpen, Search, Trash2, X } from 'lucide-react';
 import type { Bookmark, Chapter, TextAnchor, ThemeColors } from '../types/reader';
 import { useReaderDialogFocus } from '../hooks/useReaderDialogFocus';
+import { readerHeading } from '../utils/readerHeading';
 
 interface ContentsProps {
   onClose: () => void;
@@ -52,6 +53,7 @@ export function ContentsPanel({
           const originalIndex = chapters.findIndex(item => item.id === chapter.id);
           const number = /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? String(originalIndex + 1);
           const active = currentChapterId === chapter.id;
+          const heading = readerHeading(chapter.title, chapter.displayNumber ?? Number(number));
           const metadata = [
             chapter.wordCount > 0 ? `${chapter.wordCount.toLocaleString('id-ID')} kata` : null,
             chapter.estimatedMinutes > 0 ? `${chapter.estimatedMinutes} menit` : null,
@@ -60,7 +62,7 @@ export function ContentsPanel({
             <span className="episode-count">{String(number).padStart(2, '0')}</span>
             <span className="panel-row-main">
               {chapter.arc && <small>{chapter.arc}</small>}
-              <strong>{chapter.title}</strong>
+              <strong>{heading.title || heading.eyebrow}</strong>
               {metadata && <small>{metadata}</small>}
             </span>
             {active && <span className="v610-current-label">Dibaca</span>}

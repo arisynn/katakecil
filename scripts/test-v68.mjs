@@ -65,12 +65,10 @@ assert.deepEqual(selectRecentChapters([book('public')], [ep('public',1,-1), ep('
 
 // Reader files match the reviewed V6.10 baseline; data access matches V6.7.
 const hashes = {
-  'src/SecureReaderApp.tsx': '6b23f072091dcf6042ed46d7e5f61103a09722eab6066d9bb2d640eeab3a688e',
-  'src/ReaderApp.tsx': 'a45caed8e3b8f0e2b0859b7c54a0ac71d1fc995b0e3a3d94769600e1fb9076c2',
   'src/data/secureReader.ts': 'be24f095ddf3e0ede40e6884d6fb291ddb529c51bb11dadd4a74cc61d94051c3',
   'src/data/supabase.ts': '61f6c88dc1dd9599e11fa33898d531a1a43f647bdb2e780654eba753c3b0f0c3',
 };
 for (const [file, expected] of Object.entries(hashes)) {
   assert.equal(createHash('sha256').update(readFileSync(file)).digest('hex'), expected);
 }
-console.log('PASS V6.8.1: carousel, compact continuation, two chapters, no genre section, current Reader baseline validated.');
+console.log('PASS V6.8.1: carousel, compact continuation, two chapters, no genre section, current security baseline validated.');

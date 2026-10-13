@@ -12,6 +12,6 @@ export function chapterFromEpisode(episodeNumber:number,title:string,arc:string,
   const plainParagraphs=paragraphs.map(plainMarkdown);
   const plainText=plainParagraphs.join('\n\n');
   const wordCount=plainText.trim().split(/\s+/).filter(Boolean).length;
-  return {id:`secure-episode-${episodeNumber}-part-0`,title,arc,paragraphs,
+  return {id:`secure-episode-${episodeNumber}-part-0`,title,arc,displayNumber:episodeNumber,paragraphs,
     plainParagraphs,plainText,level:2,wordCount,estimatedMinutes:Math.max(1,Math.ceil(wordCount/220)),startPageIndex:0};
 }

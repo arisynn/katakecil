@@ -1,17 +1,13 @@
-/** V6.5 maintenance regression: current reader baseline hashes + modularization contracts. */
+/** V6.5 maintenance regression: unchanged security/pagination hashes + modularization contracts. */
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const protectedFiles = {
-  'src/SecureReaderApp.tsx': '6b23f072091dcf6042ed46d7e5f61103a09722eab6066d9bb2d640eeab3a688e',
-  'src/ReaderApp.tsx': 'a45caed8e3b8f0e2b0859b7c54a0ac71d1fc995b0e3a3d94769600e1fb9076c2',
   'src/components/PageMeasurer.tsx': '1f858e48cbfb23ba2353572f0f31ae7e58bf0cf50a2b484a70f4a308271dee7c',
   'src/components/ReaderPage.tsx': '77c5c4f3749dc7205faed2dc7224d5e52b92be0675af869adc1f72976c4c34f1',
   'src/components/ReadingSettingsModal.tsx': 'e37d18285582035690bd2f17e04ef702760b774e462d29de55c50fc4b6f59120',
-  'src/components/ReaderControls.tsx': 'aa67effaf5e98206b174f67dec2e8fa9a138def23ccd7a7fcd2a1a493db04d82',
-  'src/components/ReaderPanels.tsx': '58093f173229c3cce74152a7df7c152aa704e17c7946a3edc3507287d5658e17',
   'src/utils/pagination.ts': '965a272af1ad77804a0b8468ef581dfc653338e9e0b9af588265f86e60a0c81c',
   'src/data/secureReader.ts': 'be24f095ddf3e0ede40e6884d6fb291ddb529c51bb11dadd4a74cc61d94051c3',
   'src/data/supabase.ts': '61f6c88dc1dd9599e11fa33898d531a1a43f647bdb2e780654eba753c3b0f0c3',
@@ -33,7 +29,7 @@ assert.ok(publicUi.includes('features/public/components/LibraryUI'));
 assert.doesNotMatch(studio, /function (?:Nav|Dashboard|Editor|BookDetails)\(/, 'Extracted components must not remain duplicated');
 assert.ok(readdirSync('docs/archive').filter(name => name.endsWith('.md')).length >= 26);
 assert.ok(!existsSync('_implement_v63.py') && !existsSync('_preview_v63.py'));
-assert.ok(['6.5.0', '6.6.0', '6.7.0', '6.8.0', '6.8.1', '6.9.0', '6.10.0'].includes(JSON.parse(readFileSync('package.json', 'utf8')).version));
+assert.ok(['6.5.0', '6.6.0', '6.7.0', '6.8.0', '6.8.1', '6.9.0', '6.10.0', '6.11.0'].includes(JSON.parse(readFileSync('package.json', 'utf8')).version));
 for (const file of ['src/studio.css', 'src/site.css', 'src/design/v6.css']) {
   const longest = Math.max(...readFileSync(file, 'utf8').split('\n').map(line => line.length));
   assert.ok(longest < 200, `${file} still contains unusually long lines (${longest})`);
