@@ -11,7 +11,7 @@ import { DEFAULT_SETTINGS, THEMES } from './utils/theme';
 import type { Bookmark, PageLocation, ReadingSettings, TextAnchor } from './types/reader';
 import './index.css';
 import { useUiTheme } from './hooks/useUiTheme';
-import { getReaderThemePreference, resolveReaderTheme, setReaderThemePreference, READER_THEME_KEY, type ReaderThemePreference } from './utils/readerThemePreference';
+import { readerModeFor } from './utils/globalTheme';
 
 const readJson = <T,>(key: string, fallback: T): T => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
 const anchorKey = (id: string) => `quiet_reader_anchor_${id}`;
@@ -37,18 +37,13 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const parsed = useMemo(() => parseMarkdown(story.content), [story.content]);
   const chapters = parsed.chapters;
   const [settings, setSettings] = useState<ReadingSettings>(() => ({ ...DEFAULT_SETTINGS, ...readJson('quiet_reader_settings', {}) }));
-  const {theme:appTheme}=useUiTheme();
-  const [readerPreference,setReaderPreference]=useState<ReaderThemePreference>(getReaderThemePreference);
-  const effectiveTheme=resolveReaderTheme(readerPreference,appTheme);
+  const {theme:appTheme,setPreference:setAppTheme}=useUiTheme();
+  const effectiveTheme=readerModeFor(appTheme);
   const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveTheme}),[settings,effectiveTheme]);
   const theme = THEMES[effectiveTheme] ?? THEMES.white;
   const changeReaderSettings=(next:Partial<ReadingSettings>)=>{
-    if(next.theme){setReaderPreference(next.theme);setReaderThemePreference(next.theme);}
-    setSettings(prev=>({...prev,...next}));
-  };
-  const followAppTheme=()=>{
-    setReaderPreference('follow');setReaderThemePreference('follow');
-    setSettings(prev=>({...prev,theme:resolveReaderTheme('follow',appTheme)}));
+    const {theme:unusedTheme,...readingOnly}=next;
+    setSettings(prev=>({...prev,...readingOnly}));
   };
   const [viewSize, setViewSize] = useState(() => ({ width: window.innerWidth, height: window.innerHeight, safeTop: 0, safeBottom: 0 }));
   const [pages, setPages] = useState<PageLocation[]>([]);
@@ -88,8 +83,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     document.addEventListener('fullscreenchange', onFullscreen);
     return () => { window.removeEventListener('resize', onResize); document.removeEventListener('fullscreenchange', onFullscreen); };
   }, []);
-  useEffect(() => { try { if(!localStorage.getItem(READER_THEME_KEY))setReaderThemePreference(readerPreference); } catch { /* browser storage unavailable */ } }, []);
-  useEffect(() => { try { localStorage.setItem('quiet_reader_settings', JSON.stringify(settings)); } catch { /* browser storage unavailable */ } }, [settings]);
+  useEffect(() => { try { localStorage.setItem('quiet_reader_settings', JSON.stringify(effectiveSettings)); } catch { /* browser storage unavailable */ } }, [effectiveSettings]);
   useEffect(() => { try { localStorage.setItem(bookmarkKey(story.id), JSON.stringify(bookmarks)); } catch { /* browser storage unavailable */ } }, [bookmarks, story.id]);
   useEffect(() => { if (!status) return; const timer = window.setTimeout(() => setStatus(''), 2000); return () => window.clearTimeout(timer); }, [status]);
 
@@ -266,6 +260,6 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     {status && <div className="quiet-status" role="status" style={{ background: theme.barBg, color: theme.secondaryText }}>{status}</div>}
     {modal === 'contents' && <ContentsPanel onClose={() => setModal('none')} chapters={chapters.map((ch, i) => ({...ch, startPageIndex: Math.max(0, pages.findIndex(p => p.chapterIndex === i))}))} currentChapterId={chapter?.id ?? ''} bookmarks={bookmarks} onChapter={ch => goChapter(chapters.findIndex(c => c.id === ch.id))} onBookmark={at => goToAnchor(at)} onDeleteBookmark={id => setBookmarks(prev => prev.filter(b => b.id !== id))} theme={theme}/>}
     {modal === 'search' && <SearchPanel onClose={() => setModal('none')} chapters={chapters} onResult={at => goToAnchor(at)} theme={theme}/>}
-    <ReadingSettingsModal isOpen={modal === 'settings'} onClose={() => setModal('none')} settings={effectiveSettings} theme={theme} onUpdateSettings={changeReaderSettings} readerPreference={readerPreference} onFollowAppTheme={followAppTheme} appTheme={appTheme}/>
+    <ReadingSettingsModal isOpen={modal === 'settings'} onClose={() => setModal('none')} settings={effectiveSettings} onUpdateSettings={changeReaderSettings} appTheme={appTheme} onAppThemeChange={setAppTheme}/>
   </div>;
 }

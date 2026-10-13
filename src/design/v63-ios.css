@@ -69,7 +69,7 @@ html[data-app-theme='dark']{
 .v63-menu-studio>span{flex:1;display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;}
 .v63-menu-studio small{font-size:10px;font-weight:450;color:var(--v63-secondary);}
 .v63-menu-theme-label{font-size:11px;font-weight:650;margin:17px 3px 9px;}
-.v63-menu-theme-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+.v63-menu-theme-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
 .v63-menu-theme-choices button{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;min-height:62px;padding:6px 2px;border:1px solid var(--v63-line);background:var(--v63-card);color:var(--v63-secondary);border-radius:13px;font-size:10px;}
 .v63-menu-theme-choices button[aria-pressed='true']{background:var(--v63-tint);color:var(--v63-ink);border-color:var(--v63-accent);}
 /* Reader controls retain all existing actions; the floating chrome never alters pagination. */
@@ -255,16 +255,9 @@ html[data-app-theme='dark']{
   .v6-public .v6-hero-copy{padding-top:245px;}
   .v6-public[data-kk-theme='light'] .v6-hero{min-height:615px;}
   .v6-public[data-kk-theme='light'] .v6-hero-copy{padding-top:305px;}
-  .v6-public[data-kk-theme='dark'] .v6-chapters{background:#F8EDDC!important;color:#352E2C!important;border-color:#FFFAF0!important;}
-  .v6-public[data-kk-theme='dark'] .v6-chapters-title h2,
-  .v6-public[data-kk-theme='dark'] .v6-chapter{color:#352E2C!important;}
-  .v6-public[data-kk-theme='dark'] .v6-chapter{border-color:#D8C9B5!important;}
-  .v6-public[data-kk-theme='dark'] .v6-chapters-title span,
-  .v6-public[data-kk-theme='dark'] .v6-chapter small,
-  .v6-public[data-kk-theme='dark'] .v6-chapter-date{color:#74685D!important;}
-  .v6-public[data-kk-theme='dark'] .v6-chapter>span:first-child{color:#805321!important;}
+
 }
-/* The reader chrome follows the *reader* theme, even when app and reader differ. */
+/* Reader chrome uses the same global mode as the public app. */
 .quiet-app.reader-protected{
   --v63-reader-float:rgba(255,249,239,.91);
   --v63-reader-border:rgba(132,108,79,.23);
@@ -275,14 +268,6 @@ html[data-app-theme='dark']{
   --v63-reader-float:rgba(16,28,47,.90);
   --v63-reader-border:rgba(194,207,225,.23);
   --v63-reader-shadow:0 10px 30px rgba(0,5,16,.37);
-}
-.quiet-app.reader-protected[data-reader-theme='calm']{
-  --v63-reader-float:rgba(218,235,228,.91);
-  --v63-reader-border:rgba(54,100,92,.22);
-}
-.quiet-app.reader-protected[data-reader-theme='sepia']{
-  --v63-reader-float:rgba(241,224,195,.92);
-  --v63-reader-border:rgba(125,93,60,.24);
 }
 .quiet-app.reader-protected .reader-control-header{
   background:var(--v63-reader-float)!important;

@@ -37,7 +37,7 @@ export default function PublicHeader({path}:{path:string}) {
               <button type="button" className="v63-menu-studio" onClick={()=>{setMenuOpen(false);navigate('/studio')}}><PenLine size={18}/><span>Buka Studio <small>Khusus pemilik</small></span><ArrowRight size={16}/></button>
               <div className="v63-menu-theme-label">Tampilan aplikasi</div>
               <div className="v63-menu-theme-choices">
-                {([{value:'system',label:'Otomatis'},{value:'light',label:'Terang'},{value:'dark',label:'Gelap'}] as const).map(item=><button type="button" key={item.value} aria-pressed={preference===item.value} onClick={()=>{setPreference(item.value);setMenuOpen(false)}}>{item.value==='dark'?<Moon size={15}/>:item.value==='light'?<Sun size={15}/>:<span aria-hidden="true">◐</span>}{item.label}</button>)}
+                {([{value:'light',label:'Terang'},{value:'dark',label:'Gelap'}] as const).map(item=><button type="button" key={item.value} aria-pressed={preference===item.value} onClick={()=>{setPreference(item.value);setMenuOpen(false)}}>{item.value==='dark'?<Moon size={15}/>:<Sun size={15}/>}{item.label}</button>)}
               </div>
             </div>}
           </div>

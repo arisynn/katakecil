@@ -1,0 +1,119 @@
+/* KataKecil V6.4 — one global theme (light / dark) for every surface.
+   This is a small compatibility layer for V6.3's fixed-color chapter and reader
+   styles; new components must consume the semantic --kk-* variables. */
+
+/* Reuse V6.2 semantic colors inside the iOS components; no second palette. */
+html {
+  --v63-canvas:var(--kk-bg);
+  --v63-card:var(--kk-surface);
+  --v63-ink:var(--kk-text);
+  --v63-secondary:var(--kk-muted);
+  --v63-line:var(--kk-border);
+  --v63-tint:var(--kk-surface-2);
+  --v63-accent:var(--kk-amber);
+  --v63-on-accent:var(--kk-amber-text);
+}
+
+/* The chapter list is a large reading surface: NEVER use cream in dark mode. */
+.v6-public .v6-chapters,
+.v6-public .v6-detail-extra {
+  background:var(--kk-surface)!important;
+  color:var(--kk-text)!important;
+  border:1px solid var(--kk-border)!important;
+  box-shadow:0 12px 32px var(--kk-shadow);
+}
+.v6-public .v6-chapters-title h2,
+.v6-public .v6-detail-extra h2,
+.v6-public .v6-chapter,
+.v6-public .v6-detail-extra dd {
+  color:var(--kk-text)!important;
+}
+.v6-public .v6-chapters-title span,
+.v6-public .v6-chapter small,
+.v6-public .v6-chapter-date,
+.v6-public .v6-no-chapters,
+.v6-public .v6-detail-extra dt,
+.v6-public .v6-detail-extra>p {
+  color:var(--kk-muted)!important;
+}
+.v6-public .v6-chapter {
+  border-color:var(--kk-border)!important;
+  border-radius:11px;
+  transition:background-color .15s ease;
+}
+.v6-public .v6-chapter:hover,
+.v6-public .v6-chapter:focus-visible {background:var(--kk-surface-2)!important;}
+.v6-public .v6-chapter>span:first-child,
+.v6-public .v6-show-chapters {color:var(--kk-amber)!important;}
+.v6-public .v6-chapters-title {border-color:var(--kk-border);}
+
+/* Two actual global options in the Reader; other typography controls remain. */
+.v6-reader-settings .v64-global-theme-choices {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.v6-reader-settings .v64-global-theme-choices>button {
+  display:flex;align-items:center;flex-direction:column;gap:9px;
+  min-width:0;min-height:155px;padding:9px 9px 12px;
+  border:1px solid var(--reader-ui-border);border-radius:18px;
+  background:var(--reader-ui-soft);color:var(--reader-ui-fg);
+  font-size:12px;font-weight:650;position:relative;
+}
+.v6-reader-settings .v64-global-theme-choices>button.selected {
+  border-color:var(--reader-ui-accent);
+  box-shadow:0 0 0 1px var(--reader-ui-accent);
+}
+.v6-reader-settings .v64-global-theme-choices>button>svg:last-child {
+  position:absolute;right:16px;bottom:14px;color:var(--reader-ui-accent);
+}
+.v6-reader-settings .v64-theme-swatch {
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  width:100%;min-height:104px;border-radius:13px;
+  border:1px solid rgba(127,127,127,.2);
+}
+.v6-reader-settings .v64-theme-swatch-light {
+  color:#805321;background:linear-gradient(145deg,#FFFCF7,#E9D8BD);
+}
+.v6-reader-settings .v64-theme-swatch-dark {
+  color:#F0C98B;background:linear-gradient(145deg,#21344E,#0D1729);
+}
+.v6-reader-settings .v64-theme-note {
+  margin:11px 1px 0;font-size:11px;line-height:1.65;color:var(--reader-ui-muted);
+}
+.v6-reader-settings .v6-reader-settings-group h3 small {
+  font-weight:400;letter-spacing:0;
+}
+
+/* Reader stage, page, controls, panels and error states share the same palette. */
+.quiet-app.reader-protected[data-reader-theme='night'],
+.quiet-app.reader-author-preview[data-reader-theme='night'] {background:#0D1729;color:#F6EFE5;}
+.quiet-app.reader-protected[data-reader-theme='night'] .reader-stage,
+.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-stage {background:#0D1729;}
+.quiet-app.reader-protected[data-reader-theme='white'] .reader-stage,
+.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-stage {background:#F8F4EE;}
+.quiet-app.reader-protected[data-reader-theme='night'] .reader-leaf,
+.quiet-app.reader-author-preview[data-reader-theme='night'] .reader-leaf {background:#15243B;color:#F6EFE5;}
+.quiet-app.reader-protected[data-reader-theme='white'] .reader-leaf,
+.quiet-app.reader-author-preview[data-reader-theme='white'] .reader-leaf {background:#FFFCF7;color:#302C29;}
+.quiet-app[data-reader-theme='night'] .drawer-panel,
+.quiet-app[data-reader-theme='night'] .search-panel {background:#0D1729;color:#F6EFE5;}
+.quiet-app[data-reader-theme='white'] .drawer-panel,
+.quiet-app[data-reader-theme='white'] .search-panel {background:#F8F4EE;color:#302C29;}
+.quiet-app[data-reader-theme='night'] .search-line input {color:#F6EFE5;}
+.quiet-app[data-reader-theme='white'] .search-line input {color:#302C29;}
+html[data-app-theme='dark'] .reader-recovery {background:#0D1729;color:#F6EFE5;}
+html[data-app-theme='dark'] .reader-recovery-card {background:#15243B;border-color:#3A4D66;}
+html[data-app-theme='dark'] .reader-recovery-actions button {background:#21344E;border-color:#3A4D66;color:#F6EFE5;}
+
+/* The legacy CSS defines separate sepia/calm/OLED selectors; no element receives
+   those data attributes after the V6.4 migration. */
+.v6-public .v63-menu-theme-choices {grid-template-columns:repeat(2,minmax(0,1fr));}
+@media(max-width:600px) {
+  .v6-reader-settings .v64-global-theme-choices>button {min-height:140px;}
+  .v6-reader-settings .v64-theme-swatch {min-height:95px;}
+  .v6-public .v6-chapters {border-radius:22px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .v6-public .v6-chapter {transition:none;}
+}

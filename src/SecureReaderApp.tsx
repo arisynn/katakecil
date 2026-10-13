@@ -11,7 +11,7 @@ import {DEFAULT_SETTINGS,THEMES} from './utils/theme';
 import type {Bookmark,Chapter,ReadingSettings,TextAnchor} from './types/reader';
 import './index.css';
 import { useUiTheme } from './hooks/useUiTheme';
-import { getReaderThemePreference, resolveReaderTheme, setReaderThemePreference, READER_THEME_KEY, type ReaderThemePreference } from './utils/readerThemePreference';
+import { readerModeFor } from './utils/globalTheme';
 
 function readLocal<T>(key:string,fallback:T):T {try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
 function viewport(){
@@ -32,8 +32,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const segmentRef=useRef<ReaderEpisode|null>(null);
  const [error,setError]=useState('');
  const [loading,setLoading]=useState(true);
- const {theme:appTheme}=useUiTheme();
- const [readerPreference,setReaderPreference]=useState<ReaderThemePreference>(getReaderThemePreference);
+ const {theme:appTheme,setPreference:setAppTheme}=useUiTheme();
  const [settings,setSettings]=useState<ReadingSettings>(()=>({...DEFAULT_SETTINGS,...readLocal('quiet_reader_settings',{})}));
  const [dimensions,setDimensions]=useState(viewport);
  const [pages,setPages]=useState<number[]>([]);
@@ -52,7 +51,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const touch=useRef<{x:number;y:number;moved:boolean;pinch:boolean}|null>(null);
  const ignoreClick=useRef(false);
  const focusTried=useRef(false);
- const effectiveReaderTheme=resolveReaderTheme(readerPreference,appTheme);
+ const effectiveReaderTheme=readerModeFor(appTheme);
  const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveReaderTheme}),[settings,effectiveReaderTheme]);
  const theme=THEMES[effectiveReaderTheme]||THEMES.white;
  const spread=settings.spreadMode==='spread'&&dimensions.width>=1024;
@@ -105,8 +104,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   window.addEventListener('resize',resize);document.addEventListener('fullscreenchange',full);
   return()=>{window.removeEventListener('resize',resize);document.removeEventListener('fullscreenchange',full);};
  },[]);
- useEffect(()=>{try{if(!localStorage.getItem(READER_THEME_KEY))setReaderThemePreference(readerPreference);}catch{}},[]);
- useEffect(()=>{try{localStorage.setItem('quiet_reader_settings',JSON.stringify(settings));}catch{}},[settings]);
+ useEffect(()=>{try{localStorage.setItem('quiet_reader_settings',JSON.stringify(effectiveSettings));}catch{}},[effectiveSettings]);
  useEffect(()=>{try{localStorage.setItem(bookmarkKey,JSON.stringify(bookmarks));}catch{}},[bookmarks,bookmarkKey]);
  useEffect(()=>{if(!status)return;const timer=setTimeout(()=>setStatus(''),2500);return()=>clearTimeout(timer);},[status]);
  const onMeasured=useCallback((counts:number[],nodes:HTMLElement[])=>{
@@ -188,13 +186,12 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  },[pageIndex,goTo,modal]);
  const setSettingsSafe=(next:Partial<ReadingSettings>)=>{
   pendingOffset.current=offsetRef.current;pendingEdge.current='offset';
-  if(next.theme){setReaderPreference(next.theme);setReaderThemePreference(next.theme);}
-  setSettings(prev=>({...prev,...next}));
+  const {theme:unusedTheme,...readingOnly}=next;
+  setSettings(prev=>({...prev,...readingOnly}));
  };
- const followAppTheme=()=>{
+ const changeGlobalTheme=(next:'light'|'dark')=>{
   pendingOffset.current=offsetRef.current;pendingEdge.current='offset';
-  setReaderPreference('follow');setReaderThemePreference('follow');
-  setSettings(prev=>({...prev,theme:resolveReaderTheme('follow',appTheme)}));
+  setAppTheme(next);
  };
  useEffect(()=>{
   document.documentElement.dataset.readerTheme=effectiveReaderTheme;
@@ -218,7 +215,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
   {status&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>{status}</div>}
   {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}
   {modal==='search'&&<SearchPanel onClose={()=>setModal('none')} chapters={chapter?[chapter]:[]} onResult={at=>{if(chapter){const col=anchorColumn(measuringNode.current,chapter,at.offset,geometry.bodyWidth);setPageIndex(col);saveAt(col);}}} theme={theme}/>}
-  <ReadingSettingsModal isOpen={modal==='settings'} onClose={()=>setModal('none')} settings={effectiveSettings} theme={theme} onUpdateSettings={setSettingsSafe} readerPreference={readerPreference} onFollowAppTheme={followAppTheme} appTheme={appTheme}/>
+  <ReadingSettingsModal isOpen={modal==='settings'} onClose={()=>setModal('none')} settings={effectiveSettings} onUpdateSettings={setSettingsSafe} appTheme={appTheme} onAppThemeChange={changeGlobalTheme}/>
   <span aria-live="polite" className="sr-only">{segment?`Episode ${segment.episodeNumber}`:''}</span>
  </div>;
 }

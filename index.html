@@ -12,7 +12,7 @@
       html,body,#root{margin:0;min-height:100%;background:#F8F4EE;color:#26364B;}
       html[data-app-theme="dark"],html[data-app-theme="dark"] body,html[data-app-theme="dark"] #root{background:#0D1729;color:#F6EFE5;}
       html[data-kk-boot-context="reader"],html[data-kk-boot-context="reader"] body,html[data-kk-boot-context="reader"] #root{background:#FFF5E6;color:#44372D;}
-      html[data-kk-boot-context="reader"][data-reader-theme="night"],html[data-kk-boot-context="reader"][data-reader-theme="night"] body,html[data-kk-boot-context="reader"][data-reader-theme="night"] #root,html[data-kk-boot-context="reader"][data-reader-theme="black"],html[data-kk-boot-context="reader"][data-reader-theme="black"] body,html[data-kk-boot-context="reader"][data-reader-theme="black"] #root{background:#0D1729;color:#F6EFE5;}
+      html[data-kk-boot-context="reader"][data-reader-theme="night"],html[data-kk-boot-context="reader"][data-reader-theme="night"] body,html[data-kk-boot-context="reader"][data-reader-theme="night"] #root{background:#0D1729;color:#F6EFE5;}
       .kk-boot-loader{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;overflow:hidden;min-height:100dvh;padding:60px 24px;background:#101c31;color:#fff1db;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;}
       .kk-boot-loader::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#091426b8,#111c30d8),url('/assets/v6/loading-ambience.webp') center/cover no-repeat;}
       .kk-boot-content{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(100%,380px);}
@@ -59,16 +59,22 @@
       (function(){var context=location.pathname.startsWith('/baca/')?'reader':location.pathname.startsWith('/studio')?'studio':'public';
         document.documentElement.setAttribute('data-kk-boot-context',context);
         try{
-          var pref=localStorage.getItem('appThemePreference')||localStorage.getItem('katakecil_ui_theme_v53')||'system';
-          var mode=pref==='dark'||pref==='light'?pref:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+          var app=localStorage.getItem('appThemePreference');
+          var legacy=localStorage.getItem('katakecil_ui_theme_v53');
+          var oldReader=localStorage.getItem('katakecil_reader_theme_preference_v62');
+          var oldSettings=null;
+          try{oldSettings=JSON.parse(localStorage.getItem('quiet_reader_settings')||'null')?.theme||null;}catch(e){}
+          var osDark=matchMedia('(prefers-color-scheme:dark)').matches;
+          var mode;
+          if(app==='dark'||app==='light')mode=app;
+          else if(app==='system')mode=osDark?'dark':'light';
+          else if(legacy==='dark'||legacy==='light')mode=legacy;
+          else {var old=oldReader&&oldReader!=='follow'?oldReader:oldSettings;
+            mode=old==='night'||old==='black'?'dark':['white','sepia','calm'].includes(old)?'light':osDark?'dark':'light';}
+          localStorage.setItem('appThemePreference',mode);
           document.documentElement.setAttribute('data-app-theme',mode);
-          var readerPref=localStorage.getItem('katakecil_reader_theme_preference_v62');
-          if(!readerPref){try{readerPref=JSON.parse(localStorage.getItem('quiet_reader_settings')||'null')?.theme;}catch(e){}}
-          if(!['white','night','sepia','calm','black'].includes(readerPref))readerPref='follow';
-          var readerTheme=readerPref==='follow'?(mode==='dark'?'night':'white'):readerPref;
-          document.documentElement.setAttribute('data-reader-theme',readerTheme);
-          var readerColors={white:'#FFF5E6',night:'#102A43',sepia:'#FAF1DF',calm:'#E5F0E9',black:'#0B111A'};
-          document.querySelector('meta[name="theme-color"]').setAttribute('content',context==='reader'?readerColors[readerTheme]:(mode==='dark'?'#0D1729':'#F8F4EE'));
+          document.documentElement.setAttribute('data-reader-theme',mode==='dark'?'night':'white');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content',context==='reader'?(mode==='dark'?'#15243B':'#FFFCF7'):(mode==='dark'?'#0D1729':'#F8F4EE'));
         }catch(e){ /* Private browsing: preserve a readable light fallback. */ }
       })();
     </script>

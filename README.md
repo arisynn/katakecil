@@ -1,6 +1,12 @@
-# KataKecil V6.3 — iOS Mobile-First
+# KataKecil V6.4 — Unified Theme (Mobile-First)
 
-Lihat [RELEASE_V6.3.md](RELEASE_V6.3.md) untuk pembaruan UI gelap/terang, navigasi mobile, Reader, hasil pengujian, dan keterbatasan.
+Versi ini melanjutkan V6.3 dengan **dua tema global saja: Terang dan Gelap**. Pilihan tema pada Beranda, menu mobile, Studio, dan pengaturan Reader mengubah satu preferensi `appThemePreference`. Panel Daftar Bab dan Daftar Isi Reader mengikuti tema global. Preferensi font, jarak baris, lebar halaman, bookmark, progres, dan gesture membaca tetap independen dari warna.
+
+- Rincian implementasi dan batasan validasi: [RELEASE_V6.4.md](RELEASE_V6.4.md)
+- Tes regresi yang relevan: `npm run test:current`
+- Pemeriksaan TypeScript/build setelah `npm install`: `npm run lint && npm run build`
+
+---
 
 # KataKecil V6.2
 

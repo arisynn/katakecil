@@ -1,27 +1,23 @@
 import React from 'react';
-import { X, Check, AlignLeft, AlignJustify, Columns, Square, Minus, Plus, BookOpen, Type, MonitorSmartphone } from 'lucide-react';
-import type { FontFamily, LineHeight, MarginWidth, ReadingSettings, ThemeColors, ThemeMode } from '../types/reader';
-import { THEMES } from '../utils/theme';
-import type { ReaderThemePreference } from '../utils/readerThemePreference';
+import { X, Check, AlignLeft, AlignJustify, Columns, Square, Minus, Plus, BookOpen, Type, Sun, Moon } from 'lucide-react';
+import type { FontFamily, LineHeight, MarginWidth, ReadingSettings } from '../types/reader';
 import type { UiTheme } from '../hooks/useUiTheme';
 
-interface Props { isOpen:boolean;onClose:()=>void;settings:ReadingSettings;theme:ThemeColors;onUpdateSettings:(next:Partial<ReadingSettings>)=>void;readerPreference:ReaderThemePreference;onFollowAppTheme:()=>void;appTheme:UiTheme }
-const themeChoices: Array<{id:ThemeMode;label:string;image:string;mobileImage:string}> = [
-  {id:'white',label:'Paper',image:'/assets/v6/reader-paper-texture.webp',mobileImage:'/assets/v6/reader-paper-texture-mobile.webp'},
-  {id:'night',label:'Malam',image:'/assets/v6/studio-ambience.webp',mobileImage:'/assets/v6/studio-ambience-mobile.webp'},
-  {id:'sepia',label:'Sepia',image:'/assets/v6/hero-library-sunset.webp',mobileImage:'/assets/v6/hero-library-sunset-mobile.webp'},
-  {id:'calm',label:'Calm',image:'/assets/v6/covers/02-langit.webp',mobileImage:'/assets/v6/covers/02-langit-mobile.webp'},
-];
+interface Props { isOpen:boolean;onClose:()=>void;settings:ReadingSettings;onUpdateSettings:(next:Partial<ReadingSettings>)=>void;appTheme:UiTheme;onAppThemeChange:(next:UiTheme)=>void }
 const fonts: Array<{id:FontFamily;label:string}> = [{id:'literata',label:'Serif'},{id:'sans',label:'Sans'},{id:'merriweather',label:'Classic'},{id:'mono',label:'Mono'}];
 const lines: Array<{id:LineHeight;label:string}> = [{id:'compact',label:'Rapat'},{id:'normal',label:'Normal'},{id:'loose',label:'Lega'}];
 const widths: Array<{id:MarginWidth;label:string}> = [{id:'narrow',label:'Lebar'},{id:'normal',label:'Sedang'},{id:'wide',label:'Sempit'}];
-export function ReadingSettingsModal({isOpen,onClose,settings,theme,onUpdateSettings,readerPreference,onFollowAppTheme,appTheme}:Props){
+export function ReadingSettingsModal({isOpen,onClose,settings,onUpdateSettings,appTheme,onAppThemeChange}:Props){
  if(!isOpen)return null;
- const choices=readerPreference==='black'?[...themeChoices,{id:'black' as ThemeMode,label:'OLED Lama',image:'/assets/v6/studio-ambience.webp',mobileImage:'/assets/v6/studio-ambience-mobile.webp'}]:themeChoices;
- return <div className="v6-reader-settings-scrim" onClick={onClose} role="presentation"><section className="v6-reader-settings" data-reader-settings-theme={theme.name==='night'||theme.name==='black'?'dark':'light'} role="dialog" aria-modal="true" aria-label="Pengaturan Membaca" onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Escape')onClose();}}>
+ return <div className="v6-reader-settings-scrim" onClick={onClose} role="presentation"><section className="v6-reader-settings" data-reader-settings-theme={appTheme} role="dialog" aria-modal="true" aria-label="Pengaturan Membaca" onClick={e=>e.stopPropagation()} onKeyDown={e=>{if(e.key==='Escape')onClose();}}>
   <div className="v6-reader-settings-header"><h2>Pengaturan Membaca</h2><button onClick={onClose} aria-label="Tutup pengaturan"><X size={19}/></button></div>
   <div className="v6-reader-settings-scroll">
-   <div className="v6-reader-settings-group"><h3>Tema Tampilan</h3><button type="button" className={`v62-follow-theme ${readerPreference==='follow'?'selected':''}`} aria-pressed={readerPreference==='follow'} onClick={onFollowAppTheme}><MonitorSmartphone size={18}/><span>Ikuti tema aplikasi <small>{appTheme==='dark'?'Malam':'Paper'} · otomatis</small></span>{readerPreference==='follow'&&<Check size={17}/>}</button><div className="v6-theme-tiles">{choices.map(choice=><button key={choice.id} aria-pressed={readerPreference===choice.id} className={readerPreference===choice.id?'selected':''} onClick={()=>onUpdateSettings({theme:choice.id})}><span className={`v6-theme-preview v63-theme-${choice.id}`} style={{backgroundColor:THEMES[choice.id].pageBg}}><picture><source media="(max-width: 600px)" srcSet={choice.mobileImage} type="image/webp"/><img src={choice.image} alt="" loading="lazy" decoding="async"/></picture><BookOpen size={21}/>{readerPreference===choice.id&&<Check className="v6-theme-check" size={17}/>}</span><span>{choice.label}</span></button>)}</div></div>
+   <div className="v6-reader-settings-group"><h3>Tema Tampilan <small>Berlaku untuk seluruh KataKecil</small></h3>
+    <div className="v64-global-theme-choices" role="group" aria-label="Tema global KataKecil">
+     <button type="button" className={appTheme==='light'?'selected':''} aria-pressed={appTheme==='light'} onClick={()=>onAppThemeChange('light')}><span className="v64-theme-swatch v64-theme-swatch-light"><Sun size={24}/><BookOpen size={29}/></span><span>Terang</span>{appTheme==='light'&&<Check size={17} aria-hidden="true"/>}</button>
+     <button type="button" className={appTheme==='dark'?'selected':''} aria-pressed={appTheme==='dark'} onClick={()=>onAppThemeChange('dark')}><span className="v64-theme-swatch v64-theme-swatch-dark"><Moon size={24}/><BookOpen size={29}/></span><span>Gelap</span>{appTheme==='dark'&&<Check size={17} aria-hidden="true"/>}</button>
+    </div><p className="v64-theme-note">Perubahan di sini juga berlaku untuk Beranda, Perpustakaan, Daftar Bab, dan Studio.</p>
+   </div>
    <div className="v6-reader-settings-group"><h3>Ukuran Teks <span>{settings.fontSize}%</span></h3><div className="v6-slider-row"><button onClick={()=>onUpdateSettings({fontSize:Math.max(70,settings.fontSize-10)})} disabled={settings.fontSize<=70} aria-label="Perkecil teks"><Minus size={17}/></button><span>A</span><input aria-label="Ukuran teks" type="range" min="70" max="160" step="10" value={settings.fontSize} onChange={e=>onUpdateSettings({fontSize:Number(e.target.value)})}/><span className="large">A</span><button onClick={()=>onUpdateSettings({fontSize:Math.min(160,settings.fontSize+10)})} disabled={settings.fontSize>=160} aria-label="Perbesar teks"><Plus size={17}/></button></div></div>
    <div className="v6-reader-settings-group"><h3>Jenis Font</h3><div className="v6-settings-segments">{fonts.map(f=><button key={f.id} aria-pressed={settings.fontFamily===f.id} className={settings.fontFamily===f.id?'selected':''} onClick={()=>onUpdateSettings({fontFamily:f.id})}>{f.label}</button>)}</div></div>
    <div className="v6-reader-settings-group"><h3>Jarak Baris</h3><div className="v6-settings-segments">{lines.map(line=><button key={line.id} aria-pressed={settings.lineHeight===line.id} className={settings.lineHeight===line.id?'selected':''} onClick={()=>onUpdateSettings({lineHeight:line.id})}>{line.label}</button>)}</div></div>
