@@ -33,20 +33,7 @@ function SectionHeading({eyebrow,title,link}:{eyebrow:string;title:string;link?:
 }
 function BookCard({book,count,demo}:{book:Book;count:number;demo?:boolean}) {
   return <button className="library-card" onClick={()=>navigate(`/cerita/${book.slug}`)}>
-    <Cover book={book}/>
-    <div className="card-copy">
-      <div className="card-meta">
-        <span className="card-genre">{book.genre}</span>
-        <span className="card-dot" aria-hidden="true">·</span>
-        <span className="card-count">{demo?'Contoh tampilan':count?`${count} episode`:'Segera hadir'}</span>
-      </div>
-      <h3>{book.title}</h3>
-      <p>{book.synopsis}</p>
-      <div className="card-bottom">
-        <span>Buka cerita</span>
-        <span><ArrowRight size={16}/></span>
-      </div>
-    </div>
+    <Cover book={book}/><div className="card-copy"><span className="card-genre">{book.genre}</span><h3>{book.title}</h3><p>{book.synopsis}</p><div className="card-bottom"><span>{demo?'Contoh tampilan':count?`${count} episode`:'Segera hadir'}</span><span><ArrowRight size={17}/></span></div></div>
   </button>;
 }
 function EmptyLibrary() {return <div className="library-empty"><Library size={27}/><h3>Rak buku ini menanti cerita pertamanya.</h3><p>Belum ada cerita yang diterbitkan. Kembali lagi nanti untuk menemukan kisah pertama di rak ini.</p><LinkButton className="btn-primary" to="/">Kembali ke beranda <ArrowRight size={17}/></LinkButton></div>;}
@@ -81,7 +68,7 @@ function Detail({book,episodes,demo}:{book:Book;episodes:EpisodeSummary[];demo:b
   const rows=episodes.filter(e=>e.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number);
   const [showAll,setShowAll]=useState(false);
   return <main className="public-main inner-page detail-page"><LinkButton className="breadcrumb" to="/cerita"><ArrowLeft size={16}/> Kembali ke perpustakaan</LinkButton>
-  <section className="detail-top"><div className="detail-art"><Cover book={book} size="large"/></div><div className="detail-info"><span className="eyebrow">KARYA PILIHAN</span><h1>{book.title}</h1><div className="detail-tags"><span>{book.genre}</span><span className="card-dot" aria-hidden="true">·</span><span>{book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Berlangsung'}</span><span className="card-dot" aria-hidden="true">·</span><span>{demo?'Contoh tampilan':`${rows.length} episode`}</span></div><h3>Tentang cerita ini</h3><p>{book.synopsis||'Sinopsis belum ditambahkan oleh penulis.'}</p>
+  <section className="detail-top"><div className="detail-art"><Cover book={book} size="large"/></div><div className="detail-info"><span className="eyebrow">KARYA PILIHAN · {book.genre.toUpperCase()}</span><h1>{book.title}</h1><div className="detail-tags"><span>{book.genre}</span><span>{book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Berlangsung'}</span><span>{demo?'Contoh tampilan':`${rows.length} episode`}</span></div><h3>Tentang cerita ini</h3><p>{book.synopsis||'Sinopsis belum ditambahkan oleh penulis.'}</p>
    <div className="detail-actions">{rows.length&&!demo?<button className="btn-primary" onClick={()=>navigate(`/baca/${book.slug}`)}>Mulai membaca <BookOpen size={18}/></button>:<button className="btn-primary" disabled>Belum ada episode <Clock3 size={17}/></button>}<button className="btn-outline" onClick={()=>navigate('/cerita')}>Cerita lainnya <ArrowRight size={16}/></button></div>
   </div></section>
   <section className="episode-section"><SectionHeading eyebrow="PERJALANAN CERITA" title="Daftar episode"/><div className="episode-list">

@@ -43,13 +43,7 @@ function Nav({path,theme,preference,onPreferenceChange}:{path:string;theme:UiThe
  const active=(p:string)=>p==='/studio'?path===p:path.startsWith(p);
  return <><aside className="studio-sidebar">
   <B to="/" className="studio-logo"><span><Feather size={20}/></span>KataKecil.</B><div className="studio-sidebar-label">RUANG KARISYONO</div><div className="studio-side-nav">{tabs.map(tab=><B key={tab.p} to={tab.p} className={`studio-nav-link ${active(tab.p)?'studio-nav-active':''}`}><tab.icon size={18}/>{tab.label}{active(tab.p)&&<span className="studio-nav-active-dot"/>}</B>)}</div>
-  <div className="studio-sidebar-bottom">
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'10px',padding:'0 4px'}}>
-      <span style={{fontSize:'11px',fontWeight:600,color:'var(--app-muted)'}}>Tema Tampilan</span>
-      <ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/>
-    </div>
-    <B to="/" className="studio-nav-link"><BookOpen size={18}/>Lihat website <ArrowRight size={15}/></B>
-  </div>
+  <div className="studio-sidebar-bottom"><B to="/" className="studio-nav-link"><BookOpen size={18}/>Lihat website <ArrowRight size={15}/></B></div>
  </aside><div className="studio-mobile-top"><B to="/studio" className="studio-logo"><span><Feather size={18}/></span><span className="kk-studio-wordmark">Studio KataKecil</span></B><div className="studio-mobile-actions"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/><B to="/" className="kk-back-public" ><House size={19}/><span>Publik</span></B></div></div>
   <nav className="studio-bottom-nav" aria-label="Navigasi Studio">{tabs.slice(0,4).map(tab=><B key={tab.p} to={tab.p} className={active(tab.p)?'studio-bottom-active':''}><tab.icon size={21}/><span>{tab.label}</span></B>)}
    <button type="button" aria-label="Menu lainnya" aria-haspopup="dialog" aria-expanded={more} className={more||tabs.slice(4).some(t=>active(t.p))?'studio-bottom-active':''} onClick={()=>setMore(previous=>!previous)}><Menu size={21}/><span>Lainnya</span></button>

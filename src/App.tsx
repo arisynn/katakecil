@@ -11,6 +11,7 @@ import { navigate } from './utils/nav';
 import './index.css';
 import './site.css';
 import './studio.css';
+import './v6-redesign.css';
 import './studio-v4.css';
 import './studio-v41.css';
 import './content-protection.css';
@@ -45,17 +46,12 @@ export default function App(){
   useEffect(()=>{let active=true; if(!isReader){setReaderBook(null);return;} if(!supabase){setReaderBook(null);return;}
     setLoading(true);
     // Public reader can open only a published book. V1 legacy fallback only when V2 tables aren't migrated.
-    void (async () => {
-      try {
-        const { data, error } = await supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle();
-        if (!active) return;
-        if (!error && data) setReaderBook(data as Book);
-        else if (error && slug === legacyBookId) setReaderBook({id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''});
-        else setReaderBook(null);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
+    supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle().then(({data,error})=>{
+      if(!active)return;
+      if(!error&&data)setReaderBook(data as Book);
+      else if(error&&slug===legacyBookId)setReaderBook({id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''});
+      else setReaderBook(null);
+    }).finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
   },[slug,isReader]);
   if(isReader) return loading?<ThemeLoading context="reader" text="Menyiapkan halaman cerita…"/>:readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/cerita/${readerBook.slug}`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/cerita')}>Kembali ke perpustakaan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;

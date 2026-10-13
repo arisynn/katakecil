@@ -61,16 +61,15 @@ export const ReadingSettingsModal: React.FC<ReadingSettingsModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 border transition-all max-h-[90vh] overflow-y-auto custom-scrollbar backdrop-blur-2xl"
+        className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 border transition-all max-h-[90vh] overflow-y-auto custom-scrollbar"
         style={{
-          backgroundColor: theme.barBg,
+          backgroundColor: theme.bg,
           borderColor: theme.border,
           color: theme.text,
-          boxShadow: '0 24px 60px -8px rgba(0, 0, 0, 0.3), 0 4px 16px -2px rgba(0, 0, 0, 0.1)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
