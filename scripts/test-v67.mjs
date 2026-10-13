@@ -21,7 +21,7 @@ assert.match(publicPage, /Koleksi tersimpan pada browser perangkat ini/);
 assert.doesNotMatch(publicPage, /v6-detail-backdrop" aria-hidden/);
 assert.match(studio, /p: '\/studio\/impor', label: 'Upload'/);
 assert.match(studio, /p: '\/studio\/settings', label: 'Pengaturan'/);
-assert.match(studio, /aria-controls="v67-studio-more"/);
+assert.match(studio, /aria-controls=\{mobile \? "v67-studio-more"/);
 assert.match(studio, /const secondary =/);
 assert.doesNotMatch(studio, /p: '\/studio\/impor', label: 'Impor Naskah'/);
 assert.match(hero, /<Cover book=\{story\.book\}/);

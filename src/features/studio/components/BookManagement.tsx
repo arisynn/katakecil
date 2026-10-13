@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Check, ChevronRight, FilePlus2, ImagePlus, Library, Plus, Save, Send, Trash2, UploadCloud } from 'lucide-react';
+import { ArrowLeft, Check, ChevronRight, FilePlus2, ImagePlus, Library, Plus, Save, Search, Send, Trash2, UploadCloud } from 'lucide-react';
 import { Cover } from '../../../components/Cover';
 import BookSections from '../../../pages/BookSections';
 import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../../../data/library';
@@ -10,13 +10,42 @@ import { B, Pill, errMsg } from './StudioShared';
 const BOOK_STATUS: Record<Book['status'], string> = { ongoing: 'Berlangsung', completed: 'Tamat', hiatus: 'Jeda' };
 
 export function Books({ books, episodes, onCreate }: {
-    books: Book[];
-    episodes: Episode[];
-    onCreate: () => void;
+  books: Book[];
+  episodes: Episode[];
+  onCreate: () => void;
 }) {
-    return <><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA SEMUA KARYA</span><h1>Rak <i>ceritamu.</i></h1><p>Kelola novel, sampul, dan episode dalam satu tempat.</p></div>{books.length > 0 && <button onClick={onCreate} className="studio-primary"><Plus size={17}/> Novel baru</button>}</div>
- {books.length ? <div className="studio-manage-list">{books.map(b => <B key={b.id} to={`/studio/cerita/${b.id}`} className="studio-manage-item"><Cover book={b} size="mini"/><span><strong>{b.title}</strong><small>{b.genre} · {episodes.filter(e => e.book_id === b.id).length} episode</small><em>{b.is_published ? 'Tayang di perpustakaan' : 'Draft (privat)'} · {BOOK_STATUS[b.status]}</em></span><ChevronRight size={20}/></B>)}</div> : <div className="studio-big-empty"><Library size={30}/><h2>Sebuah dunia menunggu ditulis.</h2><p>Mulailah dengan membuat novel pertama.</p><button onClick={onCreate} className="studio-primary"><Plus size={18}/> Buat novel</button></div>}
- </>;
+  const [query, setQuery] = useState('');
+  const filtered = books.filter(book =>
+    `${book.title} ${book.genre}`.toLocaleLowerCase('id-ID')
+      .includes(query.trim().toLocaleLowerCase('id-ID')));
+  return <div className="v69-books-page">
+    <div className="studio-page-head studio-head-with-action">
+      <div><span className="studio-kicker">PERPUSTAKAAN PENULIS</span>
+        <h1>Karya Saya</h1><p>Semua cerita, bab, dan jadwal dalam satu tempat.</p></div>
+      {books.length > 0 && <button onClick={onCreate} className="studio-primary">
+        <Plus size={17}/> Karya Baru
+      </button>}
+    </div>
+    {books.length > 0 && <label className="v69-search-field">
+      <Search size={18}/><span className="v69-visually-hidden">Cari karya</span>
+      <input type="search" value={query} onChange={event => setQuery(event.target.value)}
+        placeholder="Cari judul atau genre…"/>
+    </label>}
+    {filtered.length ? <div className="studio-manage-list">
+      {filtered.map(book => <B key={book.id} to={`/studio/cerita/${book.id}`}
+        className="studio-manage-item">
+        <Cover book={book} size="mini"/>
+        <span><strong>{book.title}</strong>
+          <small>{book.genre} · {episodes.filter(ep => ep.book_id === book.id).length} bab</small>
+          <em>{book.is_published ? 'Publik' : 'Privat'} · {BOOK_STATUS[book.status]}</em>
+        </span><ChevronRight size={20}/>
+      </B>)}
+    </div> : books.length ? <p className="studio-muted">Tidak ada karya yang cocok dengan pencarian.</p>
+      : <div className="studio-big-empty"><Library size={30}/>
+          <h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dengan membuat karya pertama.</p>
+          <button onClick={onCreate} className="studio-primary"><Plus size={18}/> Buat Karya</button>
+        </div>}
+  </div>;
 }
 
 export function BookForm({ existing, onSaved }: {
@@ -99,6 +128,11 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
     const local = episodes.filter(e => e.book_id === book.id).sort((a, b) => a.episode_number - b.episode_number);
     const drafts = local.filter(e => episodeStatus(e) === 'Draft');
     const blankDrafts = drafts.filter(e => !e.content_md.trim());
+    const [search, setSearch] = useState('');
+    const [filter, setFilter] = useState<'Semua' | 'Draft' | 'Terjadwal' | 'Terbit'>('Semua');
+    const visible = local.filter(ep => (filter === 'Semua' || episodeStatus(ep) === filter) &&
+        `${ep.episode_number} ${ep.title} ${ep.arc_title}`.toLocaleLowerCase('id-ID')
+            .includes(search.trim().toLocaleLowerCase('id-ID')));
     const [publishing, setPublishing] = useState(false);
     const [publishError, setPublishError] = useState('');
     const [publishNotice, setPublishNotice] = useState('');
@@ -127,9 +161,25 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
         }
     };
     return <><B to="/studio/cerita" className="studio-backlink"><ArrowLeft size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published ? 'Tayang di perpustakaan' : 'Draft (privat)'}</p></div><button onClick={onNew} className="studio-primary"><Plus size={16}/> Episode baru</button></div>
- <div className="studio-detail-tabs"><a href="#bulk-publish">Penerbitan cepat</a><a href="#episodes">Daftar episode</a><a href="#book-sections">Halaman buku</a><a href="#settings">Pengaturan novel</a></div>
- <section className="studio-panel kk-bulk-panel" id="bulk-publish" aria-label="Penerbitan episode sekaligus">
-   <div className="studio-panel-top"><h2>Terbitkan sekaligus</h2><Send size={19}/></div>
+ <div className="studio-detail-tabs"><a href="#episodes">Daftar bab</a><a href="#book-sections">Halaman buku</a><a href="#bulk-publish">Terbit massal</a><a href="#settings">Pengaturan karya</a></div>
+ <section className="studio-panel v69-chapter-manager" id="episodes"><div className="studio-panel-top"><h2>Daftar Bab</h2><B to={`/studio/impor?book=${encodeURIComponent(book.id)}`} className="studio-text-button"><UploadCloud size={16}/> Impor EPUB / MD</B></div>
+ 
+ {local.length > 0 && <div className="v69-chapter-filters">
+   <label className="v69-search-field"><Search size={17}/>
+     <span className="v69-visually-hidden">Cari bab</span>
+     <input type="search" placeholder="Cari nomor atau judul bab…" value={search}
+       onChange={event => setSearch(event.target.value)}/>
+   </label>
+   <div className="v69-status-filter" role="group" aria-label="Filter status bab">
+     {(['Semua', 'Draft', 'Terjadwal', 'Terbit'] as const).map(value =>
+       <button type="button" key={value} aria-pressed={filter === value}
+         className={filter === value ? 'is-active' : ''} onClick={() => setFilter(value)}>{value}</button>)}
+   </div>
+ </div>}
+ {visible.length ? <div className="studio-episode-stack">{visible.map(ep => <B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{String(ep.episode_number).padStart(2, '0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title || 'Tanpa arc'}{ep.is_finale ? ' · Finale' : ''}{episodeStatus(ep) === 'Terjadwal' ? ` · ${formatWib(ep.release_at)}` : ''}</small></span><Pill episode={ep}/><ChevronRight size={17}/></B>)}</div> : <p className="studio-muted">{local.length ? "Tidak ada bab yang cocok dengan filter." : "Belum ada bab. Buat bab baru atau impor naskah melalui Upload."}</p>}
+ {!local.some(e => e.episode_number === 0) && <button onClick={onNewZero} className="studio-light-button"><FilePlus2 size={16}/> Buat Episode 0</button>}</section>
+ <details className="studio-panel kk-bulk-panel v69-bulk-details" id="bulk-publish" aria-label="Penerbitan episode sekaligus">
+   <summary><Send size={18}/> Terbitkan banyak bab sekaligus</summary>
    <p className="studio-muted">{drafts.length} draft dari {local.length} episode. Terbitkan seluruh draft novel tamat tanpa membuka editor satu per satu. Episode terjadwal tetap mengikuti jadwalnya.</p>
    {blankDrafts.length > 0 && <p className="studio-warning" role="alert">Ada {blankDrafts.length} draft tanpa isi. Lengkapi semuanya sebelum terbit massal.</p>}
    {publishError && <div className="studio-error" role="alert">{publishError}</div>}
@@ -139,11 +189,7 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
      <button type="button" className="studio-primary" disabled={publishing || !local.length || !!blankDrafts.length} onClick={() => void publish(true)}><Check size={16}/> {publishing ? 'Memproses…' : 'Tandai Tamat & Terbitkan Draft'}</button>
    </div>
    <small className="studio-muted">Hanya setelah konfirmasi. Jika proses gagal, transaksi database membatalkan seluruh perubahan.</small>
- </section>
- <section className="studio-panel" id="episodes"><div className="studio-panel-top"><h2>Daftar episode</h2><B to={`/studio/impor?book=${encodeURIComponent(book.id)}`} className="studio-text-button"><UploadCloud size={16}/> Impor EPUB / MD</B></div>
- 
- {local.length ? <div className="studio-episode-stack">{local.map(ep => <B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{String(ep.episode_number).padStart(2, '0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title || 'Tanpa arc'}{ep.is_finale ? ' · Finale' : ''}{episodeStatus(ep) === 'Terjadwal' ? ` · ${formatWib(ep.release_at)}` : ''}</small></span><Pill episode={ep}/><ChevronRight size={17}/></B>)}</div> : <p className="studio-muted">Belum ada episode. Buat episode baru atau impor EPUB/Markdown melalui Smart Import Studio.</p>}
- {!local.some(e => e.episode_number === 0) && <button onClick={onNewZero} className="studio-light-button"><FilePlus2 size={16}/> Buat Episode 0</button>}</section>
+ </details>
  <BookSections bookId={book.id}/><div id="settings"><BookForm existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={() => void onDelete()}><Trash2 size={16}/> Pindahkan novel ke Sampah</button></section></>;
 }
 

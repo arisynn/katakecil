@@ -1,133 +1,303 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Bold, BookOpen, CalendarDays, Eye, Heading2, Italic, List, LockKeyhole, Quote, Save, Send, ShieldCheck, Trash2, UploadCloud } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ArrowLeft, ArrowRight, Bold, CalendarDays, CheckCircle2, Eye, FileUp,
+  Focus, Heading2, Italic, List, LockKeyhole, Quote, RotateCw, Send,
+  ShieldCheck, Trash2,
+} from 'lucide-react';
 import ReaderApp from '../../../ReaderApp';
 import { supabase } from '../../../data/supabase';
 import { episodeStatus, type Book, type Episode } from '../../../data/library';
 import { toWibInput } from '../../../utils/releasePlanning';
-import { B, Pill, errMsg } from './StudioShared';
+import { navigate } from '../../../utils/nav';
+import { Pill, errMsg } from './StudioShared';
+
+type Manuscript = { title: string; arc: string; body: string };
+const same = (a: Manuscript, b: Manuscript) =>
+  a.title === b.title && a.arc === b.arc && a.body === b.body;
+
 export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
-    ep: Episode;
-    book: Book;
-    onUpdate: (value: Episode) => void;
-    onDelete: () => Promise<void>;
+  ep: Episode;
+  book: Book;
+  onUpdate: (value: Episode) => void;
+  onDelete: () => Promise<void>;
 }) {
-    const manuscriptRef = useRef<HTMLTextAreaElement>(null);
-    const [title, setTitle] = useState(ep.title);
-    const [arc, setArc] = useState(ep.arc_title);
-    const [body, setBody] = useState(ep.content_md);
-    const [status, setStatus] = useState('Tersimpan');
-    const [error, setError] = useState('');
-    const [schedule, setSchedule] = useState(toWibInput(ep.release_at));
-    const [preview, setPreview] = useState(false);
-    const [publishing, setPublishing] = useState(false);
-    const lastSaved = useRef({ title: ep.title, arc: ep.arc_title, body: ep.content_md });
-    const queue = useRef<Promise<void>>(Promise.resolve());
-    const mounted = useRef(true);
-    useEffect(() => () => { mounted.current = false; }, []);
-    const dirty = title !== lastSaved.current.title || arc !== lastSaved.current.arc || body !== lastSaved.current.body;
-    const save = useCallback(async () => {
-        if (!supabase)
-            return;
-        const snapshot = { title, arc, body };
-        if (snapshot.title === lastSaved.current.title && snapshot.arc === lastSaved.current.arc && snapshot.body === lastSaved.current.body)
-            return queue.current;
-        setStatus('Menyimpan…');
-        const action = async () => { const { data, error } = await supabase!.from('qr_episodes').update({ title: snapshot.title.trim() || `Episode ${ep.episode_number}`, arc_title: snapshot.arc, content_md: snapshot.body }).eq('id', ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single(); if (error)
-            throw error; lastSaved.current = snapshot; onUpdate({ ...data, content_md: snapshot.body, is_finale: ep.is_finale } as Episode); if (mounted.current)
-            setStatus('Tersimpan'); };
-        const run = queue.current.catch(() => { }).then(action);
-        queue.current = run;
-        try {
-            await run;
-        }
-        catch (e) {
-            if (mounted.current) {
-                setError(errMsg(e));
-                setStatus('Gagal menyimpan');
-            }
-        }
-        ;
-    }, [title, arc, body, ep.id, ep.episode_number, onUpdate]);
-    const latestSave = useRef(save);
-    latestSave.current = save;
-    // Flush unsaved changes when navigating away inside the SPA as well.
-    useEffect(() => () => { void latestSave.current(); }, []);
-    useEffect(() => { if (!dirty)
-        return; const timer = setTimeout(() => { void save(); }, 1700); return () => clearTimeout(timer); }, [dirty, save, title, arc, body]);
-    const updateRelease = async (mode: 'now' | 'schedule' | 'draft') => {
-        if (!supabase)
-            return;
-        setPublishing(true);
+  const manuscriptRef = useRef<HTMLTextAreaElement>(null);
+  const [title, setTitle] = useState(ep.title);
+  const [arc, setArc] = useState(ep.arc_title);
+  const [body, setBody] = useState(ep.content_md);
+  const [status, setStatus] = useState('Tersimpan');
+  const [error, setError] = useState('');
+  const [schedule, setSchedule] = useState(toWibInput(ep.release_at));
+  const [preview, setPreview] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const lastSaved = useRef<Manuscript>({ title: ep.title, arc: ep.arc_title, body: ep.content_md });
+  const current = useRef<Manuscript>({ title, arc, body });
+  current.current = { title, arc, body };
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const lastSaveFailed = useRef(false);
+  const mounted = useRef(true);
+  const dirty = !same(current.current, lastSaved.current);
+  const wordCount = body.trim() ? body.trim().split(/\s+/u).length : 0;
+  const isLive = episodeStatus(ep) === 'Terbit';
+
+  useEffect(() => () => { mounted.current = false; }, []);
+
+  const save = useCallback(async (): Promise<boolean> => {
+    if (!supabase) return false;
+    const snapshot = { ...current.current };
+    if (same(snapshot, lastSaved.current)) {
+      try { await queue.current; return same(current.current, lastSaved.current); }
+      catch { return false; }
+    }
+    lastSaveFailed.current = false;
+    setStatus('Menyimpan…');
+    const action = async () => {
+      const { data, error: dbError } = await supabase!.from('qr_episodes')
+        .update({
+          title: snapshot.title.trim() || `Episode ${ep.episode_number}`,
+          arc_title: snapshot.arc,
+          content_md: snapshot.body,
+        })
+        .eq('id', ep.id)
+        .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
+        .single();
+      if (dbError) throw dbError;
+      lastSaved.current = snapshot;
+      onUpdate({ ...data, content_md: snapshot.body, is_finale: ep.is_finale } as Episode);
+      if (mounted.current) {
         setError('');
-        try {
-            await save();
-            await queue.current;
-            let release_at: string | null = null;
-            let is_enabled = false;
-            if (mode === 'now') {
-                release_at = new Date().toISOString();
-                is_enabled = true;
-            }
-            if (mode === 'schedule') {
-                if (!schedule)
-                    throw new Error('Pilih tanggal dan jam rilis terlebih dahulu.');
-                const when = new Date(`${schedule}:00+07:00`);
-                if (Number.isNaN(when.getTime()) || when.getTime() <= Date.now())
-                    throw new Error('Jadwal harus di masa depan (WIB).');
-                release_at = when.toISOString();
-                is_enabled = true;
-                if (ep.is_enabled && ep.release_at && ep.release_at !== release_at && !window.confirm('Episode ini sudah memiliki jadwal. Yakin ingin mengganti tanggal rilis lama?'))
-                    return;
-            }
-            const { data, error } = await supabase.from('qr_episodes').update({ release_at, is_enabled }).eq('id', ep.id).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();
-            if (error)
-                throw error;
-            onUpdate({ ...data, content_md: body, is_finale: ep.is_finale } as Episode);
-            setStatus(mode === 'now' ? 'Diterbitkan' : mode === 'schedule' ? 'Terjadwal' : 'Menjadi draft');
-        }
-        catch (e) {
-            setError(errMsg(e));
-        }
-        finally {
-            setPublishing(false);
-        }
+        setStatus(same(current.current, snapshot) ? 'Tersimpan' : 'Belum disimpan');
+      }
     };
-    const importOne = async (file?: File) => { if (!file)
-        return; if (file.size > 2000000) {
-        setError('File Markdown maksimal 2 MB.');
-        return;
-    } setBody(await file.text()); setStatus('Belum disimpan'); };
-    const insertMarkdown = (before: string, after = '', placeholder = 'teks') => {
-        const node = manuscriptRef.current;
-        if (!node)
-            return;
-        const start = node.selectionStart, end = node.selectionEnd;
-        const selection = body.slice(start, end) || placeholder;
-        const next = body.slice(0, start) + before + selection + after + body.slice(end);
-        setBody(next);
-        requestAnimationFrame(() => { node.focus(); node.setSelectionRange(start + before.length, start + before.length + selection.length); });
+    const run = queue.current.catch(() => undefined).then(action);
+    queue.current = run;
+    try { await run; return same(current.current, lastSaved.current); }
+    catch (caught) {
+      lastSaveFailed.current = true;
+      if (mounted.current) {
+        setError(`Gagal menyimpan naskah: ${errMsg(caught)}`);
+        setStatus('Gagal menyimpan');
+      }
+      return false;
+    }
+  }, [ep.id, ep.episode_number, ep.is_finale, onUpdate]);
+
+  const latestSave = useRef(save);
+  latestSave.current = save;
+  const flush = useCallback(async () => {
+    // A change can arrive while a previous snapshot is in flight.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if (await latestSave.current()) return true;
+      if (lastSaveFailed.current) break;
+    }
+    return same(current.current, lastSaved.current);
+  }, []);
+  const latestFlush = useRef(flush);
+  latestFlush.current = flush;
+
+  useEffect(() => {
+    if (!dirty) return;
+    const timer = window.setTimeout(() => { void save(); }, 1700);
+    return () => window.clearTimeout(timer);
+  }, [dirty, title, arc, body, save]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (same(current.current, lastSaved.current)) return;
+      event.preventDefault();
+      event.returnValue = '';
     };
-    const makePreview = () => ({ id: `preview-${ep.id}`, title: book.title, path: '', content: `# ${book.title}\n\n${arc ? `## ${arc}\n\n` : ''}### ${title || `Episode ${ep.episode_number}`}\n\n${body || 'Belum ada isi episode.'}` });
-    if (preview)
-        return <ReaderApp key={`${ep.id}-preview`} bookId={`preview-${ep.id}`} bookTitle={book.title} onExit={() => setPreview(false)} previewStory={makePreview()}/>;
-    return <><B to={`/studio/cerita/${book.id}`} className="studio-backlink"><ArrowLeft size={16}/> {book.title}</B>
- <div className="studio-editor-title v6-editor-heading"><div><span className="studio-kicker">{book.title} / BAB {ep.episode_number}</span><h1>{title || `Bab ${ep.episode_number}`}</h1><p>{dirty ? 'Ada perubahan yang belum disimpan' : status} · {episodeStatus(ep)}</p></div><div className="v6-editor-head-actions"><button className="studio-light-button" onClick={() => setPreview(true)}><Eye size={17}/> Pratinjau</button></div></div>
- <div className="studio-editor-layout"><section className="studio-panel studio-editor-panel"><div className="studio-editor-topline"><span><span className={`save-dot ${dirty ? 'save-unsaved' : ''}`}/>{status}</span><span><Pill episode={ep}/></span></div>
- <label className="studio-label">Judul episode<input className="studio-title-input" maxLength={180} value={title} onChange={e => setTitle(e.target.value)} placeholder="Judul episodenya"/></label><label className="studio-label">Arc / bagian<input value={arc} onChange={e => setArc(e.target.value)} placeholder="Opsional, mis. Arc I"/></label>
- <div className="studio-editor-toolbar v6-editor-format"><div className="v6-format-actions"><button type="button" title="Tebal" aria-label="Tebal" onClick={() => insertMarkdown('**', '**')}><Bold size={16}/></button><button type="button" title="Miring" aria-label="Miring" onClick={() => insertMarkdown('*', '*')}><Italic size={16}/></button><button type="button" title="Judul" aria-label="Judul" onClick={() => insertMarkdown('## ')}><Heading2 size={17}/></button><button type="button" title="Daftar" aria-label="Daftar" onClick={() => insertMarkdown('- ')}><List size={17}/></button><button type="button" title="Kutipan" aria-label="Kutipan" onClick={() => insertMarkdown('> ')}><Quote size={17}/></button></div><label><UploadCloud size={16}/> Impor .md<input type="file" accept=".md,.txt,text/markdown,text/plain" onChange={e => { void importOne(e.target.files?.[0]); e.target.value = ''; }}/></label></div>
- <textarea ref={manuscriptRef} className="studio-manuscript" aria-label="Isi episode dalam Markdown" spellCheck={true} placeholder="Mulai ceritamu di sini…" value={body} onChange={e => setBody(e.target.value)}/>
- <div className="studio-editor-bottom"><span>{body.trim() ? body.trim().split(/\s+/).length : 0} kata</span><div><button onClick={() => void save()} className="studio-light-button"><Save size={16}/> Simpan</button></div></div>
- </section><aside className="studio-panel studio-publish-panel"><div className="studio-panel-top"><h2>Publikasi</h2><Send size={19}/></div><p className="studio-muted">Status: <strong>{episodeStatus(ep)}</strong></p>
- {episodeStatus(ep) === 'Terbit' && <p className="studio-warning">Episode ini sudah publik. Perubahan isi yang disimpan akan langsung dapat dibaca.</p>}
- {!book.is_published && <p className="studio-warning">Novel ini masih privat. Walaupun episode diterbitkan, pembaca tidak dapat membukanya sebelum novel ditampilkan.</p>}
- <label className="studio-label">Tanggal & jam rilis (WIB)<input type="datetime-local" value={schedule} onChange={e => setSchedule(e.target.value)}/></label><button disabled={publishing || !body.trim()} onClick={() => void updateRelease('schedule')} className="studio-light-button"><CalendarDays size={17}/> Jadwalkan</button>
- <button disabled={publishing || !body.trim()} onClick={() => { if (window.confirm('Terbitkan episode ini sekarang? Semua pembaca dapat mengaksesnya jika novel sudah publik.'))
-        void updateRelease('now'); }} className="studio-primary"><Send size={16}/> Terbitkan sekarang</button>
- {episodeStatus(ep) !== 'Draft' && <button disabled={publishing} className="studio-danger-lite" onClick={() => { if (window.confirm('Tarik episode ini dari publik dan jadikan draft?'))
-        void updateRelease('draft'); }}><LockKeyhole size={16}/> Tarik ke draft</button>}
- <p className="studio-publish-hint"><ShieldCheck size={15}/> Draft dan naskah terjadwal dilindungi kebijakan database.</p><button className="studio-danger-lite" disabled={publishing || dirty} onClick={() => void onDelete()}><Trash2 size={16}/> Pindahkan episode ke Sampah</button>{dirty && <p className="studio-muted">Simpan perubahan dulu sebelum memindahkan episode ke Sampah.</p>}</aside></div>
- {error && <div className="studio-error" role="alert">{error}</div>}
- <div className="studio-editor-mobile-actions"><button className="studio-light-button" onClick={() => setPreview(true)}><BookOpen size={18}/> Pratinjau</button><button className="studio-primary" onClick={() => void save()}><Save size={18}/> Simpan</button><button className="studio-primary" disabled={publishing || !body.trim()} onClick={() => { if (window.confirm('Terbitkan bab ini sekarang?'))
-        void updateRelease('now'); }}><Send size={17}/> Publikasikan</button></div>
- </>;
+    const onInternalNavigation = (event: Event) => {
+      if (same(current.current, lastSaved.current)) return;
+      const navigation = event as CustomEvent<{ path: string }>;
+      if (!navigation.detail?.path) return;
+      event.preventDefault();
+      void latestFlush.current().then(ok => {
+        if (ok && same(current.current, lastSaved.current)) navigate(navigation.detail.path);
+      });
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    window.addEventListener('quiet:before-navigate', onInternalNavigation);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      window.removeEventListener('quiet:before-navigate', onInternalNavigation);
+      // Best effort if a route is replaced externally; navigation guard handles app links.
+      if (!same(current.current, lastSaved.current)) void latestSave.current();
+    };
+  }, []);
+
+  const updateRelease = async (mode: 'now' | 'schedule' | 'draft') => {
+    if (!supabase || publishing) return;
+    setPublishing(true);
+    setError('');
+    try {
+      if (!(await latestFlush.current()))
+        throw new Error('Naskah belum berhasil disimpan. Periksa koneksi dan coba lagi.');
+      let release_at: string | null = null;
+      let is_enabled = false;
+      if (mode === 'now') {
+        release_at = new Date().toISOString();
+        is_enabled = true;
+      }
+      if (mode === 'schedule') {
+        if (!schedule) throw new Error('Pilih tanggal dan jam rilis terlebih dahulu.');
+        const when = new Date(`${schedule}:00+07:00`);
+        if (Number.isNaN(when.getTime()) || when.getTime() <= Date.now())
+          throw new Error('Jadwal harus berada di masa depan (WIB).');
+        release_at = when.toISOString();
+        is_enabled = true;
+        if (ep.is_enabled && ep.release_at && ep.release_at !== release_at &&
+          !window.confirm('Ganti jadwal publikasi yang sudah ada?')) return;
+      }
+      const confirmation = mode === 'now'
+        ? `Terbitkan “${title || `Episode ${ep.episode_number}`}” sekarang? ${book.is_published ? 'Pembaca dapat langsung mengaksesnya.' : 'Novel masih privat.'}`
+        : mode === 'schedule'
+          ? `Jadwalkan bab ini untuk ${schedule.replace('T', ' ')} WIB?`
+          : 'Tarik bab ini dari publik dan kembalikan menjadi draft?';
+      if (!window.confirm(confirmation)) return;
+      const { data, error: dbError } = await supabase.from('qr_episodes')
+        .update({ release_at, is_enabled }).eq('id', ep.id)
+        .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
+        .single();
+      if (dbError) throw dbError;
+      onUpdate({ ...data, content_md: current.current.body, is_finale: ep.is_finale } as Episode);
+      setStatus(mode === 'now' ? 'Diterbitkan' : mode === 'schedule' ? 'Terjadwal' : 'Menjadi draft');
+      setReviewOpen(false);
+    } catch (caught) { setError(errMsg(caught)); }
+    finally { setPublishing(false); }
+  };
+
+  const importOne = async (file?: File) => {
+    if (!file) return;
+    if (file.size > 2_000_000) { setError('File Markdown maksimal 2 MB.'); return; }
+    try {
+      const imported = await file.text();
+      if (body.trim() && !window.confirm('Ganti seluruh isi bab dengan berkas ini? Isi yang belum disimpan akan diganti.')) return;
+      setBody(imported);
+      setStatus('Belum disimpan');
+    } catch (caught) { setError(errMsg(caught)); }
+  };
+  const insertMarkdown = (before: string, after = '', placeholder = 'teks') => {
+    const node = manuscriptRef.current;
+    if (!node) return;
+    const start = node.selectionStart;
+    const end = node.selectionEnd;
+    const selection = body.slice(start, end) || placeholder;
+    setBody(body.slice(0, start) + before + selection + after + body.slice(end));
+    setStatus('Belum disimpan');
+    requestAnimationFrame(() => {
+      node.focus();
+      node.setSelectionRange(start + before.length, start + before.length + selection.length);
+    });
+  };
+  const makePreview = () => ({
+    id: `preview-${ep.id}`,
+    title: book.title,
+    path: '',
+    content: `# ${book.title}\n\n${arc ? `## ${arc}\n\n` : ''}### ${title || `Episode ${ep.episode_number}`}\n\n${body || 'Belum ada isi episode.'}`,
+  });
+  if (preview) return <ReaderApp key={`${ep.id}-preview`} bookId={`preview-${ep.id}`}
+    bookTitle={book.title} onExit={() => setPreview(false)} previewStory={makePreview()}/>;
+
+  return <div className={`v69-writing-shell ${focusMode ? 'v69-focus-mode' : ''}`}>
+    <div className="v69-editor-top">
+      <button className="v69-icon-button" type="button" aria-label="Kembali ke karya"
+        onClick={() => navigate(`/studio/cerita/${book.id}`)}><ArrowLeft size={20}/></button>
+      <div className="v69-editor-heading"><span>{book.title} · BAB {ep.episode_number}</span>
+        <strong aria-live="polite" className={status === 'Gagal menyimpan' ? 'v69-save-error' : ''}>
+          {dirty && status === 'Tersimpan' ? 'Belum disimpan' : status}
+        </strong>
+      </div>
+      <div className="v69-editor-actions">
+        <button type="button" className="v69-icon-button" title="Pratinjau" aria-label="Pratinjau"
+          onClick={() => setPreview(true)}><Eye size={19}/></button>
+        <button type="button" className="v69-icon-button" title="Mode fokus" aria-label={focusMode ? 'Keluar mode fokus' : 'Mode fokus'}
+          aria-pressed={focusMode} onClick={() => { setFocusMode(value => !value); setReviewOpen(false); }}><Focus size={19}/></button>
+      </div>
+    </div>
+
+    {isLive && <p className="v69-live-notice" role="note">Bab ini sudah terbit. Perubahan yang tersimpan akan langsung terlihat oleh pembaca.</p>}
+    <div className="v69-editor-layout">
+      <section className="v69-writing-paper" aria-label="Kanvas menulis">
+        <span className="v69-chapter-kicker">BAB {ep.episode_number}</span>
+        <label className="v69-visually-hidden" htmlFor="v69-chapter-title">Judul bab</label>
+        <input id="v69-chapter-title" className="v69-chapter-title" maxLength={180}
+          value={title} onChange={event => { setTitle(event.target.value); setStatus('Belum disimpan'); }}
+          placeholder="Judul bab"/>
+        <label className="v69-visually-hidden" htmlFor="v69-chapter-arc">Arc / bagian (opsional)</label>
+        <input id="v69-chapter-arc" className="v69-chapter-arc" maxLength={180}
+          value={arc} onChange={event => { setArc(event.target.value); setStatus('Belum disimpan'); }}
+          placeholder="Arc / bagian (opsional)"/>
+        <div className="v69-editor-toolbar" role="toolbar" aria-label="Format Markdown">
+          <button type="button" title="Tebal" aria-label="Tebal" onClick={() => insertMarkdown('**', '**')}><Bold size={17}/></button>
+          <button type="button" title="Miring" aria-label="Miring" onClick={() => insertMarkdown('*', '*')}><Italic size={17}/></button>
+          <button type="button" title="Judul bagian" aria-label="Judul bagian" onClick={() => insertMarkdown('## ')}><Heading2 size={18}/></button>
+          <button type="button" title="Daftar" aria-label="Daftar" onClick={() => insertMarkdown('- ')}><List size={17}/></button>
+          <button type="button" title="Kutipan" aria-label="Kutipan" onClick={() => insertMarkdown('> ')}><Quote size={17}/></button>
+        </div>
+        <textarea ref={manuscriptRef} className="studio-manuscript v69-manuscript"
+          aria-label="Isi bab dalam Markdown" spellCheck
+          placeholder="Mulai menulis kisahmu di sini…"
+          value={body} onChange={event => { setBody(event.target.value); setStatus('Belum disimpan'); }}/>
+        <div className="v69-writing-footer">
+          <span>{wordCount.toLocaleString('id-ID')} kata</span>
+          <span><CheckCircle2 size={15}/>{dirty ? 'Autosave aktif' : status}</span>
+        </div>
+        <details className="v69-editor-extra"><summary>Alat tambahan</summary>
+          <label className="v69-import-file"><FileUp size={16}/> Impor Markdown / TXT
+            <input type="file" accept=".md,.txt,text/markdown,text/plain"
+              onChange={event => { void importOne(event.target.files?.[0]); event.target.value = ''; }}/>
+          </label>
+          <p>Impor ke bab ini akan mengganti isi sebelumnya setelah konfirmasi.</p>
+        </details>
+      </section>
+
+      {!focusMode && <aside className="v69-editor-workflow" aria-label="Pemeriksaan dan publikasi">
+        <div className="v69-editor-workflow-intro">
+          <span className="studio-kicker">ALUR PENULIS</span>
+          <h2>Menulis dulu. Terbitkan nanti.</h2>
+          <p>Perubahan tersimpan otomatis. Periksa naskah sebelum pembaca melihatnya.</p>
+        </div>
+        <div className="v69-editor-workflow-status"><Pill episode={ep}/>
+          <span>{dirty ? 'Ada perubahan lokal' : status}</span>
+        </div>
+        {status === 'Gagal menyimpan' && <button type="button" className="studio-light-button"
+          onClick={() => void latestFlush.current()}><RotateCw size={16}/> Coba simpan lagi</button>}
+        <button type="button" className="studio-primary v69-finish-writing"
+          onClick={() => setReviewOpen(value => !value)} aria-expanded={reviewOpen}>
+          {reviewOpen ? 'Tutup Pemeriksaan' : 'Selesai Menulis'} <ArrowRight size={17}/>
+        </button>
+        {reviewOpen && <div className="v69-publish-review">
+          <h3>Periksa sebelum terbit</h3>
+          <ul>
+            <li><CheckCircle2 size={17}/> Judul {title.trim() ? 'sudah diisi' : 'belum diisi'}</li>
+            <li><CheckCircle2 size={17}/> {wordCount} kata dalam naskah</li>
+            <li><Eye size={17}/> Periksa dialog, alur, dan typo melalui pratinjau</li>
+          </ul>
+          {isLive && <p className="studio-warning">Bab ini sudah publik. Perubahan isi yang tersimpan langsung terlihat oleh pembaca.</p>}
+          {!book.is_published && <p className="studio-warning">Novel masih privat. Pembaca belum dapat mengakses bab yang diterbitkan.</p>}
+          <label className="studio-label">Tanggal & jam rilis (WIB)
+            <input type="datetime-local" value={schedule} onChange={event => setSchedule(event.target.value)}/>
+          </label>
+          <button type="button" className="studio-light-button" disabled={publishing || !body.trim()}
+            onClick={() => void updateRelease('schedule')}><CalendarDays size={17}/> Jadwalkan</button>
+          <button type="button" className="studio-primary" disabled={publishing || !body.trim()}
+            onClick={() => void updateRelease('now')}><Send size={17}/> Terbitkan sekarang</button>
+          <p className="studio-publish-hint"><ShieldCheck size={15}/> Tidak ada publikasi tanpa konfirmasi.</p>
+        </div>}
+        <details className="v69-editor-danger"><summary>Pengelolaan bab</summary>
+          {episodeStatus(ep) !== 'Draft' && <button type="button" className="studio-danger-lite"
+            disabled={publishing} onClick={() => void updateRelease('draft')}>
+            <LockKeyhole size={16}/> Tarik ke draft
+          </button>}
+          <button type="button" className="studio-danger-lite" disabled={publishing || dirty}
+            onClick={() => void onDelete()}><Trash2 size={16}/> Pindahkan ke Sampah</button>
+          {dirty && <small>Simpan perubahan sebelum memindahkan bab ke Sampah.</small>}
+        </details>
+      </aside>}
+    </div>
+    {error && <div className="studio-error v69-editor-error" role="alert">{error}</div>}
+  </div>;
 }

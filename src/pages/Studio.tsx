@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Clock3, Feather, LockKeyhole, LogOut } from 'lucide-react';
-import { formatWib, getStudioLibrary, episodeStatus, type Book, type Episode } from '../data/library';
+import { ArrowLeft, ArrowRight, Feather, LockKeyhole } from 'lucide-react';
+import { getStudioLibrary, type Book, type Episode } from '../data/library';
 import { isConfigured, supabase } from '../data/supabase';
 import { navigate } from '../utils/nav';
 import { DatabaseManager, ScheduleManager } from './StudioManagement';
@@ -11,7 +11,7 @@ import { trashItem } from '../data/trash';
 import { useUiTheme, type UiTheme, type AppThemePreference } from '../hooks/useUiTheme';
 import ThemeToggle from '../components/ThemeToggle';
 import ThemeLoading from '../components/ThemeLoading';
-import StudioNavigation from '../features/studio/components/StudioNavigation';
+import StudioNavigation, { StudioToolsMenu } from '../features/studio/components/StudioNavigation';
 import ChapterEditor from '../features/studio/components/ChapterEditor';
 import { Dashboard, Analytics, StudioSettings } from '../features/studio/components/StudioOverview';
 import { B, authorName, errMsg } from '../features/studio/components/StudioShared';
@@ -45,13 +45,6 @@ function Login({ onSuccess, theme, preference, onPreferenceChange }: {
     return <div className="studio-login-wrap" data-kk-theme={theme}><div className="v62-login-theme"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div><B to="/" className="studio-backlink"><ArrowLeft size={17}/> Kembali ke perpustakaan</B><form className="studio-login" onSubmit={submit}><div className="studio-login-icon"><Feather size={29}/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Selamat datang<br /><i>di Studio.</i></h1><p>Masuk untuk menulis, menyimpan draft, dan mengatur penerbitan ceritamu.</p>
    <label>Email<input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} placeholder="email@contoh.com"/></label><label>Kata sandi<input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"/></label>
    {error && <div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy} type="submit">{busy ? 'Masuk…' : 'Masuk ke Studio'} <ArrowRight size={17}/></button><small><LockKeyhole size={13}/> Hanya akun penulis yang diizinkan.</small></form></div>;
-}
-function Schedule({ books, episodes }: {
-    books: Book[];
-    episodes: Episode[];
-}) {
-    const upcoming = episodes.filter(e => episodeStatus(e) === 'Terjadwal').sort((a, b) => new Date(a.release_at!).getTime() - new Date(b.release_at!).getTime());
-    return <><div className="studio-page-head"><span className="studio-kicker">KALENDER PUBLIKASI</span><h1>Jadwal <i>terbit.</i></h1><p>Semua waktu ditampilkan dalam WIB (UTC+7).</p></div><div className="studio-panel studio-schedule"><div className="studio-panel-top"><h2>Episode berikutnya</h2><CalendarDays size={19}/></div>{upcoming.length ? upcoming.map(ep => <B to={`/studio/editor/${ep.id}`} key={ep.id} className="studio-schedule-row"><div className="studio-schedule-icon"><CalendarDays size={21}/></div><div><strong>{ep.title}</strong><small>{books.find(b => b.id === ep.book_id)?.title}</small><em>{formatWib(ep.release_at)}</em></div><ChevronRight size={18}/></B>) : <div className="studio-panel-empty"><Clock3 size={32}/><p>Belum ada jadwal terbit. Buka editor episode dan pilih waktu rilis.</p></div>}</div></>;
 }
 export default function Studio({ path }: {
     path: string;
@@ -183,7 +176,7 @@ export default function Studio({ path }: {
     const book = sections[1] === 'cerita' && sections[2] && sections[2] !== 'baru' ? books.find(b => b.id === decodeURIComponent(sections[2])) : undefined;
     const editorEpisode = sections[1] === 'editor' ? episodes.find(e => e.id === sections[2]) : undefined;
     const displayName = authorName(user);
-    return <div className="studio-app v6-studio-app" data-kk-theme={theme}><StudioNavigation path={path} displayName={displayName} theme={theme} preference={preference} onPreferenceChange={setPreference}/><div className="studio-page"><div className="studio-toolbar"><span>KataKecil <strong>Studio</strong></span><div><ThemeToggle theme={theme} preference={preference} onPreferenceChange={setPreference}/><span className="studio-auth-indicator"><span />{displayName}</span><button onClick={() => void supabase?.auth.signOut()} title="Keluar" aria-label="Keluar akun"><LogOut size={18}/></button></div></div>
+    return <div className="studio-app v6-studio-app" data-kk-theme={theme}><StudioNavigation path={path} displayName={displayName} theme={theme} preference={preference} onPreferenceChange={setPreference}/><div className="studio-page"><div className="studio-toolbar"><span>KataKecil <strong>Studio</strong></span><div><ThemeToggle theme={theme} preference={preference} onPreferenceChange={setPreference}/><span className="studio-auth-indicator"><span />{displayName}</span><StudioToolsMenu path={path}/></div></div>
  <main className="studio-content">{error && <div className="studio-error" role="alert">{error}</div>}{loading ? <Busy /> : sections[1] === 'impor' ? <ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'jadwal' ? <ScheduleManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'database' ? <DatabaseManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'sampah' ? <TrashManager onChanged={refresh}/> : sections[1] === 'editor' ? (editorEpisode ? <ChapterEditor key={editorEpisode.id} ep={editorEpisode} book={books.find(b => b.id === editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={() => moveToTrash('episode', editorEpisode.id, editorEpisode.title)}/> : <p>Episode tidak ditemukan.</p>) : sections[1] === 'cerita' && sections[2] === 'baru' ? <><B className="studio-backlink" to="/studio/cerita"><ArrowLeft size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></> : sections[1] === 'cerita' && sections[2] ? (book ? <BookDetails key={book.id} book={book} episodes={episodes} onNew={() => void createEpisode(book.id)} onNewZero={() => void createEpisode(book.id, true)} onUpdate={onUpdateBook} onDelete={() => moveToTrash('book', book.id, book.title)} onChanged={refresh}/> : <p>Novel tidak ditemukan.</p>) : sections[1] === 'cerita' ? <Books books={books} episodes={episodes} onCreate={() => navigate('/studio/cerita/baru')}/> : sections[1] === 'analytics' ? <Analytics books={books} episodes={episodes}/> : sections[1] === 'settings' ? <StudioSettings /> : <Dashboard books={books} episodes={episodes} user={user}/>}
  </main></div></div>;
 }

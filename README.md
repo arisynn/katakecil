@@ -1,55 +1,46 @@
-# KataKecil V6.8.1 — Beranda Ringkas & Jadwal Bab
+# KataKecil V6.9 — Writer Studio Redesign
 
-KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk penulis**, dibangun menggunakan React, TypeScript, Vite, Tailwind/CSS, dan Supabase. Desain mobile-first menggunakan dua tema global: **Arctic Blue** dan **Midnight Sapphire**.
+KataKecil adalah aplikasi baca cerita publik dengan **Studio privat untuk satu penulis**, menggunakan React, TypeScript, Vite, CSS, dan Supabase. Tema global tetap **Arctic Blue** (terang) dan **Midnight Sapphire** (gelap).
 
-Beranda V6.8.1 hanya menampilkan carousel cerita terbit, Lanjut Membaca yang ringkas (jika ada progres), dan Bab Baru (maksimal **dua** episode yang terbit dalam 30 hari terakhir). Tidak ada bagian Jelajahi Genre maupun kartu tambahan setelah Bab Baru. Genre dan pencarian tetap tersedia di halaman Perpustakaan.
+V6.9 memprioritaskan pengalaman menulis: dashboard yang langsung menuju draft terakhir, editor kanvas dengan mode fokus dan autosave, pemeriksaan sebelum publikasi, pencarian/filter bab, alur upload tiga langkah, dan navigasi empat tab utama. Seluruh fitur publik V6.8.1 tetap dipertahankan, termasuk Hero Carousel, Lanjut Membaca ringkas, maksimal dua Bab Baru, serta jadwal bab yang benar-benar tersedia.
 
-Jadwal **bab berikutnya** muncul pada carousel dan Informasi Cerita hanya ketika ada episode aktif yang sudah dijadwalkan di Supabase. Yang ditampilkan hanya nomor bab dan waktu terbit WIB, bukan isi atau judul draft.
-
-## Menjalankan aplikasi
+## Menjalankan
 
 ```bash
 npm install
 cp .env.example .env.local
-# Isi URL Supabase dan anon key publik dalam .env.local
+# Isi URL dan publishable key Supabase pada .env.local
 npm run dev
 ```
-
-## Migrasi SQL wajib untuk jadwal publik
-
-Sebelum jadwal bab muncul, jalankan **satu migrasi tambahan** berikut pada Supabase SQL Editor / workflow migrasi yang sudah dipakai:
-
-`supabase/migrations/20261013010000_public_next_chapter_schedule_v68.sql`
-
-Fungsi `qr_public_next_chapters()` memakai `SECURITY DEFINER` dengan `search_path` terkunci dan hanya mengembalikan `book_id`, `episode_number`, serta `release_at` dari **episode aktif yang belum terbit** pada buku yang benar-benar publik. RLS untuk isi naskah tidak berubah. Periksa pemilik fungsi adalah role database tepercaya (normalnya `postgres`) sebelum deployment.
-
-Jika migrasi belum dijalankan, website tetap dapat digunakan; jadwal tidak ditampilkan. Tidak ada penjadwalan fiktif, dan tidak ada modifikasi terhadap naskah yang tersimpan.
 
 ## Validasi
 
 ```bash
 npm run check:structure
 npm run test:current
-npm run test:v68
 npm run lint
 npm run build
 ```
 
-Pemeriksaan integrasi Supabase, otorisasi, autosave, dan gesture Reader tetap harus dilakukan pada deployment staging. Jangan menaruh service-role key, naskah privat, atau rahasia dalam frontend.
+Pemeriksaan visual opsional menggunakan Python Playwright + Chromium:
 
-## Dokumentasi
+```bash
+python scripts/fixtures/render-v69.py
+```
 
-- [Catatan rilis V6.8](docs/RELEASE_V6.8.md)
-- [Arsitektur V6.5](docs/architecture/README.md)
-- [Panduan deployment](docs/deployment/README.md)
-- [Riwayat versi dan migrasi](docs/archive/README.md)
+Fixture hanya menggunakan konten contoh untuk mengecek CSS, bukan data Supabase. Untuk integrasi sebenarnya, uji dengan akun penulis di staging.
 
-## Rute
+## Struktur utama
 
-- `/` — beranda publik
-- `/cerita` — perpustakaan publik
-- `/cerita/:slug` — detail cerita dan jadwal berikutnya
-- `/baca/:slug` — Secure Reader
-- `/studio` — dashboard privat dengan otorisasi Supabase
+- `src/features/studio/components/` — dashboard, navigasi, editor, pengelolaan karya.
+- `src/pages/ManuscriptImporter.tsx` — importer EPUB/MD/TXT yang menjaga draft dan konflik nomor bab.
+- `src/design/v69-writer-studio.css` — penyesuaian Studio untuk dua tema global.
+- `src/SecureReaderApp.tsx` — engine Secure Reader lama yang dipertahankan.
+- `supabase/` — migrasi, RLS, dan Edge Functions asli.
 
-Tidak ada cerita contoh yang ditambahkan ke database. Saat Supabase tidak dikonfigurasi, data demo lokal hanya digunakan untuk preview antarmuka.
+## Catatan penting
+
+- Studio hanya untuk anggota `qr_author_members` yang terautentikasi. Jangan menaruh service-role key dalam frontend.
+- V6.9 **tidak menambah migrasi database**. Untuk jadwal bab publik dari V6.8, migrasi `20261013010000_public_next_chapter_schedule_v68.sql` masih diperlukan bila belum dijalankan.
+- Tidak ada naskah atau cover asli yang diganti, dan tidak ada cerita demo yang dimasukkan ke Supabase.
+- [Catatan Rilis V6.9](docs/RELEASE_V6.9.md) · [Arsitektur](docs/architecture/README.md) · [Deployment](docs/deployment/README.md)

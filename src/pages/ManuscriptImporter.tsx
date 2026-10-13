@@ -268,8 +268,8 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     };
     return <>
   <button className="studio-backlink" onClick={() => navigate(destination === 'new' ? '/studio/cerita' : `/studio/cerita/${destination}`)}><ArrowLeft size={16}/> Kembali ke karya</button>
-  <div className="studio-page-head"><span className="studio-kicker">SMART MANUSCRIPT IMPORTER · V5</span><h1>Impor <i>naskahmu.</i></h1><p>EPUB, Markdown, atau TXT. Pembacaan berkas dilakukan di browser; tidak dikirim ke layanan AI.</p></div>
-  <div className="v4-progress"><span className="active"><FileUp size={15}/> 1 · Unggah</span><ArrowRight size={16}/><span className={step === 'review' ? 'active' : ''}><BookOpen size={15}/> 2 · Periksa</span><ArrowRight size={16}/><span><ShieldCheck size={15}/> 3 · Draft</span></div>
+  <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>Pilih berkas, periksa pembagian bab, lalu simpan sebagai draft. Tidak ada publikasi otomatis.</p></div>
+  <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><FileUp size={15}/> 1 · Pilih file</span><ArrowRight size={16}/><span className={parsed && !success ? 'active' : ''}><BookOpen size={15}/> 2 · Periksa bab</span><ArrowRight size={16}/><span className={success ? 'active' : ''}><ShieldCheck size={15}/> 3 · Simpan draft</span></div>
   {error && <div className="studio-error" role="alert">{error}</div>}
   {saveStage && <div className="v5-import-stage" role="status" aria-live="polite"><span className="v4-picker-spinner"/> {saveStage}</div>}
   {(reading || importReport) && <section className="studio-panel kk-import-progress" aria-label="Tahapan pemrosesan impor" aria-live="polite">
