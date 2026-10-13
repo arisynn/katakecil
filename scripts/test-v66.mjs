@@ -80,5 +80,5 @@ assert.match(css, /safe-area-inset-bottom/);
 assert.match(css, /\[data-kk-theme='light'\]/);
 assert.match(app, /import '\.\/design\/v66-featured-carousel\.css'/);
 assert.ok(existsSync('src/SecureReaderApp.tsx'));
-assert.ok(['6.6.0','6.7.0','6.8.0','6.8.1', '6.9.0','6.10.0','6.11.0','6.12.0'].includes(pkg.version));
+assert.ok(['6.6.0','6.7.0','6.8.0','6.8.1', '6.9.0','6.10.0','6.11.0','6.12.0', '6.12.1'].includes(pkg.version));
 console.log('PASS V6.6: published-only sorting, fallback, responsive carousel, theme, accessibility and Reader isolation.');

@@ -52,3 +52,7 @@ npm run build
 ## V6.12 — Adaptive Reader
 
 Perbaikan viewport/pinch, loading episode, dan palet Sapphire global. Detail perubahan dan batasan pengujian terdapat pada `docs/RELEASE_V6.12.md`. Tes regresi: `npm run test:current`; audit warna: `npm run audit:colors:v612`.
+
+## V6.12.1 — Sapphire CTA Hotfix
+
+Tombol **Mulai Membaca** pada halaman detail cerita (mode gelap) kini mengikuti aksen biru global; override kuning emas V6.2 dihapus. Tombol utama Studio juga mengikuti token Sapphire. Lihat `docs/RELEASE_V6.12.1.md`. Jalankan `npm run test:v6121` untuk pemeriksaan khusus.

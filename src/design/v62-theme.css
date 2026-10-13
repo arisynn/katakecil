@@ -177,18 +177,9 @@ html,body,#root {
   min-height:44px;
 }
 
-/*Night mode is quieter than V6.1; avoid neon-like amber gradients.*/
-
-.v6-public[data-kk-theme='dark'] .v6-button-gold,
-.v6-studio-app[data-kk-theme='dark'] .studio-primary {
-  background:#F0C98B!important;
-  color:#172238!important;
-  box-shadow:0 4px 17px rgba(240,201,139,.14);
-}
-
-.v6-public[data-kk-theme='dark'] .v6-button-gold:hover {
-  box-shadow:0 6px 21px rgba(240,201,139,.24);
-}
+/* V6.12.1: retired the old gold dark-mode CTA override.
+   The current primary button is styled once in v67-sapphire-polish.css
+   with --kk-primary / --kk-on-primary for both global themes. */
 
 .v6-studio-app[data-kk-theme='dark'] .v6-quick-actions button {
   box-shadow:none;
@@ -428,7 +419,7 @@ html,body,#root {
 .v6-public[data-kk-theme='light'] .v6-button-gold {
   background:var(--kk-amber);
   color:var(--kk-amber-text);
-  box-shadow:0 4px 15px rgba(128,83,33,.18);
+  box-shadow:0 4px 15px color-mix(in srgb, var(--kk-primary) 18%, transparent);
 }
 
 .v6-public[data-kk-theme='light'] .v6-button-outline {
