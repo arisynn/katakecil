@@ -21,6 +21,10 @@ import './design/v54.css';
 import './design/v6.css';
 import './design/v61-loading-mobile.css';
 import ThemeLoading from './components/ThemeLoading';
+import { getThemePreference, resolveAppTheme, themeMetaColors } from './hooks/useUiTheme';
+import { getReaderThemePreference, resolveReaderTheme } from './utils/readerThemePreference';
+import { THEMES } from './utils/theme';
+import './design/v62-theme.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
@@ -41,7 +45,15 @@ export default function App(){
     window.addEventListener('quiet:navigate',updatePrivacy);
     return ()=>{document.documentElement.classList.remove('kk-backgrounded');document.removeEventListener('visibilitychange',updatePrivacy);window.removeEventListener('pageshow',updatePrivacy);window.removeEventListener('focus',onFocus);window.removeEventListener('quiet:navigate',updatePrivacy);};
   },[]);
-  useEffect(()=>{document.querySelector('meta[name="theme-color"]')?.setAttribute('content',path.startsWith('/baca/')?'#F8EEDC':'#101C31');},[path]);
+  useEffect(()=>{
+    const sync=()=>{
+      const app=resolveAppTheme(getThemePreference());
+      const color=path.startsWith('/baca/')?THEMES[resolveReaderTheme(getReaderThemePreference(),app)].pageBg:themeMetaColors[app];
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content',color);
+    };
+    sync();window.addEventListener('katakecil:theme-change',sync);window.addEventListener('katakecil:reader-theme-change',sync);
+    return()=>{window.removeEventListener('katakecil:theme-change',sync);window.removeEventListener('katakecil:reader-theme-change',sync);};
+  },[path]);
   const isReader = path.startsWith('/baca/');
   const slug=isReader?decodeURIComponent(path.split('/')[2]||''):'';
   useEffect(()=>{

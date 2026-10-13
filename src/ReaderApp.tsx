@@ -10,6 +10,8 @@ import { anchorColumn, columnAnchor, createPageMap, getSnippet, parseMarkdown } 
 import { DEFAULT_SETTINGS, THEMES } from './utils/theme';
 import type { Bookmark, PageLocation, ReadingSettings, TextAnchor } from './types/reader';
 import './index.css';
+import { useUiTheme } from './hooks/useUiTheme';
+import { getReaderThemePreference, resolveReaderTheme, setReaderThemePreference, READER_THEME_KEY, type ReaderThemePreference } from './utils/readerThemePreference';
 
 const readJson = <T,>(key: string, fallback: T): T => { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback; } catch { return fallback; } };
 const anchorKey = (id: string) => `quiet_reader_anchor_${id}`;
@@ -35,7 +37,19 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
   const parsed = useMemo(() => parseMarkdown(story.content), [story.content]);
   const chapters = parsed.chapters;
   const [settings, setSettings] = useState<ReadingSettings>(() => ({ ...DEFAULT_SETTINGS, ...readJson('quiet_reader_settings', {}) }));
-  const theme = THEMES[settings.theme] ?? THEMES.white;
+  const {theme:appTheme}=useUiTheme();
+  const [readerPreference,setReaderPreference]=useState<ReaderThemePreference>(getReaderThemePreference);
+  const effectiveTheme=resolveReaderTheme(readerPreference,appTheme);
+  const effectiveSettings=useMemo<ReadingSettings>(()=>({...settings,theme:effectiveTheme}),[settings,effectiveTheme]);
+  const theme = THEMES[effectiveTheme] ?? THEMES.white;
+  const changeReaderSettings=(next:Partial<ReadingSettings>)=>{
+    if(next.theme){setReaderPreference(next.theme);setReaderThemePreference(next.theme);}
+    setSettings(prev=>({...prev,...next}));
+  };
+  const followAppTheme=()=>{
+    setReaderPreference('follow');setReaderThemePreference('follow');
+    setSettings(prev=>({...prev,theme:resolveReaderTheme('follow',appTheme)}));
+  };
   const [viewSize, setViewSize] = useState(() => ({ width: window.innerWidth, height: window.innerHeight, safeTop: 0, safeBottom: 0 }));
   const [pages, setPages] = useState<PageLocation[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -74,6 +88,7 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     document.addEventListener('fullscreenchange', onFullscreen);
     return () => { window.removeEventListener('resize', onResize); document.removeEventListener('fullscreenchange', onFullscreen); };
   }, []);
+  useEffect(() => { try { if(!localStorage.getItem(READER_THEME_KEY))setReaderThemePreference(readerPreference); } catch { /* browser storage unavailable */ } }, []);
   useEffect(() => { try { localStorage.setItem('quiet_reader_settings', JSON.stringify(settings)); } catch { /* browser storage unavailable */ } }, [settings]);
   useEffect(() => { try { localStorage.setItem(bookmarkKey(story.id), JSON.stringify(bookmarks)); } catch { /* browser storage unavailable */ } }, [bookmarks, story.id]);
   useEffect(() => { if (!status) return; const timer = window.setTimeout(() => setStatus(''), 2000); return () => window.clearTimeout(timer); }, [status]);
@@ -237,12 +252,12 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
 
   const first = pages[safeIndex];
   const second = spread ? pages[safeIndex + 1] : undefined;
-  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
-    {chapters.length > 0 && <PageMeasurer chapters={chapters} settings={settings} geometry={geometry} onMeasured={onMeasured}/>}
+  return <div className={`quiet-app ${previewStory ? 'reader-author-preview' : 'reader-protected'}`} data-reader-theme={effectiveTheme} style={{ backgroundColor: theme.bg, color: theme.text }} onTouchStart={touchStart} onTouchMove={touchMove} onTouchEnd={touchEnd}>
+    {chapters.length > 0 && <PageMeasurer chapters={chapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured}/>}
     <main className={`reader-stage ${controls ? 'showing-controls' : ''}`} onCopy={e=>{if(!previewStory)e.preventDefault();}} onCut={e=>{if(!previewStory)e.preventDefault();}} onContextMenu={e=>{if(!previewStory)e.preventDefault();}} onDragStart={e=>{if(!previewStory)e.preventDefault();}} onClick={onCanvasClick} aria-label="Halaman pembaca, ketuk tengah untuk menu">
       <div className={`reader-book ${spread ? 'reader-book-spread' : ''}`} style={{ background: theme.pageBg, gap: spread ? 16 : 0 }}>
-        {first && chapters[first.chapterIndex] ? <ReaderPage key={`left-${first.chapterIndex}`} chapter={chapters[first.chapterIndex]} columnIndex={first.columnIndex} pageNumber={safeIndex + 1} totalPages={pages.length} settings={settings} theme={theme} geometry={geometry}/> : <div className="loading-text" style={{ color: theme.secondaryText }}>{chapters.length ? 'Menata halaman…' : loadState === 'loading' ? 'Memuat episode…' : loadState === 'error' ? loadError : 'Belum ada episode terbit.'}</div>}
-        {spread && second && chapters[second.chapterIndex] && <ReaderPage key={`right-${second.chapterIndex}`} chapter={chapters[second.chapterIndex]} columnIndex={second.columnIndex} pageNumber={safeIndex + 2} totalPages={pages.length} settings={settings} theme={theme} geometry={geometry}/>}
+        {first && chapters[first.chapterIndex] ? <ReaderPage key={`left-${first.chapterIndex}`} chapter={chapters[first.chapterIndex]} columnIndex={first.columnIndex} pageNumber={safeIndex + 1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry}/> : <div className="loading-text" style={{ color: theme.secondaryText }}>{chapters.length ? 'Menata halaman…' : loadState === 'loading' ? 'Memuat episode…' : loadState === 'error' ? loadError : 'Belum ada episode terbit.'}</div>}
+        {spread && second && chapters[second.chapterIndex] && <ReaderPage key={`right-${second.chapterIndex}`} chapter={chapters[second.chapterIndex]} columnIndex={second.columnIndex} pageNumber={safeIndex + 2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry}/>}
       </div>
     </main>
     <div className={`controls-shell ${controls ? 'controls-open' : ''}`} aria-hidden={!controls}>
@@ -251,6 +266,6 @@ export default function ReaderApp({ bookId, bookTitle, onExit, previewStory, epi
     {status && <div className="quiet-status" role="status" style={{ background: theme.barBg, color: theme.secondaryText }}>{status}</div>}
     {modal === 'contents' && <ContentsPanel onClose={() => setModal('none')} chapters={chapters.map((ch, i) => ({...ch, startPageIndex: Math.max(0, pages.findIndex(p => p.chapterIndex === i))}))} currentChapterId={chapter?.id ?? ''} bookmarks={bookmarks} onChapter={ch => goChapter(chapters.findIndex(c => c.id === ch.id))} onBookmark={at => goToAnchor(at)} onDeleteBookmark={id => setBookmarks(prev => prev.filter(b => b.id !== id))} theme={theme}/>}
     {modal === 'search' && <SearchPanel onClose={() => setModal('none')} chapters={chapters} onResult={at => goToAnchor(at)} theme={theme}/>}
-    <ReadingSettingsModal isOpen={modal === 'settings'} onClose={() => setModal('none')} settings={settings} theme={theme} onUpdateSettings={nextSettings => setSettings(prev => ({ ...prev, ...nextSettings }))}/>
+    <ReadingSettingsModal isOpen={modal === 'settings'} onClose={() => setModal('none')} settings={effectiveSettings} theme={theme} onUpdateSettings={changeReaderSettings} readerPreference={readerPreference} onFollowAppTheme={followAppTheme} appTheme={appTheme}/>
   </div>;
 }

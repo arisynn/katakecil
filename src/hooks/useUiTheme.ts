@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export type UiTheme = 'light' | 'dark';
 export type AppThemePreference = 'system' | UiTheme;
 export const APP_THEME_KEY = 'appThemePreference';
+export const themeMetaColors = {light:'#F8F4EE',dark:'#0D1729'} as const;
 const LEGACY_KEY = 'katakecil_ui_theme_v53';
 
 export function getThemePreference(): AppThemePreference {
@@ -48,7 +49,10 @@ export function useUiTheme() {
   }, []);
   useEffect(() => {
     document.documentElement.dataset.appTheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', window.location.pathname.startsWith('/baca/') ? '#F8EEDC' : '#101C31');
+    // Reader sets its own meta color based on the effective reading preference.
+    if (!window.location.pathname.startsWith('/baca/')) {
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeMetaColors[theme]);
+    }
   }, [theme]);
   return { theme, preference, setPreference, toggleTheme };
 }
