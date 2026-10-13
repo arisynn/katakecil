@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "6.2.0",
+  "version": "6.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,8 @@
     "test:v54": "node scripts/test-v54.mjs",
     "test:v6": "node scripts/test-v6.mjs",
     "test:v61": "node scripts/test-v61.mjs",
-    "test:v62": "node scripts/test-v62.mjs"
+    "test:v62": "node scripts/test-v62.mjs",
+    "test:v63": "node scripts/test-v63.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

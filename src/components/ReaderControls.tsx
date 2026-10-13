@@ -15,7 +15,7 @@ export function ReaderControls({ title, chapterTitle, theme, page, total, isBook
   return <>
     <header className="reader-control-header" style={{ background: theme.barBg, borderColor: theme.border, color: theme.text }}>
       <div className="control-inner">
-        <button className="control-icon" onClick={onClose} aria-label="Tutup menu pembaca"><ArrowLeft size={19}/></button>
+        <button className="control-icon reader-close-menu" onClick={onClose} aria-label="Tutup menu pembaca"><ArrowLeft size={19}/></button>
         <button className="control-icon reader-exit" title="Kembali ke detail cerita" aria-label="Keluar dari pembaca" onClick={onExit}><House size={18}/></button>
         <div className="control-titles"><span className="control-title">{title}</span><span className="control-subtitle" style={{ color: theme.secondaryText }}>{chapterTitle}</span></div>
         {canReturn && <button className="control-icon" title="Kembali ke posisi sebelumnya" onClick={onReturn}><Undo2 size={19}/></button>}

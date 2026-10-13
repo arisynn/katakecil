@@ -25,6 +25,7 @@ import { getThemePreference, resolveAppTheme, themeMetaColors } from './hooks/us
 import { getReaderThemePreference, resolveReaderTheme } from './utils/readerThemePreference';
 import { THEMES } from './utils/theme';
 import './design/v62-theme.css';
+import './design/v63-ios.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

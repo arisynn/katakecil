@@ -1,3 +1,7 @@
+# KataKecil V6.3 — iOS Mobile-First
+
+Lihat [RELEASE_V6.3.md](RELEASE_V6.3.md) untuk pembaruan UI gelap/terang, navigasi mobile, Reader, hasil pengujian, dan keterbatasan.
+
 # KataKecil V6.2
 
 Versi terbaru: **V6.2 — Midnight Library & Ivory Atelier**. Lihat [`RELEASE_V6.2.md`](RELEASE_V6.2.md) untuk perubahan tema, Reader, navigasi dan hasil pengujian.
