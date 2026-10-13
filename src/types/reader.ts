@@ -1,4 +1,4 @@
-export type ThemeMode = 'white' | 'sepia' | 'night' | 'black';
+export type ThemeMode = 'white' | 'sepia' | 'night' | 'black' | 'calm';
 export type FontFamily = 'literata' | 'sans' | 'merriweather' | 'mono';
 export type LineHeight = 'compact' | 'normal' | 'loose';
 export type MarginWidth = 'narrow' | 'normal' | 'wide';

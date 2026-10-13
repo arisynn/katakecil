@@ -11,7 +11,6 @@ import { navigate } from './utils/nav';
 import './index.css';
 import './site.css';
 import './studio.css';
-import './v6-redesign.css';
 import './studio-v4.css';
 import './studio-v41.css';
 import './content-protection.css';
@@ -19,6 +18,7 @@ import './secure-reader.css';
 import './mist-blue.css';
 import './design/v53-mobile.css';
 import './design/v54.css';
+import './design/v6.css';
 import ThemeLoading from './components/ThemeLoading';
 
 export default function App(){
