@@ -27,6 +27,7 @@ import { THEMES } from './utils/theme';
 import './design/v62-theme.css';
 import './design/v63-ios.css';
 import './design/v64-unified-theme.css';
+import './design/v66-featured-carousel.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

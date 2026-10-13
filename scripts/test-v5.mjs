@@ -16,10 +16,10 @@ assert.ok(read('src/components/Cover.tsx').includes('art-cover-backdrop'), 'Prov
 assert.match(read('supabase/REVIEW_ONLY_stage2_metadata_grants.sql'),/updated_at, deleted_at/, 'Grant safe metadata column before filtering trashed episodes.');
 assert.ok(!/\.from\('qr_books'\)\.insert\(/.test(importUi), 'Importer must not create a new book in a separate transaction.');
 assert.ok(importUi.includes("rpc('qr_import_manuscript_v5'"), 'Importer must use atomic RPC.');
-assert.ok(importUi.includes(".eq('id',String(data?.batch_id||''))"), 'Importer needs a post-write verification.');
+assert.match(importUi, /\.eq\('id',\s*String\(data\?\.batch_id\s*\|\|\s*''\)\)/, 'Importer needs a post-write verification.');
 assert.ok(importUi.includes('meaningfulFrontmatter') && importUi.includes('chosenSections'));
 assert.ok(read('src/pages/BookSections.tsx').includes('loadBookSections'));
-assert.ok(read('src/pages/TrashManager.tsx').includes("restore(group.kind,item.id)"));
+assert.match(read('src/pages/TrashManager.tsx'), /restore\(group\.kind,\s*item\.id\)/);
 assert.ok(read('src/pages/Studio.tsx').includes("'/studio/sampah'"));
 assert.match(sql,/create or replace function public\.qr_import_manuscript_v5/);
 assert.match(sql,/security definer set search_path=''/);
