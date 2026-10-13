@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Clock3, Library, Search, Sparkles, X } from 'lucide-react';
-import { Cover, fallbackCover } from '../components/Cover';
+import { Cover, fallbackCover, fallbackCoverMobile } from '../components/Cover';
 import { getPublicLibrary, type Book, type EpisodeSummary } from '../data/library';
 import { isConfigured } from '../data/supabase';
 import { navigate } from '../utils/nav';
@@ -48,7 +48,7 @@ function BookCard({book,count,demo,variant='default'}:{book:Book;count:number;de
   </article>;
 }
 function EmptyLibrary({collection=false}:{collection?:boolean}) {
-  return <section className="v6-empty"><img src="/assets/v6/empty-library.webp" alt="Buku terbuka di meja dekat jendela" loading="lazy"/><div className="v6-empty-copy"><h2>{collection?'Koleksimu masih kosong':'Belum ada cerita di sini'}</h2><p>{collection?'Simpan cerita yang kamu sukai melalui ikon penanda pada sampul.':'Mulai dari halaman perpustakaan untuk menemukan cerita yang telah diterbitkan.'}</p><Action to="/cerita" className="v6-button v6-button-dark">Jelajahi cerita <ArrowRight size={17}/></Action></div></section>;
+  return <section className="v6-empty"><picture><source media="(max-width: 600px)" srcSet="/assets/v6/empty-library-mobile.webp" type="image/webp"/><img src="/assets/v6/empty-library.webp" alt="Buku terbuka di meja dekat jendela" loading="lazy" decoding="async"/></picture><div className="v6-empty-copy"><h2>{collection?'Koleksimu masih kosong':'Belum ada cerita di sini'}</h2><p>{collection?'Simpan cerita yang kamu sukai melalui ikon penanda pada sampul.':'Mulai dari halaman perpustakaan untuk menemukan cerita yang telah diterbitkan.'}</p><Action to="/cerita" className="v6-button v6-button-dark">Jelajahi cerita <ArrowRight size={17}/></Action></div></section>;
 }
 function Heading({title,to}:{title:string;to?:string}) {return <div className="v6-section-heading"><h2>{title}</h2>{to&&<Action to={to} className="v6-see-all">Lihat Semua <ChevronRight size={15}/></Action>}</div>}
 function readProgress(book:Book) {
@@ -100,7 +100,7 @@ function Detail({book,episodes,demo}:{book:Book;episodes:EpisodeSummary[];demo:b
   const rows=episodes.filter(e=>e.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number);
   const [showAll,setShowAll]=useState(false);
   const image=book.cover_url||fallbackCover(book);
-  return <main className="v6-detail-page"><div className="v6-detail-backdrop" style={{backgroundImage:`linear-gradient(90deg,rgba(11,21,38,.93),rgba(11,21,38,.54)),url("${image.replaceAll('"','%22')}")`}}/>
+  return <main className="v6-detail-page"><div className="v6-detail-backdrop" aria-hidden="true"><picture><source media="(max-width: 600px)" srcSet={book.cover_url||fallbackCoverMobile(book)} /><img src={image} alt="" loading="eager" decoding="async" onError={e=>{e.currentTarget.style.display='none';}}/></picture></div>
     <div className="v6-detail-content"><Action to="/cerita" className="v6-detail-back"><ArrowLeft size={17}/> Perpustakaan</Action>
       <section className="v6-detail-hero"><div className="v6-detail-cover"><Cover book={book} size="large" eager/><BookmarkButton book={book}/></div><div className="v6-detail-info"><h1>{book.title}</h1><div className="v6-detail-tags"><span>{book.genre||'Fiksi'}</span><span>{book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Berlangsung'}</span></div><div className="v6-detail-numbers"><span><BookOpen size={16}/>{demo?'Contoh':`${rows.length} Bab`}</span><span><Clock3 size={16}/>{book.status==='completed'?'Selesai':'Bersambung'}</span></div><p>{book.synopsis||'Sinopsis belum ditambahkan oleh penulis.'}</p><div className="v6-detail-actions">{rows.length&&!demo?<Action className="v6-button v6-button-gold" to={`/baca/${book.slug}`}>Mulai Membaca <ArrowRight size={17}/></Action>:<button className="v6-button v6-button-gold" disabled>Belum ada bab terbit</button>}<Action to="/koleksi" className="v6-button v6-button-outline"><Bookmark size={16}/> Koleksi</Action></div></div></section>
       <div className="v6-detail-bottom"><section className="v6-chapters"><div className="v6-chapters-title"><h2>Daftar Bab</h2><span>Urut: Terbaru tersedia</span></div>{rows.length?rows.slice(0,showAll?undefined:18).map((ep,i)=><button className="v6-chapter" key={ep.episode_number} onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}><span>{i+1}.</span><div><strong>{ep.title}</strong><small>{ep.arc_title||`Bab ${ep.episode_number}`}</small></div><span className="v6-chapter-date">{ep.release_at?new Date(ep.release_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):''}</span><ChevronRight size={16}/></button>):<div className="v6-no-chapters">{demo?'Ini hanya pratinjau visual. Hubungkan Supabase untuk membaca cerita asli.':'Bab pertama belum diterbitkan.'}</div>}{rows.length>18&&!showAll&&<button className="v6-show-chapters" onClick={()=>setShowAll(true)}>Lihat semua bab <ArrowRight size={16}/></button>}</section>
@@ -115,9 +115,10 @@ export default function PublicLibrary({path}:{path:string}) {
   const slug=path.startsWith('/cerita/')?decodeURIComponent(path.split('/')[2]||''):null;
   const book=slug?books.find(b=>b.slug===slug):undefined;
   useEffect(()=>{document.title=`${book?.title?`${book.title} · `:path==='/cerita'?'Perpustakaan · ':path==='/koleksi'?'Koleksi · ':''}KataKecil`;},[book?.title,path]);
+  if(loading)return <ThemeLoading context="public" text="Membuka perpustakaan…"/>;
   return <div className="site-shell v6-public" data-kk-theme={theme}><PublicHeader path={path}/>
     {demo&&<div className="v6-demo-notice"><Sparkles size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error&&<div className="v6-error" role="alert">{error}</div>}
-    {loading?<ThemeLoading context="public" text="Membuka perpustakaan…"/>:path==='/tentang'?<About/>:path==='/koleksi'?<Listing books={books} episodes={episodes} demo={demo} collection/>:slug?(book?<Detail book={book} episodes={episodes} demo={demo}/>:<div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>):path==='/cerita'?<Listing books={books} episodes={episodes} demo={demo}/>:<Home books={books} episodes={episodes} demo={demo}/>}
+    {path==='/tentang'?<About/>:path==='/koleksi'?<Listing books={books} episodes={episodes} demo={demo} collection/>:slug?(book?<Detail book={book} episodes={episodes} demo={demo}/>:<div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>):path==='/cerita'?<Listing books={books} episodes={episodes} demo={demo}/>:<Home books={books} episodes={episodes} demo={demo}/>}
   </div>;
 }

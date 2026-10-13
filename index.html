@@ -2,22 +2,43 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="theme-color" content="#F5F9FD" />
+    <meta name="theme-color" content="#101C31" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <style>
-      :root { color-scheme: light dark; --app-background:#F5F9FD; --app-foreground:#243447; }
-      @media (prefers-color-scheme:dark) { :root { --app-background:#08192D; --app-foreground:#E6EEF8; } }
-      html[data-app-theme="light"] { color-scheme:light; --app-background:#F5F9FD; --app-foreground:#243447; }
-      html[data-app-theme="dark"] { color-scheme:dark; --app-background:#08192D; --app-foreground:#E6EEF8; }
-      html,body,#root {background:var(--app-background);color:var(--app-foreground);min-height:100%;margin:0}
-      .kk-boot-loader{display:flex;min-height:65vh;align-items:center;justify-content:center;flex-direction:column;gap:11px;color:var(--app-foreground);font-family:Georgia,serif}
-      .kk-boot-loader strong{font-size:27px;font-weight:500}.kk-boot-loader small{color:var(--app-foreground);opacity:.72;font:12px system-ui,sans-serif}
+      :root {color-scheme:light dark;--app-background:#F5F9FD;--app-foreground:#243447;}
+      @media (prefers-color-scheme:dark){:root{--app-background:#08192D;--app-foreground:#E6EEF8;}}
+      html[data-app-theme="light"]{color-scheme:light;--app-background:#F5F9FD;--app-foreground:#243447;}
+      html[data-app-theme="dark"]{color-scheme:dark;--app-background:#08192D;--app-foreground:#E6EEF8;}
+      html,body,#root{margin:0;min-height:100%;background:#101c31;color:#fff1db;}
+      html[data-kk-boot-context="reader"],html[data-kk-boot-context="reader"] body,html[data-kk-boot-context="reader"] #root{background:#f8eedc;color:#40342c;}
+      .kk-boot-loader{box-sizing:border-box;position:relative;isolation:isolate;display:grid;place-items:center;overflow:hidden;min-height:100dvh;padding:60px 24px;background:#101c31;color:#fff1db;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;}
+      .kk-boot-loader::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,#091426b8,#111c30d8),url('/assets/v6/loading-ambience.webp') center/cover no-repeat;}
+      .kk-boot-content{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(100%,380px);}
+      .kk-boot-mark{display:grid;place-items:center;width:83px;height:83px;margin-bottom:8px;border:1px solid #ffe5b469;border-radius:24px;background:#f8dfaa19;color:#f7d69c;box-shadow:0 0 38px #e8b87126;}
+      .kk-boot-brand{font:500 clamp(35px,6vw,45px)/1.1 Georgia,serif;letter-spacing:-.045em;color:#fff1db;}
+      .kk-boot-tagline{font-size:12px;line-height:1.6;color:#e4d9d1;margin:0;}
+      .kk-boot-track{width:145px;height:3px;position:relative;overflow:hidden;border-radius:20px;background:#ffffff36;margin-top:17px;}
+      .kk-boot-track::after{content:"";position:absolute;top:0;bottom:0;width:42%;border-radius:20px;background:#f7d69c;animation:kk-boot-progress 1.65s ease-in-out infinite alternate;}
+      .kk-boot-message{font-size:12px;color:#d2d6df;margin:2px 0 0;}
+      @keyframes kk-boot-progress{from{transform:translateX(0)}to{transform:translateX(205%)}}
+      html[data-kk-boot-context="reader"] .kk-boot-loader{background:#f8eedc;color:#40342c;}
+      html[data-kk-boot-context="reader"] .kk-boot-loader::before{background:linear-gradient(#f8eedce8,#f8eedce8),url('/assets/v6/reader-paper-texture.webp') center/cover;}
+      html[data-kk-boot-context="reader"] .kk-boot-mark{background:#fff6e7;border-color:#a7895b70;color:#a57c49;box-shadow:none;}
+      html[data-kk-boot-context="reader"] .kk-boot-brand{color:#40342c;}
+      html[data-kk-boot-context="reader"] .kk-boot-tagline,html[data-kk-boot-context="reader"] .kk-boot-message{color:#75675a;}
+      html[data-kk-boot-context="reader"] .kk-boot-track{background:#b19b7b4d;}
+      html[data-kk-boot-context="reader"] .kk-boot-track::after{background:#a57c49;}
+      @media(max-width:600px){.kk-boot-loader::before{background-image:linear-gradient(180deg,#091426b8,#111c30d8),url('/assets/v6/loading-ambience-mobile.webp');}.kk-boot-content{gap:11px;}.kk-boot-mark{width:73px;height:73px;}}
+      @media(max-width:600px){html[data-kk-boot-context="reader"] .kk-boot-loader::before{background-image:linear-gradient(#f8eedce8,#f8eedce8),url('/assets/v6/reader-paper-texture-mobile.webp');}}
+      @media(prefers-reduced-motion:reduce){.kk-boot-track::after{animation:none;left:29%;}}
     </style>
     <script>
-      (function(){try{var pref=localStorage.getItem('appThemePreference')||localStorage.getItem('katakecil_ui_theme_v53')||'system';
+      (function(){var context=location.pathname.startsWith('/baca/')?'reader':location.pathname.startsWith('/studio')?'studio':'public';
+        document.documentElement.setAttribute('data-kk-boot-context',context);
+        document.querySelector('meta[name="theme-color"]').setAttribute('content',context==='reader'?'#F8EEDC':'#101C31');
+        try{var pref=localStorage.getItem('appThemePreference')||localStorage.getItem('katakecil_ui_theme_v53')||'system';
         var mode=pref==='dark'||pref==='light'?pref:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
         document.documentElement.setAttribute('data-app-theme',mode);
-        document.querySelector('meta[name="theme-color"]').setAttribute('content',mode==='dark'?'#08192D':'#F5F9FD');
       }catch(e){ /* CSS media preference is the fallback. */ }})();
     </script>
     <title>KataKecil — Perpustakaan Cerita</title>
@@ -31,7 +52,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"><div class="kk-boot-loader" role="status"><strong>KataKecil</strong><small>Membuka cerita…</small></div></div>
+    <div id="root"><div class="kk-boot-loader" role="status" aria-live="polite" aria-busy="true">
+      <div class="kk-boot-content">
+        <div class="kk-boot-mark" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18V5a1 1 0 0 1 1-1h3a5 5 0 0 1 5 5 5 5 0 0 1 5-5h3a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3a5 5 0 0 0-5 2 5 5 0 0 0-5-2H4a1 1 0 0 1-1-1z"/></svg></div>
+        <strong class="kk-boot-brand">KataKecil</strong>
+        <p class="kk-boot-tagline">Setiap cerita punya tempat untuk kembali.</p>
+        <div class="kk-boot-track" aria-hidden="true"></div>
+        <p class="kk-boot-message">Membuka perpustakaan…</p>
+      </div>
+    </div></div>
+    <script>
+      (function(){var context=document.documentElement.getAttribute('data-kk-boot-context');var message=context==='reader'?'Menyiapkan halaman cerita…':context==='studio'?'Memverifikasi akses Studio…':'Membuka perpustakaan…';var loader=document.querySelector('.kk-boot-loader');if(loader){loader.setAttribute('aria-label',message);var label=loader.querySelector('.kk-boot-message');if(label)label.textContent=message;}})();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

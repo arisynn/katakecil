@@ -48,7 +48,7 @@ export function useUiTheme() {
   }, []);
   useEffect(() => {
     document.documentElement.dataset.appTheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#08192D' : '#F5F9FD');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', window.location.pathname.startsWith('/baca/') ? '#F8EEDC' : '#101C31');
   }, [theme]);
   return { theme, preference, setPreference, toggleTheme };
 }

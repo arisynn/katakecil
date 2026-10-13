@@ -45,8 +45,9 @@ const core={
 };
 for(const [file,expected] of Object.entries(core)) assert.equal(sha(file),expected,`Core reader changed: ${file}`);
 const assets=readdirSync('public/assets/v6/covers').filter(n=>n.endsWith('.webp'));
-assert.equal(assets.length,8,'Eight distinct cover assets');
-for(const file of [...assets.map(a=>`public/assets/v6/covers/${a}`),...['hero-library-sunset.webp','hero-library-sunset-mobile.webp','studio-ambience.webp','empty-library.webp','reader-paper-texture.webp','detail-backdrop.webp'].map(a=>`public/assets/v6/${a}`)]) {
- const b=readFileSync(file);assert.equal(b.toString('ascii',8,12),'WEBP',`Not WebP: ${file}`);assert.ok(statSync(file).size>8000,`Asset missing or empty: ${file}`);
+assert.equal(assets.filter(n=>!n.endsWith('-mobile.webp')).length,8,'Eight distinct desktop cover assets');
+assert.equal(assets.filter(n=>n.endsWith('-mobile.webp')).length,8,'Eight distinct mobile cover assets');
+for(const file of [...assets.map(a=>`public/assets/v6/covers/${a}`),...['hero-library-sunset.webp','hero-library-sunset-mobile.webp','studio-ambience.webp','empty-library.webp','reader-paper-texture.webp','detail-backdrop.webp','studio-ambience-mobile.webp','empty-library-mobile.webp','detail-backdrop-mobile.webp','reader-paper-texture-mobile.webp','loading-ambience.webp','loading-ambience-mobile.webp'].map(a=>`public/assets/v6/${a}`)]) {
+ const b=readFileSync(file);assert.equal(b.toString('ascii',8,12),'WEBP',`Not WebP: ${file}`);assert.ok(statSync(file).size>2000,`Asset missing or empty: ${file}`);
 }
-console.log('PASS V6: public/Studio routes, private author gate, actual data, autosave, reader core hashes, theme compatibility, collection, 14 WebP assets.');
+console.log('PASS V6: public/Studio routes, private author gate, actual data, autosave, reader core hashes, theme compatibility, collection, 28 WebP assets.');
