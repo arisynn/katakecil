@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Bookmark, ChevronDown, ChevronRight, Clock3, Feather, Search, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Bookmark, CalendarClock, ChevronDown, ChevronRight, Clock3, Feather, Search, Sparkles, X } from 'lucide-react';
 import { Cover } from '../components/Cover';
 import { getPublicLibrary, type Book, type EpisodeSummary } from '../data/library';
 import { isConfigured } from '../data/supabase';
@@ -12,6 +12,8 @@ import { BookmarkButton, BookCard } from '../features/public/components/StoryCar
 import { Action, EmptyLibrary, Heading } from '../features/public/components/LibraryUI';
 import FeaturedHeroCarousel from '../features/public/components/FeaturedHeroCarousel';
 import { selectRecentlyPublishedStories } from '../features/public/featuredStories';
+import { selectRecentChapters } from '../features/public/recentChapters';
+import { getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter } from '../data/publicSchedule';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
 const demoDate = '2026-10-01T00:00:00.000Z';
 const demoData: Array<[
@@ -33,22 +35,41 @@ function useLibrary() {
     const [data, setData] = useState<{
         books: Book[];
         episodes: EpisodeSummary[];
-    }>({ books: [], episodes: [] });
+        schedules: UpcomingChapter[];
+    }>({ books: [], episodes: [], schedules: [] });
     const [loading, setLoading] = useState(isConfigured);
     const [error, setError] = useState('');
     useEffect(() => {
         let active = true;
         if (!isConfigured) {
-            setData({ books: demoBooks, episodes: [] });
+            setData({ books: demoBooks, episodes: [], schedules: [] });
             setLoading(false);
             return;
         }
-        getPublicLibrary().then(result => { if (active)
-            setData(result); }).catch(e => { if (active)
+        Promise.all([getPublicLibrary(), getPublicUpcomingChapters()]).then(([library, schedules]) => {
+            if (active) setData({ ...library, schedules });
+        }).catch(e => { if (active)
             setError(e instanceof Error ? e.message : 'Gagal memuat perpustakaan.'); }).finally(() => { if (active)
             setLoading(false); });
         return () => { active = false; };
     }, []);
+    // When the next scheduled release goes live, refresh the public metadata.
+    // The reader never receives future chapter bodies or titles.
+    useEffect(() => {
+        if (!isConfigured || data.schedules.length === 0) return;
+        const nextRelease = Math.min(...data.schedules.map(item => Date.parse(item.release_at)));
+        if (!Number.isFinite(nextRelease)) return;
+        const delay = Math.max(1000, Math.min(nextRelease - Date.now() + 2000, 86_400_000));
+        let active = true;
+        const timer = window.setTimeout(() => {
+            Promise.all([getPublicLibrary(), getPublicUpcomingChapters()])
+                .then(([library, schedules]) => {
+                    if (active) setData({ ...library, schedules });
+                })
+                .catch(() => { /* Keep the existing public catalog on transient errors. */ });
+        }, delay);
+        return () => { active = false; window.clearTimeout(timer); };
+    }, [data.schedules]);
     return { ...data, loading, error, demo: !isConfigured };
 }
 const countFor = (episodes: EpisodeSummary[], book: Book) => episodes.filter(e => e.book_id === book.id).length;
@@ -61,81 +82,81 @@ function readProgress(book: Book) {
         return null;
     }
 }
-function Home({ books, episodes, demo }: {
+function Home({ books, episodes, schedules, demo }: {
     books: Book[];
     episodes: EpisodeSummary[];
+    schedules: UpcomingChapter[];
     demo: boolean;
 }) {
-    // Preview data is never promoted into the real, publication-driven hero.
+    // Only real, released stories are allowed in the carousel.
     const latestStories = useMemo(
         () => demo ? [] : selectRecentlyPublishedStories(books, episodes),
         [books, episodes, demo],
     );
-    const heroIds = new Set(latestStories.map(story => story.book.id));
-    const availableBooks = books.filter(book => demo || countFor(episodes, book) > 0);
-    const remainingBooks = availableBooks.filter(book => !heroIds.has(book.id));
-    const sortedRemaining = [...remainingBooks].sort((a, b) =>
-        Number(b.is_featured) - Number(a.is_featured),
+    const recentChapters = useMemo(
+        () => demo ? [] : selectRecentChapters(books, episodes),
+        [books, episodes, demo],
     );
-    const selection = sortedRemaining.slice(0, 3);
-    const selectionIds = new Set(selection.map(book => book.id));
-    const otherBooks = remainingBooks.filter(book => !selectionIds.has(book.id)).slice(0, 4);
-    const genres = [...new Set(books.map(book => book.genre).filter(Boolean))].slice(0, 6);
-
-    const continuation = demo ? undefined : books.find(book => {
+    const availableBooks = books.filter(book => demo || countFor(episodes, book) > 0);
+    const genres = [...new Set(availableBooks.map(book => book.genre).filter(Boolean))].slice(0, 6);
+    const continuation = demo ? undefined : availableBooks.find(book => {
         const progress = readProgress(book);
         return progress !== null && episodes.some(
-            episode => episode.book_id === book.id && episode.episode_number === progress,
+            ep => ep.book_id === book.id && ep.episode_number === progress,
         );
     });
     const episode = continuation ? readProgress(continuation) : null;
 
-    return <main className="v6-home v66-home">
-        <FeaturedHeroCarousel stories={latestStories}/>
-        <div className="v6-home-sections">
-            {(continuation || selection.length > 0) && <div className="v6-home-row">
-                {continuation && episode !== null && (
-                    <section className="v6-continue">
-                        <Heading title="Lanjut Membaca"/>
-                        <div className="v6-continue-card">
-                            <div className="v6-continue-cover"><Cover book={continuation} eager/></div>
-                            <div className="v6-continue-info">
-                                <strong>{continuation.title}</strong>
-                                <span>Terakhir di bab {episode}</span>
-                                <Action className="v6-continue-action" to={`/baca/${continuation.slug}?episode=${episode}`}>
-                                    Lanjutkan <ArrowRight size={14}/>
-                                </Action>
-                            </div>
-                        </div>
-                    </section>
-                )}
-                {selection.length > 0 && (
-                    <section className="v6-featured">
-                        <Heading title="Cerita Pilihan"/>
-                        <div className="v6-featured-grid">
-                            {selection.map(book => <BookCard key={book.id} book={book} count={countFor(episodes, book)} demo={demo} variant="featured"/>)}
-                        </div>
-                    </section>
-                )}
-            </div>}
-            {otherBooks.length > 0 && (
-                <section className="v6-newest">
-                    <Heading title="Cerita Lainnya"/>
-                    <div className="v6-newest-grid">
-                        {otherBooks.map(book => <BookCard key={book.id} book={book} count={countFor(episodes, book)} demo={demo} variant="horizontal"/>)}
+    return <main className="v6-home v66-home v68-home">
+        <FeaturedHeroCarousel stories={latestStories} schedules={schedules}/>
+        <div className="v6-home-sections v68-home-sections">
+            {continuation && episode !== null && <section className="v68-continue" aria-label="Lanjut membaca">
+                <Heading title="Lanjut Membaca"/>
+                <button
+                    type="button"
+                    className="v68-continue-card"
+                    onClick={() => navigate(`/baca/${continuation.slug}?episode=${episode}`)}
+                    aria-label={`Lanjutkan ${continuation.title} dari bab ${episode}`}
+                >
+                    <div className="v68-continue-cover"><Cover book={continuation} eager/></div>
+                    <div className="v68-continue-info">
+                        <strong>{continuation.title}</strong>
+                        <span>Bab {episode} · {countFor(episodes, continuation)} bab tersedia</span>
                     </div>
-                </section>
-            )}
-            {books.length > 0 && <section className="v66-discover" aria-labelledby="v66-discover-title">
-                <div>
-                    <span className="v66-discover-kicker">TEMUKAN CERITAMU</span>
-                    <h2 id="v66-discover-title">Jelajahi Perpustakaan</h2>
-                    <p>Pilih suasana yang ingin kamu baca hari ini.</p>
+                    <span className="v68-continue-arrow" aria-hidden="true"><ArrowRight size={19}/></span>
+                </button>
+            </section>}
+            {recentChapters.length > 0 && <section className="v68-new-chapters" aria-label="Bab baru">
+                <Heading title="Bab Baru"/>
+                <div className="v68-chapter-list">
+                    {recentChapters.map(({ book, episode: ep }) => <button
+                        key={`${book.id}:${ep.episode_number}`}
+                        type="button"
+                        className="v68-chapter-item"
+                        onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}
+                        aria-label={`Baca ${ep.title} dari ${book.title}`}
+                    >
+                        <span className="v68-chapter-number" aria-hidden="true">{ep.episode_number === 0 ? 'P' : ep.episode_number}</span>
+                        <span className="v68-chapter-copy">
+                            <strong>{ep.title}</strong>
+                            <small>{book.title} · {new Intl.DateTimeFormat('id-ID', {
+                                timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short',
+                            }).format(new Date(ep.release_at!))}</small>
+                        </span>
+                        <ChevronRight size={17} aria-hidden="true"/>
+                    </button>)}
                 </div>
-                {genres.length > 0 && <div className="v66-discover-genres" aria-label="Jelajahi berdasarkan genre">
-                    {genres.map(genre => <Action key={genre} to={`/cerita?genre=${encodeURIComponent(genre)}`} className="v66-genre-link">{genre} <ArrowRight size={14}/></Action>)}
-                </div>}
-                <Action to="/cerita" className="v66-discover-all">Lihat semua cerita <ArrowRight size={16}/></Action>
+            </section>}
+            {genres.length > 0 && <section className="v68-genres" aria-label="Jelajahi genre">
+                <Heading title="Jelajahi Genre"/>
+                <div className="v68-genre-pills">
+                    <Action to="/cerita" className="v68-genre-pill v68-genre-all">Semua Cerita</Action>
+                    {genres.map(genre => <Action
+                        key={genre}
+                        to={`/cerita?genre=${encodeURIComponent(genre)}`}
+                        className="v68-genre-pill"
+                    >{genre}</Action>)}
+                </div>
             </section>}
             <footer className="v6-footer">KataKecil © {new Date().getFullYear()} <span>Setiap cerita punya tempat untuk kembali.</span></footer>
         </div>
@@ -177,20 +198,106 @@ function Listing({ books, episodes, demo, collection = false }: {
     {shown.length ? <div className="v6-library-grid">{shown.map(b => <BookCard key={b.id} book={b} count={countFor(episodes, b)} demo={demo}/>)}</div> : !q && filter === 'Semua' && (!books.length || collection) ? <EmptyLibrary collection={collection}/> : <div className="v6-filter-empty"><Search size={24}/><h2>Tidak ada cerita yang cocok</h2><p>Coba kata kunci atau genre lain.</p><button onClick={() => { setQ(''); setFilter('Semua'); }}>Hapus filter</button></div>}
   </main>;
 }
-function Detail({ book, episodes, demo }: {
+function Detail({ book, episodes, schedules, demo }: {
     book: Book;
     episodes: EpisodeSummary[];
+    schedules: UpcomingChapter[];
     demo: boolean;
 }) {
-    const rows = episodes.filter(e => e.book_id === book.id).sort((a, b) => a.episode_number - b.episode_number);
+    const rows = episodes
+        .filter(episode => episode.book_id === book.id)
+        .sort((a, b) => a.episode_number - b.episode_number);
     const [showAll, setShowAll] = useState(false);
+    const nextChapter = schedules.find(item => item.book_id === book.id);
+    const bookStatus = book.status === 'completed' ? 'Tamat'
+        : book.status === 'hiatus' ? 'Jeda' : 'Berlangsung';
+
     return <main className="v6-detail-page">
-    <div className="v6-detail-content"><Action to="/cerita" className="v6-detail-back"><ArrowLeft size={17}/><span>Perpustakaan</span></Action>
-      <section className="v6-detail-hero"><div className="v6-detail-cover"><Cover book={book} size="large" eager/><BookmarkButton book={book}/></div><div className="v6-detail-info"><h1>{book.title}</h1><div className="v6-detail-tags"><span>{book.genre || 'Fiksi'}</span><span>{book.status === 'completed' ? 'Tamat' : book.status === 'hiatus' ? 'Jeda' : 'Berlangsung'}</span></div><div className="v6-detail-numbers"><span><BookOpen size={16}/>{demo ? 'Contoh' : `${rows.length} Bab`}</span><span><Clock3 size={16}/>{book.status === 'completed' ? 'Selesai' : 'Bersambung'}</span></div><p>{book.synopsis || 'Sinopsis belum ditambahkan oleh penulis.'}</p><div className="v6-detail-actions">{rows.length && !demo ? <Action className="v6-button v6-button-gold" to={`/baca/${book.slug}`}>Mulai Membaca <ArrowRight size={17}/></Action> : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}</div></div></section>
-      <div className="v6-detail-bottom"><section className="v6-chapters"><div className="v6-chapters-title"><h2>Daftar Bab</h2><span>Urut: Terbaru tersedia</span></div>{rows.length ? rows.slice(0, showAll ? undefined : 18).map((ep, i) => <button className="v6-chapter" key={ep.episode_number} onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}><span>{i + 1}.</span><div><strong>{ep.title}</strong><small>{ep.arc_title || `Bab ${ep.episode_number}`}</small></div><span className="v6-chapter-date">{ep.release_at ? new Date(ep.release_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span><ChevronRight size={16}/></button>) : <div className="v6-no-chapters">{demo ? 'Ini hanya pratinjau visual. Hubungkan Supabase untuk membaca cerita asli.' : 'Bab pertama belum diterbitkan.'}</div>}{rows.length > 18 && !showAll && <button className="v6-show-chapters" onClick={() => setShowAll(true)}>Lihat semua bab <ArrowRight size={16}/></button>}</section>
-      <aside className="v6-detail-extra"><h2>Informasi</h2><dl><dt>Genre</dt><dd>{book.genre || 'Fiksi'}</dd><dt>Status</dt><dd>{book.status === 'completed' ? 'Tamat' : 'Berjalan'}</dd><dt>Diperbarui</dt><dd>{new Date(book.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</dd><dt>Total bab</dt><dd>{demo ? 'Demo' : rows.length}</dd></dl><p>Setiap cerita punya tempat untuk kembali.</p></aside></div>
-    </div>
-  </main>;
+        <div className="v6-detail-content">
+            <Action to="/cerita" className="v6-detail-back">
+                <ArrowLeft size={17}/><span>Perpustakaan</span>
+            </Action>
+            <section className="v6-detail-hero">
+                <div className="v6-detail-cover">
+                    <Cover book={book} size="large" eager/>
+                    <BookmarkButton book={book}/>
+                </div>
+                <div className="v6-detail-info">
+                    <h1>{book.title}</h1>
+                    <div className="v6-detail-tags">
+                        <span>{book.genre || 'Fiksi'}</span><span>{bookStatus}</span>
+                    </div>
+                    <div className="v6-detail-numbers">
+                        <span><BookOpen size={16}/>{demo ? 'Contoh' : `${rows.length} Bab`}</span>
+                        <span><Clock3 size={16}/>{book.status === 'completed' ? 'Selesai' : 'Bersambung'}</span>
+                    </div>
+                    <p>{book.synopsis || 'Sinopsis belum ditambahkan oleh penulis.'}</p>
+                    <div className="v6-detail-actions">
+                        {rows.length > 0 && !demo
+                            ? <Action className="v6-button v6-button-gold" to={`/baca/${book.slug}`}>
+                                Mulai Membaca <ArrowRight size={17}/>
+                            </Action>
+                            : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}
+                    </div>
+                </div>
+            </section>
+            <div className="v6-detail-bottom">
+                <section className="v6-chapters">
+                    <div className="v6-chapters-title">
+                        <h2>Daftar Bab</h2><span>Urut: Terbaru tersedia</span>
+                    </div>
+                    {rows.length > 0
+                        ? rows.slice(0, showAll ? undefined : 18).map((ep, i) =>
+                            <button
+                                className="v6-chapter"
+                                key={ep.episode_number}
+                                onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}
+                            >
+                                <span>{i + 1}.</span>
+                                <div>
+                                    <strong>{ep.title}</strong>
+                                    <small>{ep.arc_title || `Bab ${ep.episode_number}`}</small>
+                                </div>
+                                <span className="v6-chapter-date">
+                                    {ep.release_at ? new Date(ep.release_at).toLocaleDateString('id-ID', {
+                                        timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric',
+                                    }) : ''}
+                                </span>
+                                <ChevronRight size={16}/>
+                            </button>)
+                        : <div className="v6-no-chapters">
+                            {demo
+                                ? 'Ini hanya pratinjau visual. Hubungkan Supabase untuk membaca cerita asli.'
+                                : 'Bab pertama belum diterbitkan.'}
+                        </div>}
+                    {rows.length > 18 && !showAll && <button
+                        className="v6-show-chapters"
+                        onClick={() => setShowAll(true)}
+                    >Lihat semua bab <ArrowRight size={16}/></button>}
+                </section>
+                <aside className="v6-detail-extra">
+                    <h2>Informasi</h2>
+                    <dl>
+                        <dt>Genre</dt><dd>{book.genre || 'Fiksi'}</dd>
+                        <dt>Status</dt><dd>{bookStatus}</dd>
+                        <dt>Diperbarui</dt>
+                        <dd>{new Date(book.updated_at).toLocaleDateString('id-ID', {
+                            timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric',
+                        })}</dd>
+                        <dt>Total bab</dt><dd>{demo ? 'Demo' : rows.length}</dd>
+                        {nextChapter && <>
+                            <dt>Bab berikutnya</dt>
+                            <dd className="v68-detail-schedule">
+                                <CalendarClock size={15} aria-hidden="true"/>
+                                {formatUpcomingChapter(nextChapter)}
+                            </dd>
+                        </>}
+                    </dl>
+                    <p>Setiap cerita punya tempat untuk kembali.</p>
+                </aside>
+            </div>
+        </div>
+    </main>;
 }
 function About() {
     return <main className="v6-about v67-about">
@@ -213,7 +320,7 @@ function About() {
 export default function PublicLibrary({ path }: {
     path: string;
 }) {
-    const { books, episodes, loading, error, demo } = useLibrary();
+    const { books, episodes, schedules, loading, error, demo } = useLibrary();
     const { theme } = useUiTheme();
     const { ids: collectionIds } = useCollection();
     const showCollection = books.some(book => collectionIds.includes(book.id));
@@ -225,6 +332,6 @@ export default function PublicLibrary({ path }: {
     return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path} showCollection={showCollection}/>
     {demo && <div className="v6-demo-notice"><Sparkles size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error && <div className="v6-error" role="alert">{error}</div>}
-    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>) : path === '/cerita' ? <Listing books={books} episodes={episodes} demo={demo}/> : <Home books={books} episodes={episodes} demo={demo}/>}
+    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>) : path === '/cerita' ? <Listing books={books} episodes={episodes} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
   </div>;
 }

@@ -1,0 +1,244 @@
+/* KataKecil V6.8 — compact, content-first homepage and final sapphire polish.
+   All visible colors come from the two global V6.7 semantic palettes. */
+
+.v6-public .v68-home .v68-home-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  width: min(100%, 1110px);
+  margin: 0 auto !important;
+  padding: 25px 26px calc(115px + env(safe-area-inset-bottom)) !important;
+}
+.v6-public .v68-home .v6-section-heading { margin-bottom: 11px; }
+.v6-public .v68-home .v6-section-heading h2 {
+  color: var(--kk-text) !important;
+  font: 650 clamp(19px, 2.4vw, 25px)/1.2 Georgia, serif;
+  letter-spacing: -.025em;
+}
+.v6-public .v68-home .v6-footer {
+  margin: 2px 0 0;
+  padding: 12px 0;
+  color: var(--kk-muted) !important;
+  border-color: var(--kk-border) !important;
+}
+
+/* One action per row. The entire compact continuation card is clickable. */
+.v68-continue-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 84px;
+  padding: 8px 13px 8px 9px;
+  border: 1px solid var(--kk-border);
+  border-radius: 18px;
+  background: var(--kk-surface);
+  box-shadow: 0 5px 17px var(--kk-shadow);
+  color: var(--kk-text);
+  text-align: left;
+  cursor: pointer;
+}
+.v68-continue-card:hover, .v68-chapter-item:hover { background: var(--kk-surface-2); }
+.v68-continue-cover { width: 47px; height: 69px; flex: 0 0 47px; }
+.v68-continue-cover .v6-cover { width: 100%; height: 100%; border-radius: 7px; }
+.v68-continue-cover .v6-cover-backdrop { display: none; }
+.v68-continue-cover .v6-cover-image { object-fit: contain !important; }
+.v68-continue-info { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 5px; }
+.v68-continue-info strong {
+  overflow: hidden;
+  color: var(--kk-text);
+  font: 650 16px/1.2 Georgia, serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v68-continue-info span { color: var(--kk-muted); font-size: 12px; }
+.v68-continue-arrow {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--kk-surface-2);
+  color: var(--kk-amber);
+}
+
+/* New chapters: only released records, only when a recent update exists. */
+.v68-chapter-list {
+  overflow: hidden;
+  border: 1px solid var(--kk-border);
+  border-radius: 18px;
+  background: var(--kk-surface);
+}
+.v68-chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 69px;
+  padding: 11px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--kk-border);
+  background: transparent;
+  color: var(--kk-text);
+  text-align: left;
+  cursor: pointer;
+}
+.v68-chapter-item:last-child { border-bottom: 0; }
+.v68-chapter-item > svg { flex: 0 0 auto; color: var(--kk-muted); }
+.v68-chapter-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--kk-surface-2);
+  color: var(--kk-amber);
+  font-weight: 750;
+  font-size: 14px;
+}
+.v68-chapter-copy { display: flex; flex: 1; flex-direction: column; gap: 4px; min-width: 0; }
+.v68-chapter-copy strong {
+  overflow: hidden;
+  color: var(--kk-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v68-chapter-copy small { color: var(--kk-muted); font-size: 11px; }
+
+/* Genre links are simple pills, not another large promotional card. */
+.v68-genre-pills { display: flex; flex-wrap: wrap; gap: 9px; }
+.v6-public .v68-genre-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid var(--kk-border);
+  border-radius: 999px;
+  background: var(--kk-surface);
+  color: var(--kk-text);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.v6-public .v68-genre-pill:hover { background: var(--kk-surface-2); }
+.v6-public .v68-genre-pill.v68-genre-all {
+  border-color: var(--kk-amber);
+  background: var(--kk-amber);
+  color: var(--kk-amber-text);
+}
+
+/* Public schedule badges: no false countdown, no future chapter title. */
+.v6-public .v67-hero-card .v68-hero-schedule {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin: -4px 0 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--kk-border);
+  border-radius: 12px;
+  background: var(--kk-surface-2);
+  color: var(--kk-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.v68-hero-schedule > svg { flex: 0 0 auto; margin-top: 1px; color: var(--kk-amber); }
+.v68-hero-schedule span { display: flex; flex-direction: column; gap: 1px; }
+.v68-hero-schedule strong { color: var(--kk-text); font-weight: 700; }
+.v6-public .v68-detail-schedule { display: flex; align-items: flex-start; gap: 6px; line-height: 1.5; }
+.v68-detail-schedule > svg { flex: 0 0 auto; color: var(--kk-amber); }
+
+/* Audit of lingering fixed V5/V6 colors: use sapphire semantic tokens. */
+.v6-public .v6-chapters-title span,
+.v6-public .v6-chapter-date,
+.v6-public .v6-no-chapters,
+.v6-public .v6-detail-extra dt,
+.v6-public .v6-detail-extra > p,
+.v6-public .v6-sort,
+.v6-public .v6-library-search input,
+.v6-public .v6-story-meta small { color: var(--kk-muted) !important; }
+.v6-public .v6-chapter,
+.v6-public .v6-library-search,
+.v6-public .v6-story-card,
+.v6-public .v6-detail-extra,
+.v6-public .v6-chapters { border-color: var(--kk-border) !important; }
+.v6-public .v6-chapter:hover { background: var(--kk-surface-2) !important; }
+.v6-public .v6-library-search input { background: transparent !important; }
+.v6-public .v6-story-card .v6-story-meta strong,
+.v6-public .v6-detail-extra dd,
+.v6-public .v6-chapter strong { color: var(--kk-text) !important; }
+.v6-public .v6-detail-extra,
+.v6-public .v6-chapters { background: var(--kk-surface) !important; }
+.v6-public .v6-show-chapters,
+.v6-public .v6-detail-back { color: var(--kk-amber) !important; }
+.v6-public .v6-public-bottom button:not(.active) { color: var(--kk-muted) !important; }
+.v6-public .v6-public-bottom button:not(.active) svg { color: var(--kk-muted) !important; }
+.v6-public .v6-public-bottom button.active { color: var(--kk-amber) !important; }
+.v6-public .v6-public-bottom button.active svg { color: var(--kk-amber) !important; }
+.v6-studio-app .studio-bottom-nav button:not(.studio-bottom-active) { color: var(--kk-muted) !important; }
+.v6-studio-app .studio-bottom-nav button.studio-bottom-active { color: var(--kk-amber) !important; }
+
+.v6-public .v68-home button:focus-visible,
+.v6-public .v68-home .v68-genre-pill:focus-visible {
+  outline: 2px solid var(--kk-amber);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .v6-public .v68-home .v68-home-sections {
+    gap: 23px;
+    padding: 21px 17px calc(130px + env(safe-area-inset-bottom)) !important;
+  }
+  .v6-public .v68-home .v6-section-heading h2 { font-size: 21px; }
+  .v6-public .v67-hero-card .v68-hero-schedule {
+    margin: -2px 0 10px;
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  .v6-public .v67-hero-card .v66-hero-copy p { margin-bottom: 11px; }
+  .v6-public .v67-hero-card .v66-hero-kicker { margin-bottom: 7px; }
+  .v6-public .v67-hero-card .v66-hero-meta { margin-bottom: 7px; }
+  .v6-public .v67-hero-card .v66-hero-action { min-height: 44px; }
+  .v68-continue-card { min-height: 80px; padding: 7px 11px 7px 8px; }
+  .v68-continue-cover { width: 44px; height: 66px; flex-basis: 44px; }
+  .v68-chapter-item { min-height: 65px; }
+  /* Show release information before a potentially long chapter list. */
+  .v6-public .v6-detail-bottom { display: flex; flex-direction: column; }
+  .v6-public .v6-detail-extra { order: -1; }
+}
+@media (max-width: 365px) {
+  .v6-public .v67-hero-card .v68-hero-schedule { font-size: 9px; }
+  .v6-public .v67-hero-card .v66-hero-meta span { font-size: 8px; }
+  .v68-continue-info strong { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v68-continue-card, .v68-chapter-item, .v68-genre-pill { transition: none !important; }
+}
+
+/* Native cover artwork should not sit inside a second decorative frame. */
+.v6-public .v67-hero-card .v66-hero-media {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.v6-public .v67-hero-card .v66-hero-art .v6-cover,
+.v6-public .v68-continue-cover .v6-cover {
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+.v6-public .v6-detail-cover .v6-cover,
+.v6-public .v6-story-open .v6-cover {
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+.v6-public .v6-detail-cover .v6-cover-image,
+.v6-public .v6-story-open .v6-cover-image { object-fit: contain !important; }

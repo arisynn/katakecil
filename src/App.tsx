@@ -29,6 +29,7 @@ import './design/v63-ios.css';
 import './design/v64-unified-theme.css';
 import './design/v66-featured-carousel.css';
 import './design/v67-sapphire-polish.css';
+import './design/v68-minimal-home.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

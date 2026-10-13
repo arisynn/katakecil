@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CalendarClock } from 'lucide-react';
 import { Cover } from '../../../components/Cover';
 import { navigate } from '../../../utils/nav';
 import type { FeaturedStory } from '../featuredStories';
+import { formatUpcomingChapter, type UpcomingChapter } from '../../../data/publicSchedule';
 
 const AUTO_ADVANCE_MS = 6000;
 const INTERACTION_PAUSE_MS = 10000;
@@ -48,7 +49,10 @@ function DefaultHero() {
   );
 }
 
-export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedStory[] }) {
+export default function FeaturedHeroCarousel({ stories, schedules = [] }: {
+  stories: FeaturedStory[];
+  schedules?: UpcomingChapter[];
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
   // Cloned edge slides make last → first and first → last transitions seamless.
   const [trackPosition, setTrackPosition] = useState(stories.length > 1 ? 1 : 0);
@@ -130,6 +134,7 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
     ? [stories[stories.length - 1], ...stories, stories[0]]
     : stories;
   const { book, chapterCount } = current;
+  const nextChapter = schedules.find(item => item.book_id === book.id);
 
   return (
     <section
@@ -181,6 +186,10 @@ export default function FeaturedHeroCarousel({ stories }: { stories: FeaturedSto
           {book.title}
         </h1>
         <p>{book.synopsis || 'Sebuah cerita baru menantimu di KataKecil.'}</p>
+        {nextChapter && <div className="v68-hero-schedule">
+          <CalendarClock size={15} aria-hidden="true"/>
+          <span>Bab berikutnya <strong>{formatUpcomingChapter(nextChapter)}</strong></span>
+        </div>}
         <button
           type="button"
           className="v66-hero-action"

@@ -57,7 +57,7 @@ assert.ok(select(books, episodes).every(item => item.publishedAt <= Date.now()))
 
 // The homepage must not invent hero slides, duplicate a featured book, or hijack Reader.
 assert.match(home, /demo \? \[\] : selectRecentlyPublishedStories/);
-assert.match(home, /heroIds\.has\(book\.id\)/);
+assert.match(home, /selectRecentChapters\(books, episodes\)/);
 assert.match(home, /<FeaturedHeroCarousel stories=\{latestStories\}/);
 assert.match(home, /episode !== null/);
 assert.match(home, /\/cerita\?genre=\$\{encodeURIComponent\(genre\)\}/);
@@ -80,5 +80,5 @@ assert.match(css, /safe-area-inset-bottom/);
 assert.match(css, /\[data-kk-theme='light'\]/);
 assert.match(app, /import '\.\/design\/v66-featured-carousel\.css'/);
 assert.ok(existsSync('src/SecureReaderApp.tsx'));
-assert.ok(['6.6.0','6.7.0'].includes(pkg.version));
+assert.ok(['6.6.0','6.7.0','6.8.0'].includes(pkg.version));
 console.log('PASS V6.6: published-only sorting, fallback, responsive carousel, theme, accessibility and Reader isolation.');
