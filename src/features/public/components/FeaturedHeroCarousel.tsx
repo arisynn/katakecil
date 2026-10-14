@@ -1,5 +1,5 @@
+import BrandIcon from '../../../components/BrandIcon';
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, CalendarClock } from 'lucide-react';
 import { Cover } from '../../../components/Cover';
 import { navigate } from '../../../utils/nav';
 import type { FeaturedStory } from '../featuredStories';
@@ -42,7 +42,7 @@ function DefaultHero() {
           className="v66-hero-action"
           onClick={() => navigate('/cerita')}
         >
-          Jelajahi Perpustakaan <ArrowRight size={18} aria-hidden="true" />
+          Jelajahi Perpustakaan <BrandIcon name="arrow-right" size={18} aria-hidden="true" />
         </button>
       </div>
     </section>
@@ -180,14 +180,14 @@ export default function FeaturedHeroCarousel({ stories, schedules = [] }: {
         <span className="v66-hero-kicker">✦ &nbsp; TERBARU DI KATAKECIL</span>
         <div className="v66-hero-meta">
           <span>{book.genre || 'Fiksi'}</span>
-          <span><BookOpen size={13} aria-hidden="true" /> {chapterCount} bab tersedia</span>
+          <span><BrandIcon name="book-open" size={13} aria-hidden="true" /> {chapterCount} bab tersedia</span>
         </div>
         <h1 className={book.title.length > 37 ? 'is-long-title' : undefined}>
           {book.title}
         </h1>
         <p>{book.synopsis || 'Sebuah cerita baru menantimu di KataKecil.'}</p>
         {nextChapter && <div className="v68-hero-schedule">
-          <CalendarClock size={15} aria-hidden="true"/>
+          <BrandIcon name="calendar-clock" size={15} aria-hidden="true"/>
           <span>Bab berikutnya <strong>{formatUpcomingChapter(nextChapter)}</strong></span>
         </div>}
         <button
@@ -196,7 +196,7 @@ export default function FeaturedHeroCarousel({ stories, schedules = [] }: {
           aria-label={`Mulai membaca ${book.title}`}
           onClick={() => navigate(`/baca/${book.slug}`)}
         >
-          Mulai Membaca <ArrowRight size={18} aria-hidden="true" />
+          Mulai Membaca <BrandIcon name="arrow-right" size={18} aria-hidden="true" />
         </button>
       </div>
       </div>
@@ -227,14 +227,14 @@ export default function FeaturedHeroCarousel({ stories, schedules = [] }: {
               aria-label="Cerita sebelumnya"
               onClick={() => selectSlide(activeIndex - 1)}
             >
-              <ArrowLeft size={17} aria-hidden="true" />
+              <BrandIcon name="arrow-left" size={17} aria-hidden="true" />
             </button>
             <button
               type="button"
               aria-label="Cerita berikutnya"
               onClick={() => selectSlide(activeIndex + 1)}
             >
-              <ArrowRight size={17} aria-hidden="true" />
+              <BrandIcon name="arrow-right" size={17} aria-hidden="true" />
             </button>
           </div>
         </div>

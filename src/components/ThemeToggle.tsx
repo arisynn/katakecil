@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import BrandIcon from './BrandIcon';
 import type { UiTheme, AppThemePreference } from '../hooks/useUiTheme';
 
 /** One button, one action: switch the global theme immediately. */
@@ -13,7 +13,7 @@ export default function ThemeToggle({ theme, onPreferenceChange }: {
     <button type="button" className="v53-theme-toggle" onClick={() => onPreferenceChange(next)}
       aria-label={`Aktifkan mode ${next === 'dark' ? 'gelap' : 'terang'}`}
       title={`Mode ${theme === 'dark' ? 'gelap' : 'terang'} · ubah ke ${next === 'dark' ? 'gelap' : 'terang'}`}>
-      {theme === 'dark' ? <Moon size={19} /> : <Sun size={19} />}
+      <BrandIcon name={theme === 'dark' ? 'moon' : 'sun'} size={19}/>
     </button>
   </div>;
 }

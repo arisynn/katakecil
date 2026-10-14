@@ -1,5 +1,5 @@
+import BrandIcon from '../components/BrandIcon';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BookOpen, Check, CheckCircle2, ChevronDown, ChevronUp, FileText, FileUp, Layers3, Library, Merge, Scissors, ShieldCheck, UploadCloud, TriangleAlert, X } from 'lucide-react';
 import type { Book, Episode } from '../data/library';
 import { slugify } from '../data/library';
 import { supabase } from '../data/supabase';
@@ -267,26 +267,26 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
         }
     };
     return <>
-  <button className="studio-backlink" onClick={() => navigate(destination === 'new' ? '/studio/cerita' : `/studio/cerita/${destination}`)}><ArrowLeft size={16}/> Kembali ke karya</button>
+  <button className="studio-backlink" onClick={() => navigate(destination === 'new' ? '/studio/cerita' : `/studio/cerita/${destination}`)}><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</button>
   <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>Pilih berkas, periksa pembagian bab, lalu simpan sebagai draft. Tidak ada publikasi otomatis.</p></div>
-  <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><FileUp size={15}/> 1 · Pilih file</span><ArrowRight size={16}/><span className={parsed && !success ? 'active' : ''}><BookOpen size={15}/> 2 · Periksa bab</span><ArrowRight size={16}/><span className={success ? 'active' : ''}><ShieldCheck size={15}/> 3 · Simpan draft</span></div>
+  <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><BrandIcon name="upload" size={15}/> 1 · Pilih file</span><BrandIcon name="arrow-right" size={16}/><span className={parsed && !success ? 'active' : ''}><BrandIcon name="book-open" size={15}/> 2 · Periksa bab</span><BrandIcon name="arrow-right" size={16}/><span className={success ? 'active' : ''}><BrandIcon name="shield" size={15}/> 3 · Simpan draft</span></div>
   {error && <div className="studio-error" role="alert">{error}</div>}
   {saveStage && <div className="v5-import-stage" role="status" aria-live="polite"><span className="v4-picker-spinner"/> {saveStage}</div>}
   {(reading || importReport) && <section className="studio-panel kk-import-progress" aria-label="Tahapan pemrosesan impor" aria-live="polite">
-    <div className="studio-panel-top"><h2>Progres impor</h2><BookOpen size={17}/></div>
+    <div className="studio-panel-top"><h2>Progres impor</h2><BrandIcon name="book-open" size={17}/></div>
     {reading && <p className="studio-muted">{readPhase}</p>}
     {importReport && <ul className="kk-import-checklist">
-      <li><CheckCircle2 size={17}/>Berkas {parsed?.format.toUpperCase() || pickedName.split('.').pop()?.toUpperCase() || 'naskah'} berhasil dibaca</li>
-      <li><CheckCircle2 size={17}/>{importReport.cover ? 'Sampul ditemukan' : 'Tidak ada sampul terdeteksi — bisa ditambahkan nanti'}</li>
-      <li><CheckCircle2 size={17}/>{importReport.parts} bagian ditemukan ({importReport.episodes} calon episode, {importReport.pages} halaman buku)</li>
-      {importReport.saved && <li><CheckCircle2 size={17}/>{importReport.episodes} episode draft berhasil dibuat</li>}
-      {importReport.saved && <li><CheckCircle2 size={17}/>Penyimpanan database berhasil diverifikasi</li>}
+      <li><BrandIcon name="check-circle" size={17}/>Berkas {parsed?.format.toUpperCase() || pickedName.split('.').pop()?.toUpperCase() || 'naskah'} berhasil dibaca</li>
+      <li><BrandIcon name="check-circle" size={17}/>{importReport.cover ? 'Sampul ditemukan' : 'Tidak ada sampul terdeteksi — bisa ditambahkan nanti'}</li>
+      <li><BrandIcon name="check-circle" size={17}/>{importReport.parts} bagian ditemukan ({importReport.episodes} calon episode, {importReport.pages} halaman buku)</li>
+      {importReport.saved && <li><BrandIcon name="check-circle" size={17}/>{importReport.episodes} episode draft berhasil dibuat</li>}
+      {importReport.saved && <li><BrandIcon name="check-circle" size={17}/>Penyimpanan database berhasil diverifikasi</li>}
     </ul>}
   </section>}
-  {success && <div className="studio-success" role="status">{success} <button className="studio-light-button" onClick={() => navigate(`/studio/cerita/${destination}`)}>Lihat novel <ArrowRight size={16}/></button></div>}
+  {success && <div className="studio-success" role="status">{success} <button className="studio-light-button" onClick={() => navigate(`/studio/cerita/${destination}`)}>Lihat novel <BrandIcon name="arrow-right" size={16}/></button></div>}
   <section className="studio-panel v4-upload-panel" aria-label="Unggah berkas naskah">
    <label className={`v4-dropzone${reading ? ' v4-upload-reading' : ''}`}>
-    <UploadCloud size={32} aria-hidden="true"/>
+    <BrandIcon name="upload" size={32} aria-hidden="true"/>
     <strong>{reading ? 'Menganalisis naskah…' : parsed ? 'Pilih berkas lain' : 'Pilih EPUB, MD, atau TXT dari HP'}</strong>
     <small>{reading ? `Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.` : 'Maksimum 18 MB. Berkas dibaca di browser dan tidak otomatis diterbitkan.'}</small>
     <input type="file" name="manuscript" aria-label="Pilih berkas EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading || saving} onClick={() => { setPickerOpen(true); setPickerStatus('Menunggu berkas dari pemilih file Android…'); }} onChange={handleFileSelection}/>
@@ -303,39 +303,39 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
    <section className="studio-panel v4-metadata">
     <div className="studio-panel-top"><h2>Hasil pembacaan</h2><span className="v3-counter">{parsed.format.toUpperCase()}</span></div>
     <div className="v4-metadata-grid">{coverURL && <img src={coverURL} alt="Sampul EPUB" className="v4-cover"/>}<div><strong>{parsed.title}</strong><small>{parsed.creator || 'Penulis tidak tercantum'} · {parsed.language || 'Bahasa tidak tercantum'}</small><p>{chapters.length} bagian terdeteksi · {selected.length} episode dipilih · {chosenSections.length} halaman buku dipilih</p></div></div>
-    {parsed.warnings.map((w, i) => <div className="v4-warning" key={i}><TriangleAlert size={16}/>{w}</div>)}
+    {parsed.warnings.map((w, i) => <div className="v4-warning" key={i}><BrandIcon name="alert" size={16}/>{w}</div>)}
    </section>
-   <section className="studio-panel v4-target"><div className="studio-panel-top"><h2>Tujuan penyimpanan</h2><Library size={19}/></div>
+   <section className="studio-panel v4-target"><div className="studio-panel-top"><h2>Tujuan penyimpanan</h2><BrandIcon name="books" size={19}/></div>
     <label className="studio-label">Simpan ke novel<select value={destination} onChange={e => setDestination(e.target.value)}><option value="new">+ Novel baru (privat)</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
     {destination === 'new' && <div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e => setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e => setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat privat dengan ID unik, termasuk jika judul sama pernah digunakan atau berada di Sampah. Sinopsis bisa diisi kemudian.</p>{parsed.cover && <label className="studio-check"><input type="checkbox" checked={useCover} onChange={e => setUseCover(e.target.checked)}/><span><strong>Gunakan sampul EPUB</strong><small>Perhatian: sampul akan disimpan di bucket Storage publik, walaupun novel masih privat.</small></span></label>}</div>}
     {destination !== 'new' && <p className="studio-muted">Ditemukan {currentEpisodes.length} episode lama. Nomor dan isi duplikat akan ditolak; seluruh jadwal yang sudah ada tetap utuh.</p>}
    </section>
    <section className="studio-panel v4-review"><div className="studio-panel-top"><h2>Periksa isi buku</h2><span className="v3-counter">{selected.length} dipilih</span></div>
     <p className="studio-muted">Kata pengantar, dedikasi, dan catatan penulis dapat disimpan sebagai halaman buku tersendiri, tanpa nomor episode. Daftar isi dan halaman hak cipta tidak dipilih otomatis. Episode 0 tetap didukung.</p>
-    <div className="v4-actions"><button type="button" className="studio-light-button" onClick={autoNumber}><CheckCircle2 size={16}/> Isi nomor kosong otomatis</button><button type="button" className="studio-light-button" onClick={() => setChapters(prev => prev.map(c => ({ ...c, include: !c.section_type })))}>Pilih semua episode</button></div>
+    <div className="v4-actions"><button type="button" className="studio-light-button" onClick={autoNumber}><BrandIcon name="check-circle" size={16}/> Isi nomor kosong otomatis</button><button type="button" className="studio-light-button" onClick={() => setChapters(prev => prev.map(c => ({ ...c, include: !c.section_type })))}>Pilih semua episode</button></div>
     <div className="v4-chapter-stack">{chapters.map((chapter, i) => <div className={`v4-chapter ${!chapter.include ? 'v4-excluded' : ''}`} key={chapter.key}>
       <div className="v4-chapter-line"><label className="v4-checkbox"><input type="checkbox" aria-label={`Simpan ${chapter.title}`} checked={chapter.include} onChange={e => update(i, { include: e.target.checked })}/></label>
        <span className="v4-chapter-number">{chapter.section_type ? 'H' : chapter.episode_number ?? '—'}</span>
        <button type="button" className="v4-chapter-name" onClick={() => open(chapter)}><strong>{chapter.title}</strong><small>{chapter.section_type ? "Halaman buku / " + (chapter.section_type === "arc" ? "pemisah arc" : "materi depan") + " · " : ""}{chapter.arc_title || 'Tanpa arc'} · {chapter.content_md.trim().split(/\s+/).filter(Boolean).length} kata · {chapter.confidence === 'periksa' ? 'Perlu dicek' : `Deteksi ${chapter.confidence}`}</small></button>
-       <button type="button" className="v4-icon-btn" aria-label={expanded === chapter.key ? 'Tutup' : 'Edit episode'} onClick={() => open(chapter)}>{expanded === chapter.key ? <ChevronUp size={19}/> : <ChevronDown size={19}/>}</button>
+       <button type="button" className="v4-icon-btn" aria-label={expanded === chapter.key ? 'Tutup' : 'Edit episode'} onClick={() => open(chapter)}>{expanded === chapter.key ? <BrandIcon name="chevron-up" size={19}/> : <BrandIcon name="chevron-down" size={19}/>}</button>
       </div>
       {expanded === chapter.key && <div className="v4-chapter-edit"><div className="v4-chapter-fields"><label className="studio-label" hidden={Boolean(chapter.section_type)}>Nomor episode<input type="number" min="0" max="9999" value={chapter.episode_number ?? ''} onChange={e => update(i, { episode_number: e.target.value === '' ? null : Number(e.target.value), confidence: 'tinggi' })}/></label><label className="studio-label">Judul<input value={chapter.title} maxLength={180} onChange={e => update(i, { title: e.target.value, confidence: 'tinggi' })}/></label></div>
        <label className="studio-label">Arc / bagian<input value={chapter.arc_title} maxLength={180} onChange={e => update(i, { arc_title: e.target.value })}/></label>
        <label className="studio-label">Isi Markdown<textarea ref={textareaRef} className="v4-manuscript" value={chapter.content_md} onClick={e => setSplitAt(e.currentTarget.selectionStart)} onKeyUp={e => setSplitAt(e.currentTarget.selectionStart)} onSelect={e => setSplitAt(e.currentTarget.selectionStart)} onChange={e => { update(i, { content_md: e.target.value }); setSplitAt(e.currentTarget.selectionStart); }}/></label>
-       <div className="v4-edit-actions"><button className="studio-light-button" title="Naik satu posisi" disabled={i === 0} onClick={() => setChapters(x => changeOrder(x, i, -1))}><ArrowUp size={16}/> Naik</button><button className="studio-light-button" disabled={i === chapters.length - 1} onClick={() => setChapters(x => changeOrder(x, i, 1))}><ArrowDown size={16}/> Turun</button><button className="studio-light-button" disabled={i === chapters.length - 1} onClick={() => { if (window.confirm('Gabungkan isi episode ini dengan bagian berikutnya?')) {
+       <div className="v4-edit-actions"><button className="studio-light-button" title="Naik satu posisi" disabled={i === 0} onClick={() => setChapters(x => changeOrder(x, i, -1))}><BrandIcon name="arrow-up" size={16}/> Naik</button><button className="studio-light-button" disabled={i === chapters.length - 1} onClick={() => setChapters(x => changeOrder(x, i, 1))}><BrandIcon name="arrow-down" size={16}/> Turun</button><button className="studio-light-button" disabled={i === chapters.length - 1} onClick={() => { if (window.confirm('Gabungkan isi episode ini dengan bagian berikutnya?')) {
                     setChapters(x => mergeAdjacent(x, i));
                     setExpanded(null);
-                } }}><Layers3 size={16}/> Gabung berikutnya</button><button className="studio-light-button" disabled={splitAt < 10 || splitAt > chapter.content_md.length - 10} onClick={() => split(i)}><Scissors size={16}/> Pisah di kursor</button></div>
+                } }}><BrandIcon name="layers" size={16}/> Gabung berikutnya</button><button className="studio-light-button" disabled={splitAt < 10 || splitAt > chapter.content_md.length - 10} onClick={() => split(i)}><BrandIcon name="scissors" size={16}/> Pisah di kursor</button></div>
        <small className="studio-muted">Untuk memisah episode, letakkan kursor di dalam naskah lalu pilih “Pisah di kursor”. Konten tidak diubah oleh AI.</small>
       </div>}
      </div>)}</div>
    </section>
-   <section className="studio-panel v4-confirm"><div className="studio-panel-top"><h2>Simpan sebagai draft</h2><ShieldCheck size={20}/></div>
-    {warnings.length > 0 && <div className="v4-error-list">{warnings.slice(0, 12).map((w, i) => <p key={i}><TriangleAlert size={14}/>{w}</p>)}</div>}
-    {chapters.some(c => c.include && !c.section_type && c.episode_number === null) && <div className="v4-warning"><TriangleAlert size={15}/> Masih ada nomor episode kosong. Klik “Isi nomor kosong otomatis” sebelum menyimpan.</div>}
-    {dirty && <div className="v4-warning"><TriangleAlert size={15}/> Ada bagian dengan deteksi tidak pasti. Periksa atau keluarkan dari impor sebelum lanjut.</div>}
+   <section className="studio-panel v4-confirm"><div className="studio-panel-top"><h2>Simpan sebagai draft</h2><BrandIcon name="shield" size={20}/></div>
+    {warnings.length > 0 && <div className="v4-error-list">{warnings.slice(0, 12).map((w, i) => <p key={i}><BrandIcon name="alert" size={14}/>{w}</p>)}</div>}
+    {chapters.some(c => c.include && !c.section_type && c.episode_number === null) && <div className="v4-warning"><BrandIcon name="alert" size={15}/> Masih ada nomor episode kosong. Klik “Isi nomor kosong otomatis” sebelum menyimpan.</div>}
+    {dirty && <div className="v4-warning"><BrandIcon name="alert" size={15}/> Ada bagian dengan deteksi tidak pasti. Periksa atau keluarkan dari impor sebelum lanjut.</div>}
     <p className="studio-muted">Episode dan halaman buku yang dicentang disimpan. Episode baru menggunakan <strong>is_enabled=false</strong> dan <strong>release_at=NULL</strong>. Tidak ada publikasi otomatis.</p>
-    <button type="button" className="studio-primary v4-confirm-button" disabled={saving || warnings.length > 0 || (!selected.length && !chosenSections.length) || selected.some(c => c.episode_number === null)} onClick={() => void persist()}>{saving ? 'Menyimpan…' : `Simpan ${selected.length} episode + ${chosenSections.length} halaman`} <ArrowRight size={18}/></button>
+    <button type="button" className="studio-primary v4-confirm-button" disabled={saving || warnings.length > 0 || (!selected.length && !chosenSections.length) || selected.some(c => c.episode_number === null)} onClick={() => void persist()}>{saving ? 'Menyimpan…' : `Simpan ${selected.length} episode + ${chosenSections.length} halaman`} <BrandIcon name="arrow-right" size={18}/></button>
    </section>
   </>}
  </>;

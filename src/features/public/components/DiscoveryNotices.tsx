@@ -1,5 +1,5 @@
+import BrandIcon from '../../../components/BrandIcon';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Bell, CalendarClock, Megaphone } from 'lucide-react';
 import type { Book, EpisodeSummary } from '../../../data/library';
 import type { UpcomingChapter } from '../../../data/publicSchedule';
 import { isActiveAnnouncement, type PublicAnnouncement } from '../../../data/announcements';
@@ -101,11 +101,11 @@ export default function DiscoveryNotices({ books, episodes, schedules, announcem
     }}
     onTouchCancel={() => { touch.current = null; setPaused(false); }}>
     <div className="kk-v7-notice-card" aria-live="off">
-      <div className="kk-v7-notice-icon">{notice.kind === 'announcement' ? <Megaphone size={22}/> : notice.kind === 'schedule' ? <CalendarClock size={22}/> : <Bell size={22}/>}</div>
+      <div className="kk-v7-notice-icon">{notice.kind === 'announcement' ? <BrandIcon name="megaphone" size={22}/> : notice.kind === 'schedule' ? <BrandIcon name="calendar-clock" size={22}/> : <BrandIcon name="bell" size={22}/>}</div>
       <div className="kk-v7-notice-body"><span className="kk-v7-kicker">{notice.kicker}</span>
         <h2>{notice.title}</h2>{notice.detail && <p>{notice.detail}</p>}
         {notice.slug && <button type="button" className="kk-v7-notice-action" onClick={() => navigate(`/cerita/${notice.slug}`)}>
-          Lihat cerita <ArrowRight size={17}/>
+          Lihat cerita <BrandIcon name="arrow-right" size={17}/>
         </button>}
       </div>
     </div>

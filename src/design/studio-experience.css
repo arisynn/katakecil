@@ -1,0 +1,41 @@
+/* V7.1 · Kirana + Nara. Focused workflow improvements, not a Studio redesign. */
+.v6-studio-app .kk-v71-resume-timestamp { display: block; margin: 0 0 10px; color: var(--st-muted); font-size: 11px; line-height: 1.5; }
+.v6-studio-app .kk-v71-save-retry {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 8px 11px; border: 1px solid var(--kk-border);
+  border-radius: 11px; background: var(--kk-surface-2); color: var(--kk-primary);
+  font-size: 12px; font-weight: 750; white-space: nowrap; cursor: pointer;
+}
+.v6-studio-app .kk-v71-save-retry:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 3px; }
+.v6-studio-app .kk-v71-editor-alert { margin: 0 0 16px; overflow-wrap: anywhere; }
+.v6-studio-app .v69-editor-heading > strong.v69-save-error { color: var(--kk-primary); }
+.v6-studio-app .v69-writing-footer > span { min-width: 0; }
+.v6-studio-app .v69-writing-footer > span:last-child { display: inline-flex; align-items: center; gap: 6px; text-align: right; }
+.v6-studio-app .v69-tools-link[aria-current='page'] { color: var(--kk-primary); font-weight: 750; }
+.v6-studio-app .v69-tools-trigger:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 3px; }
+@media (max-width: 430px) {
+  .v6-studio-app .kk-v71-save-retry { min-width: 44px; padding: 9px; }
+  .v6-studio-app .kk-v71-save-retry > span { display: none; }
+  .v6-studio-app .v69-editor-top { min-width: 0; }
+  .v6-studio-app .v69-editor-actions { flex-shrink: 0; }
+}
+/* Works and chapters: clear visibility/status filters with recoverable empty results. */
+.v6-studio-app .kk-v71-books-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin-bottom: 18px; }
+.v6-studio-app .kk-v71-books-toolbar .v69-search-field { flex: 1 1 240px; margin: 0; }
+.v6-studio-app .kk-v71-books-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.v6-studio-app .kk-v71-books-filter button {
+  min-height: 44px; padding: 8px 13px; border: 1px solid var(--kk-border);
+  border-radius: 999px; background: var(--kk-surface); color: var(--kk-muted);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.v6-studio-app .kk-v71-books-filter button.is-active { background: var(--kk-primary); border-color: var(--kk-primary); color: var(--kk-on-primary); }
+.v6-studio-app .kk-v71-books-count, .v6-studio-app .kk-v71-chapter-count { color: var(--kk-muted); font-size: 12px; }
+.v6-studio-app .kk-v71-chapter-count { margin: 4px 0 12px; }
+.v6-studio-app .kk-v71-studio-no-results { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 22px 0; color: var(--kk-muted); }
+.v6-studio-app .kk-v71-studio-no-results p { margin: 0; font-size: 13px; }
+.v6-studio-app .kk-v71-studio-no-results button { min-height: 44px; }
+.v6-studio-app .kk-v71-books-filter button:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 3px; }
+@media (max-width: 430px) {
+  .v6-studio-app .kk-v71-books-toolbar { align-items: stretch; }
+  .v6-studio-app .kk-v71-books-toolbar .v69-search-field { flex: 1 1 100%; }
+}

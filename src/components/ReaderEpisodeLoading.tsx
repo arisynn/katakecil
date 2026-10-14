@@ -29,10 +29,7 @@ export function ReaderEpisodeLoading({ phase, storyTitle, episodeNumber, episode
         {headingMeta.title && <strong>{headingMeta.title}</strong>}
       </div>}
       <div className="kk-reader-load__symbol" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M32 18v29M32 22c-7-5-15-6-23-3v27c9-3 17-2 23 3"/>
-          <path className={isBusy ? 'kk-reader-load__page' : ''} d="M32 22c7-5 15-6 23-3v27c-9-3-17-2-23 3"/>
-        </svg>
+        <img src="/brand/katakecil-mark.svg" width="54" height="54" alt=""/>
       </div>
       <h2 className="kk-reader-load__title">{heading}</h2>
       <p className="kk-reader-load__detail">{detail}</p>

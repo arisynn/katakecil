@@ -1,23 +1,19 @@
+import BrandIcon from '../../../components/BrandIcon';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, CalendarClock, Megaphone, Plus, Save, Trash2 } from 'lucide-react';
 import type { Book } from '../../../data/library';
 import {
   deleteAnnouncement, getStudioAnnouncements, saveAnnouncement,
   type AnnouncementInput, type StudioAnnouncement,
 } from '../../../data/announcements';
 import { navigate } from '../../../utils/nav';
+import { fromWib, toWibInput } from '../../../utils/releasePlanning';
 
-function toLocalInput(iso: string | null): string {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (!Number.isFinite(date.getTime())) return '';
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
-}
-function toIso(local: string): string | null {
-  if (!local) return null;
-  const date = new Date(local);
-  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+function toIsoWib(input: string): string | null {
+  if (!input) return null;
+  const parts = /^(\d{4}-\d{2}-\d{2})T([0-2]\d:[0-5]\d)$/.exec(input);
+  if (!parts) return null;
+  try { return fromWib(parts[1], parts[2]); }
+  catch { return null; }
 }
 function newDraft(): AnnouncementInput {
   return {
@@ -44,7 +40,7 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | 'new' | null>(null);
   const [draft, setDraft] = useState<AnnouncementInput>(newDraft);
-  const [startInput, setStartInput] = useState(() => toLocalInput(new Date().toISOString()));
+  const [startInput, setStartInput] = useState(() => toWibInput(new Date().toISOString()));
   const [endInput, setEndInput] = useState('');
   const load = useCallback(async () => {
     try { setItems(await getStudioAnnouncements()); setError(''); }
@@ -58,19 +54,21 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
       status: item.status, starts_at: item.starts_at, ends_at: item.ends_at,
     } : newDraft();
     setDraft(next);
-    setStartInput(toLocalInput(next.starts_at));
-    setEndInput(toLocalInput(next.ends_at));
+    setStartInput(toWibInput(next.starts_at));
+    setEndInput(toWibInput(next.ends_at));
     setEditing(item?.id ?? 'new');
     setError(''); setMessage('');
   };
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
-    const start = toIso(startInput);
-    if (!start) { setError('Tanggal mulai tidak valid.'); return; }
-    if (endInput && !toIso(endInput)) { setError('Tanggal selesai tidak valid.'); return; }
+    const start = toIsoWib(startInput);
+    const end = toIsoWib(endInput);
+    if (!start) { setError('Tanggal mulai WIB tidak valid.'); return; }
+    if (endInput && !end) { setError('Tanggal selesai WIB tidak valid.'); return; }
+    if (end && Date.parse(end) <= Date.parse(start)) { setError('Tanggal selesai harus setelah tanggal mulai (WIB).'); return; }
     setBusy(true); setError(''); setMessage('');
     try {
-      await saveAnnouncement({ ...draft, starts_at: start, ends_at: toIso(endInput) }, editing === 'new' ? undefined : editing ?? undefined);
+      await saveAnnouncement({ ...draft, starts_at: start, ends_at: end }, editing === 'new' ? undefined : editing ?? undefined);
       setEditing(null);
       await load();
       setMessage('Pengumuman berhasil disimpan.');
@@ -90,7 +88,7 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
       <h1>Pengumuman</h1>
       <p>Kelola pesan yang tampil di carousel Temukan. Hanya pengumuman terbit dalam rentang tanggal aktif yang bisa dilihat pembaca.</p>
       <button className="studio-primary" type="button" onClick={() => edit()} disabled={busy}>
-        <Plus size={18}/> Pengumuman Baru
+        <BrandIcon name="plus" size={18}/> Pengumuman Baru
       </button>
     </header>
     {error && <div role="alert" className="studio-error">{error}{error.includes('qr_announcements') && <p>Jalankan migrasi V7 Alpha.3 di Supabase terlebih dahulu.</p>}</div>}
@@ -98,7 +96,7 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
     {editing !== null && <form className="kk-v73-editor" onSubmit={event => void save(event)}>
       <div className="kk-v73-editor-title">
         <h2>{editing === 'new' ? 'Buat Pengumuman' : 'Edit Pengumuman'}</h2>
-        <button type="button" className="studio-light-button" onClick={() => setEditing(null)} disabled={busy}><ArrowLeft size={16}/> Batal</button>
+        <button type="button" className="studio-light-button" onClick={() => setEditing(null)} disabled={busy}><BrandIcon name="arrow-left" size={16}/> Batal</button>
       </div>
       <label>Judul <small>maksimal 120 karakter</small>
         <input required maxLength={120} value={draft.title} onChange={event => setDraft(prev => ({ ...prev, title: event.target.value }))} placeholder="Misalnya: Bab terbaru sudah terbit"/>
@@ -113,21 +111,21 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
         </select>
       </label>
       <div className="kk-v73-dates">
-        <label>Mulai tampil <input type="datetime-local" required value={startInput} onChange={event => setStartInput(event.target.value)}/></label>
-        <label>Berakhir (opsional) <input type="datetime-local" value={endInput} min={startInput} onChange={event => setEndInput(event.target.value)}/></label>
+        <label>Mulai tampil (WIB) <input type="datetime-local" required value={startInput} onChange={event => setStartInput(event.target.value)}/></label>
+        <label>Berakhir (WIB, opsional) <input type="datetime-local" value={endInput} min={startInput} onChange={event => setEndInput(event.target.value)}/></label>
       </div>
-      <p className="kk-v73-hint"><CalendarClock size={15}/> Jadwal dimasukkan sesuai zona waktu perangkatmu. Waktu ditampilkan sebagai WIB pada daftar.</p>
+      <p className="kk-v73-hint"><BrandIcon name="calendar-clock" size={15}/> Masukkan tanggal dan jam WIB (UTC+07:00). Jadwal tetap sama meskipun perangkat menggunakan zona waktu lain.</p>
       <label>Status
         <select value={draft.status} onChange={event => setDraft(prev => ({ ...prev, status: event.target.value as AnnouncementInput['status'] }))}>
           <option value="draft">Draft — hanya terlihat di Studio</option>
           <option value="published">Terbit — tampil sesuai jadwal</option>
         </select>
       </label>
-      <div className="kk-v73-actions"><button className="studio-primary" type="submit" disabled={busy}><Save size={17}/>{busy ? 'Menyimpan…' : 'Simpan Pengumuman'}</button></div>
+      <div className="kk-v73-actions"><button className="studio-primary" type="submit" disabled={busy}><BrandIcon name="save" size={17}/>{busy ? 'Menyimpan…' : 'Simpan Pengumuman'}</button></div>
     </form>}
     <section className="kk-v73-list" aria-label="Daftar pengumuman">
       <h2>Daftar Pengumuman</h2>
-      {loading ? <p className="studio-muted">Memuat pengumuman…</p> : items.length === 0 ? <div className="kk-v73-list-empty"><Megaphone size={28}/><p>Belum ada pengumuman. Buat pengumuman pertama untuk pembaca.</p></div> :
+      {loading ? <p className="studio-muted">Memuat pengumuman…</p> : items.length === 0 ? <div className="kk-v73-list-empty"><BrandIcon name="megaphone" size={28}/><p>Belum ada pengumuman. Buat pengumuman pertama untuk pembaca.</p></div> :
         items.map(item => <article className="kk-v73-item" key={item.id}>
           <div className="kk-v73-item-main"><span className="kk-v73-status">{announcementState(item)}</span><h3>{item.title}</h3>
             {item.body && <p>{item.body}</p>}
@@ -135,7 +133,7 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
           </div>
           <div className="kk-v73-item-actions">
             <button type="button" className="studio-light-button" onClick={() => edit(item)} disabled={busy}>Edit</button>
-            <button type="button" className="studio-danger-lite" onClick={() => void remove(item)} disabled={busy} aria-label={`Hapus pengumuman ${item.title}`}><Trash2 size={16}/></button>
+            <button type="button" className="studio-danger-lite" onClick={() => void remove(item)} disabled={busy} aria-label={`Hapus pengumuman ${item.title}`}><BrandIcon name="delete" size={16}/></button>
           </div>
         </article>)}
     </section>

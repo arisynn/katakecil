@@ -1,5 +1,5 @@
+import BrandIcon from './BrandIcon';
 import React, { useMemo, useState } from 'react';
-import { Bookmark as BookmarkIcon, BookOpen, CircleCheck, Search, Trash2, X } from 'lucide-react';
 import type { Bookmark, Chapter, TextAnchor, ThemeColors } from '../types/reader';
 import { useReaderDialogFocus } from '../hooks/useReaderDialogFocus';
 import { readerHeading } from '../utils/readerHeading';
@@ -39,14 +39,14 @@ export function ContentsPanel({
     <aside ref={dialogRef} className="drawer-panel v610-drawer" role="dialog" aria-modal="true" aria-label="Daftar isi dan penanda" style={{ background: theme.bg, color: theme.text }} onClick={event => event.stopPropagation()}>
       <div className="panel-heading" style={{ borderColor: theme.border }}>
         <div><div className="panel-eyebrow">KATAKECIL READER</div><h2>Daftar Isi</h2></div>
-        <button type="button" className="control-icon" aria-label="Tutup daftar isi" data-reader-autofocus onClick={onClose}><X size={20} /></button>
+        <button type="button" className="control-icon" aria-label="Tutup daftar isi" data-reader-autofocus onClick={onClose}><BrandIcon name="close" size={20} /></button>
       </div>
       <div className="panel-tabs" style={{ borderColor: theme.border }} role="tablist" aria-label="Konten panel">
-        <button type="button" role="tab" aria-selected={tab === 'contents'} className={tab === 'contents' ? 'selected' : ''} onClick={() => setTab('contents')}><BookOpen size={17} /> Bab</button>
-        <button type="button" role="tab" aria-selected={tab === 'bookmarks'} className={tab === 'bookmarks' ? 'selected' : ''} onClick={() => setTab('bookmarks')}><BookmarkIcon size={17} /> Penanda ({bookmarks.length})</button>
+        <button type="button" role="tab" aria-selected={tab === 'contents'} className={tab === 'contents' ? 'selected' : ''} onClick={() => setTab('contents')}><BrandIcon name="book-open" size={17} /> Bab</button>
+        <button type="button" role="tab" aria-selected={tab === 'bookmarks'} className={tab === 'bookmarks' ? 'selected' : ''} onClick={() => setTab('bookmarks')}><BrandIcon name="bookmark" size={17} /> Penanda ({bookmarks.length})</button>
       </div>
       {tab === 'contents' && <div className="v610-chapter-filter">
-        <Search size={17} aria-hidden="true" />
+        <BrandIcon name="search" size={17} aria-hidden="true" />
         <input type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Cari judul atau nomor bab" aria-label="Cari judul atau nomor bab" />
       </div>}
       <div className="panel-list" role="tabpanel">
@@ -66,7 +66,7 @@ export function ContentsPanel({
               <strong>{heading.title || heading.eyebrow}</strong>
               {metadata && <small>{metadata}</small>}
             </span>
-            {completedEpisodeNumbers.includes(Number(number)) ? <span className="v74-completed-label" aria-label="Bab selesai"><CircleCheck size={15} aria-hidden="true" /> Selesai</span> : active && <span className="v610-current-label">Dibaca</span>}
+            {completedEpisodeNumbers.includes(Number(number)) ? <span className="v74-completed-label" aria-label="Bab selesai"><BrandIcon name="check-circle" size={15} aria-hidden="true" /> Selesai</span> : active && <span className="v610-current-label">Dibaca</span>}
           </button>;
         }) : <p className="panel-empty">Tidak ada bab yang cocok.</p>)}
         {tab === 'bookmarks' && (bookmarks.length ? bookmarks.map(bookmark => <div className="panel-row v610-bookmark-row" key={bookmark.id}>
@@ -75,7 +75,7 @@ export function ContentsPanel({
             <small className="bookmark-snippet">{bookmark.snippet}</small>
             <small>{bookmark.createdAt}</small>
           </button>
-          <button type="button" className="control-icon" title="Hapus penanda" aria-label={`Hapus penanda ${bookmark.chapterTitle}`} onClick={() => onDeleteBookmark(bookmark.id)}><Trash2 size={17} /></button>
+          <button type="button" className="control-icon" title="Hapus penanda" aria-label={`Hapus penanda ${bookmark.chapterTitle}`} onClick={() => onDeleteBookmark(bookmark.id)}><BrandIcon name="delete" size={17} /></button>
         </div>) : <p className="panel-empty">Belum ada penanda. Ketuk ikon penanda saat membaca untuk menyimpan posisi.</p>)}
       </div>
     </aside>
@@ -118,9 +118,9 @@ export function SearchPanel({ onClose, chapters, onResult, theme }: SearchProps)
   return <div className="panel-scrim v610-panel-scrim" onClick={onClose} role="presentation">
     <section ref={dialogRef} className="search-panel v610-search-panel" role="dialog" aria-modal="true" aria-label={onlyCurrentChapter ? 'Cari dalam bab ini' : 'Cari dalam naskah pratinjau'} style={{ background: theme.bg, color: theme.text }} onClick={event => event.stopPropagation()}>
       <div className="search-line" style={{ borderColor: theme.border }}>
-        <Search size={20} aria-hidden="true" />
+        <BrandIcon name="search" size={20} aria-hidden="true" />
         <input data-reader-autofocus type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={onlyCurrentChapter ? 'Cari dalam bab ini…' : 'Cari dalam naskah pratinjau…'} aria-label="Kata yang dicari" />
-        <button type="button" className="control-icon" onClick={onClose} aria-label="Tutup pencarian"><X size={20} /></button>
+        <button type="button" className="control-icon" onClick={onClose} aria-label="Tutup pencarian"><BrandIcon name="close" size={20} /></button>
       </div>
       <div className="panel-list search-results">
         {query.trim().length < 2 ? <p className="panel-empty">Ketik minimal dua huruf untuk mencari dialog atau kata dalam {onlyCurrentChapter ? 'bab ini' : 'naskah pratinjau'}.</p>

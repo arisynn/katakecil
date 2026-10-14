@@ -1,0 +1,169 @@
+/* V7 Beta.2 — Sapphire asset iconography & writer-first Studio. */
+.kk-brand-icon {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  flex: 0 0 auto;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  vertical-align: middle;
+}
+/* Icon colors come from the parent. Never embed a theme-dependent fill in image files. */
+.v6-public :is(.v6-public-bottom, .v6-header-actions, .v63-mobile-menu) .kk-brand-icon,
+.v6-studio-app :is(.studio-side-nav, .studio-bottom-nav, .v69-tools, .v69-dashboard) .kk-brand-icon { color: inherit; }
+
+/* Brand: use the original mark asset on every route and keep its ratio intact. */
+.kk-v7-brand img, .studio-logo .kk-v7-brand img { display: block; object-fit: contain; flex: 0 0 auto; }
+.kk-v7-brand { display: inline-flex; align-items: center; gap: 9px; min-width: 0; }
+.kk-v7-brand > span { white-space: nowrap; }
+
+/* Studio: clear hierarchy, task-focused dashboard, zero invented statistics. */
+.v6-studio-app .studio-content { width: min(100%, 1200px); margin-inline: auto; }
+.v6-studio-app .v72-dashboard { gap: clamp(16px, 2.4vw, 24px); }
+.v6-studio-app .v72-dashboard .studio-page-head { padding-bottom: 2px; }
+.v6-studio-app .v72-dashboard .studio-page-head p { max-width: 50ch; line-height: 1.6; }
+.v6-studio-app .v72-quick-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.v6-studio-app .v72-quick-actions button {
+  min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 9px; padding: 10px 15px; text-decoration: none;
+  border: 1px solid var(--st-border); border-radius: 13px;
+  color: var(--st-text); background: var(--st-card);
+  font-weight: 650; font-size: 13px;
+}
+.v6-studio-app .v72-quick-actions button:first-child { background: var(--st-primary); border-color: transparent; color: var(--st-on-primary); }
+.v6-studio-app .v72-quick-actions button:hover { filter: brightness(.98); }
+.v6-studio-app .v72-quick-actions button:focus-visible { outline: 2px solid var(--st-primary); outline-offset: 3px; }
+.v6-studio-app .v72-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(250px, .85fr); gap: 16px; align-items: start; }
+.v6-studio-app .v72-dashboard-grid > * { min-width: 0; }
+.v6-studio-app .v72-dashboard-side { display: flex; flex-direction: column; gap: 16px; }
+.v6-studio-app .v72-writing-guide { padding: clamp(17px, 2.5vw, 22px); }
+.v6-studio-app .v72-writing-guide .studio-panel-top { margin-bottom: 9px; }
+.v6-studio-app .v72-writing-guide ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.v6-studio-app .v72-writing-guide li { display: flex; gap: 10px; align-items: flex-start; color: var(--st-text); font-size: 13px; line-height: 1.5; }
+.v6-studio-app .v72-writing-guide li .kk-brand-icon { margin-top: 2px; color: var(--st-primary); }
+.v6-studio-app .v72-writing-guide li span { min-width: 0; }
+.v6-studio-app .v72-writing-guide li small { display: block; margin-top: 3px; color: var(--st-muted); font-size: 11px; }
+.v6-studio-app .v72-writing-guide .v72-guide-action { border: 0; background: transparent; cursor: pointer; padding: 0; }
+.v72-writing-guide .v72-guide-action { display: inline-flex; gap: 6px; align-items: center; margin-top: 16px; min-height: 44px; color: var(--st-primary); font-weight: 700; text-decoration: none; font-size: 12px; }
+.v6-studio-app .v72-resume { background: var(--st-raised); border: 1px solid var(--st-border); box-shadow: none; }
+.v6-studio-app .v72-resume h2 { text-wrap: balance; overflow-wrap: anywhere; }
+.v6-studio-app .v72-resume .studio-primary { min-height: 44px; }
+.v6-studio-app .v72-dashboard-stats > div { min-width: 0; }
+.v6-studio-app .v72-dashboard-stats .kk-brand-icon { position: absolute; right: 16px; top: 18px; color: var(--st-primary); }
+.v6-studio-app .v72-work-list { margin: 0; }
+.v6-studio-app .v72-work-list .studio-panel-top { gap: 12px; }
+.v6-studio-app .v72-work-list .studio-panel-top h2 { min-width: 0; }
+.v6-studio-app .v72-work-list .studio-book-row { min-height: 72px; }
+.v6-studio-app .v72-work-list .studio-book-row .kk-brand-icon { color: var(--st-muted); }
+.v6-studio-app .v72-next-release .v69-next-release-link { min-height: 58px; }
+.v6-studio-app .v72-dashboard .studio-footnote { margin: 0; overflow-wrap: anywhere; }
+.v6-studio-app .studio-nav-link, .v6-studio-app .studio-bottom-nav button { display: flex; align-items: center; gap: 11px; }
+.v6-studio-app .studio-bottom-nav button { justify-content: center; flex-direction: column; gap: 5px; }
+.v6-studio-app .studio-sidebar .studio-logo { display: flex; align-items: center; gap: 8px; }
+.v6-studio-app .studio-sidebar .studio-logo small { margin: 0; }
+.v6-studio-app .v69-tools-popover { max-height: min(75dvh, 560px); overflow-y: auto; overscroll-behavior: contain; }
+.v6-studio-app .v69-tools-link .kk-brand-icon:last-child { margin-left: auto; color: var(--st-muted); }
+.v6-studio-app .v69-tools-link > span { min-width: 0; }
+.v6-studio-app .v69-tools-link:focus-visible { outline: 2px solid var(--st-primary); outline-offset: 2px; }
+.v6-studio-app .studio-mobile-top .studio-logo { min-width: 0; }
+.v6-studio-app .studio-mobile-top .kk-v7-brand > span { font-size: clamp(16px, 4.2vw, 22px); }
+
+/* Harmonize old Studio surfaces with the global Sapphire semantic tokens. */
+.v6-studio-app[data-kk-theme] :is(.v69-resume, .v72-writing-guide, .v69-dashboard-stats > div) { border-color: var(--kk-border); }
+.v6-studio-app[data-kk-theme] :is(.v69-resume, .v72-writing-guide, .v69-dashboard-stats > div) { color: var(--kk-text); }
+.v6-studio-app[data-kk-theme] .v72-writing-guide li small { color: var(--kk-muted); }
+.v6-studio-app[data-kk-theme] .v72-dashboard-stats strong { color: var(--kk-text); }
+
+@media (max-width: 1050px) {
+  .v6-studio-app .v72-dashboard-grid { grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr); }
+}
+@media (max-width: 820px) {
+  .v6-studio-app .v72-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .v6-studio-app .v72-dashboard-side { display: contents; }
+  .v6-studio-app .v72-writing-guide { order: 3; }
+  .v6-studio-app .v72-next-release { order: 4; }
+  .v6-studio-app .v72-quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v6-studio-app .v72-quick-actions button { padding-inline: 9px; }
+  .v6-studio-app .studio-content { width: 100%; }
+  .v6-studio-app .studio-mobile-top { padding-inline: 12px; }
+  .v6-studio-app .studio-bottom-nav button { gap: 5px; }
+}
+@media (max-width: 380px) {
+  .v6-studio-app .v72-dashboard-stats > div { padding: 12px 10px; }
+  .v6-studio-app .v72-dashboard-stats .kk-brand-icon { right: 9px; top: 12px; }
+  .v6-studio-app .v72-dashboard-stats strong { font-size: 20px; }
+  .v6-studio-app .v72-quick-actions button { font-size: 12px; }
+  .v6-studio-app .studio-mobile-top .kk-v7-brand img { width: 25px; height: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v6-studio-app .v72-quick-actions button { transition: none !important; }
+}
+
+/* Loading uses the exact app mark instead of an unrelated animated outline. */
+.quiet-app .kk-reader-load__symbol img { width: 54px; height: 54px; object-fit: contain; display: block; }
+.v6-studio-app .studio-panel-top > .kk-brand-icon,
+.v6-studio-app .v69-writing-footer .kk-brand-icon,
+.v6-studio-app .v69-publish-review li .kk-brand-icon,
+.v6-studio-app .v69-bulk-details > summary .kk-brand-icon,
+.v6-studio-app .v4-dropzone .kk-brand-icon { color: var(--st-primary); }
+.v6-studio-app .studio-stats .kk-brand-icon { color: var(--st-primary); }
+.v6-studio-app .studio-book-row > .kk-brand-icon:last-child,
+.v6-studio-app .studio-manage-item > .kk-brand-icon:last-child,
+.v6-studio-app .studio-episode-item > .kk-brand-icon:last-child,
+.v6-studio-app .v3-event > .kk-brand-icon:last-child { margin-left: auto; color: var(--st-muted); }
+.v6-studio-app .v69-upload-steps > .kk-brand-icon { width: 12px !important; height: 12px !important; }
+.studio-unavailable > .kk-brand-icon { color: var(--kk-primary); }
+/* Wordmark is a vector image asset: identical glyph outlines on every platform. */
+.kk-v72-wordmark { display: inline-flex !important; align-items: center; width: min(180px, 100%); min-width: 0; height: auto; font-size: 0; line-height: 0; background: transparent !important; }
+.kk-v72-wordmark img { width: 100% !important; height: auto !important; max-height: 35px; object-fit: contain; }
+.kk-v72-wordmark .kk-v72-wordmark-dark { display: none !important; }
+html[data-app-theme='dark'] .kk-v72-wordmark .kk-v72-wordmark-light { display: none !important; }
+html[data-app-theme='dark'] .kk-v72-wordmark .kk-v72-wordmark-dark { display: block !important; }
+.v6-studio-app .studio-logo .kk-v72-wordmark { width: min(151px, 100%); }
+.v6-studio-app .studio-logo .kk-v72-wordmark img { width: 100% !important; height: auto !important; max-height: 30px; }
+.v6-public .v6-brand .kk-v72-wordmark { width: clamp(145px, 21vw, 180px); }
+@media (max-width: 380px) {
+  .v6-studio-app .studio-mobile-top .kk-v72-wordmark { width: 125px; }
+  .v6-public .v6-brand .kk-v72-wordmark { width: 145px; }
+}
+@media (max-width: 820px) {
+  .v6-studio-app .v72-quick-actions button:nth-child(3):last-child { grid-column: 1 / -1; }
+}
+/* V6 Studio's image selector had !important; suppress the inactive wordmark explicitly. */
+html[data-app-theme='light'] .v6-studio-app .studio-logo .kk-v72-wordmark > .kk-v72-wordmark-dark,
+html[data-app-theme='light'] .v6-public .kk-v72-wordmark > .kk-v72-wordmark-dark { display: none !important; }
+html[data-app-theme='dark'] .v6-studio-app .studio-logo .kk-v72-wordmark > .kk-v72-wordmark-light,
+html[data-app-theme='dark'] .v6-public .kk-v72-wordmark > .kk-v72-wordmark-light { display: none !important; }
+html[data-app-theme='dark'] .v6-studio-app .studio-logo .kk-v72-wordmark > .kk-v72-wordmark-dark,
+html[data-app-theme='dark'] .v6-public .kk-v72-wordmark > .kk-v72-wordmark-dark { display: block !important; }
+/* Correct inherited V7 Alpha width:auto!important on the Studio lockup. */
+.v6-studio-app .studio-logo > .kk-v72-wordmark { width: 151px !important; max-width: 100%; flex: 0 1 151px; }
+@media (max-width: 380px) {
+  .v6-studio-app .studio-mobile-top .studio-logo > .kk-v72-wordmark { width: 125px !important; flex-basis: 125px; }
+}
+/* Dark-mode legacy button rules were brighter than Sapphire surfaces. */
+.v6-studio-app[data-kk-theme] .v72-quick-actions > button {
+  background: var(--kk-surface) !important;
+  color: var(--kk-text) !important;
+  border: 1px solid var(--kk-border) !important;
+  box-shadow: none !important;
+}
+.v6-studio-app[data-kk-theme] .v72-quick-actions > button:first-child {
+  background: var(--kk-primary) !important;
+  color: var(--kk-on-primary) !important;
+  border-color: transparent !important;
+}
+.v6-studio-app[data-kk-theme] .studio-bottom-nav button.studio-bottom-active {
+  background: var(--kk-surface-2) !important;
+  color: var(--kk-primary) !important;
+}
+.v6-studio-app[data-kk-theme] .studio-mobile-top :is(.v53-theme-toggle, .v69-tools-trigger) {
+  background: var(--kk-surface-2) !important;
+  color: var(--kk-text) !important;
+  border: 1px solid var(--kk-border) !important;
+}

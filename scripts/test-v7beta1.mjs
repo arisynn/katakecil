@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 const read = file => readFileSync(file, 'utf8');
 const pkg = JSON.parse(read('package.json'));
-assert.equal(pkg.version, '7.0.0-beta.1');
+assert.match(pkg.version, /^(?:7\.0\.0-beta\.[12]|7\.1\.0-rc\.1)$/);
 const app = read('src/App.tsx');
 const publicUI = read('src/pages/PublicLibrary.tsx');
 const secure = read('src/SecureReaderApp.tsx');

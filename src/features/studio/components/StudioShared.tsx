@@ -3,13 +3,14 @@ import type { User } from '@supabase/supabase-js';
 import type { Episode } from '../../../data/library';
 import { episodeStatus } from '../../../data/library';
 import { navigate } from '../../../utils/nav';
-export function B({ children, to, className = '', disabled = false }: {
+export function B({ children, to, className = '', disabled = false, 'aria-current': ariaCurrent }: {
     children: React.ReactNode;
     to?: string;
     className?: string;
     disabled?: boolean;
+    'aria-current'?: React.AriaAttributes['aria-current'];
 }) {
-    return <button disabled={disabled} className={className} onClick={() => to && navigate(to)}>{children}</button>;
+    return <button type="button" aria-current={ariaCurrent} disabled={disabled} className={className} onClick={() => to && navigate(to)}>{children}</button>;
 }
 export function Pill({ episode }: {
     episode: Episode;

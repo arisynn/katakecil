@@ -1,9 +1,5 @@
+import BrandIcon from '../../../components/BrandIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ArrowLeft, ArrowRight, Bold, CalendarDays, CheckCircle2, Eye, FileUp,
-  Focus, Heading2, Italic, List, LockKeyhole, Quote, RotateCw, Send,
-  ShieldCheck, Trash2,
-} from 'lucide-react';
 import ReaderApp from '../../../ReaderApp';
 import { supabase } from '../../../data/supabase';
 import { episodeStatus, type Book, type Episode } from '../../../data/library';
@@ -204,20 +200,22 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   return <div className={`v69-writing-shell ${focusMode ? 'v69-focus-mode' : ''}`}>
     <div className="v69-editor-top">
       <button className="v69-icon-button" type="button" aria-label="Kembali ke karya"
-        onClick={() => navigate(`/studio/cerita/${book.id}`)}><ArrowLeft size={20}/></button>
+        onClick={() => navigate(`/studio/cerita/${book.id}`)}><BrandIcon name="arrow-left" size={20}/></button>
       <div className="v69-editor-heading"><span>{book.title} · BAB {ep.episode_number}</span>
         <strong aria-live="polite" className={status === 'Gagal menyimpan' ? 'v69-save-error' : ''}>
           {dirty && status === 'Tersimpan' ? 'Belum disimpan' : status}
         </strong>
       </div>
       <div className="v69-editor-actions">
+        {status === 'Gagal menyimpan' && <button type="button" className="kk-v71-save-retry" aria-label="Coba simpan ulang" onClick={() => void latestFlush.current()}><BrandIcon name="rotate" size={16}/><span>Coba simpan</span></button>}
         <button type="button" className="v69-icon-button" title="Pratinjau" aria-label="Pratinjau"
-          onClick={() => setPreview(true)}><Eye size={19}/></button>
+          onClick={() => setPreview(true)}><BrandIcon name="eye" size={19}/></button>
         <button type="button" className="v69-icon-button" title="Mode fokus" aria-label={focusMode ? 'Keluar mode fokus' : 'Mode fokus'}
-          aria-pressed={focusMode} onClick={() => { setFocusMode(value => !value); setReviewOpen(false); }}><Focus size={19}/></button>
+          aria-pressed={focusMode} onClick={() => { setFocusMode(value => !value); setReviewOpen(false); }}><BrandIcon name="focus" size={19}/></button>
       </div>
     </div>
 
+    {error && <div className="studio-error kk-v71-editor-alert" role="alert">{error}</div>}
     {isLive && <p className="v69-live-notice" role="note">Bab ini sudah terbit. Perubahan yang tersimpan akan langsung terlihat oleh pembaca.</p>}
     <div className="v69-editor-layout">
       <section className="v69-writing-paper" aria-label="Kanvas menulis">
@@ -231,11 +229,11 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           value={arc} onChange={event => { setArc(event.target.value); setStatus('Belum disimpan'); }}
           placeholder="Arc / bagian (opsional)"/>
         <div className="v69-editor-toolbar" role="toolbar" aria-label="Format Markdown">
-          <button type="button" title="Tebal" aria-label="Tebal" onClick={() => insertMarkdown('**', '**')}><Bold size={17}/></button>
-          <button type="button" title="Miring" aria-label="Miring" onClick={() => insertMarkdown('*', '*')}><Italic size={17}/></button>
-          <button type="button" title="Judul bagian" aria-label="Judul bagian" onClick={() => insertMarkdown('## ')}><Heading2 size={18}/></button>
-          <button type="button" title="Daftar" aria-label="Daftar" onClick={() => insertMarkdown('- ')}><List size={17}/></button>
-          <button type="button" title="Kutipan" aria-label="Kutipan" onClick={() => insertMarkdown('> ')}><Quote size={17}/></button>
+          <button type="button" title="Tebal" aria-label="Tebal" onClick={() => insertMarkdown('**', '**')}><BrandIcon name="bold" size={17}/></button>
+          <button type="button" title="Miring" aria-label="Miring" onClick={() => insertMarkdown('*', '*')}><BrandIcon name="italic" size={17}/></button>
+          <button type="button" title="Judul bagian" aria-label="Judul bagian" onClick={() => insertMarkdown('## ')}><BrandIcon name="heading" size={18}/></button>
+          <button type="button" title="Daftar" aria-label="Daftar" onClick={() => insertMarkdown('- ')}><BrandIcon name="list" size={17}/></button>
+          <button type="button" title="Kutipan" aria-label="Kutipan" onClick={() => insertMarkdown('> ')}><BrandIcon name="quote" size={17}/></button>
         </div>
         <textarea ref={manuscriptRef} className="studio-manuscript v69-manuscript"
           aria-label="Isi bab dalam Markdown" spellCheck
@@ -243,10 +241,10 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           value={body} onChange={event => { setBody(event.target.value); setStatus('Belum disimpan'); }}/>
         <div className="v69-writing-footer">
           <span>{wordCount.toLocaleString('id-ID')} kata</span>
-          <span><CheckCircle2 size={15}/>{dirty ? 'Autosave aktif' : status}</span>
+          <span role="status"><BrandIcon name={status === 'Gagal menyimpan' ? 'alert' : 'check-circle'} size={15}/>{status === 'Gagal menyimpan' ? status : dirty && status !== 'Menyimpan…' ? 'Belum disimpan · Autosave aktif' : status}</span>
         </div>
         <details className="v69-editor-extra"><summary>Alat tambahan</summary>
-          <label className="v69-import-file"><FileUp size={16}/> Impor Markdown / TXT
+          <label className="v69-import-file"><BrandIcon name="upload" size={16}/> Impor Markdown / TXT
             <input type="file" accept=".md,.txt,text/markdown,text/plain"
               onChange={event => { void importOne(event.target.files?.[0]); event.target.value = ''; }}/>
           </label>
@@ -264,17 +262,17 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           <span>{dirty ? 'Ada perubahan lokal' : status}</span>
         </div>
         {status === 'Gagal menyimpan' && <button type="button" className="studio-light-button"
-          onClick={() => void latestFlush.current()}><RotateCw size={16}/> Coba simpan lagi</button>}
+          onClick={() => void latestFlush.current()}><BrandIcon name="rotate" size={16}/> Coba simpan lagi</button>}
         <button type="button" className="studio-primary v69-finish-writing"
           onClick={() => setReviewOpen(value => !value)} aria-expanded={reviewOpen}>
-          {reviewOpen ? 'Tutup Pemeriksaan' : 'Selesai Menulis'} <ArrowRight size={17}/>
+          {reviewOpen ? 'Tutup Pemeriksaan' : 'Selesai Menulis'} <BrandIcon name="arrow-right" size={17}/>
         </button>
         {reviewOpen && <div className="v69-publish-review">
           <h3>Periksa sebelum terbit</h3>
           <ul>
-            <li><CheckCircle2 size={17}/> Judul {title.trim() ? 'sudah diisi' : 'belum diisi'}</li>
-            <li><CheckCircle2 size={17}/> {wordCount} kata dalam naskah</li>
-            <li><Eye size={17}/> Periksa dialog, alur, dan typo melalui pratinjau</li>
+            <li><BrandIcon name="check-circle" size={17}/> Judul {title.trim() ? 'sudah diisi' : 'belum diisi'}</li>
+            <li><BrandIcon name="check-circle" size={17}/> {wordCount} kata dalam naskah</li>
+            <li><BrandIcon name="eye" size={17}/> Periksa dialog, alur, dan typo melalui pratinjau</li>
           </ul>
           {isLive && <p className="studio-warning">Bab ini sudah publik. Perubahan isi yang tersimpan langsung terlihat oleh pembaca.</p>}
           {!book.is_published && <p className="studio-warning">Novel masih privat. Pembaca belum dapat mengakses bab yang diterbitkan.</p>}
@@ -282,22 +280,21 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
             <input type="datetime-local" value={schedule} onChange={event => setSchedule(event.target.value)}/>
           </label>
           <button type="button" className="studio-light-button" disabled={publishing || !body.trim()}
-            onClick={() => void updateRelease('schedule')}><CalendarDays size={17}/> Jadwalkan</button>
+            onClick={() => void updateRelease('schedule')}><BrandIcon name="calendar" size={17}/> Jadwalkan</button>
           <button type="button" className="studio-primary" disabled={publishing || !body.trim()}
-            onClick={() => void updateRelease('now')}><Send size={17}/> Terbitkan sekarang</button>
-          <p className="studio-publish-hint"><ShieldCheck size={15}/> Tidak ada publikasi tanpa konfirmasi.</p>
+            onClick={() => void updateRelease('now')}><BrandIcon name="send" size={17}/> Terbitkan sekarang</button>
+          <p className="studio-publish-hint"><BrandIcon name="shield" size={15}/> Tidak ada publikasi tanpa konfirmasi.</p>
         </div>}
         <details className="v69-editor-danger"><summary>Pengelolaan bab</summary>
           {episodeStatus(ep) !== 'Draft' && <button type="button" className="studio-danger-lite"
             disabled={publishing} onClick={() => void updateRelease('draft')}>
-            <LockKeyhole size={16}/> Tarik ke draft
+            <BrandIcon name="lock" size={16}/> Tarik ke draft
           </button>}
           <button type="button" className="studio-danger-lite" disabled={publishing || dirty}
-            onClick={() => void onDelete()}><Trash2 size={16}/> Pindahkan ke Sampah</button>
+            onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan ke Sampah</button>
           {dirty && <small>Simpan perubahan sebelum memindahkan bab ke Sampah.</small>}
         </details>
       </aside>}
     </div>
-    {error && <div className="studio-error v69-editor-error" role="alert">{error}</div>}
   </div>;
 }

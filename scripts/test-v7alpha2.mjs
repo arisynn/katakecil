@@ -8,7 +8,7 @@ const empty = read('src/features/public/components/LibraryUI.tsx');
 const css = read('src/design/v70-alpha2.css');
 const app = read('src/App.tsx');
 const pkg = JSON.parse(read('package.json'));
-assert.ok(/^7\.0\.0-(?:alpha\.\d+|beta\.\d+)$/.test(pkg.version));
+assert.ok(/^(?:7\.0\.0-(?:alpha\.\d+|beta\.\d+)|7\.1\.0-rc\.1)$/.test(pkg.version));
 assert.match(app, /design\/v70-alpha2.css/);
 assert.match(page, /filterSavedStories\(savedStories, collectionFilter,/);
 assert.match(page, /collectionFilter===value/);
