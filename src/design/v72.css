@@ -92,3 +92,77 @@ html[data-kk-offline='true'] .reader-protected .reader-book,html[data-kk-offline
   font-weight: 700;
 }
 .kk-cover-note { margin: 0; line-height: 1.5; }
+
+/* Detail mengikuti bentuk asli. Rak tetap 2:3 dan menandai rasio yang tidak pas. */
+.kk-cover-shelf-tag {
+  position: absolute;
+  z-index: 2;
+  left: 8px;
+  bottom: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgb(8 20 37 / .78);
+  color: #fff;
+  font: 700 10px/1.2 'Plus Jakarta Sans', system-ui, sans-serif;
+  letter-spacing: .04em;
+  pointer-events: none;
+}
+.kk-v7-collection-cover .kk-cover-shelf-tag,
+.v68-continue-cover .kk-cover-shelf-tag,
+.art-cover--mini .kk-cover-shelf-tag { display: none; }
+.kk-cover-shape {
+  margin: 10px 0 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--kk-primary, #235DB4);
+  color: #fff;
+  font: 700 11px/1.2 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.v6-public .kk-smart-detail .v6-original-cover[data-cover-surface="detail"] {
+  aspect-ratio: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: hidden;
+  border-radius: 15px;
+}
+.v6-public .kk-smart-detail .v6-original-cover[data-cover-surface="detail"] > picture {
+  display: block;
+  height: auto !important;
+}
+.v6-public .kk-smart-detail .v6-original-cover[data-cover-surface="detail"] .v6-cover-image {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
+.v6-public .kk-smart-detail .v6-original-cover[data-cover-kind="poster"] {
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+@media (max-width: 820px) {
+  .v6-public .kk-smart-detail:has([data-cover-kind="wallpaper"]),
+  .v6-public .kk-smart-detail:has([data-cover-kind="poster"]) {
+    width: min(78vw, 340px);
+  }
+  .v6-public .kk-smart-detail:has([data-cover-kind="wide"]) {
+    width: min(100%, 520px);
+  }
+  .v6-public .kk-smart-detail:has([data-cover-kind="square"]) {
+    width: min(72vw, 300px);
+  }
+}
+@media (min-width: 821px) {
+  .v6-public .v6-detail-hero:has([data-cover-kind="wide"]) {
+    grid-template-columns: minmax(280px, 460px) 1fr;
+  }
+  .v6-public .v6-detail-hero:has([data-cover-kind="wallpaper"]),
+  .v6-public .v6-detail-hero:has([data-cover-kind="poster"]) {
+    grid-template-columns: minmax(220px, 300px) 1fr;
+  }
+}

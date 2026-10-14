@@ -220,7 +220,7 @@ function Detail({ book, episodes, schedules, demo }: {
             </Action>
             <section className="v6-detail-hero">
                 <div className="v6-detail-cover kk-smart-detail">
-                    <Cover book={book} size="large" eager/>
+                    <Cover book={book} size="large" eager surface="detail"/>
                 </div>
                 <div className="v6-detail-info">
                     <h1>{book.title}</h1>

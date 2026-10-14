@@ -40,30 +40,34 @@ export function Cover({book, size = 'normal', eager = false, surface = 'shelf'}:
   const detailRatio = surface === 'detail' && measure && measure.kind !== 'poster'
     ? `${measure.width} / ${measure.height}`
     : undefined;
-  return <div
-    className={`art-cover v6-cover art-cover--${size} ${original ? 'v6-original-cover' : 'v6-fallback-cover'}`}
-    data-cover-kind={original ? (measure?.kind ?? 'unknown') : 'fallback'}
-    data-cover-fill={fill ? 'yes' : 'no'}
-    data-cover-surface={surface}
-    style={detailRatio ? { aspectRatio: detailRatio, maxHeight: '70vh' } : undefined}
-  >
-    {original && <img src={src} alt="" aria-hidden="true" className="art-cover-backdrop v6-cover-backdrop" loading={eager ? 'eager' : 'lazy'}/>}
-    <picture>
-      {!original && <source media="(max-width: 600px)" srcSet={fallbackCoverMobile(book)} type="image/webp" />}
-      <img
-        src={src}
-        alt={`Ilustrasi sampul ${book.title}`}
-        className="art-cover-image v6-cover-image"
-        style={original ? { objectPosition: `${focus.x * 100}% ${focus.y * 100}%` } : undefined}
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        onLoad={event => {
-          if (!original) return;
-          const img = event.currentTarget;
-          setMeasure(classifyCover(img.naturalWidth, img.naturalHeight));
-        }}
-        onError={() => setFailed(true)}
-      />
-    </picture>
-  </div>;
+  return <>
+    <div
+      className={`art-cover v6-cover art-cover--${size} ${original ? 'v6-original-cover' : 'v6-fallback-cover'}`}
+      data-cover-kind={original ? (measure?.kind ?? 'unknown') : 'fallback'}
+      data-cover-fill={fill ? 'yes' : 'no'}
+      data-cover-surface={surface}
+      style={detailRatio ? { aspectRatio: detailRatio } : undefined}
+    >
+      {original && <img src={src} alt="" aria-hidden="true" className="art-cover-backdrop v6-cover-backdrop" loading={eager ? 'eager' : 'lazy'}/>}
+      <picture>
+        {!original && <source media="(max-width: 600px)" srcSet={fallbackCoverMobile(book)} type="image/webp" />}
+        <img
+          src={src}
+          alt={`Ilustrasi sampul ${book.title}`}
+          className="art-cover-image v6-cover-image"
+          style={original ? { objectPosition: `${focus.x * 100}% ${focus.y * 100}%` } : undefined}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          onLoad={event => {
+            if (!original) return;
+            const img = event.currentTarget;
+            setMeasure(classifyCover(img.naturalWidth, img.naturalHeight));
+          }}
+          onError={() => setFailed(true)}
+        />
+      </picture>
+      {surface !== 'detail' && fill && measure && <span className="kk-cover-shelf-tag">{measure.ratioName}</span>}
+    </div>
+    {surface === 'detail' && measure && <p className="kk-cover-shape">{measure.ratioName} · {measure.label}</p>}
+  </>;
 }
