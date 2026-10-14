@@ -6,8 +6,8 @@ const light = SAPPHIRE_PALETTE.light;
 const dark = SAPPHIRE_PALETTE.dark;
 
 export const THEMES: Record<ThemeMode, ThemeColors> = {
-  white: { name:'white',label:'Terang',bg:light.background,pageBg:light.surface,text:light.text,secondaryText:light.muted,border:light.border,barBg:'rgba(255,255,255,.97)',accent:light.accent,accentHover:light.accentHover,hoverBg:light.raised,cardBg:light.raised,selectionBg:light.selection },
-  night: { name:'night',label:'Gelap',bg:dark.background,pageBg:dark.surface,text:dark.text,secondaryText:dark.muted,border:dark.border,barBg:'rgba(16,36,61,.97)',accent:dark.accent,accentHover:dark.accentHover,hoverBg:dark.raised,cardBg:dark.raised,selectionBg:dark.selection },
+  white: { name:'white',label:'Terang',bg:light.background,pageBg:light.surface,text:light.text,secondaryText:light.muted,border:light.border,barBg:'var(--kk-overlay)',accent:light.accent,accentHover:light.accentHover,hoverBg:light.raised,cardBg:light.raised,selectionBg:light.selection },
+  night: { name:'night',label:'Gelap',bg:dark.background,pageBg:dark.surface,text:dark.text,secondaryText:dark.muted,border:dark.border,barBg:'var(--kk-overlay)',accent:dark.accent,accentHover:dark.accentHover,hoverBg:dark.raised,cardBg:dark.raised,selectionBg:dark.selection },
 };
 
 export const DEFAULT_SETTINGS: ReadingSettings = {

@@ -14,6 +14,9 @@ import DiscoveryNotices from '../features/public/components/DiscoveryNotices';
 import { selectRecentChapters } from '../features/public/recentChapters';
 import { filterSavedStories, sortSavedStories, type CollectionFilter } from '../features/public/collectionFilters';
 import { getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter } from '../data/publicSchedule';
+import { getPublicAnnouncements, type PublicAnnouncement } from '../data/announcements';
+import { newestReadingProgress, parseReadingProgress } from '../utils/readingProgress';
+import { readerHeading } from '../utils/readerHeading';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
 const demoDate = '2026-10-01T00:00:00.000Z';
 const demoData: Array<[
@@ -36,47 +39,54 @@ function useLibrary() {
         books: Book[];
         episodes: EpisodeSummary[];
         schedules: UpcomingChapter[];
-    }>({ books: [], episodes: [], schedules: [] });
+        announcements: PublicAnnouncement[];
+    }>({ books: [], episodes: [], schedules: [], announcements: [] });
     const [loading, setLoading] = useState(isConfigured);
     const [error, setError] = useState('');
     useEffect(() => {
         let active = true;
         if (!isConfigured) {
-            setData({ books: demoBooks, episodes: [], schedules: [] });
+            setData({ books: demoBooks, episodes: [], schedules: [], announcements: [] });
             setLoading(false);
             return;
         }
-        Promise.all([getPublicLibrary(), getPublicUpcomingChapters()]).then(([library, schedules]) => {
-            if (active) setData({ ...library, schedules });
+        Promise.all([getPublicLibrary(), getPublicUpcomingChapters(), getPublicAnnouncements()]).then(([library, schedules, announcements]) => {
+            if (active) setData({ ...library, schedules, announcements });
         }).catch(e => { if (active)
             setError(e instanceof Error ? e.message : 'Gagal memuat perpustakaan.'); }).finally(() => { if (active)
             setLoading(false); });
         return () => { active = false; };
     }, []);
-    // When the next scheduled release goes live, refresh the public metadata.
+    // When a chapter or notice visibility boundary passes, refresh public metadata.
     // The reader never receives future chapter bodies or titles.
     useEffect(() => {
-        if (!isConfigured || data.schedules.length === 0) return;
-        const nextRelease = Math.min(...data.schedules.map(item => Date.parse(item.release_at)));
+        if (!isConfigured) return;
+        const now = Date.now();
+        const boundaries = [
+          ...data.schedules.map(item => Date.parse(item.release_at)),
+          ...data.announcements.flatMap(item => item.ends_at ? [Date.parse(item.ends_at)] : []),
+        ].filter(date => Number.isFinite(date) && date > now);
+        // A periodic refresh also catches announcements scheduled after initial load.
+        const nextRelease = boundaries.length ? Math.min(...boundaries) : now + 600_000;
         if (!Number.isFinite(nextRelease)) return;
-        const delay = Math.max(1000, Math.min(nextRelease - Date.now() + 2000, 86_400_000));
+        const delay = Math.max(1000, Math.min(nextRelease - Date.now() + 2000, 600_000));
         let active = true;
         const timer = window.setTimeout(() => {
-            Promise.all([getPublicLibrary(), getPublicUpcomingChapters()])
-                .then(([library, schedules]) => {
-                    if (active) setData({ ...library, schedules });
+            Promise.all([getPublicLibrary(), getPublicUpcomingChapters(), getPublicAnnouncements()])
+                .then(([library, schedules, announcements]) => {
+                    if (active) setData({ ...library, schedules, announcements });
                 })
                 .catch(() => { /* Keep the existing public catalog on transient errors. */ });
         }, delay);
         return () => { active = false; window.clearTimeout(timer); };
-    }, [data.schedules]);
+    }, [data.schedules, data.announcements]);
     return { ...data, loading, error, demo: !isConfigured };
 }
 const countFor = (episodes: EpisodeSummary[], book: Book) => episodes.filter(e => e.book_id === book.id).length;
 function readProgress(book: Book) {
     try {
         const v = JSON.parse(localStorage.getItem(`kk-secure-progress-${book.id}`) || 'null');
-        return v && typeof v.ep === 'number' ? v.ep : null;
+        return parseReadingProgress(v);
     }
     catch {
         return null;
@@ -91,17 +101,15 @@ function Home({ books, episodes, demo }: {
         const picks = published.filter(book => book.is_featured);
         return [...picks, ...published.filter(book => !book.is_featured)].slice(0, 8);
     }, [published]);
-    const continuation = demo ? undefined : published.find(book => {
-        const progress = readProgress(book);
-        return progress !== null && episodes.some(ep => ep.book_id === book.id && ep.episode_number === progress);
-    });
-    const episode = continuation ? readProgress(continuation) : null;
+    const latest = demo ? null : newestReadingProgress(published, episodes, readProgress);
+    const continuation = latest?.book;
+    const episode = latest?.progress.ep ?? null;
     return <main className="kk-v7-home" aria-label="Beranda KataKecil">
       <div className="kk-v7-home-inner">
         <div className="kk-v7-home-intro"><span className="kk-v7-kicker">CERITA KECIL, MAKNA BESAR</span><h1>Selamat datang di KataKecil.</h1><p>Cerita yang bisa kamu bawa ke mana saja.</p></div>
         {continuation && episode !== null && <section className="kk-v7-home-section" aria-label="Lanjut membaca">
           <Heading title="Lanjut Membaca"/>
-          <button className="v68-continue-card" type="button" onClick={()=>navigate(`/baca/${continuation.slug}?episode=${episode}`)} aria-label={`Lanjutkan ${continuation.title} dari bab ${episode}`}>
+          <button className="v68-continue-card" type="button" onClick={()=>navigate(`/baca/${continuation.slug}`)} aria-label={`Lanjutkan ${continuation.title} dari bab ${episode}`}>
             <div className="v68-continue-cover"><Cover book={continuation} eager/></div>
             <div className="v68-continue-info"><strong>{continuation.title}</strong><span>Bab {episode} · {countFor(episodes, continuation)} bab tersedia</span></div>
             <span className="v68-continue-arrow" aria-hidden="true"><ArrowRight size={19}/></span>
@@ -123,8 +131,8 @@ function Home({ books, episodes, demo }: {
       </div>
     </main>;
 }
-function Listing({ books, episodes, schedules, demo, collection = false }: {
-    books: Book[]; episodes: EpisodeSummary[]; schedules: UpcomingChapter[]; demo: boolean; collection?: boolean;
+function Listing({ books, episodes, schedules, announcements = [], demo, collection = false }: {
+    books: Book[]; episodes: EpisodeSummary[]; schedules: UpcomingChapter[]; announcements?: PublicAnnouncement[]; demo: boolean; collection?: boolean;
 }) {
     const params = new URLSearchParams(window.location.search);
     const [q, setQ] = useState(params.get('q') || '');
@@ -146,7 +154,7 @@ function Listing({ books, episodes, schedules, demo, collection = false }: {
         .sort((a,b)=>sort==='judul'?a.title.localeCompare(b.title,'id-ID'):new Date(b.updated_at).getTime()-new Date(a.updated_at).getTime());
     },[eligible,filter,status,q,sort]);
     const savedStories = collection ? sortSavedStories(eligible, ids) : [];
-    const filteredSaved = filterSavedStories(savedStories, collectionFilter, readProgress);
+    const filteredSaved = filterSavedStories(savedStories, collectionFilter, book => readProgress(book)?.ep ?? null);
     if(collection) return <main className="kk-v7-collection kk-v7-page">
       <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RAK PRIBADIMU</span><h1>Koleksi Saya</h1><p>Cerita yang kamu simpan, tetap ada di perangkat ini.</p></div>
       {savedStories.length===0?<EmptyLibrary collection/>:<>
@@ -159,14 +167,14 @@ function Listing({ books, episodes, schedules, demo, collection = false }: {
           <p>Belum ada cerita dalam kategori ini.</p>
           <button type="button" onClick={()=>setCollectionFilter('semua')}>Tampilkan semua koleksi</button>
         </div>:<div className="kk-v7-collection-list">{filteredSaved.map(book=>{const progress=readProgress(book);return <article className="kk-v7-collection-item" key={book.id}>
-          <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat ${book.title}`}><div className="kk-v7-collection-cover"><Cover book={book}/></div><span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{progress!==null?`Terakhir dibaca: Bab ${progress}`:`${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <ChevronRight size={15}/></span></span></button>
+          <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat ${book.title}`}><div className="kk-v7-collection-cover"><Cover book={book}/></div><span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{progress!==null?`Terakhir dibaca: Bab ${progress.ep}`:`${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <ChevronRight size={15}/></span></span></button>
           <button type="button" className="kk-v7-collection-remove" onClick={()=>toggle(book.id)} aria-label={`Hapus ${book.title} dari Koleksi`} title="Hapus dari Koleksi"><BookmarkCheck size={18}/></button>
         </article>})}</div>}
       </>}
     </main>;
     return <main className="kk-v7-discover kk-v7-page">
       <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RUANG UNTUK MENEMUKAN</span><h1>Temukan</h1><p>Jelajahi cerita dan kabar terbaru dari Karisyono.</p></div>
-      {!demo && <DiscoveryNotices books={books} episodes={episodes} schedules={schedules}/>}
+      {!demo && <DiscoveryNotices books={books} episodes={episodes} schedules={schedules} announcements={announcements}/>}
       <div className="kk-v7-discover-tools"><div className="v6-library-search"><Search size={19}/><input ref={input} type="search" aria-label="Cari judul atau genre" placeholder="Cari judul atau genre..." value={q} onChange={e=>setQ(e.target.value)}/>{q&&<button type="button" aria-label="Hapus pencarian" onClick={()=>setQ('')}><X size={16}/></button>}</div>
         <div className="kk-v7-filter-row" role="group" aria-label="Status cerita">{['Semua','Tamat','Berlangsung'].map(value=><button type="button" key={value} aria-pressed={status===value} className={status===value?'active':''} onClick={()=>setStatus(value)}>{value}</button>)}</div>
         {genres.length>1&&<div className="v6-genre-pills">{genres.map(value=><button type="button" key={value} className={filter===value?'selected':''} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{value}</button>)}</div>}
@@ -187,6 +195,8 @@ function Detail({ book, episodes, schedules, demo }: {
         .sort((a, b) => a.episode_number - b.episode_number);
     const [showAll, setShowAll] = useState(false);
     const nextChapter = schedules.find(item => item.book_id === book.id);
+    const progress = readProgress(book);
+    const resumeChapter = progress && rows.some(ep => ep.episode_number === progress.ep) ? progress.ep : null;
     const bookStatus = book.status === 'completed' ? 'Tamat'
         : book.status === 'hiatus' ? 'Jeda' : 'Berlangsung';
 
@@ -212,7 +222,7 @@ function Detail({ book, episodes, schedules, demo }: {
                     <div className="v6-detail-actions">
                         {rows.length > 0 && !demo
                             ? <Action className="v6-button v6-button-gold" to={`/baca/${book.slug}`}>
-                                Mulai Membaca <ArrowRight size={17}/>
+                                {resumeChapter !== null ? 'Lanjutkan Membaca' : 'Mulai Membaca'} <ArrowRight size={17}/>
                             </Action>
                             : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}
                       {!demo && <BookmarkButton book={book}/>}
@@ -233,8 +243,8 @@ function Detail({ book, episodes, schedules, demo }: {
                             >
                                 <span>{i + 1}.</span>
                                 <div>
-                                    <strong>{ep.title}</strong>
-                                    <small>{ep.arc_title || `Bab ${ep.episode_number}`}</small>
+                                    <strong>{readerHeading(ep.title, ep.episode_number).title || `Bab ${ep.episode_number}`}</strong>
+                                    <small>{readerHeading(ep.title, ep.episode_number).eyebrow}</small>
                                 </div>
                                 <span className="v6-chapter-date">
                                     {ep.release_at ? new Date(ep.release_at).toLocaleDateString('id-ID', {
@@ -298,7 +308,7 @@ function About() {
 export default function PublicLibrary({ path }: {
     path: string;
 }) {
-    const { books, episodes, schedules, loading, error, demo } = useLibrary();
+    const { books, episodes, schedules, announcements, loading, error, demo } = useLibrary();
     const { theme } = useUiTheme();
     const slug = path.startsWith('/cerita/') ? decodeURIComponent(path.split('/')[2] || '') : null;
     const book = slug ? books.find(b => b.slug === slug) : undefined;
@@ -308,6 +318,6 @@ export default function PublicLibrary({ path }: {
     return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path}/>
     {demo && <div className="v6-demo-notice"><Sparkles size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error && <div className="v6-error" role="alert">{error}</div>}
-    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} schedules={schedules} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/temukan" className="v6-button v6-button-gold">Kembali ke Temukan</Action></div>) : (path === '/cerita' || path === '/temukan') ? <Listing books={books} episodes={episodes} schedules={schedules} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
+    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/temukan" className="v6-button v6-button-gold">Kembali ke Temukan</Action></div>) : (path === '/cerita' || path === '/temukan') ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
   </div>;
 }

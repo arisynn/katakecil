@@ -11,6 +11,9 @@ html[data-app-theme='light'] {
   --kk-surface-2: #E9F2FC;
   --kk-text: #172C48;
   --kk-muted: #506781;
+  --sapphire-muted: #506781;
+  --sapphire-border: #D5E3F2;
+  --sapphire-shadow: rgba(30, 68, 116, .09);
   --kk-border: #D5E3F2;
   --kk-primary: #235DB4;
   --kk-on-primary: #FFFFFF;
@@ -20,6 +23,7 @@ html[data-app-theme='light'] {
   --kk-rose: #3269A8;
   --kk-shadow: rgba(30, 68, 116, .09);
   --kk-overlay: rgba(255, 255, 255, .95);
+  --kk-scrim: rgba(23, 44, 72, .30);
   --v63-canvas: var(--kk-bg);
   --v63-card: var(--kk-surface);
   --v63-ink: var(--kk-text);
@@ -38,6 +42,9 @@ html[data-app-theme='dark'] {
   --kk-surface-2: #173251;
   --kk-text: #EFF6FF;
   --kk-muted: #B2C5DA;
+  --sapphire-muted: #B2C5DA;
+  --sapphire-border: #294665;
+  --sapphire-shadow: rgba(0, 6, 20, .32);
   --kk-border: #294665;
   --kk-primary: #9BC9FF;
   --kk-on-primary: #081425;
@@ -47,6 +54,7 @@ html[data-app-theme='dark'] {
   --kk-rose: #82BAFF;
   --kk-shadow: rgba(0, 6, 20, .32);
   --kk-overlay: rgba(16, 36, 61, .95);
+  --kk-scrim: rgba(0, 6, 20, .62);
   --v63-canvas: var(--kk-bg);
   --v63-card: var(--kk-surface);
   --v63-ink: var(--kk-text);

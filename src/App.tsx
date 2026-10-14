@@ -37,6 +37,9 @@ import './design/v611-immersive-reader.css';
 import './design/v612-reader-layout.css';
 import './design/v70-alpha.css';
 import './design/v70-alpha2.css';
+import './design/v70-alpha3.css';
+import './design/v70-alpha4.css';
+import './design/v70-beta1.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

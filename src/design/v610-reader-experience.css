@@ -179,7 +179,7 @@
 .v610-chapter-nav button:hover:not(:disabled) { background: var(--r-raised); }
 .v610-chapter-nav button:disabled { color: var(--r-muted); opacity: .48; }
 .quiet-app .controls-shell.controls-open { pointer-events: none; }
-.quiet-app .v610-panel-scrim { background: rgba(5,16,32,.50); }
+.quiet-app .v610-panel-scrim { background: var(--kk-scrim); }
 .quiet-app .v610-drawer,
 .quiet-app .v610-search-panel {
   color: var(--r-ink) !important;
@@ -244,7 +244,7 @@
 .quiet-app .v610-search-panel .search-hit small { color: var(--r-muted); font-size: 12px; }
 .quiet-app .v610-search-panel .search-hit:hover { background: var(--r-raised); }
 .v610-settings-scrim {
-  background: rgba(5,16,32,.55);
+  background: var(--kk-scrim);
   backdrop-filter: blur(4px);
   align-items: flex-end;
   padding: 0;

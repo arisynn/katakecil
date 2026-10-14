@@ -1,0 +1,48 @@
+/* V7.0 Alpha.3 — Announcements Studio & Sapphire-only discovery. */
+.v6-studio-app .kk-v73-announcements { width:100%; max-width:960px; color:var(--kk-text); }
+.v6-studio-app .kk-v73-head { display:grid; justify-items:start; gap:10px; margin-bottom:25px; }
+.v6-studio-app .kk-v73-head h1 { margin:0; color:var(--kk-text); }
+.v6-studio-app .kk-v73-head p { max-width:600px; margin:0 0 9px; color:var(--kk-muted); font-size:14px; line-height:1.65; }
+.v6-studio-app .kk-v73-head .studio-primary,
+.v6-studio-app .kk-v73-editor .studio-primary { display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; }
+.v6-studio-app .kk-v73-editor,
+.v6-studio-app .kk-v73-list { display:grid; gap:18px; margin:20px 0 28px; padding:clamp(19px,3vw,30px); background:var(--kk-surface); border:1px solid var(--kk-border); border-radius:22px; box-shadow:0 8px 26px var(--kk-shadow); }
+.v6-studio-app .kk-v73-editor-title { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+.v6-studio-app .kk-v73-editor-title h2,
+.v6-studio-app .kk-v73-list h2 { margin:0; font:650 clamp(20px,3vw,26px)/1.2 Georgia,serif; color:var(--kk-text); }
+.v6-studio-app .kk-v73-editor-title .studio-light-button,
+.v6-studio-app .kk-v73-item-actions .studio-light-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 15px; cursor:pointer; }
+.v6-studio-app .kk-v73-editor label { display:grid; gap:8px; font-size:13px; font-weight:650; color:var(--kk-text); }
+.v6-studio-app .kk-v73-editor label small { font-size:11px; font-weight:400; color:var(--kk-muted); }
+.v6-studio-app .kk-v73-editor :is(input,select,textarea) { box-sizing:border-box; display:block; width:100%; min-height:46px; padding:12px 13px; font-size:14px; line-height:1.5; font-family:inherit; background:var(--kk-surface); border:1px solid var(--kk-border); color:var(--kk-text); border-radius:12px; }
+.v6-studio-app .kk-v73-editor textarea { resize:vertical; min-height:90px; }
+.v6-studio-app .kk-v73-dates { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.v6-studio-app .kk-v73-hint { display:flex; align-items:flex-start; gap:7px; margin:-5px 0 0; color:var(--kk-muted); font-size:12px; line-height:1.5; }
+.v6-studio-app .kk-v73-hint svg { flex:none; }
+.v6-studio-app .kk-v73-actions { display:flex; justify-content:flex-end; }
+.v6-studio-app .kk-v73-item { display:flex; justify-content:space-between; align-items:flex-start; gap:15px; padding:17px; background:var(--kk-surface-2); border:1px solid var(--kk-border); border-radius:16px; }
+.v6-studio-app .kk-v73-item-main { display:grid; gap:8px; min-width:0; }
+.v6-studio-app .kk-v73-item-main h3 { margin:0; font-size:16px; line-height:1.35; color:var(--kk-text); overflow-wrap:anywhere; }
+.v6-studio-app .kk-v73-item-main p { margin:0; font-size:13px; line-height:1.6; color:var(--kk-muted); overflow-wrap:anywhere; }
+.v6-studio-app .kk-v73-item-main small { font-size:11px; color:var(--kk-muted); }
+.v6-studio-app .kk-v73-status { justify-self:start; border:1px solid var(--kk-border); background:var(--kk-surface); color:var(--kk-primary); border-radius:999px; padding:5px 10px; font-size:11px; font-weight:750; }
+.v6-studio-app .kk-v73-item-actions { display:flex; align-items:center; gap:8px; flex:none; }
+.v6-studio-app .kk-v73-item-actions .studio-danger-lite { display:grid; place-items:center; min-width:44px; width:44px; padding:0; cursor:pointer; }
+.v6-studio-app .kk-v73-list-empty { display:flex; align-items:center; flex-direction:column; gap:12px; text-align:center; padding:25px 14px; color:var(--kk-muted); }
+.v6-studio-app .kk-v73-list-empty svg { color:var(--kk-primary); }
+.v6-studio-app .kk-v73-list-empty p { margin:0; font-size:13px; line-height:1.6; }
+.v6-studio-app .kk-v73-announcements :is(button,input,textarea,select):focus-visible { outline:2px solid var(--kk-primary)!important; outline-offset:3px; }
+.v6-studio-app .kk-v73-announcements button:disabled { opacity:.55; cursor:not-allowed; }
+/* Prevent legacy generic Studio selectors from reintroducing amber/cream. */
+.v6-studio-app .kk-v73-announcements .studio-success { background:var(--kk-surface-2)!important; color:var(--kk-text)!important; border:1px solid var(--kk-border); border-radius:12px; padding:12px 15px; }
+.v6-public .kk-v7-notices .kk-v7-notice-card { background:var(--kk-surface)!important; border-color:var(--kk-border)!important; color:var(--kk-text)!important; }
+.v6-public .kk-v7-notices .kk-v7-notice-body h2 { color:var(--kk-text)!important; }
+.v6-public .kk-v7-notices .kk-v7-notice-body p { color:var(--kk-muted)!important; }
+@media (max-width:640px) {
+ .v6-studio-app .kk-v73-editor,.v6-studio-app .kk-v73-list { padding:17px; border-radius:18px; }
+ .v6-studio-app .kk-v73-dates { grid-template-columns:minmax(0,1fr); }
+ .v6-studio-app .kk-v73-item { flex-direction:column; }
+ .v6-studio-app .kk-v73-item-actions { width:100%; justify-content:flex-end; }
+ .v6-studio-app .kk-v73-editor-title { align-items:flex-start; }
+}
+@media (prefers-reduced-motion:reduce) { .v6-studio-app .kk-v73-announcements * { scroll-behavior:auto; } }

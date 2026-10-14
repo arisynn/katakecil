@@ -20,6 +20,7 @@ assert.deepEqual(readerHeading('Bab 3: Tidak cocok',5),{eyebrow:'BAB 5',title:'B
 assert.deepEqual(readerHeading('Prolog'),{eyebrow:'PROLOG',title:''});
 assert.deepEqual(readerHeading('Epilog — Kepulangan'),{eyebrow:'EPILOG',title:'Kepulangan'});
 assert.deepEqual(readerHeading('Bab 8: Pulang'),{eyebrow:'BAB 8',title:'Pulang'});
+assert.deepEqual(readerHeading('Suara Mesin di Balik Terpal',0),{eyebrow:'BAB 0',title:'Suara Mesin di Balik Terpal'});
 assert.equal(pinchAction(200,166,false),'open');
 assert.equal(pinchAction(200,235,true),'close');
 assert.equal(pinchAction(200,170,true),null);

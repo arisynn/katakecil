@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft, Bookmark, BookmarkCheck, BookOpen, ChevronLeft, ChevronRight, Maximize2, Minimize2, Menu,
-  Search, Settings2, Undo2, X,
+  Search, Settings2, Undo2, X, CheckCircle2, CircleCheck,
 } from 'lucide-react';
 import type { ThemeColors } from '../types/reader';
 
@@ -28,6 +28,9 @@ interface Props {
   prevChapter: boolean;
   nextChapter: boolean;
   progressScope?: 'chapter' | 'story';
+  estimatedMinutesRemaining?: number | null;
+  chapterCompleted?: boolean;
+  onToggleChapterCompleted?: () => void;
 }
 
 /** Controls are presentation-only. SecureReaderApp owns navigation and persistence. */
@@ -36,6 +39,7 @@ export function ReaderControls({
   canReturn, onContents, onSettings, onSearch, onBookmark, onFullscreen,
   onReturn, onExit, onClose, onPage, onPrevChapter, onNextChapter,
   prevChapter, nextChapter, progressScope = 'chapter',
+  estimatedMinutesRemaining = null, chapterCompleted = false, onToggleChapterCompleted,
 }: Props) {
   const [moreOpen, setMoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -88,6 +92,10 @@ export function ReaderControls({
               <button type="button" role="menuitem" disabled={!prevChapter} onClick={() => runMenuAction(onPrevChapter)}><ChevronLeft size={18} /> Bab sebelumnya</button>
               <button type="button" role="menuitem" disabled={!nextChapter} onClick={() => runMenuAction(onNextChapter)}>Bab berikutnya <ChevronRight size={18} /></button>
             </div>
+            {onToggleChapterCompleted && <button type="button" role="menuitem" onClick={() => runMenuAction(onToggleChapterCompleted)}>
+              {chapterCompleted ? <CircleCheck size={18} /> : <CheckCircle2 size={18} />}
+              {chapterCompleted ? 'Batalkan tanda selesai' : 'Tandai bab selesai'}
+            </button>}
             <button type="button" role="menuitem" onClick={() => runMenuAction(onFullscreen)}>
               {fullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
               {fullscreen ? 'Keluar layar penuh' : 'Layar penuh'}
@@ -113,7 +121,11 @@ export function ReaderControls({
           />
           <button type="button" className="v611-page-step" onClick={() => onPage(page + 1)} disabled={page >= total} aria-label="Halaman berikutnya"><ChevronRight size={20}/></button>
         </div>
-        <div className="v611-page-summary" aria-live="off">{page} / {total}</div>
+        <div className="v611-page-summary v74-reading-summary" aria-live="off">
+          <span>{page} / {total}</span>
+          {chapterCompleted ? <span className="v74-reading-insight"><CircleCheck size={13} aria-hidden="true" /> Bab selesai</span>
+            : estimatedMinutesRemaining !== null ? <span className="v74-reading-insight">{estimatedMinutesRemaining > 0 ? `±${estimatedMinutesRemaining} menit lagi` : 'Halaman terakhir'}</span> : null}
+        </div>
       </div>
     </footer>
   </>;

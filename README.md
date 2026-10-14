@@ -1,3 +1,25 @@
+# KataKecil V7.0 Beta.1 — Sapphire Refinement & Reading Continuity
+
+**Kandidat pengujian staging, belum dideploy.** Memperbaiki alias warna warisan V5/V6, Koleksi mobile, indikator carousel, progres terakhir dibaca, dan tombol Lanjut Membaca yang memulihkan posisi teks. Pengumuman terjadwal yang kedaluwarsa tidak lagi mengambil jatah hasil query publik.
+
+Lihat [`docs/RELEASE_V7_BETA1.md`](docs/RELEASE_V7_BETA1.md) dan [`docs/V7_BETA1_FILE_MANIFEST.md`](docs/V7_BETA1_FILE_MANIFEST.md).
+
+Tes lokal: `npm run test:current && npm run audit:v7-theme && npm run audit:v7beta && npm run check:structure`. Lint/build memerlukan instalasi dependensi npm. Tidak ada migrasi baru di Beta.1; migrasi Pengumuman Alpha.3 tetap diperlukan jika belum diterapkan.
+
+---
+
+# KataKecil V7.0 Alpha.4 — Smart Reader & Sapphire Recovery
+
+**Source untuk staging, belum dideploy ke Vercel.** Reader kini memiliki tanda bab selesai manual, perkiraan waktu tersisa, loading judul BAB N (termasuk Bab 0), serta recovery screen Sapphire tanpa warna krem. Tidak ada perubahan skema Supabase baru di Alpha.4; fitur Pengumuman dari Alpha.3 tetap membutuhkan migrasi sebelumnya.
+
+Lihat [`docs/RELEASE_V7_ALPHA4.md`](docs/RELEASE_V7_ALPHA4.md) dan [`docs/V7_ALPHA4_FILE_MANIFEST.md`](docs/V7_ALPHA4_FILE_MANIFEST.md). Validasi: `npm run test:current && npm run audit:v7-theme && npm run check:structure`; `npm run lint && npm run build` setelah memasang dependencies.
+
+# KataKecil V7.0 Alpha.3 — Pengumuman Studio & Temukan
+
+**Source staging; belum dideploy ke produksi.** Fitur pengumuman membutuhkan migrasi Supabase tambahan dengan RLS.
+
+Baca [`docs/RELEASE_V7_ALPHA3.md`](docs/RELEASE_V7_ALPHA3.md) dan [`docs/V7_ALPHA3_FILE_MANIFEST.md`](docs/V7_ALPHA3_FILE_MANIFEST.md).
+
 # KataKecil V7.0 Alpha.2 — Sapphire Consistency & Collection Polish
 
 Lihat [`docs/RELEASE_V7_ALPHA2.md`](docs/RELEASE_V7_ALPHA2.md) untuk perbaikan empty state Koleksi dan audit dua tema.

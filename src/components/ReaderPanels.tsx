@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Bookmark as BookmarkIcon, BookOpen, Search, Trash2, X } from 'lucide-react';
+import { Bookmark as BookmarkIcon, BookOpen, CircleCheck, Search, Trash2, X } from 'lucide-react';
 import type { Bookmark, Chapter, TextAnchor, ThemeColors } from '../types/reader';
 import { useReaderDialogFocus } from '../hooks/useReaderDialogFocus';
 import { readerHeading } from '../utils/readerHeading';
@@ -9,6 +9,7 @@ interface ContentsProps {
   chapters: Chapter[];
   currentChapterId: string;
   bookmarks: Bookmark[];
+  completedEpisodeNumbers?: number[];
   onChapter: (chapter: Chapter) => void;
   onBookmark: (anchor: TextAnchor) => void;
   onDeleteBookmark: (id: string) => void;
@@ -17,7 +18,7 @@ interface ContentsProps {
 
 /** Secure index contains metadata only. Never attempt to fetch unpublished text here. */
 export function ContentsPanel({
-  onClose, chapters, currentChapterId, bookmarks, onChapter,
+  onClose, chapters, currentChapterId, bookmarks, completedEpisodeNumbers = [], onChapter,
   onBookmark, onDeleteBookmark, theme,
 }: ContentsProps) {
   const dialogRef = useReaderDialogFocus<HTMLElement>(onClose);
@@ -65,7 +66,7 @@ export function ContentsPanel({
               <strong>{heading.title || heading.eyebrow}</strong>
               {metadata && <small>{metadata}</small>}
             </span>
-            {active && <span className="v610-current-label">Dibaca</span>}
+            {completedEpisodeNumbers.includes(Number(number)) ? <span className="v74-completed-label" aria-label="Bab selesai"><CircleCheck size={15} aria-hidden="true" /> Selesai</span> : active && <span className="v610-current-label">Dibaca</span>}
           </button>;
         }) : <p className="panel-empty">Tidak ada bab yang cocok.</p>)}
         {tab === 'bookmarks' && (bookmarks.length ? bookmarks.map(bookmark => <div className="panel-row v610-bookmark-row" key={bookmark.id}>

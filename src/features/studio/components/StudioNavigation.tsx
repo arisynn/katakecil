@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, BarChart3, BookOpen, CalendarDays, ChevronRight, Database,
-  Feather, Library, LogOut, Menu, Settings2, Trash2, UploadCloud,
+  Feather, Library, LogOut, Menu, Settings2, Trash2, UploadCloud, Megaphone,
   LayoutDashboard,
 } from 'lucide-react';
 import { supabase } from '../../../data/supabase';
@@ -19,6 +19,7 @@ const primary = [
 const secondary = [
   { p: '/studio/settings', label: 'Pengaturan', icon: Settings2 },
   { p: '/studio/jadwal', label: 'Jadwal Terbit', icon: CalendarDays },
+  { p: '/studio/pengumuman', label: 'Pengumuman', icon: Megaphone },
   { p: '/studio/database', label: 'Database', icon: Database },
   { p: '/studio/sampah', label: 'Sampah', icon: Trash2 },
 ];

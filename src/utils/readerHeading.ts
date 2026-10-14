@@ -6,7 +6,7 @@ export function readerHeading(title: string, episodeNumber?: number): ReaderHead
   const special = /^(prolog|epilog)(?:\s*[:—–-]\s*(.*))?$/i.exec(original);
   if (special) return { eyebrow: special[1].toLocaleUpperCase('id-ID'), title: (special[2] || '').trim() };
 
-  const validNumber = Number.isSafeInteger(episodeNumber) && (episodeNumber ?? 0) > 0;
+  const validNumber = Number.isSafeInteger(episodeNumber) && (episodeNumber ?? -1) >= 0;
   const prefix = /^(?:(?:bab|episode)\s+)?(\d{1,5})(?:\s*[.:—–-]\s*|\s+)(.+)$/i.exec(original);
   const standalone = /^(?:bab|episode)\s+(\d{1,5})$/i.exec(original);
   const embeddedNumber = prefix ? Number(prefix[1]) : standalone ? Number(standalone[1]) : undefined;

@@ -16,6 +16,6 @@ assert.match(tokens, /--kk-primary: #235DB4;/);
 assert.match(tokens, /--kk-primary: #9BC9FF;/);
 assert.match(tokens, /--kk-amber: var\(--kk-primary\)/);
 assert.match(tokens, /--kk-amber-text: var\(--kk-on-primary\)/);
-assert.match(page, /className="v6-button v6-button-gold" to=\{`\/baca\/\$\{book.slug\}`\}/);
+assert.match(page, /className="v6-button v6-button-gold" to=\{`\/baca\/\$\{book.slug\}/);
 assert.ok(app.indexOf("./design/sapphire-tokens.css") < app.indexOf("./design/v67-sapphire-polish.css"));
 console.log('PASS V6.12.1: old gold CTA override removed, global sapphire tokens preserved for both themes.');

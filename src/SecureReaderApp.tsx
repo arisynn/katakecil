@@ -18,6 +18,7 @@ import { readerHeading } from './utils/readerHeading';
 import { useReaderViewport } from './hooks/useReaderViewport';
 import { useReaderMenuPlacement } from './hooks/useReaderMenuPlacement';
 import { readerGeometry } from './utils/readerLayout';
+import { completionStorageKey, normalizeCompletedEpisodes, toggleCompletedEpisode, estimateRemainingMinutes } from './utils/readerCompletion';
 
 function readLocal<T>(key:string,fallback:T):T {try{return JSON.parse(localStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
 function marker(ep:number){return `secure-episode-${ep}-part-0`;}
@@ -27,6 +28,7 @@ type Props={bookId:string;bookTitle:string;onExit:()=>void;episodeNumber?:number
 export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:Props){
  const progressKey=`kk-secure-progress-${bookId}`;
  const bookmarkKey=`kk-secure-bookmarks-${bookId}`;
+ const completedKey=completionStorageKey(bookId);
  const [index,setIndex]=useState<ReleasedEpisode[]>([]);
  const indexRef=useRef<ReleasedEpisode[]>([]);
  // Only one released episode is kept in memory. No story text is persisted.
@@ -46,6 +48,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const [modal,setModal]=useState<'none'|'contents'|'settings'|'search'>('none');
  const [fullscreen,setFullscreen]=useState(!!document.fullscreenElement);
  const [bookmarks,setBookmarks]=useState<Bookmark[]>(()=>readLocal<Bookmark[]>(bookmarkKey,[]).map(b=>({...b,snippet:'Penanda bacaan'})));
+ const [completedEpisodes,setCompletedEpisodes]=useState<number[]>(()=>normalizeCompletedEpisodes(readLocal<unknown>(completedKey,[])));
  const [status,setStatus]=useState('');
  const [returnAt,setReturnAt]=useState<{ep:number;offset:number}|null>(null);
  const measuringNode=useRef<HTMLElement|null>(null);
@@ -53,6 +56,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  const pendingEdge=useRef<'start'|'end'|'offset'>('start');
  const pendingOffset=useRef(0);
  const requestRef=useRef(0);
+ const loadingTarget=useRef<number|undefined>(undefined);
  const touch=useRef<{x:number;y:number;moved:boolean;pinch:boolean;distance?:number}|null>(null);
  const ignoreClick=useRef(false);
  const effectiveReaderTheme=readerModeFor(appTheme);
@@ -72,12 +76,13 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  // to run on every render, triggering an endless measure/setPages loop.
  const measuredChapters=useMemo(()=>chapter?[chapter]:[],[chapter]);
  const storedPos=()=>readLocal<{ep:number;part?:number;offset:number}|null>(progressKey,null);
- const persistProgress=(ep:number,offset:number)=>{try{localStorage.setItem(progressKey,JSON.stringify({ep,part:0,offset}));}catch{}};
+ const persistProgress=(ep:number,offset:number)=>{try{localStorage.setItem(progressKey,JSON.stringify({ep,part:0,offset,updatedAt:Date.now()}));}catch{}};
 
  // Episode boundaries, not arbitrary network chunks, determine reading progression.
  const loadEpisode=useCallback(async(ep:number,edge:'start'|'end'|'offset'='start',offset=0)=>{
   if(!indexRef.current.some(x=>x.episode_number===ep))return;
   const token=++requestRef.current;
+  loadingTarget.current=ep;
   setLoading(true);setControls(false);setError('');pendingEdge.current=edge;pendingOffset.current=offset;offsetRef.current=offset;
   try{
    const incoming=await loadReaderEpisode(bookId,ep);
@@ -112,6 +117,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  },[]);
  useEffect(()=>{try{localStorage.setItem('quiet_reader_settings',JSON.stringify(effectiveSettings));}catch{}},[effectiveSettings]);
  useEffect(()=>{try{localStorage.setItem(bookmarkKey,JSON.stringify(bookmarks));}catch{}},[bookmarks,bookmarkKey]);
+ useEffect(()=>{try{localStorage.setItem(completedKey,JSON.stringify(completedEpisodes));}catch{}},[completedKey,completedEpisodes]);
  useEffect(()=>{if(!status)return;const timer=setTimeout(()=>setStatus(''),2500);return()=>clearTimeout(timer);},[status]);
  const onMeasured=useCallback((counts:number[],nodes:HTMLElement[])=>{
   measuringNode.current=nodes[0]||null;
@@ -239,6 +245,16 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
  },[effectiveReaderTheme,theme.pageBg]);
  const displayedHeading=readerHeading(segment?.title||'',segment?.episodeNumber);
  const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
+ const isChapterCompleted=segment!==null&&completedEpisodes.includes(segment.episodeNumber);
+ const minutesRemaining=chapter?estimateRemainingMinutes(chapter.wordCount,pageIndex+1,pages.length):null;
+ const toggleChapterCompleted=()=>{
+  if(!segment||!index.some(entry=>entry.episode_number===segment.episodeNumber))return;
+  const wasCompleted=completedEpisodes.includes(segment.episodeNumber);
+  setCompletedEpisodes(previous=>toggleCompletedEpisode(previous,segment.episodeNumber));
+  setStatus(wasCompleted?'Tanda selesai dibatalkan':'Bab ditandai selesai');
+ };
+ const loadingEpisodeNumber=loadingTarget.current;
+ const loadingEpisode=index.find(entry=>entry.episode_number===loadingEpisodeNumber);
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
  return <div className="quiet-app reader-protected" data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text,...layoutVars}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
   {chapter&&<PageMeasurer chapters={measuredChapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured} hideIntro={false}/>}
@@ -246,13 +262,13 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber}:
    {chapter&&pages.length>0&&!loading?<div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
     {first!==undefined&&<ReaderPage chapter={chapter} columnIndex={first} pageNumber={pageIndex+1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
     {spread&&second!==undefined&&<ReaderPage chapter={chapter} columnIndex={second} pageNumber={pageIndex+2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
-   </div>:<ReaderEpisodeLoading phase={error?'error':loading?'fetch':!index.length?'empty':'layout'} storyTitle={bookTitle} message={error||undefined} onRetry={error?()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}:undefined}/>}
+   </div>:<ReaderEpisodeLoading phase={error?'error':loading?'fetch':!index.length?'empty':'layout'} storyTitle={bookTitle} episodeNumber={loadingEpisodeNumber} episodeTitle={loadingEpisode?.title} message={error||undefined} onRetry={error?()=>{if(segment)void loadEpisode(segment.episodeNumber);else window.location.reload();}:undefined}/>}
   </main>
   <div className={`controls-shell ${controls?'controls-open':''}`} aria-hidden={!controls}>
-   {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1}/>}
+   {controls && <ReaderControls onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1} estimatedMinutesRemaining={minutesRemaining} chapterCompleted={isChapterCompleted} onToggleChapterCompleted={toggleChapterCompleted}/>}
   </div>
   {status&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>{status}</div>}
-  {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}
+  {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} completedEpisodeNumbers={completedEpisodes} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}
   {modal==='search'&&<SearchPanel onClose={()=>setModal('none')} chapters={chapter?[chapter]:[]} onResult={at=>{if(chapter){const col=anchorColumn(measuringNode.current,chapter,at.offset,geometry.bodyWidth);setPageIndex(col);saveAt(col);}}} theme={theme}/>}
   <ReadingSettingsModal isOpen={modal==='settings'} onClose={()=>setModal('none')} settings={effectiveSettings} onUpdateSettings={setSettingsSafe} appTheme={appTheme} onAppThemeChange={changeGlobalTheme}/>
   <span aria-live="polite" className="sr-only">{segment?`Episode ${segment.episodeNumber}`:''}</span>
