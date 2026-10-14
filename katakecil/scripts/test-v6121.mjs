@@ -1,0 +1,21 @@
+/** V6.12.1 — regression: story detail CTA and Studio primary use global blue tokens. */
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const read = file => readFileSync(file, 'utf8');
+const old = read('src/design/v62-theme.css');
+const blue = read('src/design/v67-sapphire-polish.css');
+const tokens = read('src/design/sapphire-tokens.css');
+const page = read('src/pages/PublicLibrary.tsx');
+const app = read('src/App.tsx');
+assert.doesNotMatch(old, /\.v6-public\[data-kk-theme='dark'\] \.v6-button-gold\s*,/);
+assert.doesNotMatch(old, /\.v6-public\[data-kk-theme='dark'\] \.v6-button-gold:hover/);
+assert.doesNotMatch(old, /\.v6-studio-app\[data-kk-theme='dark'\] \.studio-primary/);
+assert.match(blue, /\.v6-public \.v6-button-gold, \.v6-public \.v6-button-dark\s*\{\s*background: var\(--kk-amber\) !important; color: var\(--kk-amber-text\) !important;/);
+assert.match(blue, /\.v6-studio-app \.studio-primary \{ background: var\(--kk-amber\) !important; color: var\(--kk-amber-text\) !important;/);
+assert.match(tokens, /--kk-primary: #235DB4;/);
+assert.match(tokens, /--kk-primary: #9BC9FF;/);
+assert.match(tokens, /--kk-amber: var\(--kk-primary\)/);
+assert.match(tokens, /--kk-amber-text: var\(--kk-on-primary\)/);
+assert.match(page, /className="v6-button v6-button-gold" to=\{`\/baca\/\$\{book.slug\}/);
+assert.ok(app.indexOf("./design/sapphire-tokens.css") < app.indexOf("./design/v67-sapphire-polish.css"));
+console.log('PASS V6.12.1: old gold CTA override removed, global sapphire tokens preserved for both themes.');

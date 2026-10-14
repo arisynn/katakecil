@@ -1,0 +1,85 @@
+/* KataKecil V7 Beta.1 — repair inherited V5/V6 theme aliases without a new palette.
+   Old styles remain for compatibility, but cannot redefine the live Sapphire semantics. */
+html[data-app-theme='light'] :is(.v6-public, .v6-studio-app, .studio-login-wrap),
+html[data-app-theme='dark'] :is(.v6-public, .v6-studio-app, .studio-login-wrap) {
+  --kk-muted: var(--sapphire-muted);
+  --kk-border: var(--sapphire-border);
+  --kk-shadow: var(--sapphire-shadow);
+}
+
+/* All V7 empty states use the same surface, regardless of route or theme. */
+.v6-public .kk-v7-empty {
+  width: min(100%, 560px);
+  min-height: 0;
+  background: var(--kk-surface) !important;
+  background-image: none !important;
+  border-color: var(--kk-border) !important;
+  box-shadow: 0 8px 28px var(--kk-shadow);
+  margin-block: clamp(12px, 3vw, 22px) 0;
+}
+.v6-public .kk-v7-empty :is(h2,p) { text-wrap: balance; }
+.v6-public .kk-v7-collection { max-width: none; }
+
+/* The announcement dots must be finger-sized, not 8px hit targets. */
+.v6-public .kk-v7-notice-dots { gap: 0; align-items: center; }
+.v6-public .kk-v7-notice-dots button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  touch-action: manipulation;
+}
+.v6-public .kk-v7-notice-dots button.active { width: 44px; background: transparent; }
+.v6-public .kk-v7-notice-dots button::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--kk-border);
+  transition: width 180ms ease, background-color 180ms ease;
+}
+.v6-public .kk-v7-notice-dots button.active::after { width: 22px; background: var(--kk-primary); }
+.v6-public .kk-v7-notice-dots button:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 2px; }
+
+/* Fix high-contrast text and tap targets on active V7 surfaces. */
+.v6-public :is(.kk-v7-discover, .kk-v7-collection, .kk-v7-home) { color: var(--kk-text); }
+.v6-public :is(.kk-v7-story-open, .kk-v7-collection-open) { border-radius: 12px; }
+.v6-public :is(.kk-v7-collection-remove, .kk-v7-collection-filter-empty button) { min-width: 44px; min-height: 44px; }
+.v6-public .kk-v7-story-open:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 3px; }
+.v6-public .v6-detail-actions .v6-button-gold { background: var(--kk-primary) !important; color: var(--kk-on-primary) !important; }
+.v6-public .v6-detail-info :is(h1,p),
+.v6-public .v6-chapters-title h2,
+.v6-public .v6-chapter strong { color: var(--kk-text) !important; }
+.v6-public .v6-detail-info p,
+.v6-public .v6-chapter small { color: var(--kk-muted) !important; }
+.v6-public .v6-chapters,
+.v6-public .v6-detail-extra { background: var(--kk-surface) !important; border-color: var(--kk-border) !important; }
+
+/* No accidental horizontal overflow on compact Android and split-screen widths. */
+@media (max-width: 600px) {
+  .v6-public .kk-v7-home,
+  .v6-public .kk-v7-page { padding-inline: clamp(13px, 4vw, 18px); }
+  .v6-public .kk-v7-discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v6-public .kk-v7-collection-item { min-width: 0; }
+  .v6-public .kk-v7-collection-open { min-width: 0; }
+  .v6-public .kk-v7-notice-card { min-height: 0; }
+  .v6-public .kk-v7-empty { padding: clamp(25px, 7vw, 35px) 20px; }
+  .v6-public .kk-v7-home,
+  .v6-public .kk-v7-page { padding-bottom: calc(145px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 360px) {
+  .v6-public .kk-v7-discover-grid { column-gap: 11px; }
+  .v6-public .kk-v7-collection-open { gap: 10px; }
+  .v6-public .kk-v7-collection-cover { flex-basis: 58px; width: 58px; }
+  .v6-public .kk-v7-collection-info strong { font-size: 14px; }
+  .v6-public .kk-v7-collection-remove { flex-basis: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v6-public .kk-v7-notice-dots button::after { transition: none; }
+}

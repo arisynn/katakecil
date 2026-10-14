@@ -1,0 +1,19 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Never put complete or unreleased manuscripts into the Vite source tree.
+story/
+manuscript-private/
+private-manuscripts/
+naskah-pribadi/
+.aistudio/
+.env
+
+# Generated browser QA artifacts
+qa/
