@@ -5,7 +5,7 @@
 | Pemeriksaan | Bukti |
 |---|---|
 | TypeScript | `npm run lint` lulus |
-| Struktur | 113 source files, 297 referensi lokal, tidak ada target hilang |
+| Struktur | 109 source files, 290 referensi lokal, tidak ada target hilang |
 | Build produksi | `npm run build` lulus; pemeriksa bundle tidak menemukan impor naskah privat |
 | Regresi aktif | 9 suite pada `npm run test:current` lulus |
 | Parser | Pembuka tidak hilang, episode 0/Romawi/Chapter/nama file, dua arc, fenced heading, review, penomoran, gabung/pisah |
@@ -26,9 +26,9 @@ Browser integration memakai endpoint Supabase palsu dan teks sintetis, bukan ser
 
 Build sebelum perubahan: JS awal 408.08 kB / gzip 124.08 kB; CSS 326.28 kB / gzip 58.80 kB. Build V7.2 sekitar JS awal sekitar 323 kB / gzip 99 kB; Studio sekitar 121 kB, EPUB sekitar 109.28 kB dimuat terpisah; worker sekitar 108.15 kB. CSS sekitar 331 kB / gzip 60 kB. Angka bundling bisa bergeser sedikit setelah perubahan presentasi akhir; ini bukan pengukuran waktu muat perangkat nyata.
 
-## Suite historis
+## Suite pengujian setelah pembersihan
 
-`test:current` sekarang menjalankan regresi aktif, termasuk test perilaku baru. Rantai lama dipertahankan sebagai `test:historical`, dan berkas `test-v*` tetap tersedia. Banyak test historis memeriksa hash reader yang dibekukan, string lokasi implementasi, versi persis 7.1, atau perilaku yang sengaja diganti (misalnya prolog tanpa nomor dan retry membuat ID baru). Sebagian harness lama juga menggabungkan modul tanpa mendukung import baru. Rantai historis **tidak dinyatakan lulus V7.2**. Hash lama tidak diganti secara mekanis. Kontrak baru diuji lewat parser/SQL/browser; lihat `scripts/test-current.mjs` untuk daftar suite yang benar-benar menjadi gate.
+Sembilan suite pada `test:current` tetap dipertahankan, termasuk tes keamanan lama yang masih relevan. Tes snapshot/hash versi terdahulu yang tidak menjadi gate V7.2, fixture visual lamanya, dan perintah `test:historical` telah dihapus. Tes browser V7.2 tetap tersedia melalui `npm run test:browser`. Daftar file yang dihapus ada di `scripts/obsolete-files.json`.
 
 ## Wajib dilakukan di staging
 
@@ -63,3 +63,5 @@ Frontend dipublish dari hasil `npm ci && npm run build`. Jangan mempublikasikan 
 ## Pemeriksaan lanjutan
 
 Build produksi lokal berhasil memasang service worker otomatis; manifest, PNG PWA, dan MIME JavaScript tersedia; Cache Storage kosong; halaman publik tidak memuat chunk Studio/EPUB lebih awal. Vite preview tidak meniru seluruh header Vercel. Pemeriksaan read-only live juga mengonfirmasi signature RPC impor lama sesuai migrasi, kolom tabel impor/halaman tersedia, serta policy Storage lama dibatasi pada bucket publik sehingga tidak otomatis membuka bucket privat baru. RPC author lama menolak konteks tanpa identitas pengguna. Tidak ada isi karya atau data produksi yang diubah.
+
+Pembersihan 15 Oktober: `npm run check`, dua audit tema, build, dan browser lulus setelah penghapusan 107 file usang. Pembantu pembersihan diuji pada salinan sementara: mode cek tidak menghapus file; mode apply menghapus 105 file identik dan mempertahankan dua file yang dimodifikasi/symlink, konfigurasi env, serta file lain di luar daftar.

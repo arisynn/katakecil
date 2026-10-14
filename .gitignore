@@ -14,3 +14,6 @@ private-manuscripts/
 naskah-pribadi/
 .aistudio/
 .env
+
+# Generated browser QA artifacts
+qa/

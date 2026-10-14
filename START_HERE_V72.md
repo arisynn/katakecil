@@ -18,6 +18,10 @@ Banner tetap “Pratinjau penulis” dihapus sesuai permintaan. Ketuk layar untu
 - **Ikon:** panah kembali detail cerita kembali terlihat pada ponsel; ikon menggunakan palet biru pada tema terang/gelap, dengan warna kontras di tombol biru. Label aksesibilitas ditambahkan.
 - **Audit Supabase live:** koneksi berhasil diperiksa tanpa mengubah data; patch akses REST dan Sampah disertakan terpisah untuk staging.
 
+## Paket bersih
+
+File usang telah dibuang dan dokumentasi diringkas. Jika menimpa folder proyek lama, ikuti `docs/v72/PEMBERSIHAN.md` agar sisa file lama juga terhapus tanpa menghapus editanmu.
+
 ## Urutan pemasangan
 
 **Jangan mengganti frontend produksi sebelum migrasi V7.2 diterapkan.** Kode Studio baru memerlukan RPC metadata/editor V7.2.
