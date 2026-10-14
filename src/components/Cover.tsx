@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Book } from '../data/library';
+import { classifyCover, defaultFocus, shelfNeedsFill, type CoverMeasure } from '../utils/coverFit';
 
 const FALLBACK_COVERS = [
   '/assets/v6/covers/01-senja.webp',
@@ -22,14 +23,47 @@ function fallbackCoverIndex(book: Pick<Book, 'id'|'title'>) {
 }
 export function fallbackCover(book: Pick<Book, 'id'|'title'>) {return FALLBACK_COVERS[fallbackCoverIndex(book)];}
 export function fallbackCoverMobile(book: Pick<Book, 'id'|'title'>) {return MOBILE_FALLBACK_COVERS[fallbackCoverIndex(book)];}
-export function Cover({book, size = 'normal', eager = false}: {book: Pick<Book, 'title'|'genre'|'cover_url'|'id'>; size?: 'normal'|'mini'|'large'; eager?: boolean}) {
+
+export function Cover({book, size = 'normal', eager = false, surface = 'shelf'}: {
+  book: Pick<Book, 'title'|'genre'|'cover_url'|'id'>;
+  size?: 'normal'|'mini'|'large';
+  eager?: boolean;
+  surface?: 'shelf' | 'detail' | 'thumb';
+}) {
   const [failed, setFailed] = useState(false);
-  const src = book.cover_url && !failed ? book.cover_url : fallbackCover(book);
-  return <div className={`art-cover v6-cover art-cover--${size} ${book.cover_url && !failed ? 'v6-original-cover' : 'v6-fallback-cover'}`}>
-    {book.cover_url && !failed && <img src={src} alt="" aria-hidden="true" className="art-cover-backdrop v6-cover-backdrop" loading={eager ? 'eager' : 'lazy'}/>}
+  const [measure, setMeasure] = useState<CoverMeasure | null>(null);
+  useEffect(() => { setFailed(false); setMeasure(null); }, [book.cover_url]);
+  const original = Boolean(book.cover_url) && !failed;
+  const src = original ? book.cover_url! : fallbackCover(book);
+  const fill = original && measure ? shelfNeedsFill(measure.ratio) : false;
+  const focus = measure ? defaultFocus(measure.kind) : { x: 0.5, y: 0.5 };
+  const detailRatio = surface === 'detail' && measure && measure.kind !== 'poster'
+    ? `${measure.width} / ${measure.height}`
+    : undefined;
+  return <div
+    className={`art-cover v6-cover art-cover--${size} ${original ? 'v6-original-cover' : 'v6-fallback-cover'}`}
+    data-cover-kind={original ? (measure?.kind ?? 'unknown') : 'fallback'}
+    data-cover-fill={fill ? 'yes' : 'no'}
+    data-cover-surface={surface}
+    style={detailRatio ? { aspectRatio: detailRatio, maxHeight: '70vh' } : undefined}
+  >
+    {original && <img src={src} alt="" aria-hidden="true" className="art-cover-backdrop v6-cover-backdrop" loading={eager ? 'eager' : 'lazy'}/>}
     <picture>
-      {(!book.cover_url || failed) && <source media="(max-width: 600px)" srcSet={fallbackCoverMobile(book)} type="image/webp" />}
-      <img src={src} alt={`Ilustrasi sampul ${book.title}`} className="art-cover-image v6-cover-image" loading={eager ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(true)}/>
+      {!original && <source media="(max-width: 600px)" srcSet={fallbackCoverMobile(book)} type="image/webp" />}
+      <img
+        src={src}
+        alt={`Ilustrasi sampul ${book.title}`}
+        className="art-cover-image v6-cover-image"
+        style={original ? { objectPosition: `${focus.x * 100}% ${focus.y * 100}%` } : undefined}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        onLoad={event => {
+          if (!original) return;
+          const img = event.currentTarget;
+          setMeasure(classifyCover(img.naturalWidth, img.naturalHeight));
+        }}
+        onError={() => setFailed(true)}
+      />
     </picture>
   </div>;
 }
