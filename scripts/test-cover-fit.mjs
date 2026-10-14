@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {loadTs} from './test-utils/load-ts.mjs';
-const {classifyCover, shelfNeedsFill, coverProblem, nearestRatioName} = loadTs(fileURLToPath(new URL('../src/utils/coverFit.ts', import.meta.url)));
+const {classifyCover, shelfNeedsFill, coverProblem, nearestRatioName, fitCrop, cropWindow, coverScale, cropPixels} = loadTs(fileURLToPath(new URL('../src/utils/coverFit.ts', import.meta.url)));
 
 const wallpaper = classifyCover(1080, 1920);
 assert.equal(wallpaper.kind, 'wallpaper');
@@ -31,5 +31,15 @@ assert.match(coverProblem(100, 200), /200 px/);
 assert.match(coverProblem(400, 2000), /ekstrem/);
 assert.equal(coverProblem(1200, 1600), null);
 assert.equal(nearestRatioName(1080, 2340).startsWith('9:'), true);
+
+const tall = fitCrop(1080, 1920, 1.5);
+assert.ok(Math.abs(tall.w * 1080 / (tall.h * 1920) - 1 / 1.5) < 0.01);
+const wideCrop = fitCrop(1920, 1080, 1.5);
+assert.ok(wideCrop.w < 1 && wideCrop.h === 1);
+const win = cropWindow(360, 520, 1080, 1920, 1.5);
+const scale = coverScale(win, 1080, 1920, 1);
+const pixels = cropPixels(win, 1080, 1920, scale, 0, (1920 * scale - win.h) / 2);
+assert.ok(pixels.w >= 200 && pixels.h >= 200);
+assert.ok(Math.abs(pixels.h / pixels.w - 1.5) < 0.02);
 
 console.log('PASS cover fit');

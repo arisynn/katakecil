@@ -197,3 +197,70 @@ export function measureImageUrl(url: string): Promise<CoverMeasure> {
     img.src = url;
   });
 }
+
+export type NormCrop = { x: number; y: number; w: number; h: number };
+
+/** Rasio frame adalah tinggi ÷ lebar. `null` berarti seluruh gambar. */
+export function fitCrop(imgW: number, imgH: number, frame: number | null): NormCrop {
+  if (!(imgW > 0) || !(imgH > 0) || !frame) return { x: 0, y: 0, w: 1, h: 1 };
+  const imgRatio = imgH / imgW;
+  if (imgRatio > frame) {
+    const h = (frame * imgW) / imgH;
+    return { x: 0, y: (1 - h) / 2, w: 1, h };
+  }
+  const w = imgH / (frame * imgW);
+  return { x: (1 - w) / 2, y: 0, w, h: 1 };
+}
+
+export function clampCrop(crop: NormCrop): NormCrop {
+  const w = Math.min(1, Math.max(0.02, crop.w));
+  const h = Math.min(1, Math.max(0.02, crop.h));
+  return {
+    x: Math.min(1 - w, Math.max(0, crop.x)),
+    y: Math.min(1 - h, Math.max(0, crop.y)),
+    w,
+    h,
+  };
+}
+
+export type CoverFrame = { x: number; y: number; w: number; h: number };
+
+/** Ukuran jendela crop di dalam panggung. `frame` = tinggi ÷ lebar, null = rasio gambar. */
+export function cropWindow(stageW: number, stageH: number, imgW: number, imgH: number, frame: number | null): CoverFrame {
+  const ratio = frame && imgW > 0 && imgH > 0 ? frame : imgH / imgW;
+  const maxW = Math.max(1, stageW - 28);
+  const maxH = Math.max(1, stageH - 28);
+  let w = maxW;
+  let h = w * ratio;
+  if (h > maxH) {
+    h = maxH;
+    w = h / ratio;
+  }
+  return { w, h, x: (stageW - w) / 2, y: (stageH - h) / 2 };
+}
+
+export function coverScale(win: CoverFrame, imgW: number, imgH: number, zoom: number): number {
+  if (!(imgW > 0) || !(imgH > 0)) return 1;
+  return Math.max(win.w / imgW, win.h / imgH) * Math.min(4, Math.max(1, zoom));
+}
+
+export function clampPan(win: CoverFrame, imgW: number, imgH: number, scale: number, panX: number, panY: number) {
+  const extraX = Math.max(0, imgW * scale - win.w) / 2;
+  const extraY = Math.max(0, imgH * scale - win.h) / 2;
+  return {
+    x: Math.min(extraX, Math.max(-extraX, panX)),
+    y: Math.min(extraY, Math.max(-extraY, panY)),
+  };
+}
+
+/** Piksel sumber yang terlihat di jendela crop. Pan positif menggeser gambar ke bawah/kanan. */
+export function cropPixels(win: CoverFrame, imgW: number, imgH: number, scale: number, panX: number, panY: number) {
+  const pan = clampPan(win, imgW, imgH, scale, panX, panY);
+  const left = win.x + (win.w - imgW * scale) / 2 + pan.x;
+  const top = win.y + (win.h - imgH * scale) / 2 + pan.y;
+  const x = Math.max(0, (win.x - left) / scale);
+  const y = Math.max(0, (win.y - top) / scale);
+  const w = Math.min(imgW - x, win.w / scale);
+  const h = Math.min(imgH - y, win.h / scale);
+  return { x, y, w, h };
+}

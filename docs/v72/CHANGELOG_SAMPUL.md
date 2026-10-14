@@ -24,7 +24,8 @@ Nama rasio terdekat juga ditampilkan (9:16, 3:4, 2:3, dan seterusnya) jika selis
 - Gambar **tidak dipotong** dan tidak ditarik. Wallpaper 9:16 tidak dipaksa jadi 2:3.
 - Jika bentuknya tidak pas 2:3 (selisih lebih dari 0,06), ruang kosong diisi blur dari sampul yang sama.
 - 2:3 yang pas mengisi bingkai tanpa blur.
-- Halaman detail mengikuti bentuk asli dan menampilkan nama rasio (misalnya `9:16 · Wallpaper HP`). Poster panjang bisa digeser. Rak tetap 2:3, dengan label kecil pada sampul yang tidak pas.
+- Rak mengisi ruang kosong dengan sampul yang sama: diperbesar sampai menutupi bingkai, lalu di-blur. Gambar tajam tetap utuh di depan.
+- Di Studio, memilih sampul membuka langkah crop dulu. Bisa utuh, 2:3, 3:4, 9:16, atau kotak. Gambar digeser dan diperbesar sebelum dipakai.
 - Fokus bawaan wallpaper dan poster ada di bagian atas (38%), supaya judul yang biasanya di atas lebih kelihatan. Belum ada penggeser fokus manual.
 
 ### Unggah di Studio
@@ -53,6 +54,7 @@ Jika Supabase tidak terhubung, enam cerita contoh memakai sampul dengan bentuk b
 |---|---|
 | Baru | `src/utils/coverFit.ts` |
 | Baru | `src/features/studio/components/CoverFields.tsx` |
+| Baru | `src/features/studio/components/CoverCropper.tsx` |
 | Baru | `scripts/test-cover-fit.mjs` |
 | Diubah | `src/components/Cover.tsx` |
 | Diubah | `src/design/v72.css` |
