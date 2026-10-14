@@ -1,3 +1,13 @@
+# KataKecil V7.0 Beta.2 — Studio & Full UI Polish
+
+**Source staging, belum dideploy.** Menggunakan 76 aset SVG untuk ikon UI, dua wordmark vektor bertema Sapphire, dashboard Studio yang berfokus pada penulis, dan penyempurnaan responsivitas serta dark mode. Mesin Reader, auth, autosave, dan database tetap dipertahankan.
+
+Baca [`docs/RELEASE_V7_BETA2.md`](docs/RELEASE_V7_BETA2.md) dan [`docs/V7_BETA2_FILE_MANIFEST.md`](docs/V7_BETA2_FILE_MANIFEST.md).
+
+Validasi: `npm run test:current && npm run check:structure && npm run audit:v7beta`. Lint/build memerlukan `npm install` di lingkungan yang dapat mengakses registry npm. Migrasi pengumuman Alpha.3 masih diperlukan jika belum diterapkan.
+
+---
+
 # KataKecil V7.0 Beta.1 — Sapphire Refinement & Reading Continuity
 
 **Kandidat pengujian staging, belum dideploy.** Memperbaiki alias warna warisan V5/V6, Koleksi mobile, indikator carousel, progres terakhir dibaca, dan tombol Lanjut Membaca yang memulihkan posisi teks. Pengumuman terjadwal yang kedaluwarsa tidak lagi mengambil jatah hasil query publik.
