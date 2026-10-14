@@ -1,3 +1,0 @@
-# Public only: the handler validates publication state on the server.
-[functions.secure-episode]
-verify_jwt = false
