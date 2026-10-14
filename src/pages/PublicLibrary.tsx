@@ -12,6 +12,7 @@ import { BookmarkButton, BookCard } from '../features/public/components/StoryCar
 import { Action, EmptyLibrary, Heading } from '../features/public/components/LibraryUI';
 import DiscoveryNotices from '../features/public/components/DiscoveryNotices';
 import { selectRecentChapters } from '../features/public/recentChapters';
+import { filterSavedStories, sortSavedStories, type CollectionFilter } from '../features/public/collectionFilters';
 import { getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter } from '../data/publicSchedule';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
 const demoDate = '2026-10-01T00:00:00.000Z';
@@ -130,6 +131,7 @@ function Listing({ books, episodes, schedules, demo, collection = false }: {
     const [filter, setFilter] = useState(params.get('genre') || 'Semua');
     const [status, setStatus] = useState('Semua');
     const [sort, setSort] = useState('terbaru');
+    const [collectionFilter, setCollectionFilter] = useState<CollectionFilter>('semua');
     const input = useRef<HTMLInputElement>(null);
     const { ids, toggle } = useCollection();
     useEffect(() => {
@@ -143,13 +145,23 @@ function Listing({ books, episodes, schedules, demo, collection = false }: {
       return eligible.filter(book=>(filter==='Semua'||book.genre===filter)&&(status==='Semua'||(status==='Tamat'?book.status==='completed':book.status!=='completed'))&&`${book.title} ${book.synopsis} ${book.genre}`.toLocaleLowerCase('id-ID').includes(term))
         .sort((a,b)=>sort==='judul'?a.title.localeCompare(b.title,'id-ID'):new Date(b.updated_at).getTime()-new Date(a.updated_at).getTime());
     },[eligible,filter,status,q,sort]);
+    const savedStories = collection ? sortSavedStories(eligible, ids) : [];
+    const filteredSaved = filterSavedStories(savedStories, collectionFilter, readProgress);
     if(collection) return <main className="kk-v7-collection kk-v7-page">
       <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RAK PRIBADIMU</span><h1>Koleksi Saya</h1><p>Cerita yang kamu simpan, tetap ada di perangkat ini.</p></div>
-      {eligible.length===0?<EmptyLibrary collection/>:<>
-        <div className="kk-v7-collection-list">{eligible.map(book=>{const progress=readProgress(book);return <article className="kk-v7-collection-item" key={book.id}>
+      {savedStories.length===0?<EmptyLibrary collection/>:<>
+        <div className="kk-v7-collection-toolbar" role="group" aria-label="Filter koleksi">
+          {([['semua','Semua'],['dibaca','Ada Progres'],['belum','Belum Dibaca']] as const).map(([value,label])=><button
+            type="button" key={value} aria-pressed={collectionFilter===value}
+            className={collectionFilter===value?'active':''} onClick={()=>setCollectionFilter(value)}>{label}</button>)}
+        </div>
+        {filteredSaved.length===0?<div className="kk-v7-collection-filter-empty" role="status">
+          <p>Belum ada cerita dalam kategori ini.</p>
+          <button type="button" onClick={()=>setCollectionFilter('semua')}>Tampilkan semua koleksi</button>
+        </div>:<div className="kk-v7-collection-list">{filteredSaved.map(book=>{const progress=readProgress(book);return <article className="kk-v7-collection-item" key={book.id}>
           <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat ${book.title}`}><div className="kk-v7-collection-cover"><Cover book={book}/></div><span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{progress!==null?`Terakhir dibaca: Bab ${progress}`:`${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <ChevronRight size={15}/></span></span></button>
           <button type="button" className="kk-v7-collection-remove" onClick={()=>toggle(book.id)} aria-label={`Hapus ${book.title} dari Koleksi`} title="Hapus dari Koleksi"><BookmarkCheck size={18}/></button>
-        </article>})}</div>
+        </article>})}</div>}
       </>}
     </main>;
     return <main className="kk-v7-discover kk-v7-page">

@@ -1,0 +1,150 @@
+/* KataKecil 7.0.0-alpha.2 — Sapphire empty states and collection polish.
+   All active V7 component colors come exclusively from sapphire-tokens.css.
+   No cream/sepia surfaces, pseudo-gradient overlays or image backgrounds. */
+
+.v6-public .kk-v7-empty {
+  box-sizing: border-box;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 640px;
+  min-height: 0;
+  margin: 20px auto 0;
+  padding: clamp(30px, 5vw, 44px) clamp(18px, 4vw, 38px);
+  border: 1px solid var(--kk-border);
+  border-radius: 24px;
+  background: var(--kk-surface);
+  background-image: none;
+  box-shadow: 0 10px 30px var(--kk-shadow);
+  color: var(--kk-text);
+  text-align: center;
+}
+.v6-public .kk-v7-empty::before,
+.v6-public .kk-v7-empty::after { content: none; display: none; }
+.v6-public .kk-v7-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  flex: 0 0 66px;
+  border-radius: 20px;
+  background: var(--kk-surface-2);
+  color: var(--kk-primary);
+}
+.v6-public .kk-v7-empty__copy { display: grid; justify-items: center; gap: 8px; max-width: 340px; }
+.v6-public .kk-v7-empty__copy h2 {
+  margin: 0;
+  font: 650 clamp(21px, 4.5vw, 27px)/1.22 Georgia, 'Iowan Old Style', serif;
+  letter-spacing: -.035em;
+  color: var(--kk-text);
+}
+.v6-public .kk-v7-empty__copy p {
+  margin: 0;
+  font: 400 13px/1.65 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: var(--kk-muted);
+}
+.v6-public .kk-v7-empty__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  margin-top: 5px;
+  padding: 11px 21px;
+  border: 1px solid var(--kk-primary);
+  border-radius: 999px;
+  background: var(--kk-primary);
+  color: var(--kk-on-primary);
+  font: 700 13px/1.2 'Plus Jakarta Sans', system-ui, sans-serif;
+  cursor: pointer;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.v6-public .kk-v7-empty__action:hover { opacity: .91; }
+.v6-public .kk-v7-empty__action:active { transform: scale(.985); }
+.v6-public .kk-v7-empty__action:focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 4px; }
+
+/* Saved collections use one stable tab and optional local-only filters. */
+.v6-public .kk-v7-collection-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+.v6-public .kk-v7-collection-toolbar button {
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid var(--kk-border);
+  border-radius: 999px;
+  background: var(--kk-surface);
+  color: var(--kk-muted);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.v6-public .kk-v7-collection-toolbar button.active {
+  border-color: var(--kk-primary);
+  background: var(--kk-primary);
+  color: var(--kk-on-primary);
+}
+.v6-public .kk-v7-collection-filter-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 16px;
+  border: 1px dashed var(--kk-border);
+  border-radius: 18px;
+  background: var(--kk-surface);
+  text-align: center;
+}
+.v6-public .kk-v7-collection-filter-empty p { margin: 0; font-size: 13px; color: var(--kk-muted); }
+.v6-public .kk-v7-collection-filter-empty button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid var(--kk-border);
+  border-radius: 12px;
+  background: var(--kk-surface-2);
+  color: var(--kk-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+.v6-public .kk-v7-collection-toolbar button:focus-visible,
+.v6-public .kk-v7-collection-filter-empty button:focus-visible {
+  outline: 2px solid var(--kk-primary);
+  outline-offset: 3px;
+}
+
+/* Avoid legacy cream/amber shadows on the active public shell. */
+.v6-public .v6-header-inner,
+.v6-public .v6-public-bottom {
+  background: var(--kk-surface) !important;
+  border-color: var(--kk-border) !important;
+  box-shadow: 0 6px 22px var(--kk-shadow) !important;
+}
+.v6-public .v6-public-bottom button.active {
+  background: var(--kk-surface-2) !important;
+  color: var(--kk-primary) !important;
+}
+.v6-public .kk-v7-collection-item,
+.v6-public .kk-v7-notice-card {
+  border-color: var(--kk-border);
+  background: var(--kk-surface);
+  color: var(--kk-text);
+}
+
+@media (max-width: 600px) {
+  .v6-public .kk-v7-page-heading { margin-bottom: 23px; }
+  .v6-public .kk-v7-empty { margin-top: 10px; padding: 30px 21px; border-radius: 22px; }
+  .v6-public .kk-v7-empty__icon { width: 60px; height: 60px; flex-basis: 60px; border-radius: 18px; }
+  .v6-public .kk-v7-empty__copy h2 { font-size: clamp(21px, 5.4vw, 25px); }
+  .v6-public .kk-v7-empty__copy p { font-size: 12px; }
+  .v6-public .kk-v7-collection-toolbar { gap: 7px; }
+  .v6-public .kk-v7-collection-toolbar button { padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v6-public .kk-v7-empty__action { transition: none; }
+}

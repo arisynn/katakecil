@@ -1,3 +1,7 @@
+# KataKecil V7.0 Alpha.2 — Sapphire Consistency & Collection Polish
+
+Lihat [`docs/RELEASE_V7_ALPHA2.md`](docs/RELEASE_V7_ALPHA2.md) untuk perbaikan empty state Koleksi dan audit dua tema.
+
 # KataKecil V7.0 Alpha.1 — The Living Library
 
 **Alpha untuk staging, belum siap langsung menggantikan production.** Fokus: logo brand baru, Beranda editorial, Temukan dengan kabar nyata, Koleksi yang selalu terlihat, dan sampul bersih. Secure Reader dan Studio privat tetap memakai mekanisme V6.12.1.

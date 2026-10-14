@@ -36,6 +36,7 @@ import './design/v610-reader-experience.css';
 import './design/v611-immersive-reader.css';
 import './design/v612-reader-layout.css';
 import './design/v70-alpha.css';
+import './design/v70-alpha2.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);
