@@ -12,7 +12,7 @@ const api=read('src/data/announcements.ts');
 const manager=read('src/features/studio/components/AnnouncementManager.tsx');
 const sql=read('supabase/migrations/20261014010000_v7_public_announcements.sql');
 const css=read('src/design/v70-alpha3.css');
-assert.match(JSON.parse(read('package.json')).version,/^(?:7\.0\.0-(?:alpha\.[34]|beta\.[12])|7\.1\.0-rc\.1)$/);
+assert.match(JSON.parse(read('package.json')).version,/^7\.0\.0-(?:alpha\.[34]|beta\.[12])$/);
 assert.match(app,/design\/v70-alpha3.css/);
 assert.match(page,/getPublicAnnouncements\(\)/);
 assert.match(page,/<DiscoveryNotices books={books} episodes={episodes} schedules={schedules} announcements={announcements}\/>/);

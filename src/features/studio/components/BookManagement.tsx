@@ -15,12 +15,9 @@ export function Books({ books, episodes, onCreate }: {
   onCreate: () => void;
 }) {
   const [query, setQuery] = useState('');
-  const [visibility, setVisibility] = useState<'Semua' | 'Publik' | 'Privat'>('Semua');
   const filtered = books.filter(book =>
-    (visibility === 'Semua' || book.is_published === (visibility === 'Publik')) &&
     `${book.title} ${book.genre}`.toLocaleLowerCase('id-ID')
       .includes(query.trim().toLocaleLowerCase('id-ID')));
-  const reset = () => { setQuery(''); setVisibility('Semua'); };
   return <div className="v69-books-page">
     <div className="studio-page-head studio-head-with-action">
       <div><span className="studio-kicker">PERPUSTAKAAN PENULIS</span>
@@ -29,18 +26,11 @@ export function Books({ books, episodes, onCreate }: {
         <BrandIcon name="plus" size={17}/> Karya Baru
       </button>}
     </div>
-    {books.length > 0 && <div className="kk-v71-books-toolbar">
-      <label className="v69-search-field">
-        <BrandIcon name="search" size={18}/><span className="v69-visually-hidden">Cari karya</span>
-        <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari judul atau genre…"/>
-      </label>
-      <div className="kk-v71-books-filter" role="group" aria-label="Filter visibilitas karya">
-        {(['Semua', 'Publik', 'Privat'] as const).map(value => <button type="button" key={value}
-          aria-pressed={visibility === value} className={visibility === value ? 'is-active' : ''}
-          onClick={() => setVisibility(value)}>{value}</button>)}
-      </div>
-      <span className="kk-v71-books-count" role="status">{filtered.length} dari {books.length} karya</span>
-    </div>}
+    {books.length > 0 && <label className="v69-search-field">
+      <BrandIcon name="search" size={18}/><span className="v69-visually-hidden">Cari karya</span>
+      <input type="search" value={query} onChange={event => setQuery(event.target.value)}
+        placeholder="Cari judul atau genre…"/>
+    </label>}
     {filtered.length ? <div className="studio-manage-list">
       {filtered.map(book => <B key={book.id} to={`/studio/cerita/${book.id}`}
         className="studio-manage-item">
@@ -50,7 +40,7 @@ export function Books({ books, episodes, onCreate }: {
           <em>{book.is_published ? 'Publik' : 'Privat'} · {BOOK_STATUS[book.status]}</em>
         </span><BrandIcon name="chevron-right" size={20}/>
       </B>)}
-    </div> : books.length ? <div className="kk-v71-studio-no-results" role="status"><p>Tidak ada karya yang cocok dengan pencarian atau filter.</p><button type="button" className="studio-light-button" onClick={reset}>Tampilkan semua karya</button></div>
+    </div> : books.length ? <p className="studio-muted">Tidak ada karya yang cocok dengan pencarian.</p>
       : <div className="studio-big-empty"><BrandIcon name="books" size={30}/>
           <h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dengan membuat karya pertama.</p>
           <button onClick={onCreate} className="studio-primary"><BrandIcon name="plus" size={18}/> Buat Karya</button>
@@ -186,8 +176,7 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
          className={filter === value ? 'is-active' : ''} onClick={() => setFilter(value)}>{value}</button>)}
    </div>
  </div>}
- {local.length > 0 && <p className="kk-v71-chapter-count" role="status">Menampilkan {visible.length} dari {local.length} bab</p>}
- {visible.length ? <div className="studio-episode-stack">{visible.map(ep => <B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{ep.episode_number === 0 ? 'P' : String(ep.episode_number).padStart(2, '0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title || 'Tanpa arc'}{ep.is_finale ? ' · Finale' : ''}{episodeStatus(ep) === 'Terjadwal' ? ` · ${formatWib(ep.release_at)}` : ''}</small></span><Pill episode={ep}/><BrandIcon name="chevron-right" size={17}/></B>)}</div> : local.length ? <div className="kk-v71-studio-no-results" role="status"><p>Tidak ada bab yang cocok dengan filter.</p><button type="button" className="studio-light-button" onClick={() => { setSearch(''); setFilter('Semua'); }}>Reset filter bab</button></div> : <p className="studio-muted">Belum ada bab. Buat bab baru atau impor naskah melalui Upload.</p>}
+ {visible.length ? <div className="studio-episode-stack">{visible.map(ep => <B key={ep.id} to={`/studio/editor/${ep.id}`} className="studio-episode-item"><span className="studio-episode-index">{String(ep.episode_number).padStart(2, '0')}</span><span className="studio-episode-text"><strong>{ep.title}</strong><small>{ep.arc_title || 'Tanpa arc'}{ep.is_finale ? ' · Finale' : ''}{episodeStatus(ep) === 'Terjadwal' ? ` · ${formatWib(ep.release_at)}` : ''}</small></span><Pill episode={ep}/><BrandIcon name="chevron-right" size={17}/></B>)}</div> : <p className="studio-muted">{local.length ? "Tidak ada bab yang cocok dengan filter." : "Belum ada bab. Buat bab baru atau impor naskah melalui Upload."}</p>}
  {!local.some(e => e.episode_number === 0) && <button onClick={onNewZero} className="studio-light-button"><BrandIcon name="file-plus" size={16}/> Buat Episode 0</button>}</section>
  <details className="studio-panel kk-bulk-panel v69-bulk-details" id="bulk-publish" aria-label="Penerbitan episode sekaligus">
    <summary><BrandIcon name="send" size={18}/> Terbitkan banyak bab sekaligus</summary>

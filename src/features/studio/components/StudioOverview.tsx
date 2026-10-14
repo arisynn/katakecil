@@ -31,8 +31,7 @@ export function Dashboard({ books, episodes, user }: {
     {lastEdited && currentBook ? <section className="v69-resume v72-resume" aria-label="Lanjutkan menulis">
       <div className="v69-resume-kicker"><BrandIcon name="file-pen" size={17}/> LANJUTKAN MENULIS</div>
       <h2>{lastEdited.title || `Bab ${lastEdited.episode_number}`}</h2>
-      <p>{currentBook.title} · {lastEdited.episode_number === 0 ? 'Prolog' : `Bab ${lastEdited.episode_number}`} · Draft</p>
-      <small className="kk-v71-resume-timestamp">Terakhir diedit: {formatWib(lastEdited.updated_at)}</small>
+      <p>{currentBook.title} · Bab {lastEdited.episode_number} · Draft</p>
       <B to={`/studio/editor/${lastEdited.id}`} className="studio-primary">
         Buka editor <BrandIcon name="arrow-right" size={17}/>
       </B>

@@ -207,7 +207,6 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
         </strong>
       </div>
       <div className="v69-editor-actions">
-        {status === 'Gagal menyimpan' && <button type="button" className="kk-v71-save-retry" aria-label="Coba simpan ulang" onClick={() => void latestFlush.current()}><BrandIcon name="rotate" size={16}/><span>Coba simpan</span></button>}
         <button type="button" className="v69-icon-button" title="Pratinjau" aria-label="Pratinjau"
           onClick={() => setPreview(true)}><BrandIcon name="eye" size={19}/></button>
         <button type="button" className="v69-icon-button" title="Mode fokus" aria-label={focusMode ? 'Keluar mode fokus' : 'Mode fokus'}
@@ -215,7 +214,6 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
       </div>
     </div>
 
-    {error && <div className="studio-error kk-v71-editor-alert" role="alert">{error}</div>}
     {isLive && <p className="v69-live-notice" role="note">Bab ini sudah terbit. Perubahan yang tersimpan akan langsung terlihat oleh pembaca.</p>}
     <div className="v69-editor-layout">
       <section className="v69-writing-paper" aria-label="Kanvas menulis">
@@ -241,7 +239,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           value={body} onChange={event => { setBody(event.target.value); setStatus('Belum disimpan'); }}/>
         <div className="v69-writing-footer">
           <span>{wordCount.toLocaleString('id-ID')} kata</span>
-          <span role="status"><BrandIcon name={status === 'Gagal menyimpan' ? 'alert' : 'check-circle'} size={15}/>{status === 'Gagal menyimpan' ? status : dirty && status !== 'Menyimpan…' ? 'Belum disimpan · Autosave aktif' : status}</span>
+          <span><BrandIcon name="check-circle" size={15}/>{dirty ? 'Autosave aktif' : status}</span>
         </div>
         <details className="v69-editor-extra"><summary>Alat tambahan</summary>
           <label className="v69-import-file"><BrandIcon name="upload" size={16}/> Impor Markdown / TXT
@@ -296,5 +294,6 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
         </details>
       </aside>}
     </div>
+    {error && <div className="studio-error v69-editor-error" role="alert">{error}</div>}
   </div>;
 }

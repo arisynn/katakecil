@@ -41,8 +41,6 @@ import './design/v70-alpha3.css';
 import './design/v70-alpha4.css';
 import './design/v70-beta1.css';
 import './design/v70-beta2.css';
-import './design/public-experience.css';
-import './design/studio-experience.css';
 
 export default function App(){
   const [path,setPath]=useState(window.location.pathname);

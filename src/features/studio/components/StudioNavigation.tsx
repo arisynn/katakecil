@@ -60,7 +60,6 @@ export function StudioToolsMenu({ path, mobile = false }: { path: string; mobile
     {open && <div id={id} className="v69-tools-popover" role="group" aria-label="Alat Studio">
       <span className="v69-tools-caption">ALAT PENULIS</span>
       {secondary.map(tab => <B key={tab.p} to={tab.p}
-        aria-current={isActive(path, tab.p) ? 'page' : undefined}
         className={`v69-tools-link ${isActive(path, tab.p) ? 'is-active' : ''}`}>
         <BrandIcon name={tab.icon} size={18}/><span>{tab.label}</span><BrandIcon name="chevron-right" size={15}/>
       </B>)}

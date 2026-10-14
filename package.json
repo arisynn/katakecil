@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "7.1.0-rc.1",
+  "version": "7.0.0-beta.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,7 +21,7 @@
     "test:v5": "node scripts/test-v5.mjs",
     "test:v51": "node scripts/test-v51.mjs",
     "test:v64": "node scripts/test-v64.mjs",
-    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs && node scripts/test-v7alpha.mjs && node scripts/test-v7alpha2.mjs && node scripts/test-v7alpha3.mjs && node scripts/test-v7alpha4.mjs && node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs && npm run test:v71",
+    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs && node scripts/test-v7alpha.mjs && node scripts/test-v7alpha2.mjs && node scripts/test-v7alpha3.mjs && node scripts/test-v7alpha4.mjs && node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs",
     "test:v65": "node scripts/test-v65.mjs",
     "test:v66": "node scripts/test-v66.mjs && node scripts/test-v67.mjs && node scripts/test-v68.mjs",
     "test:v67": "node scripts/test-v67.mjs",
@@ -37,8 +37,7 @@
     "test:v7alpha4": "node scripts/test-v7alpha4.mjs",
     "test:v7beta1": "node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs",
     "audit:v7beta": "node scripts/audit-v7beta.mjs",
-    "test:v7beta2": "node scripts/test-v7beta2.mjs",
-    "test:v71": "node scripts/test-v71-public.mjs && node scripts/test-v71-studio.mjs"
+    "test:v7beta2": "node scripts/test-v7beta2.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
