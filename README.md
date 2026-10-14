@@ -1,3 +1,9 @@
+# KataKecil V7.0 Alpha.1 — The Living Library
+
+**Alpha untuk staging, belum siap langsung menggantikan production.** Fokus: logo brand baru, Beranda editorial, Temukan dengan kabar nyata, Koleksi yang selalu terlihat, dan sampul bersih. Secure Reader dan Studio privat tetap memakai mekanisme V6.12.1.
+
+Baca [catatan rilis dan keterbatasan](docs/RELEASE_V7_ALPHA.md) serta [manifest perubahan](docs/V7_ALPHA_FILE_MANIFEST.md).
+
 # KataKecil V6.11 — Immersive Reader & Sapphire Loading
 
 KataKecil adalah aplikasi membaca cerita publik dan **Studio privat untuk satu penulis** berbasis React, TypeScript, Vite, dan Supabase. Dua tema global tetap **Arctic Blue** (terang) dan **Midnight Sapphire** (gelap).

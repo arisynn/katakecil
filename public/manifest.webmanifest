@@ -1,0 +1,25 @@
+{
+  "name": "KataKecil — Cerita Kecil, Makna Besar",
+  "short_name": "KataKecil",
+  "description": "Cerita karya Karisyono untuk dibaca dan disimpan.",
+  "lang": "id",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#081425",
+  "theme_color": "#081425",
+  "icons": [
+    {
+      "src": "/brand/katakecil-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/katakecil-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,34 +1,35 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { BookOpen, House, Info, Search, Feather, Bookmark, ArrowRight, Menu, X, PenLine, Moon, Sun } from 'lucide-react';
+import { Compass, House, Info, Search, Bookmark, ArrowRight, Menu, X, PenLine, Moon, Sun } from 'lucide-react';
 import { navigate } from '../../utils/nav';
 import { useUiTheme } from '../../hooks/useUiTheme';
 import ThemeToggle from '../ThemeToggle';
+import BrandLogo from '../BrandLogo';
 
 const links = [
   {to:'/',label:'Beranda',icon:House},
-  {to:'/cerita',label:'Perpustakaan',icon:BookOpen},
+  {to:'/temukan',label:'Temukan',icon:Compass},
   {to:'/koleksi',label:'Koleksi',icon:Bookmark},
   {to:'/tentang',label:'Tentang',icon:Info},
 ];
-export default function PublicHeader({path,showCollection}:{path:string;showCollection:boolean}) {
-  const visibleLinks = links.filter(link => link.to !== '/koleksi' || showCollection);
+export default function PublicHeader({path}:{path:string}) {
+  const visibleLinks = links; // Stable four-item navigation, even for empty collections.
   const [search,setSearch] = useState('');
   const [menuOpen,setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(()=>{if(!menuOpen)return;const outside=(e:PointerEvent)=>{if(!menuRef.current?.contains(e.target as Node))setMenuOpen(false)};const esc=(e:KeyboardEvent)=>{if(e.key==='Escape')setMenuOpen(false)};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',esc)};},[menuOpen]);
   useEffect(()=>{setMenuOpen(false);},[path]);
   const {theme,preference,setPreference}=useUiTheme();
-  const active = (to:string) => path===to || (to==='/cerita'&&path.startsWith('/cerita/'));
-  const hasPageSearch = path==='/cerita'||path==='/koleksi';
-  const submit=(event:React.FormEvent)=>{event.preventDefault();navigate(`/cerita${search.trim()?`?q=${encodeURIComponent(search.trim())}`:''}`);};
+  const active = (to:string) => path===to || (to==='/temukan'&&(path==='/cerita'||path.startsWith('/cerita/')));
+  const hasPageSearch = path==='/temukan'||path==='/cerita'||path==='/koleksi';
+  const submit=(event:React.FormEvent)=>{event.preventDefault();navigate(`/temukan${search.trim()?`?q=${encodeURIComponent(search.trim())}`:''}`);};
   return <>
     <header className="v6-public-header">
       <div className="v6-header-inner">
-        <span className="v6-brand"><span className="v6-brand-symbol"><Feather size={19}/></span>KataKecil</span>
+        <span className="v6-brand"><BrandLogo/></span>
         <nav className="v6-desktop-links" aria-label="Navigasi publik desktop">{visibleLinks.map(l=><button key={l.to} aria-current={active(l.to)?'page':undefined} className={active(l.to)?'is-active':''} onClick={()=>navigate(l.to)}>{l.label}</button>)}</nav>
         <div className="v6-header-actions">
           {!hasPageSearch&&<form className="v6-header-search" role="search" onSubmit={submit}><Search size={15}/><input aria-label="Cari cerita" placeholder="Cari cerita..." value={search} onChange={e=>setSearch(e.target.value)}/><button aria-label="Jalankan pencarian" type="submit"><ArrowRight size={15}/></button></form>}
-          {!hasPageSearch&&<button className="v6-mobile-search" aria-label="Cari cerita" onClick={()=>navigate('/cerita?focus=1')}><Search size={19}/></button>}
+          {!hasPageSearch&&<button className="v6-mobile-search" aria-label="Cari cerita" onClick={()=>navigate('/temukan?focus=1')}><Search size={19}/></button>}
           <div className="v63-desktop-theme"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={setPreference}/></div>
           <button className="v6-studio-entry" onClick={()=>navigate('/studio')}>Studio</button>
           <div className="v63-mobile-menu-wrap" ref={menuRef}>

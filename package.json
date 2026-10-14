@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "6.12.1",
+  "version": "7.0.0-alpha.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,7 +21,7 @@
     "test:v5": "node scripts/test-v5.mjs",
     "test:v51": "node scripts/test-v51.mjs",
     "test:v64": "node scripts/test-v64.mjs",
-    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v65.mjs && node scripts/test-v66.mjs && node scripts/test-v67.mjs && node scripts/test-v68.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs",
+    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs && node scripts/test-v7alpha.mjs",
     "test:v65": "node scripts/test-v65.mjs",
     "test:v66": "node scripts/test-v66.mjs && node scripts/test-v67.mjs && node scripts/test-v68.mjs",
     "test:v67": "node scripts/test-v67.mjs",
@@ -31,7 +31,8 @@
     "test:v610": "node scripts/test-v610.mjs",
     "test:v6121": "node scripts/test-v6121.mjs",
     "test:v611": "node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs",
-    "audit:colors": "node scripts/audit-v611-colors.mjs"
+    "audit:colors": "node scripts/audit-v611-colors.mjs",
+    "test:v7alpha": "node scripts/test-v7alpha.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

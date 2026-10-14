@@ -42,7 +42,7 @@ function Login({ onSuccess, theme, preference, onPreferenceChange }: {
     finally {
         setBusy(false);
     } };
-    return <div className="studio-login-wrap" data-kk-theme={theme}><div className="v62-login-theme"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div><B to="/" className="studio-backlink"><ArrowLeft size={17}/> Kembali ke perpustakaan</B><form className="studio-login" onSubmit={submit}><div className="studio-login-icon"><Feather size={29}/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Selamat datang<br /><i>di Studio.</i></h1><p>Masuk untuk menulis, menyimpan draft, dan mengatur penerbitan ceritamu.</p>
+    return <div className="studio-login-wrap" data-kk-theme={theme}><div className="v62-login-theme"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div><B to="/" className="studio-backlink"><ArrowLeft size={17}/> Kembali ke Beranda</B><form className="studio-login" onSubmit={submit}><div className="studio-login-icon"><img src="/brand/katakecil-mark.svg" width="33" height="33" alt=""/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Selamat datang<br /><i>di Studio.</i></h1><p>Masuk untuk menulis, menyimpan draft, dan mengatur penerbitan ceritamu.</p>
    <label>Email<input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} placeholder="email@contoh.com"/></label><label>Kata sandi<input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"/></label>
    {error && <div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy} type="submit">{busy ? 'Masuk…' : 'Masuk ke Studio'} <ArrowRight size={17}/></button><small><LockKeyhole size={13}/> Hanya akun penulis yang diizinkan.</small></form></div>;
 }
@@ -165,7 +165,7 @@ export default function Studio({ path }: {
         }
     };
     if (!isConfigured)
-        return <div className="studio-unavailable"><Feather size={36}/><h1>Hubungkan Studio ke Supabase</h1><p>Untuk mengaktifkan login dan publikasi, isi variabel VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY, lalu jalankan migrasi V2 dan daftarkan akun penulis.</p><B to="/" className="studio-primary">Kembali ke perpustakaan</B></div>;
+        return <div className="studio-unavailable"><Feather size={36}/><h1>Hubungkan Studio ke Supabase</h1><p>Untuk mengaktifkan login dan publikasi, isi variabel VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY, lalu jalankan migrasi V2 dan daftarkan akun penulis.</p><B to="/" className="studio-primary">Kembali ke Beranda</B></div>;
     if (authLoading)
         return <Busy text="Memverifikasi akses Studio…"/>;
     if (!user)

@@ -8,6 +8,7 @@ import { supabase } from '../../../data/supabase';
 import ThemeToggle from '../../../components/ThemeToggle';
 import type { AppThemePreference, UiTheme } from '../../../hooks/useUiTheme';
 import { B } from './StudioShared';
+import BrandLogo from '../../../components/BrandLogo';
 
 const primary = [
   { p: '/studio', label: 'Dashboard', icon: LayoutDashboard },
@@ -82,7 +83,7 @@ export default function StudioNavigation({ path, displayName, theme, preference,
 }) {
   return <>
     <aside className="studio-sidebar v6-studio-sidebar v69-sidebar">
-      <div className="studio-logo"><span><Feather size={20}/></span><span>KataKecil<small>Studio</small></span></div>
+      <div className="studio-logo"><BrandLogo/><small>Studio</small></div>
       <div className="studio-sidebar-label">RUANG MENULIS</div>
       <nav className="studio-side-nav" aria-label="Navigasi utama Studio">
         {primary.map(tab => <B key={tab.p} to={tab.p}
@@ -97,9 +98,7 @@ export default function StudioNavigation({ path, displayName, theme, preference,
       </div>
     </aside>
     <div className="studio-mobile-top">
-      <div className="studio-logo"><span><Feather size={18}/></span>
-        <span className="kk-studio-wordmark">KataKecil <small>Studio</small></span>
-      </div>
+      <div className="studio-logo"><BrandLogo/><small>Studio</small></div>
       <div className="studio-mobile-actions">
         <ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/>
         <StudioToolsMenu path={path} mobile/>

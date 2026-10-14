@@ -15,7 +15,7 @@
       .kk-v611-loader__content { display:flex;flex-direction:column;align-items:center;gap:0;width:min(100%,370px); }
       .kk-v611-loader__eyebrow { font-size:10px;line-height:1.4;font-weight:700;letter-spacing:.19em;color:var(--kk-boot-blue);margin-bottom:27px; }
       .kk-v611-loader__symbol { width:100px;height:100px;display:grid;place-items:center;border-radius:28px;border:1px solid var(--kk-boot-border);background:var(--kk-boot-card);color:var(--kk-boot-blue);box-shadow:0 16px 45px color-mix(in srgb,var(--kk-boot-ink) 9%,transparent);margin-bottom:27px; }
-      .kk-v611-loader__symbol svg { width:58px;height:58px; }
+      .kk-v611-loader__symbol img { width:58px;height:58px;object-fit:contain; }
       .kk-v611-loader__turn { transform-origin:32px 22px;animation:kk-v611-turn 2.7s ease-in-out infinite; }
       .kk-v611-loader__brand { font:600 clamp(34px,6vw,42px)/1.12 Georgia,serif;letter-spacing:-.045em;color:var(--kk-boot-ink); }
       .kk-v611-loader__tagline { margin:12px 0 0;font-size:12px;line-height:1.65;color:var(--kk-boot-muted); }
@@ -51,10 +51,14 @@
         }catch(e){var fallback=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-app-theme',fallback);document.documentElement.setAttribute('data-reader-theme',fallback==='dark'?'night':'white');}
       })();
     </script>
-    <title>KataKecil — Perpustakaan Cerita</title>
-    <meta name="description" content="Perpustakaan cerita pribadi dengan pengalaman membaca yang tenang dan nyaman." />
-    <meta property="og:title" content="KataKecil Reader" />
-    <meta property="og:description" content="Perpustakaan cerita pribadi dengan pengalaman membaca yang tenang dan nyaman." />
+    <title>KataKecil — Cerita Kecil, Makna Besar</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/brand/katakecil-icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="description" content="Temukan, simpan, dan baca cerita karya Karisyono di KataKecil." />
+    <meta property="og:title" content="KataKecil — Cerita Kecil, Makna Besar" />
+    <meta property="og:description" content="Temukan, simpan, dan baca cerita karya Karisyono di KataKecil." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,16 +68,16 @@
   <body>
     <div id="root"><div class="kk-v611-loader kk-boot-loader" role="status" aria-live="polite" aria-busy="true">
       <div class="kk-v611-loader__content">
-        <span class="kk-v611-loader__eyebrow">PERPUSTAKAAN DIGITAL</span>
-        <div class="kk-v611-loader__symbol" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 17v31M32 22C25 16 17 16 9 19v28c9-3 17-2 23 3"/><path class="kk-v611-loader__turn" d="M32 22c7-6 15-6 23-3v28c-9-3-17-2-23 3"/></svg></div>
+        <span class="kk-v611-loader__eyebrow">KATAKECIL</span>
+        <div class="kk-v611-loader__symbol" aria-hidden="true"><img src="/brand/katakecil-mark.svg" width="58" height="58" alt=""/></div>
         <strong class="kk-v611-loader__brand">KataKecil</strong>
         <p class="kk-v611-loader__tagline">Setiap cerita punya tempat untuk kembali.</p>
         <div class="kk-v611-loader__dots" aria-hidden="true"><span></span><span></span><span></span></div>
-        <p class="kk-v611-loader__message">Membuka perpustakaan…</p>
+        <p class="kk-v611-loader__message">Menyiapkan KataKecil…</p>
       </div>
     </div></div>
     <script>
-      (function(){var context=document.documentElement.getAttribute('data-kk-boot-context');var message=context==='reader'?'Menyiapkan halaman cerita…':context==='studio'?'Memverifikasi akses Studio…':'Membuka perpustakaan…';var loader=document.querySelector('.kk-boot-loader');if(loader){loader.setAttribute('aria-label',message);var label=loader.querySelector('.kk-v611-loader__message');if(label)label.textContent=message;var eyebrow=loader.querySelector('.kk-v611-loader__eyebrow');if(eyebrow)eyebrow.textContent=context==='reader'?'RUANG MEMBACA':context==='studio'?'RUANG PENULIS':'PERPUSTAKAAN DIGITAL';}})();
+      (function(){var context=document.documentElement.getAttribute('data-kk-boot-context');var message=context==='reader'?'Menyiapkan halaman cerita…':context==='studio'?'Memverifikasi akses Studio…':'Menyiapkan KataKecil…';var loader=document.querySelector('.kk-boot-loader');if(loader){loader.setAttribute('aria-label',message);var label=loader.querySelector('.kk-v611-loader__message');if(label)label.textContent=message;var eyebrow=loader.querySelector('.kk-v611-loader__eyebrow');if(eyebrow)eyebrow.textContent=context==='reader'?'RUANG MEMBACA':context==='studio'?'RUANG PENULIS':'KATAKECIL';}})();
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

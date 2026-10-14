@@ -9,7 +9,7 @@ export function Action({ children, to, className = '' }: {
 export function EmptyLibrary({ collection = false }: {
     collection?: boolean;
 }) {
-    return <section className="v6-empty"><div className="v67-empty-icon" aria-hidden="true"><BookOpen size={32}/></div><div className="v6-empty-copy"><h2>{collection ? 'Koleksimu masih kosong' : 'Belum ada cerita di sini'}</h2><p>{collection ? 'Simpan cerita yang kamu sukai melalui ikon penanda pada sampul.' : 'Mulai dari halaman perpustakaan untuk menemukan cerita yang telah diterbitkan.'}</p><Action to="/cerita" className="v6-button v6-button-dark">Jelajahi cerita <ArrowRight size={17}/></Action></div></section>;
+    return <section className="v6-empty"><div className="v67-empty-icon" aria-hidden="true"><BookOpen size={32}/></div><div className="v6-empty-copy"><h2>{collection ? 'Koleksimu masih kosong' : 'Belum ada cerita di sini'}</h2><p>{collection ? 'Buka detail cerita, lalu pilih Simpan ke Koleksi.' : 'Temukan cerita yang sudah diterbitkan oleh Karisyono.'}</p><Action to="/temukan" className="v6-button v6-button-dark">Jelajahi cerita <ArrowRight size={17}/></Action></div></section>;
 }
 export function Heading({ title, to }: {
     title: string;

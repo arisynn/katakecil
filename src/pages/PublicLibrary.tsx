@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Bookmark, CalendarClock, ChevronDown, ChevronRight, Clock3, Feather, Search, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Bookmark, BookmarkCheck, CalendarClock, ChevronDown, ChevronRight, Clock3, Feather, Search, Sparkles, X } from 'lucide-react';
 import { Cover } from '../components/Cover';
 import { getPublicLibrary, type Book, type EpisodeSummary } from '../data/library';
 import { isConfigured } from '../data/supabase';
@@ -10,8 +10,7 @@ import { useUiTheme } from '../hooks/useUiTheme';
 import ThemeLoading from '../components/ThemeLoading';
 import { BookmarkButton, BookCard } from '../features/public/components/StoryCard';
 import { Action, EmptyLibrary, Heading } from '../features/public/components/LibraryUI';
-import FeaturedHeroCarousel from '../features/public/components/FeaturedHeroCarousel';
-import { selectRecentlyPublishedStories } from '../features/public/featuredStories';
+import DiscoveryNotices from '../features/public/components/DiscoveryNotices';
 import { selectRecentChapters } from '../features/public/recentChapters';
 import { getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter } from '../data/publicSchedule';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
@@ -82,108 +81,88 @@ function readProgress(book: Book) {
         return null;
     }
 }
-function Home({ books, episodes, schedules, demo }: {
-    books: Book[];
-    episodes: EpisodeSummary[];
-    schedules: UpcomingChapter[];
-    demo: boolean;
+function Home({ books, episodes, demo }: {
+    books: Book[]; episodes: EpisodeSummary[]; schedules: UpcomingChapter[]; demo: boolean;
 }) {
-    // Only real, released stories are allowed in the carousel.
-    const latestStories = useMemo(
-        () => demo ? [] : selectRecentlyPublishedStories(books, episodes),
-        [books, episodes, demo],
-    );
-    const recentChapters = useMemo(
-        () => demo ? [] : selectRecentChapters(books, episodes),
-        [books, episodes, demo],
-    );
-    const availableBooks = books.filter(book => demo || countFor(episodes, book) > 0);
-    const continuation = demo ? undefined : availableBooks.find(book => {
+    const recentChapters = useMemo(() => demo ? [] : selectRecentChapters(books, episodes), [books, episodes, demo]);
+    const published = useMemo(() => demo ? books : books.filter(book => countFor(episodes, book) > 0), [books, episodes, demo]);
+    const featured = useMemo(() => {
+        const picks = published.filter(book => book.is_featured);
+        return [...picks, ...published.filter(book => !book.is_featured)].slice(0, 8);
+    }, [published]);
+    const continuation = demo ? undefined : published.find(book => {
         const progress = readProgress(book);
-        return progress !== null && episodes.some(
-            ep => ep.book_id === book.id && ep.episode_number === progress,
-        );
+        return progress !== null && episodes.some(ep => ep.book_id === book.id && ep.episode_number === progress);
     });
     const episode = continuation ? readProgress(continuation) : null;
-
-    return <main className="v6-home v66-home v68-home">
-        <FeaturedHeroCarousel stories={latestStories} schedules={schedules}/>
-        <div className="v6-home-sections v68-home-sections">
-            {continuation && episode !== null && <section className="v68-continue" aria-label="Lanjut membaca">
-                <Heading title="Lanjut Membaca"/>
-                <button
-                    type="button"
-                    className="v68-continue-card"
-                    onClick={() => navigate(`/baca/${continuation.slug}?episode=${episode}`)}
-                    aria-label={`Lanjutkan ${continuation.title} dari bab ${episode}`}
-                >
-                    <div className="v68-continue-cover"><Cover book={continuation} eager/></div>
-                    <div className="v68-continue-info">
-                        <strong>{continuation.title}</strong>
-                        <span>Bab {episode} · {countFor(episodes, continuation)} bab tersedia</span>
-                    </div>
-                    <span className="v68-continue-arrow" aria-hidden="true"><ArrowRight size={19}/></span>
-                </button>
-            </section>}
-            {recentChapters.length > 0 && <section className="v68-new-chapters" aria-label="Bab baru">
-                <Heading title="Bab Baru"/>
-                <div className="v68-chapter-list">
-                    {recentChapters.map(({ book, episode: ep }) => <button
-                        key={`${book.id}:${ep.episode_number}`}
-                        type="button"
-                        className="v68-chapter-item"
-                        onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}
-                        aria-label={`Baca ${ep.title} dari ${book.title}`}
-                    >
-                        <span className="v68-chapter-number" aria-hidden="true">{ep.episode_number === 0 ? 'P' : ep.episode_number}</span>
-                        <span className="v68-chapter-copy">
-                            <strong>{ep.title}</strong>
-                            <small>{book.title} · {new Intl.DateTimeFormat('id-ID', {
-                                timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short',
-                            }).format(new Date(ep.release_at!))}</small>
-                        </span>
-                        <ChevronRight size={17} aria-hidden="true"/>
-                    </button>)}
-                </div>
-            </section>}
-        </div>
+    return <main className="kk-v7-home" aria-label="Beranda KataKecil">
+      <div className="kk-v7-home-inner">
+        <div className="kk-v7-home-intro"><span className="kk-v7-kicker">CERITA KECIL, MAKNA BESAR</span><h1>Selamat datang di KataKecil.</h1><p>Cerita yang bisa kamu bawa ke mana saja.</p></div>
+        {continuation && episode !== null && <section className="kk-v7-home-section" aria-label="Lanjut membaca">
+          <Heading title="Lanjut Membaca"/>
+          <button className="v68-continue-card" type="button" onClick={()=>navigate(`/baca/${continuation.slug}?episode=${episode}`)} aria-label={`Lanjutkan ${continuation.title} dari bab ${episode}`}>
+            <div className="v68-continue-cover"><Cover book={continuation} eager/></div>
+            <div className="v68-continue-info"><strong>{continuation.title}</strong><span>Bab {episode} · {countFor(episodes, continuation)} bab tersedia</span></div>
+            <span className="v68-continue-arrow" aria-hidden="true"><ArrowRight size={19}/></span>
+          </button>
+        </section>}
+        {featured.length>0 && <section className="kk-v7-home-section" aria-label="Cerita pilihan">
+          <Heading title="Cerita Pilihan" to="/temukan"/>
+          <div className="kk-v7-featured-rail">{featured.map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div>
+        </section>}
+        {recentChapters.length>0 && <section className="kk-v7-home-section" aria-label="Bab baru">
+          <Heading title="Bab Baru"/>
+          <div className="v68-chapter-list">{recentChapters.slice(0,2).map(({book,episode:ep})=><button key={`${book.id}:${ep.episode_number}`} type="button" className="v68-chapter-item" onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}>
+            <span className="v68-chapter-number" aria-hidden="true">{ep.episode_number===0?'P':ep.episode_number}</span>
+            <span className="v68-chapter-copy"><strong>{ep.title}</strong><small>{book.title} · {new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date(ep.release_at!))}</small></span>
+            <ChevronRight size={17} aria-hidden="true"/>
+          </button>)}</div>
+        </section>}
+        {featured.length===0 && <EmptyLibrary/>}
+      </div>
     </main>;
 }
-function Listing({ books, episodes, demo, collection = false }: {
-    books: Book[];
-    episodes: EpisodeSummary[];
-    demo: boolean;
-    collection?: boolean;
+function Listing({ books, episodes, schedules, demo, collection = false }: {
+    books: Book[]; episodes: EpisodeSummary[]; schedules: UpcomingChapter[]; demo: boolean; collection?: boolean;
 }) {
     const params = new URLSearchParams(window.location.search);
     const [q, setQ] = useState(params.get('q') || '');
     const [filter, setFilter] = useState(params.get('genre') || 'Semua');
+    const [status, setStatus] = useState('Semua');
     const [sort, setSort] = useState('terbaru');
     const input = useRef<HTMLInputElement>(null);
-    const { ids } = useCollection();
+    const { ids, toggle } = useCollection();
     useEffect(() => {
-        const sync = () => { const next = new URLSearchParams(window.location.search); setQ(next.get('q') || ''); setFilter(next.get('genre') || 'Semua'); if (next.get('focus') === '1')
-            requestAnimationFrame(() => input.current?.focus()); };
-        sync();
-        window.addEventListener('quiet:navigate', sync);
-        return () => window.removeEventListener('quiet:navigate', sync);
+      const sync=()=>{const next=new URLSearchParams(window.location.search);setQ(next.get('q')||'');setFilter(next.get('genre')||'Semua');if(next.get('focus')==='1')requestAnimationFrame(()=>input.current?.focus());};
+      sync();window.addEventListener('quiet:navigate',sync);return()=>window.removeEventListener('quiet:navigate',sync);
     }, []);
-    const genres = useMemo(() => ['Semua', ...new Set(books.filter(b => !collection || ids.includes(b.id)).map(b => b.genre).filter(Boolean))], [books, collection, ids]);
-    const shown = useMemo(() => {
-        const term = q.toLocaleLowerCase('id-ID');
-        const results = books.filter(b => (!collection || ids.includes(b.id)) && (filter === 'Semua' || b.genre === filter) && `${b.title} ${b.synopsis} ${b.genre}`.toLocaleLowerCase('id-ID').includes(term));
-        return [...results].sort((a, b) => sort === 'judul' ? a.title.localeCompare(b.title, 'id') : new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-    }, [books, ids, collection, filter, q, sort]);
-    if (collection && !books.some(book => ids.includes(book.id))) {
-        return <main className="v6-library-page v67-empty-collection">
-            <div className="v6-library-intro"><h1>Koleksi</h1><p>Cerita yang kamu simpan untuk dibaca kembali.</p></div>
-            <EmptyLibrary collection/>
-        </main>;
-    }
-    return <main className="v6-library-page"><div className="v6-library-intro"><span className="v63-eyebrow">✦ &nbsp; JELAJAHI CERITA</span><h1>{collection ? 'Koleksi' : 'Perpustakaan'}</h1><p>{collection ? 'Cerita yang kamu simpan untuk dibaca kembali.' : 'Ribuan kata, satu tempat untuk kembali.'}</p></div>
-    <div className="v6-library-tools"><div className="v6-library-search"><Search size={19}/><input ref={input} type="search" aria-label="Cari cerita, penulis, atau genre" placeholder="Cari cerita, penulis, atau genre..." value={q} onChange={e => setQ(e.target.value)}/>{q && <button aria-label="Hapus pencarian" onClick={() => setQ('')}><X size={16}/></button>}</div><div className="v6-genre-pills">{genres.map(g => <button key={g} className={filter === g ? 'selected' : ''} aria-pressed={filter === g} onClick={() => setFilter(g)}>{g}</button>)}</div><label className="v6-sort">Urutkan <ChevronDown size={13}/><select aria-label="Urutkan cerita" value={sort} onChange={e => setSort(e.target.value)}><option value="terbaru">Terbaru</option><option value="judul">Judul A–Z</option></select></label></div>
-    {shown.length ? <div className="v6-library-grid">{shown.map(b => <BookCard key={b.id} book={b} count={countFor(episodes, b)} demo={demo}/>)}</div> : !q && filter === 'Semua' && (!books.length || collection) ? <EmptyLibrary collection={collection}/> : <div className="v6-filter-empty"><Search size={24}/><h2>Tidak ada cerita yang cocok</h2><p>Coba kata kunci atau genre lain.</p><button onClick={() => { setQ(''); setFilter('Semua'); }}>Hapus filter</button></div>}
-  </main>;
+    const eligible = useMemo(()=>books.filter(book=>(collection||demo||countFor(episodes,book)>0)&&(!collection||ids.includes(book.id))),[books,episodes,collection,ids,demo]);
+    const genres = useMemo(()=>['Semua',...new Set(eligible.map(book=>book.genre).filter(Boolean))],[eligible]);
+    const shown = useMemo(()=>{
+      const term=q.trim().toLocaleLowerCase('id-ID');
+      return eligible.filter(book=>(filter==='Semua'||book.genre===filter)&&(status==='Semua'||(status==='Tamat'?book.status==='completed':book.status!=='completed'))&&`${book.title} ${book.synopsis} ${book.genre}`.toLocaleLowerCase('id-ID').includes(term))
+        .sort((a,b)=>sort==='judul'?a.title.localeCompare(b.title,'id-ID'):new Date(b.updated_at).getTime()-new Date(a.updated_at).getTime());
+    },[eligible,filter,status,q,sort]);
+    if(collection) return <main className="kk-v7-collection kk-v7-page">
+      <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RAK PRIBADIMU</span><h1>Koleksi Saya</h1><p>Cerita yang kamu simpan, tetap ada di perangkat ini.</p></div>
+      {eligible.length===0?<EmptyLibrary collection/>:<>
+        <div className="kk-v7-collection-list">{eligible.map(book=>{const progress=readProgress(book);return <article className="kk-v7-collection-item" key={book.id}>
+          <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat ${book.title}`}><div className="kk-v7-collection-cover"><Cover book={book}/></div><span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{progress!==null?`Terakhir dibaca: Bab ${progress}`:`${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <ChevronRight size={15}/></span></span></button>
+          <button type="button" className="kk-v7-collection-remove" onClick={()=>toggle(book.id)} aria-label={`Hapus ${book.title} dari Koleksi`} title="Hapus dari Koleksi"><BookmarkCheck size={18}/></button>
+        </article>})}</div>
+      </>}
+    </main>;
+    return <main className="kk-v7-discover kk-v7-page">
+      <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RUANG UNTUK MENEMUKAN</span><h1>Temukan</h1><p>Jelajahi cerita dan kabar terbaru dari Karisyono.</p></div>
+      {!demo && <DiscoveryNotices books={books} episodes={episodes} schedules={schedules}/>}
+      <div className="kk-v7-discover-tools"><div className="v6-library-search"><Search size={19}/><input ref={input} type="search" aria-label="Cari judul atau genre" placeholder="Cari judul atau genre..." value={q} onChange={e=>setQ(e.target.value)}/>{q&&<button type="button" aria-label="Hapus pencarian" onClick={()=>setQ('')}><X size={16}/></button>}</div>
+        <div className="kk-v7-filter-row" role="group" aria-label="Status cerita">{['Semua','Tamat','Berlangsung'].map(value=><button type="button" key={value} aria-pressed={status===value} className={status===value?'active':''} onClick={()=>setStatus(value)}>{value}</button>)}</div>
+        {genres.length>1&&<div className="v6-genre-pills">{genres.map(value=><button type="button" key={value} className={filter===value?'selected':''} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{value}</button>)}</div>}
+        <label className="kk-v7-sort">Urutkan <ChevronDown size={14}/><select aria-label="Urutkan cerita" value={sort} onChange={e=>setSort(e.target.value)}><option value="terbaru">Terbaru</option><option value="judul">Judul A–Z</option></select></label>
+      </div>
+      <div className="kk-v7-discover-title"><h2>Jelajahi Cerita</h2><span>{shown.length} cerita</span></div>
+      {shown.length?<div className="kk-v7-discover-grid">{shown.map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div>:eligible.length===0?<EmptyLibrary/>:<div className="kk-v7-no-results"><Search size={24}/><h2>Belum ada cerita yang cocok</h2><p>Coba kata kunci atau filter lain.</p><button type="button" onClick={()=>{setQ('');setFilter('Semua');setStatus('Semua');}}>Reset filter</button></div>}
+    </main>;
 }
 function Detail({ book, episodes, schedules, demo }: {
     book: Book;
@@ -201,13 +180,12 @@ function Detail({ book, episodes, schedules, demo }: {
 
     return <main className="v6-detail-page">
         <div className="v6-detail-content">
-            <Action to="/cerita" className="v6-detail-back">
-                <ArrowLeft size={17}/><span>Perpustakaan</span>
+            <Action to="/temukan" className="v6-detail-back">
+                <ArrowLeft size={17}/><span>Temukan</span>
             </Action>
             <section className="v6-detail-hero">
                 <div className="v6-detail-cover">
                     <Cover book={book} size="large" eager/>
-                    <BookmarkButton book={book}/>
                 </div>
                 <div className="v6-detail-info">
                     <h1>{book.title}</h1>
@@ -225,6 +203,7 @@ function Detail({ book, episodes, schedules, demo }: {
                                 Mulai Membaca <ArrowRight size={17}/>
                             </Action>
                             : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}
+                      {!demo && <BookmarkButton book={book}/>}
                     </div>
                 </div>
             </section>
@@ -301,7 +280,7 @@ function About() {
             <article><BookOpen size={22}/><h3>Baca dengan nyaman</h3><p>Pilih tema terang atau gelap, atur tipografi, dan lanjutkan bacaanmu.</p></article>
             <article><Bookmark size={22}/><h3>Simpan cerita</h3><p>Tandai cerita favoritmu. Koleksi tersimpan pada browser perangkat ini.</p></article>
         </section>
-        <Action to="/cerita" className="v67-about-cta">Jelajahi perpustakaan <ArrowRight size={17}/></Action>
+        <Action to="/temukan" className="v67-about-cta">Temukan cerita <ArrowRight size={17}/></Action>
     </main>;
 }
 export default function PublicLibrary({ path }: {
@@ -309,16 +288,14 @@ export default function PublicLibrary({ path }: {
 }) {
     const { books, episodes, schedules, loading, error, demo } = useLibrary();
     const { theme } = useUiTheme();
-    const { ids: collectionIds } = useCollection();
-    const showCollection = books.some(book => collectionIds.includes(book.id));
     const slug = path.startsWith('/cerita/') ? decodeURIComponent(path.split('/')[2] || '') : null;
     const book = slug ? books.find(b => b.slug === slug) : undefined;
-    useEffect(() => { document.title = `${book?.title ? `${book.title} · ` : path === '/cerita' ? 'Perpustakaan · ' : path === '/koleksi' ? 'Koleksi · ' : path === '/tentang' ? 'Tentang · ' : ''}KataKecil`; }, [book?.title, path]);
+    useEffect(() => { document.title = `${book?.title ? `${book.title} · ` : (path === '/temukan' || path === '/cerita') ? 'Temukan · ' : path === '/koleksi' ? 'Koleksi · ' : path === '/tentang' ? 'Tentang · ' : ''}KataKecil`; }, [book?.title, path]);
     if (loading)
-        return <ThemeLoading context="public" text="Membuka perpustakaan…"/>;
-    return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path} showCollection={showCollection}/>
+        return <ThemeLoading context="public" text="Menyiapkan KataKecil…"/>;
+    return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path}/>
     {demo && <div className="v6-demo-notice"><Sparkles size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error && <div className="v6-error" role="alert">{error}</div>}
-    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/cerita" className="v6-button v6-button-gold">Kembali ke perpustakaan</Action></div>) : path === '/cerita' ? <Listing books={books} episodes={episodes} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
+    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} schedules={schedules} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/temukan" className="v6-button v6-button-gold">Kembali ke Temukan</Action></div>) : (path === '/cerita' || path === '/temukan') ? <Listing books={books} episodes={episodes} schedules={schedules} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
   </div>;
 }
