@@ -12,9 +12,16 @@ const context=await browser.newContext({viewport:{width:390,height:844},deviceSc
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 mkdirSync('qa/v72',{recursive:true});
 let failNext=false,committed=false,importCalls=[];const body='SENTINEL_QA_V72_PRIVATE_8372. Synthetic public test body.\n\n## Heading internal\n\n'+('Synthetic paragraph for pagination.\n\n'.repeat(40));
+let editorRow={id:'00000000-0000-4000-8000-000000000012',book_id:'synthetic',episode_number:12,title:'Judul terbaru server',arc_title:'Arc terbaru',content_md:'Synthetic original editor body.',release_at:null,is_enabled:false,is_finale:false,created_at:'2026-01-01T00:00:00Z',updated_at:'2026-01-02T00:00:00Z'},editorWrites=[];
 await page.route('https://synthetic-qa.supabase.co/**',async route=>{
  const req=route.request(),url=req.url(),data=req.postDataJSON();let result;
- if(url.includes('/functions/v1/secure-episode')){
+ if(url.includes('/rpc/qr_author_episode_v72'))result=editorRow;
+ else if(url.includes('/rest/v1/qr_episodes')&&req.method()==='PATCH'){
+  editorWrites.push({data,url});
+  if(new URL(url).searchParams.get('updated_at')!=='eq.'+editorRow.updated_at)return route.fulfill({status:406,json:{code:'PGRST116',message:'No matching version'}});
+  editorRow={...editorRow,...data,updated_at:new Date(Date.parse(editorRow.updated_at)+1000).toISOString()};
+  const {content_md,...metadata}=editorRow;result=metadata;
+ }else if(url.includes('/functions/v1/secure-episode')){
   if(data.action==='index')result={type:'index',episodes:[0,12,48].map(n=>({episode_number:n,title:`Bab ${n} — Synthetic`,arc_title:'Arc II',release_at:'2026-01-01T00:00:00Z'}))};
   else if(failNext&&data.episodeNumber===48){failNext=false;return route.fulfill({status:503,json:{error:'Synthetic failure'}});}
   else result={episodeNumber:data.episodeNumber,title:`Bab ${data.episodeNumber} — Synthetic`,arc:'Arc II',content:body};
@@ -46,6 +53,7 @@ try{
  await page.setViewportSize({width:390,height:844});
  await page.goto(base+fixture+'?ep=12');await page.locator('.reader-book').waitFor();
  assert((await page.locator('.reader-book').innerText()).includes('12'));
+ assert.equal(await page.locator('.kk-preview-label').count(),0);assert.equal(await page.getByText('Pratinjau penulis',{exact:true}).count(),0);
  await page.screenshot({path:'qa/v72/preview-390.png'});
  const storage=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}));assert(!storage.includes('SENTINEL_QA'));
  for(const width of [320,390,768,1440]){
@@ -79,6 +87,29 @@ try{
  const epub=new JSZip();epub.file('META-INF/container.xml','<container><rootfiles><rootfile full-path="OEBPS/package.opf"/></rootfiles></container>');epub.file('OEBPS/package.opf','<package><metadata><title>QA EPUB</title></metadata><manifest><item id="chapter" href="chapter.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="chapter"/></spine></package>');epub.file('OEBPS/chapter.xhtml','<html xmlns="http://www.w3.org/1999/xhtml"><body><p>EPUB preamble kept.</p><h1>Arc I</h1><h2>Bab 1</h2><p>First EPUB body.</p><h1>Arc II</h1><h2>Bab 2</h2><p>Second EPUB body.</p></body></html>');
  const epubResult=await page.evaluate(async bytes=>{const {parseEpubFile}=await import('/src/utils/importEpub.ts');return parseEpubFile(new File([new Uint8Array(bytes)],'qa.epub'));},Array.from(await epub.generateAsync({type:'uint8array'})));
  assert(epubResult.chapters.some(c=>c.content_md.includes('EPUB preamble kept.')));assert.equal(epubResult.chapters.find(c=>c.episode_number===2).arc_title,'Arc II');
+ // Editor loads one complete fresh snapshot, flushes navigation and preserves conflicts.
+ await page.goto(base+fixture+'?mode=editor');
+ await page.getByLabel('Isi bab dalam Markdown').waitFor();
+ assert.equal(await page.getByLabel('Judul bab',{exact:true}).inputValue(),'Judul terbaru server');
+ assert.equal(await page.getByLabel('Arc / bagian (opsional)',{exact:true}).inputValue(),'Arc terbaru');
+ await page.getByLabel('Isi bab dalam Markdown').fill('Synthetic editor saved body.');
+ await page.getByRole('button',{name:'Kembali ke karya',exact:true}).click();await page.waitForURL('**/studio/cerita/synthetic');
+ assert.equal(editorRow.content_md,'Synthetic editor saved body.');assert.equal(editorRow.title,'Judul terbaru server');
+ assert(editorWrites.length>=1);assert(!new URL(editorWrites[0].url).searchParams.get('select').includes('content_md'));
+ await page.goto(base+fixture+'?mode=editor');await page.getByLabel('Isi bab dalam Markdown').waitFor();
+ await page.getByRole('button',{name:'Pratinjau',exact:true}).click();await page.locator('.reader-book').waitFor();
+ assert.equal(await page.locator('.kk-preview-label').count(),0);
+ await page.locator('.reader-stage').click({position:{x:195,y:400}});
+ await page.getByRole('button',{name:'Kembali ke editor',exact:true}).click();await page.getByLabel('Isi bab dalam Markdown').waitFor();
+ editorRow={...editorRow,updated_at:'2026-02-01T00:00:00Z',title:'Judul diubah tab lain',content_md:'Synthetic newer remote body.'};
+ await page.getByLabel('Isi bab dalam Markdown').fill('Synthetic unsaved local conflict.');
+ await page.getByRole('button',{name:'Kembali ke karya',exact:true}).click();await page.getByRole('alert').filter({hasText:'Bab berubah di tab lain'}).waitFor();
+ assert(page.url().includes('mode=editor'));assert.equal(await page.getByLabel('Isi bab dalam Markdown').inputValue(),'Synthetic unsaved local conflict.');
+ assert.equal(editorRow.content_md,'Synthetic newer remote body.');
+ assert(await page.getByRole('button',{name:'Coba simpan ulang',exact:true}).locator('.kk-brand-icon').isVisible());
+ assert(!await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}).includes('Synthetic unsaved local conflict.')));
+ // A test-only reload discards the deliberate conflict, with native confirmation.
+ page.once('dialog',d=>d.accept());
  // Back and app navigation respect the same active leave guard.
  await page.goto(base+fixture+'?mode=guard');page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Navigasi'}).click();assert(!page.url().includes('step=next'));
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Navigasi'}).click();await page.waitForURL('**step=next');
@@ -90,5 +121,5 @@ try{
  await page.evaluate(async()=>{await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;});await page.reload();await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
  await new Promise(resolve=>{server.once('exit',resolve);server.kill('SIGTERM');});
  await context.setOffline(true);await page.goto(base+'/baca/synthetic?cold=1');await page.getByRole('heading',{name:'Koneksi diperlukan'}).waitFor();assert.equal(await page.evaluate(async()=>JSON.stringify(await caches.keys())),'[]');await context.setOffline(false);
- assert.equal(errors.length,0,errors.join('\n'));console.log('V7.2 browser: detail back arrow and blue/contrast icons (light/dark/mobile/desktop), preview, TOC alignment 320/390/768/1440, tab keys, failed chapter retry, online-only purge, ZIP worker review, lost-response retry, no body storage, install dialog, network-only SW passed.');
+ assert.equal(errors.length,0,errors.join('\n'));console.log('V7.2 browser: fresh editor snapshot, save-on-navigation, conflict preservation, unobstructed preview and return to editor; detail back arrow and blue/contrast icons (light/dark/mobile/desktop), preview, TOC alignment 320/390/768/1440, tab keys, failed chapter retry, online-only purge, ZIP worker review, lost-response retry, no body storage, install dialog, network-only SW passed.');
 }catch(error){console.error('Browser QA failure:',error.message,'URL:',page.url());console.error((await page.locator('body').innerText()).slice(0,1800));await page.screenshot({path:'qa/v72/failure.png',fullPage:true});throw error;}finally{await browser.close();server.kill('SIGTERM');}

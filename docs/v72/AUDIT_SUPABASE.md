@@ -30,3 +30,7 @@ Advisor proyek juga melaporkan RLS nonaktif pada tabel `players`, `scores`, dan 
 Peringatan `authenticated security definer function executable` perlu ditinjau per fungsi terhadap otorisasi internal, search path, dan kebutuhan bypass RLS, bukan dicabut massal karena akan memutus fitur penulis. Lihat [panduan advisor](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). Advisor juga menyebut leaked-password protection belum aktif; tinjau [password security](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) pada konfigurasi Auth.
 
 **Status akhir: tidak ada migrasi/deployment/perubahan produksi dari sesi ini.** Penguatan akses yang disertakan belum mengubah izin live. PWA tidak menjanjikan pencegahan penyalinan mutlak; konten yang sudah ditampilkan tetap berada di perangkat pembaca selama digunakan. Tidak disediakan fitur membaca/menyimpan naskah offline.
+
+## Pemeriksaan kecocokan lanjutan
+
+Signature `qr_import_manuscript_v5` live sesuai delapan parameter migrasi V7.2, termasuk nama argumen. Kolom yang dipakai pada `qr_import_batches` dan `qr_book_sections` tersedia. Policy Storage lama untuk unggah/ubah/hapus sampul secara eksplisit membatasi `bucket_id = story-covers`; tidak ada grant SELECT lintas bucket pada daftar policy yang diamati. Uji RPC author dalam transaksi read-only tanpa identitas ditolak sesuai guard; tidak ada naskah dikembalikan. Ini pemeriksaan kecocokan awal, bukan penerapan migrasi live.

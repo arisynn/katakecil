@@ -1,4 +1,4 @@
-# QA, deployment, dan rollback — 14 Oktober 2026
+# QA, deployment, dan rollback — diperbarui 15 Oktober 2026
 
 ## Lulus pada lingkungan lokal
 
@@ -13,6 +13,8 @@
 | PostgreSQL lokal | PGlite mengeksekusi migrasi V7.2 pada fixture schema: replay, mismatch, rollback, draft defaults, metadata tanpa body, Sampah, penulis/nonpenulis/anon, bucket privat/RLS; patch akses menolak body langsung sambil mempertahankan edit/RPC penulis |
 | Edge functions | Mock runtime mempertahankan released-only, buku privat, jadwal masa depan, episode 0 pada endpoint baru, rate limit, validasi request, no-store |
 | Detail cerita dan ikon | Panah kembali terlihat/berfungsi pada 320/390/1440 px, tema terang/gelap; aset SVG tersedia, ikon biru dan CTA kontras |
+| Editor browser | Snapshot judul/arc/isi terbaru; penyimpanan sebelum navigasi; konflik menahan navigasi dan menjaga teks lokal serta isi server; ikon retry terlihat |
+| Preview tanpa banner | Tidak ada overlay “Pratinjau penulis”; panah pada kontrol reader kembali ke editor; isi tidak disimpan ke browser storage |
 | Chromium headless | Preview, TOC 320/390/768/1440 px, navigasi tab dengan keyboard, kegagalan bab berikut + retry target, purge offline + reload online |
 | Import browser | Worker ZIP, exclude README/unsupported, respons commit hilang + retry memakai UUID/payload identik, isi tidak masuk localStorage/sessionStorage |
 | EPUB browser | DOM parsing, prefix terjaga, perpindahan arc |
@@ -57,3 +59,7 @@ Frontend dipublish dari hasil `npm ci && npm run build`. Jangan mempublikasikan 
 - Bila worker bermasalah, kirim worker perbaikan pada URL `/sw.js` yang sama dan pertahankan no-store. Jangan menganggap menghapus file worker akan menonaktifkan worker yang sudah terpasang.
 - Worker tidak mempunyai cache naskah untuk dipulihkan/dihapus. Jangan menjalankan `caches.delete` massal terhadap cache aplikasi lain.
 - Endpoint legacy tetap tersedia untuk kompatibilitas. Jangan mengalihkannya menjadi reader utama: episode 0 dan kontraknya berbeda dari `secure-episode`.
+
+## Pemeriksaan lanjutan
+
+Build produksi lokal berhasil memasang service worker otomatis; manifest, PNG PWA, dan MIME JavaScript tersedia; Cache Storage kosong; halaman publik tidak memuat chunk Studio/EPUB lebih awal. Vite preview tidak meniru seluruh header Vercel. Pemeriksaan read-only live juga mengonfirmasi signature RPC impor lama sesuai migrasi, kolom tabel impor/halaman tersedia, serta policy Storage lama dibatasi pada bucket publik sehingga tidak otomatis membuka bucket privat baru. RPC author lama menolak konteks tanpa identitas pengguna. Tidak ada isi karya atau data produksi yang diubah.

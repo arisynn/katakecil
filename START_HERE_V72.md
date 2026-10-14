@@ -2,6 +2,10 @@
 
 Paket ini melanjutkan sumber **V7.1 RC1** yang diberikan. PWA tetap memerlukan internet untuk membaca. Tidak ada unduh bab, cache naskah, atau antrean penyimpanan draft offline.
 
+## Revisi 15 Oktober 2026
+
+Banner tetap “Pratinjau penulis” dihapus sesuai permintaan. Ketuk layar untuk membuka kontrol reader, lalu tekan panah kembali untuk kembali ke editor. Editor kini mengambil judul, arc, isi, dan versi dari satu snapshot terbaru agar metadata lama tidak menimpa judul baru.
+
 ## Yang sudah ditambahkan
 
 - **PWA:** menu pemasangan, panduan browser yang tidak menampilkan prompt, ikon maskable terpisah, pemberitahuan koneksi, dan pembaruan atas tindakan pengguna. Service worker tidak menulis Cache Storage.

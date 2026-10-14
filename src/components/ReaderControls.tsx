@@ -18,6 +18,7 @@ interface Props {
   onFullscreen: () => void;
   onReturn: () => void;
   onExit: () => void;
+  exitLabel?: string;
   onClose: () => void;
   onPage: (page: number) => void;
   onPrevChapter: () => void;
@@ -35,7 +36,7 @@ export function ReaderControls({
   title, chapterTitle, theme, page, total, isBookmarked, fullscreen,
   canReturn, onContents, onSettings, onSearch, onBookmark, onFullscreen,
   onReturn, onExit, onClose, onPage, onPrevChapter, onNextChapter,
-  prevChapter, nextChapter, progressScope = 'chapter',
+  prevChapter, nextChapter, progressScope = 'chapter', exitLabel = 'Kembali ke detail cerita',
   estimatedMinutesRemaining = null, chapterCompleted = false, onToggleChapterCompleted,
 }: Props) {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -66,7 +67,7 @@ export function ReaderControls({
   return <>
     <header className="reader-control-header v610-control-header" style={{ background: theme.barBg, borderColor: theme.border, color: theme.text }}>
       <div className="control-inner v610-control-inner">
-        <button type="button" className="control-icon v610-exit" onClick={onExit} aria-label="Kembali ke detail cerita" title="Kembali ke cerita">
+        <button type="button" className="control-icon v610-exit" onClick={onExit} aria-label={exitLabel} title={exitLabel}>
           <BrandIcon name="arrow-left" size={20} />
         </button>
         <div className="control-titles">

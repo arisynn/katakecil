@@ -3,8 +3,6 @@
 .quiet-app .v610-chapter-row .panel-row-main { min-width:0;gap:5px; }
 .quiet-app .v610-chapter-row strong { overflow-wrap:anywhere;line-height:1.5; }
 .quiet-app .v610-chapter-row .v610-current-label,.quiet-app .v610-chapter-row .v74-completed-label { margin:0;line-height:1.8; }
-.kk-preview-label { position:fixed;z-index:60;top:env(safe-area-inset-top,0px);left:50%;transform:translateX(-50%);width:max-content;box-sizing:border-box;max-width:calc(100% - 24px);display:flex;align-items:center;gap:12px;padding:6px 12px;border:1px solid var(--kk-border);border-radius:0 0 14px 14px;background:var(--kk-surface);color:var(--kk-text);font:11px/1.4 system-ui; }
-.kk-preview-label button { min-height:36px;background:transparent;border:0;color:var(--kk-primary);font:inherit;white-space:nowrap; }
 .kk-import-toolbar { display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0; }
 .kk-import-toolbar select,.kk-import-toolbar button { min-height:44px; }
 .kk-import-origin { overflow-wrap:anywhere;word-break:break-word; }

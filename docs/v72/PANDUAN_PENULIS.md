@@ -52,3 +52,7 @@ Pratinjau menggunakan isi saat ini dan nomor asli. Untuk bab yang sudah terbit, 
 ## PWA
 
 Pilih **Pasang aplikasi** dari navigasi/pengaturan. Browser yang mendukung prompt akan menawarkannya; browser lain menampilkan petunjuk menu. Membaca tetap memerlukan internet. Ketika offline, reader menghapus isi sementara yang tampil dan meminta koneksi kembali. Perubahan editor yang belum tersimpan tetap berada di RAM, sehingga jangan menutup tab sampai tersimpan.
+
+## Kembali dari pratinjau
+
+Pratinjau tidak menampilkan banner tetap agar teks tidak tertutup. Ketuk bagian tengah halaman untuk membuka kontrol pembaca, lalu tekan panah kiri atas (Kembali ke editor). Penghapusan banner tidak mengubah status publikasi bab.

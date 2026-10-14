@@ -1,6 +1,6 @@
-# Daftar perubahan V7.2 RC1
+# Daftar perubahan V7.2 RC1 — revisi 15 Oktober 2026
 
-Dibandingkan sumber V7.1 RC1 yang diberikan. Paket tidak memuat dependency terpasang, hasil build, kredensial, atau screenshot QA.
+Dibandingkan sumber V7.1 RC1. Revisi terbaru menghapus banner preview dan memperbaiki pemuatan snapshot editor.
 
 | Status | Berkas |
 |---|---|
@@ -30,6 +30,7 @@ Dibandingkan sumber V7.1 RC1 yang diberikan. Paket tidak memuat dependency terpa
 | Diubah | `src/App.tsx` |
 | Diubah | `src/ReaderApp.tsx` |
 | Diubah | `src/SecureReaderApp.tsx` |
+| Diubah | `src/components/ReaderControls.tsx` |
 | Diubah | `src/components/ReaderPanels.tsx` |
 | Diubah | `src/components/public/PublicHeader.tsx` |
 | Diubah | `src/data/library.ts` |
@@ -69,4 +70,4 @@ Dibandingkan sumber V7.1 RC1 yang diberikan. Paket tidak memuat dependency terpa
 | Diubah | `vercel.json` |
 | Diubah | `vite.config.ts` |
 
-Validasi saat pengemasan: TypeScript, 9 suite regresi aktif, struktur, build produksi, dan integrasi Chromium lulus. Baca QA_DAN_DEPLOY.md untuk batas uji dan staging yang masih diperlukan.
+TypeScript, 9 suite regresi aktif, build produksi, dan integrasi Chromium lulus. Baca QA_DAN_DEPLOY.md untuk batas uji.
