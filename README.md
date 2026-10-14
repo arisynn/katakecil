@@ -1,3 +1,25 @@
+> **Pembaruan V7.2 RC1:** mulai dari [START_HERE_V72.md](START_HERE_V72.md). Catatan di bawah mempertahankan dokumentasi versi sebelumnya.
+
+# KataKecil V7.1 RC.1 — Five Minds Refinement
+
+**Source release candidate untuk pengujian staging, belum dideploy.** V7.1 mempertahankan identitas Sapphire, Reader Engine, dan Studio privat satu penulis. Perubahan terarah: filter Temukan memisahkan `Jeda` dari `Berlangsung`, katalog gagal dimuat memiliki retry, Koleksi bisa langsung lanjut membaca, Detail Cerita memperjelas prolog/progres, akses Studio di header publik lebih sekunder, daftar Karya Studio memiliki filter Publik/Privat, editor memperlihatkan error autosave dan retry pada mode fokus, serta input jadwal Pengumuman konsisten WIB di semua zona waktu perangkat.
+
+Baca [`docs/RELEASE_V7_1.md`](docs/RELEASE_V7_1.md), [`docs/V7_1_FILE_MANIFEST.md`](docs/V7_1_FILE_MANIFEST.md), dan [`docs/V7_1_IMPLEMENTATION_SPEC.md`](docs/V7_1_IMPLEMENTATION_SPEC.md).
+
+```bash
+npm install
+npm run check:structure
+npm run audit:v7-theme
+npm run audit:v7beta
+npm run test:current
+npm run lint
+npm run build
+```
+
+**Batas validasi lokal:** tes statis/kontrak dan audit lulus. `npm run lint` dan `npm run build` belum bisa diverifikasi pada lingkungan pembuatan ZIP karena akses registry npm tidak tersedia dan dependensi proyek belum terpasang. QA React runtime, Supabase staging, dan RLS tetap menjadi syarat sebelum deploy. Migrasi pengumuman dari V7 Alpha.3 masih diperlukan bila belum diterapkan; V7.1 tidak menambah migrasi database.
+
+---
+
 # KataKecil V7.0 Beta.2 — Studio & Full UI Polish
 
 **Source staging, belum dideploy.** Menggunakan 76 aset SVG untuk ikon UI, dua wordmark vektor bertema Sapphire, dashboard Studio yang berfokus pada penulis, dan penyempurnaan responsivitas serta dark mode. Mesin Reader, auth, autosave, dan database tetap dipertahankan.

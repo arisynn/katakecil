@@ -3,7 +3,7 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import ts from 'typescript';
 const read = file => readFileSync(file, 'utf8');
 const pkg = JSON.parse(read('package.json'));
-assert.equal(pkg.version, '7.0.0-beta.2');
+assert.ok(['7.0.0-beta.2', '7.1.0-rc.1'].includes(pkg.version), 'Beta.2 regression must remain compatible with V7.1');
 const app = read('src/App.tsx');
 const tokens = read('src/design/sapphire-tokens.css');
 const polish = read('src/design/v70-beta2.css');

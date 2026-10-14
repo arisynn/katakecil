@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import JSZip from 'jszip';
+import {loadTs} from './test-utils/load-ts.mjs';
+const {parsePlainManuscript:parse,assignEpisodeNumbers,validateImport,splitChapter,mergeAdjacent}=loadTs('src/utils/importManuscript.ts');
+const {romanNumber}=loadTs('src/utils/importStructure.ts');
+const {inspectZip,parseZip}=loadTs('src/features/import/zip.ts');
+const m=parse('# My book\n\nOpening text kept.\n\n# Arc I — Awal\n# Prolog\n\nProlog body.\n# Bab II — Dua\n\nSecond body.\n# Arc II — Akhir\n# Chapter X: Ten\n\nTenth body.','book.md');
+assert.deepEqual(m.chapters.map(c=>c.episode_number),[null,0,2,10]);assert(m.chapters[0].content_md.includes('Opening text kept.'));assert.equal(m.chapters[1].arc_title,'Arc I — Awal');assert.equal(m.chapters[3].arc_title,'Arc II — Akhir');assert.equal(m.chapters[0].confidence,'periksa');
+assert.equal(romanNumber('VII'),7);assert.equal(romanNumber('IIX'),null);
+assert.equal(parse('Standalone text','012 - name.txt').chapters[0].episode_number,12);
+assert.equal(parse('# Bab 4\nBody','005.md').chapters[0].confidence,'periksa');
+assert.equal(parse('# Bab 1\n```md\n# Bab 2\n```\nBody','b.md').chapters.length,1);
+assert.equal(parse('Bab 1\nText one\nBab 2\nText two','b.txt').chapters.length,2);
+assert.equal(parse('# Copyright\nLegal text','copyright.md').chapters[0].section_type,'frontmatter');
+assert.equal(parse('Draft notes','README.md').chapters[0].include,false);
+let candidates=parse('Standalone story text long enough for split and merge.','story.md').chapters;
+assert(validateImport(candidates,[]).some(x=>x.includes('konfirmasi')));
+candidates[0].reviewed=true;assert.equal(assignEpisodeNumbers(candidates,[{episode_number:12}])[0].episode_number,13);
+const split=splitChapter(candidates,0,24);assert.equal(split.length,2);assert(split.every(c=>c.reviewed===false));assert.equal(mergeAdjacent(split,0)[0].reviewed,false);
+const zip=new JSZip();zip.file('Arc II/010.txt','Bab 10\nTenth body.');zip.file('Arc II/002.md','# Bab II\nSecond body.');zip.file('README.md','Working notes.');zip.file('__MACOSX/meta','Ignored');zip.file('photo.jpg',new Uint8Array([1,2]));
+const bytes=await zip.generateAsync({type:'uint8array',compression:'DEFLATE'});const result=await parseZip(bytes,'qa.zip');
+assert.equal(result.parsed.chapters.filter(c=>c.include).length,2);assert(result.parsed.chapters.some(c=>c.candidate_kind==='unsupported'&&!c.include));assert(result.parsed.chapters.filter(c=>c.include).every(c=>c.arc_title==='Arc II'));
+for(const path of ['../escape.md','/absolute.md','C:/drive.md','a\\b.md']){const z=new JSZip();z.file(path,'unsafe');const b=await z.generateAsync({type:'uint8array'});assert.throws(()=>inspectZip(b),/aman/);}
+const dup=new JSZip();dup.file('A.md','a');dup.file('a.md','b');const duplicate=await dup.generateAsync({type:'uint8array'});assert.throws(()=>inspectZip(duplicate),/duplikat/);
+
+const bomb=new Uint8Array(bytes);const view=new DataView(bomb.buffer);let central=-1;for(let i=0;i<bomb.length-4;i++)if(view.getUint32(i,true)===0x02014b50){central=i;break;}view.setUint32(central+24,70_000_001,true);assert.throws(()=>inspectZip(bomb),/terlalu besar/);
+const encrypted=new Uint8Array(bytes);new DataView(encrypted.buffer).setUint16(central+8,1,true);assert.throws(()=>inspectZip(encrypted),/terenkripsi/);
+const symlink=new JSZip();symlink.file('link.md','target',{unixPermissions:0o120777});const link=await symlink.generateAsync({type:'uint8array',platform:'UNIX'});assert.throws(()=>inspectZip(link),/Symlink/);
+const crc=new Uint8Array(bytes);for(let i=0;i<crc.length-46;i++){if(new DataView(crc.buffer).getUint32(i,true)===0x02014b50){const n=new DataView(crc.buffer).getUint16(i+28,true);if(new TextDecoder().decode(crc.subarray(i+46,i+46+n)).endsWith('.txt')){new DataView(crc.buffer).setUint32(i+16,123,true);break;}}}await assert.rejects(parseZip(crc,'bad.zip'),/integritas/);
+console.log('V7.2 importer: source preservation, chapter 0/Roman/filename, arc transitions, review, edit invalidation, ZIP classification, traversal/duplicate/symlink/encryption/bomb/CRC rejection passed.');

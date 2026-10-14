@@ -62,14 +62,14 @@ Deno.serve(async (req:Request)=>{
     if(budget.error)return reply(503,{error:'Pembatasan akses belum tersedia.'});
     if(budget.data!==true)return reply(429,{error:'Terlalu banyak permintaan. Coba lagi nanti.'});
     const {data:book,error:bookError}=await db.from('qr_books').select('id')
-      .eq('id',bookId).eq('is_published',true).maybeSingle();
+      .eq('id',bookId).eq('is_published',true).is('deleted_at',null).maybeSingle();
     if(bookError)return reply(503,{error:'Status publikasi tidak bisa diperiksa.'});
     if(!book)return reply(404,{error:'Novel tidak tersedia.'});
     const now=new Date().toISOString();
     if(isIndex){
       const {data,error}=await db.from('qr_episodes')
         .select('episode_number,title,arc_title,release_at')
-        .eq('book_id',bookId).eq('is_enabled',true).lte('release_at',now)
+        .eq('book_id',bookId).eq('is_enabled',true).is('deleted_at',null).lte('release_at',now)
         .order('episode_number',{ascending:true}).limit(10000);
       if(error)return reply(503,{error:'Indeks episode tidak tersedia.'});
       return reply(200,{type:'index',episodes:data||[]});
@@ -77,7 +77,7 @@ Deno.serve(async (req:Request)=>{
     const {data:episode,error}=await db.from('qr_episodes')
       .select('episode_number,title,arc_title,content_md,release_at,is_enabled')
       .eq('book_id',bookId).eq('episode_number',Number(input.episodeNumber))
-      .eq('is_enabled',true).lte('release_at',now).maybeSingle();
+      .eq('is_enabled',true).is('deleted_at',null).lte('release_at',now).maybeSingle();
     if(error)return reply(503,{error:'Episode tidak dapat diperiksa.'});
     if(!episode||!episode.release_at||!episode.is_enabled||
       new Date(episode.release_at).getTime()>Date.now())return reply(404,{error:'Episode belum tersedia.'});

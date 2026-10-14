@@ -13,7 +13,8 @@ import { useUiTheme, type UiTheme, type AppThemePreference } from '../hooks/useU
 import ThemeToggle from '../components/ThemeToggle';
 import ThemeLoading from '../components/ThemeLoading';
 import StudioNavigation, { StudioToolsMenu } from '../features/studio/components/StudioNavigation';
-import ChapterEditor from '../features/studio/components/ChapterEditor';
+import ChapterEditor from '../features/studio/components/ChapterEditorLoader';
+import {forgetOperation} from '../data/manuscriptImport';
 import { Dashboard, Analytics, StudioSettings } from '../features/studio/components/StudioOverview';
 import { B, authorName, errMsg } from '../features/studio/components/StudioShared';
 import { Books, BookForm, BookDetails } from '../features/studio/components/BookManagement';
@@ -51,6 +52,7 @@ export default function Studio({ path }: {
     path: string;
 }) {
     const { theme, preference, setPreference } = useUiTheme();
+    const authSequence=useRef(0);
     const userIdRef = useRef<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [authorized, setAuthorized] = useState(false);
@@ -59,34 +61,39 @@ export default function Studio({ path }: {
     const [episodes, setEpisodes] = useState<Episode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const refresh = useCallback(async () => { try {
+    const generation=useRef(0);
+    const refresh = useCallback(async () => { const ticket=generation.current;try {
         const result = await getStudioLibrary();
+        if(ticket!==generation.current)return;
         setBooks(result.books);
         setEpisodes(result.episodes);
         setError('');
     }
     catch (e) {
-        setError(errMsg(e));
+        if(ticket===generation.current)setError(errMsg(e));
     }
     finally {
-        setLoading(false);
+        if(ticket===generation.current)setLoading(false);
     } }, []);
     // Do not remount the Studio on tab navigation or refresh credentials every time
     // Chrome Android opens its document picker. Auth is verified on entry/sign-in;
     // token refreshes do not replace the file importer or its File object.
     const checkAuth = useCallback(async () => {
+        const ticket=++authSequence.current;
         if (!supabase) {
             setAuthLoading(false);
             return;
         }
         try {
             const { data, error } = await supabase.auth.getUser();
+            if(ticket!==authSequence.current)return;
             if (error || !data.user) {
                 setUser(null);
                 setAuthorized(false);
                 return;
             }
             const { data: member, error: memberErr } = await supabase.from('qr_author_members').select('user_id').eq('user_id', data.user.id).maybeSingle();
+            if(ticket!==authSequence.current)return;
             if (memberErr) {
                 setError(`Gagal memeriksa izin penulis: ${memberErr.message}`);
                 setAuthorized(false);
@@ -111,6 +118,8 @@ export default function Studio({ path }: {
             if (!mounted)
                 return;
             if (event === 'SIGNED_OUT') {
+                authSequence.current++;
+                generation.current++;setBooks([]);setEpisodes([]);forgetOperation();
                 userIdRef.current = null;
                 setUser(null);
                 setAuthorized(false);
@@ -128,9 +137,9 @@ export default function Studio({ path }: {
     useEffect(() => { if (authorized) {
         setLoading(true);
         void refresh();
-    } }, [authorized, refresh]);
+    } else {generation.current++;setBooks([]);setEpisodes([]);} }, [authorized, refresh]);
     const onUpdateBook = (b: Book) => { setBooks(prev => [b, ...prev.filter(x => x.id !== b.id)]); navigate(`/studio/cerita/${b.id}`); };
-    const onUpdateEpisode = useCallback((e: Episode) => setEpisodes(prev => prev.map(x => x.id === e.id ? e : x)), []);
+    const onUpdateEpisode = useCallback((e: Episode) => setEpisodes(prev => prev.map(x => x.id === e.id ? {...e,content_length:e.content_md.trim().length,content_md:'',content_hash:undefined} : x)), []);
     const moveToTrash = async (kind: 'book' | 'episode', id: string, title: string) => {
         const confirmText = kind === 'book' ? window.prompt(`Memindahkan novel ke Sampah membuatnya privat. Ketik judul tepat untuk mengonfirmasi: ${title}`) : null;
         if (kind === 'book' && confirmText !== title)

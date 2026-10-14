@@ -89,11 +89,11 @@ Deno.serve(async (request) => {
     // Check both the book and the episode. Service-role access bypasses RLS,
     // so checks MUST be explicit and time-based on the server.
     const {data:book,error:bookError} = await client.from('qr_books')
-      .select('id').eq('id',bookId).eq('is_published',true).maybeSingle();
+      .select('id').eq('id',bookId).eq('is_published',true).is('deleted_at',null).maybeSingle();
     if (bookError || !book) return respond(404, { error:'Cerita tidak tersedia.' });
     const {data:episode,error:epError} = await client.from('qr_episodes')
       .select('episode_number,title,arc_title,content_md,release_at,is_enabled')
-      .eq('book_id',bookId).eq('episode_number',Number(episodeNumber)).eq('is_enabled',true)
+      .eq('book_id',bookId).eq('episode_number',Number(episodeNumber)).eq('is_enabled',true).is('deleted_at',null)
       .lte('release_at',new Date().toISOString()).maybeSingle();
     if (epError || !episode || !episode.release_at || !episode.is_enabled || new Date(episode.release_at).getTime()>Date.now()) {
       return respond(404, { error:'Episode belum tersedia.' });

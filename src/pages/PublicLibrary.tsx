@@ -17,6 +17,7 @@ import { getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter 
 import { getPublicAnnouncements, type PublicAnnouncement } from '../data/announcements';
 import { newestReadingProgress, parseReadingProgress } from '../utils/readingProgress';
 import { readerHeading } from '../utils/readerHeading';
+import { matchesStoryStatus, type StoryStatusFilter } from '../features/public/storyFilters';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
 const demoDate = '2026-10-01T00:00:00.000Z';
 const demoData: Array<[
@@ -43,6 +44,8 @@ function useLibrary() {
     }>({ books: [], episodes: [], schedules: [], announcements: [] });
     const [loading, setLoading] = useState(isConfigured);
     const [error, setError] = useState('');
+    const [reload, setReload] = useState(0);
+    const retry = () => { setError(''); setLoading(true); setReload(value => value + 1); };
     useEffect(() => {
         let active = true;
         if (!isConfigured) {
@@ -50,13 +53,17 @@ function useLibrary() {
             setLoading(false);
             return;
         }
-        Promise.all([getPublicLibrary(), getPublicUpcomingChapters(), getPublicAnnouncements()]).then(([library, schedules, announcements]) => {
-            if (active) setData({ ...library, schedules, announcements });
-        }).catch(e => { if (active)
-            setError(e instanceof Error ? e.message : 'Gagal memuat perpustakaan.'); }).finally(() => { if (active)
-            setLoading(false); });
+        // Catalog failure is fatal; optional announcements/schedules must not hide published stories.
+        Promise.all([getPublicLibrary(), getPublicUpcomingChapters().catch(() => []), getPublicAnnouncements().catch(() => [])])
+            .then(([library, schedules, announcements]) => {
+                if (active) { setData({ ...library, schedules, announcements }); setError(''); }
+            })
+            .catch(e => {
+                if (active) setError(e instanceof Error ? e.message : 'Gagal memuat perpustakaan.');
+            })
+            .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
-    }, []);
+    }, [reload]);
     // When a chapter or notice visibility boundary passes, refresh public metadata.
     // The reader never receives future chapter bodies or titles.
     useEffect(() => {
@@ -72,7 +79,7 @@ function useLibrary() {
         const delay = Math.max(1000, Math.min(nextRelease - Date.now() + 2000, 600_000));
         let active = true;
         const timer = window.setTimeout(() => {
-            Promise.all([getPublicLibrary(), getPublicUpcomingChapters(), getPublicAnnouncements()])
+            Promise.all([getPublicLibrary(), getPublicUpcomingChapters().catch(() => []), getPublicAnnouncements().catch(() => [])])
                 .then(([library, schedules, announcements]) => {
                     if (active) setData({ ...library, schedules, announcements });
                 })
@@ -80,7 +87,7 @@ function useLibrary() {
         }, delay);
         return () => { active = false; window.clearTimeout(timer); };
     }, [data.schedules, data.announcements]);
-    return { ...data, loading, error, demo: !isConfigured };
+    return { ...data, loading, error, retry, demo: !isConfigured };
 }
 const countFor = (episodes: EpisodeSummary[], book: Book) => episodes.filter(e => e.book_id === book.id).length;
 function readProgress(book: Book) {
@@ -137,7 +144,7 @@ function Listing({ books, episodes, schedules, announcements = [], demo, collect
     const params = new URLSearchParams(window.location.search);
     const [q, setQ] = useState(params.get('q') || '');
     const [filter, setFilter] = useState(params.get('genre') || 'Semua');
-    const [status, setStatus] = useState('Semua');
+    const [status, setStatus] = useState<StoryStatusFilter>('Semua');
     const [sort, setSort] = useState('terbaru');
     const [collectionFilter, setCollectionFilter] = useState<CollectionFilter>('semua');
     const input = useRef<HTMLInputElement>(null);
@@ -150,9 +157,11 @@ function Listing({ books, episodes, schedules, announcements = [], demo, collect
     const genres = useMemo(()=>['Semua',...new Set(eligible.map(book=>book.genre).filter(Boolean))],[eligible]);
     const shown = useMemo(()=>{
       const term=q.trim().toLocaleLowerCase('id-ID');
-      return eligible.filter(book=>(filter==='Semua'||book.genre===filter)&&(status==='Semua'||(status==='Tamat'?book.status==='completed':book.status!=='completed'))&&`${book.title} ${book.synopsis} ${book.genre}`.toLocaleLowerCase('id-ID').includes(term))
+      return eligible.filter(book=>(filter==='Semua'||book.genre===filter)&&matchesStoryStatus(book.status, status)&&`${book.title} ${book.synopsis} ${book.genre}`.toLocaleLowerCase('id-ID').includes(term))
         .sort((a,b)=>sort==='judul'?a.title.localeCompare(b.title,'id-ID'):new Date(b.updated_at).getTime()-new Date(a.updated_at).getTime());
     },[eligible,filter,status,q,sort]);
+    const hasActiveFilters = Boolean(q.trim() || filter !== 'Semua' || status !== 'Semua' || sort !== 'terbaru');
+    const resetFilters = () => { setQ(''); setFilter('Semua'); setStatus('Semua'); setSort('terbaru'); };
     const savedStories = collection ? sortSavedStories(eligible, ids) : [];
     const filteredSaved = filterSavedStories(savedStories, collectionFilter, book => readProgress(book)?.ep ?? null);
     if(collection) return <main className="kk-v7-collection kk-v7-page">
@@ -166,22 +175,32 @@ function Listing({ books, episodes, schedules, announcements = [], demo, collect
         {filteredSaved.length===0?<div className="kk-v7-collection-filter-empty" role="status">
           <p>Belum ada cerita dalam kategori ini.</p>
           <button type="button" onClick={()=>setCollectionFilter('semua')}>Tampilkan semua koleksi</button>
-        </div>:<div className="kk-v7-collection-list">{filteredSaved.map(book=>{const progress=readProgress(book);return <article className="kk-v7-collection-item" key={book.id}>
-          <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat ${book.title}`}><div className="kk-v7-collection-cover"><Cover book={book}/></div><span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{progress!==null?`Terakhir dibaca: Bab ${progress.ep}`:`${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <BrandIcon name="chevron-right" size={15}/></span></span></button>
-          <button type="button" className="kk-v7-collection-remove" onClick={()=>toggle(book.id)} aria-label={`Hapus ${book.title} dari Koleksi`} title="Hapus dari Koleksi"><BrandIcon name="bookmark-check" size={18}/></button>
-        </article>})}</div>}
+        </div>:<div className="kk-v7-collection-list">{filteredSaved.map(book=>{
+          const progress = readProgress(book);
+          const canResume = progress !== null && episodes.some(ep => ep.book_id === book.id && ep.episode_number === progress.ep);
+          return <article className="kk-v7-collection-item kk-v71-collection-item" key={book.id}>
+            <button className="kk-v7-collection-open" type="button" onClick={()=>navigate(`/cerita/${book.slug}`)} aria-label={`Lihat detail ${book.title}`}>
+              <div className="kk-v7-collection-cover"><Cover book={book}/></div>
+              <span className="kk-v7-collection-info"><strong>{book.title}</strong><small>{canResume ? `Terakhir dibaca: ${progress.ep === 0 ? 'Prolog' : `Bab ${progress.ep}`}` : `${countFor(episodes,book)} bab tersedia`}</small><span>Lihat cerita <BrandIcon name="chevron-right" size={15}/></span></span>
+            </button>
+            <div className="kk-v71-collection-actions">
+              {canResume && <button type="button" className="kk-v71-resume-link" onClick={()=>navigate(`/baca/${book.slug}`)} aria-label={`Lanjutkan membaca ${book.title}`}><BrandIcon name="book-open" size={16}/><span>Lanjut baca</span></button>}
+              <button type="button" className="kk-v7-collection-remove" onClick={()=>toggle(book.id)} aria-label={`Hapus ${book.title} dari Koleksi`} title="Hapus dari Koleksi"><BrandIcon name="bookmark-check" size={18}/></button>
+            </div>
+          </article>;
+        })}</div>}
       </>}
     </main>;
     return <main className="kk-v7-discover kk-v7-page">
       <div className="kk-v7-page-heading"><span className="kk-v7-kicker">RUANG UNTUK MENEMUKAN</span><h1>Temukan</h1><p>Jelajahi cerita dan kabar terbaru dari Karisyono.</p></div>
       {!demo && <DiscoveryNotices books={books} episodes={episodes} schedules={schedules} announcements={announcements}/>}
       <div className="kk-v7-discover-tools"><div className="v6-library-search"><BrandIcon name="search" size={19}/><input ref={input} type="search" aria-label="Cari judul atau genre" placeholder="Cari judul atau genre..." value={q} onChange={e=>setQ(e.target.value)}/>{q&&<button type="button" aria-label="Hapus pencarian" onClick={()=>setQ('')}><BrandIcon name="close" size={16}/></button>}</div>
-        <div className="kk-v7-filter-row" role="group" aria-label="Status cerita">{['Semua','Tamat','Berlangsung'].map(value=><button type="button" key={value} aria-pressed={status===value} className={status===value?'active':''} onClick={()=>setStatus(value)}>{value}</button>)}</div>
+        <div className="kk-v7-filter-row" role="group" aria-label="Status cerita">{(['Semua','Berlangsung','Tamat','Jeda'] as const).map(value=><button type="button" key={value} aria-pressed={status===value} className={status===value?'active':''} onClick={()=>setStatus(value)}>{value}</button>)}</div>
         {genres.length>1&&<div className="v6-genre-pills">{genres.map(value=><button type="button" key={value} className={filter===value?'selected':''} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{value}</button>)}</div>}
         <label className="kk-v7-sort">Urutkan <BrandIcon name="chevron-down" size={14}/><select aria-label="Urutkan cerita" value={sort} onChange={e=>setSort(e.target.value)}><option value="terbaru">Terbaru</option><option value="judul">Judul A–Z</option></select></label>
       </div>
-      <div className="kk-v7-discover-title"><h2>Jelajahi Cerita</h2><span>{shown.length} cerita</span></div>
-      {shown.length?<div className="kk-v7-discover-grid">{shown.map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div>:eligible.length===0?<EmptyLibrary/>:<div className="kk-v7-no-results"><BrandIcon name="search" size={24}/><h2>Belum ada cerita yang cocok</h2><p>Coba kata kunci atau filter lain.</p><button type="button" onClick={()=>{setQ('');setFilter('Semua');setStatus('Semua');}}>Reset filter</button></div>}
+      <div className="kk-v7-discover-title"><h2>Jelajahi Cerita</h2><div className="kk-v71-results-meta"><span aria-live="polite">{shown.length} cerita</span>{hasActiveFilters && <button type="button" onClick={resetFilters}>Reset semua filter</button>}</div></div>
+      {shown.length?<div className="kk-v7-discover-grid">{shown.map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div>:eligible.length===0?<EmptyLibrary/>:<div className="kk-v7-no-results"><BrandIcon name="search" size={24}/><h2>Belum ada cerita yang cocok</h2><p>Coba kata kunci atau filter lain.</p><button type="button" onClick={resetFilters}>Reset filter</button></div>}
     </main>;
 }
 function Detail({ book, episodes, schedules, demo }: {
@@ -202,7 +221,7 @@ function Detail({ book, episodes, schedules, demo }: {
 
     return <main className="v6-detail-page">
         <div className="v6-detail-content">
-            <Action to="/temukan" className="v6-detail-back">
+            <Action to="/temukan" className="v6-detail-back" label="Kembali ke Temukan">
                 <BrandIcon name="arrow-left" size={17}/><span>Temukan</span>
             </Action>
             <section className="v6-detail-hero">
@@ -216,7 +235,7 @@ function Detail({ book, episodes, schedules, demo }: {
                     </div>
                     <div className="v6-detail-numbers">
                         <span><BrandIcon name="book-open" size={16}/>{demo ? 'Contoh' : `${rows.length} Bab`}</span>
-                        <span><BrandIcon name="clock" size={16}/>{book.status === 'completed' ? 'Selesai' : 'Bersambung'}</span>
+                        <span><BrandIcon name="clock" size={16}/>{book.status === 'completed' ? 'Selesai' : book.status === 'hiatus' ? 'Sedang jeda' : 'Bersambung'}</span>
                     </div>
                     <p>{book.synopsis || 'Sinopsis belum ditambahkan oleh penulis.'}</p>
                     <div className="v6-detail-actions">
@@ -227,21 +246,22 @@ function Detail({ book, episodes, schedules, demo }: {
                             : <span className="v62-unavailable-chapters">Belum ada bab terbit</span>}
                       {!demo && <BookmarkButton book={book}/>}
                     </div>
+                    {resumeChapter !== null && <p className="kk-v71-detail-progress">Posisi terakhir: {resumeChapter === 0 ? 'Prolog' : `Bab ${resumeChapter}`}. Tombol Lanjutkan Membaca memulihkan posisi bacaanmu.</p>}
                 </div>
             </section>
             <div className="v6-detail-bottom">
                 <section className="v6-chapters">
                     <div className="v6-chapters-title">
-                        <h2>Daftar Bab</h2><span>Urut: Terbaru tersedia</span>
+                        <h2>Daftar Bab</h2><span>Urut: Bab pertama ke terbaru</span>
                     </div>
                     {rows.length > 0
-                        ? rows.slice(0, showAll ? undefined : 18).map((ep, i) =>
+                        ? rows.slice(0, showAll ? undefined : 18).map(ep =>
                             <button
                                 className="v6-chapter"
                                 key={ep.episode_number}
                                 onClick={() => navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}
                             >
-                                <span>{i + 1}.</span>
+                                <span>{ep.episode_number === 0 ? 'P' : `${ep.episode_number}.`}</span>
                                 <div>
                                     <strong>{readerHeading(ep.title, ep.episode_number).title || `Bab ${ep.episode_number}`}</strong>
                                     <small>{readerHeading(ep.title, ep.episode_number).eyebrow}</small>
@@ -308,16 +328,21 @@ function About() {
 export default function PublicLibrary({ path }: {
     path: string;
 }) {
-    const { books, episodes, schedules, announcements, loading, error, demo } = useLibrary();
+    const { books, episodes, schedules, announcements, loading, error, retry, demo } = useLibrary();
     const { theme } = useUiTheme();
     const slug = path.startsWith('/cerita/') ? decodeURIComponent(path.split('/')[2] || '') : null;
     const book = slug ? books.find(b => b.slug === slug) : undefined;
     useEffect(() => { document.title = `${book?.title ? `${book.title} · ` : (path === '/temukan' || path === '/cerita') ? 'Temukan · ' : path === '/koleksi' ? 'Koleksi · ' : path === '/tentang' ? 'Tentang · ' : ''}KataKecil`; }, [book?.title, path]);
-    if (loading)
+    if (loading && path !== '/tentang')
         return <ThemeLoading context="public" text="Menyiapkan KataKecil…"/>;
     return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path}/>
     {demo && <div className="v6-demo-notice"><BrandIcon name="sparkle" size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
-    {error && <div className="v6-error" role="alert">{error}</div>}
-    {path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/temukan" className="v6-button v6-button-gold">Kembali ke Temukan</Action></div>) : (path === '/cerita' || path === '/temukan') ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
+    {error && path !== '/tentang' ? <main className="kk-v7-page kk-v71-load-error" aria-label="Katalog tidak dapat dimuat">
+      <div className="kk-v71-error-panel" role="alert"><BrandIcon name="alert" size={26}/><h1>Katalog belum bisa dimuat</h1>
+        <p>Periksa koneksi internetmu, lalu coba lagi. Cerita dan posisi baca yang tersimpan di perangkat tidak berubah.</p>
+        <button type="button" onClick={retry}><BrandIcon name="rotate" size={17}/> Coba lagi</button>
+        <details><summary>Detail masalah</summary><p>{error}</p></details>
+      </div>
+    </main> : path === '/tentang' ? <About /> : path === '/koleksi' ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo} collection/> : slug ? (book ? <Detail book={book} episodes={episodes} schedules={schedules} demo={demo}/> : <div className="v6-missing"><h1>Cerita tidak ditemukan.</h1><Action to="/temukan" className="v6-button v6-button-gold">Kembali ke Temukan</Action></div>) : (path === '/cerita' || path === '/temukan') ? <Listing books={books} episodes={episodes} schedules={schedules} announcements={announcements} demo={demo}/> : <Home books={books} episodes={episodes} schedules={schedules} demo={demo}/>}
   </div>;
 }

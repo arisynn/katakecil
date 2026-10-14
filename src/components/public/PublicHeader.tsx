@@ -16,7 +16,8 @@ export default function PublicHeader({path}:{path:string}) {
   const [search,setSearch] = useState('');
   const [menuOpen,setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(()=>{if(!menuOpen)return;const outside=(e:PointerEvent)=>{if(!menuRef.current?.contains(e.target as Node))setMenuOpen(false)};const esc=(e:KeyboardEvent)=>{if(e.key==='Escape')setMenuOpen(false)};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',esc)};},[menuOpen]);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
+  useEffect(()=>{if(!menuOpen)return;const outside=(e:PointerEvent)=>{if(!menuRef.current?.contains(e.target as Node))setMenuOpen(false)};const esc=(e:KeyboardEvent)=>{if(e.key==='Escape'){setMenuOpen(false);menuTrigger.current?.focus();}};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',esc)};},[menuOpen]);
   useEffect(()=>{setMenuOpen(false);},[path]);
   const {theme,preference,setPreference}=useUiTheme();
   const active = (to:string) => path===to || (to==='/temukan'&&(path==='/cerita'||path.startsWith('/cerita/')));
@@ -30,13 +31,15 @@ export default function PublicHeader({path}:{path:string}) {
         <div className="v6-header-actions">
           {!hasPageSearch&&<form className="v6-header-search" role="search" onSubmit={submit}><BrandIcon name="search" size={15}/><input aria-label="Cari cerita" placeholder="Cari cerita..." value={search} onChange={e=>setSearch(e.target.value)}/><button aria-label="Jalankan pencarian" type="submit"><BrandIcon name="arrow-right" size={15}/></button></form>}
           {!hasPageSearch&&<button className="v6-mobile-search" aria-label="Cari cerita" onClick={()=>navigate('/temukan?focus=1')}><BrandIcon name="search" size={19}/></button>}
+          <button className="kk-install-button" type="button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Pasang aplikasi</button>
           <div className="v63-desktop-theme"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={setPreference}/></div>
-          <button className="v6-studio-entry" onClick={()=>navigate('/studio')}>Studio</button>
+          <button type="button" className="v6-studio-entry kk-v71-owner-entry" onClick={()=>navigate('/studio')} aria-label="Buka Studio khusus pemilik"><BrandIcon name="lock" size={14}/> Studio</button>
           <div className="v63-mobile-menu-wrap" ref={menuRef}>
-            <button type="button" className="v63-menu-trigger" aria-label={menuOpen?'Tutup menu':'Buka menu'} aria-expanded={menuOpen} aria-controls="v63-mobile-menu" onClick={()=>setMenuOpen(x=>!x)}>{menuOpen?<BrandIcon name="close" size={20}/>:<BrandIcon name="menu" size={20}/>}</button>
+            <button ref={menuTrigger} type="button" className="v63-menu-trigger" aria-label={menuOpen?'Tutup menu':'Buka menu'} aria-expanded={menuOpen} aria-controls="v63-mobile-menu" onClick={()=>setMenuOpen(x=>!x)}>{menuOpen?<BrandIcon name="close" size={20}/>:<BrandIcon name="menu" size={20}/>}</button>
             {menuOpen&&<div id="v63-mobile-menu" className="v63-mobile-menu" role="group" aria-label="Menu tambahan">
               <div className="v63-menu-heading"><span>Ruang KataKecil</span><small>Pengaturan dan akses penulis</small></div>
               <button type="button" className="v63-menu-studio" onClick={()=>{setMenuOpen(false);navigate('/studio')}}><BrandIcon name="pen" size={18}/><span>Buka Studio <small>Khusus pemilik</small></span><BrandIcon name="arrow-right" size={16}/></button>
+              <button type="button" onClick={()=>{setMenuOpen(false);window.dispatchEvent(new Event('kk:install'));}}>Pasang KataKecil</button>
               <div className="v63-menu-theme-label">Tampilan aplikasi</div>
               <div className="v63-menu-theme-choices">
                 {([{value:'light',label:'Terang'},{value:'dark',label:'Gelap'}] as const).map(item=><button type="button" key={item.value} aria-pressed={preference===item.value} onClick={()=>{setPreference(item.value);setMenuOpen(false)}}>{item.value==='dark'?<BrandIcon name="moon" size={15}/>:<BrandIcon name="sun" size={15}/>}{item.label}</button>)}

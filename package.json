@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "7.0.0-beta.2",
+  "version": "7.2.0-rc.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,7 +21,7 @@
     "test:v5": "node scripts/test-v5.mjs",
     "test:v51": "node scripts/test-v51.mjs",
     "test:v64": "node scripts/test-v64.mjs",
-    "test:current": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs && node scripts/test-v7alpha.mjs && node scripts/test-v7alpha2.mjs && node scripts/test-v7alpha3.mjs && node scripts/test-v7alpha4.mjs && node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs",
+    "test:current": "node scripts/test-current.mjs",
     "test:v65": "node scripts/test-v65.mjs",
     "test:v66": "node scripts/test-v66.mjs && node scripts/test-v67.mjs && node scripts/test-v68.mjs",
     "test:v67": "node scripts/test-v67.mjs",
@@ -37,21 +37,31 @@
     "test:v7alpha4": "node scripts/test-v7alpha4.mjs",
     "test:v7beta1": "node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs",
     "audit:v7beta": "node scripts/audit-v7beta.mjs",
-    "test:v7beta2": "node scripts/test-v7beta2.mjs"
+    "test:v7beta2": "node scripts/test-v7beta2.mjs",
+    "test:v71": "node scripts/test-v71-public.mjs && node scripts/test-v71-studio.mjs",
+    "test:historical": "node scripts/test-v42-security.mjs && node scripts/test-v421-reader.mjs && node scripts/test-v43.mjs && node scripts/test-v45.mjs && node scripts/test-v5.mjs && node scripts/test-v51.mjs && node scripts/test-v64.mjs && node scripts/test-v69.mjs && node scripts/test-v610.mjs && node scripts/test-v611.mjs && node scripts/test-v612.mjs && node scripts/test-v6121.mjs && node scripts/test-v7alpha.mjs && node scripts/test-v7alpha2.mjs && node scripts/test-v7alpha3.mjs && node scripts/test-v7alpha4.mjs && node scripts/test-v7beta1.mjs && node scripts/test-v7beta2.mjs && npm run test:v71",
+    "test:v72": "node scripts/test-v72-import.mjs && node scripts/test-v72-database.mjs && node scripts/test-v72-reader-pwa.mjs",
+    "test:browser": "node scripts/test-v72-browser.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "jszip": "3.10.1"
+    "@supabase/supabase-js": "2.117.3",
+    "jszip": "3.10.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.4"
+    "@electric-sql/pglite": "0.5.9",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "24.10.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "playwright": "1.56.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import {mayLeave} from '../../../utils/nav';
 import { supabase } from '../../../data/supabase';
 import ThemeToggle from '../../../components/ThemeToggle';
 import BrandIcon, { type BrandIconName } from '../../../components/BrandIcon';
@@ -60,12 +61,13 @@ export function StudioToolsMenu({ path, mobile = false }: { path: string; mobile
     {open && <div id={id} className="v69-tools-popover" role="group" aria-label="Alat Studio">
       <span className="v69-tools-caption">ALAT PENULIS</span>
       {secondary.map(tab => <B key={tab.p} to={tab.p}
+        aria-current={isActive(path, tab.p) ? 'page' : undefined}
         className={`v69-tools-link ${isActive(path, tab.p) ? 'is-active' : ''}`}>
         <BrandIcon name={tab.icon} size={18}/><span>{tab.label}</span><BrandIcon name="chevron-right" size={15}/>
       </B>)}
       <div className="v69-tools-divider"/>
       <B to="/" className="v69-tools-link"><BrandIcon name="book-open" size={18}/><span>Lihat Website</span><BrandIcon name="arrow-right" size={15}/></B>
-      <button type="button" className="v69-tools-link" onClick={() => void supabase?.auth.signOut()}>
+      <button type="button" className="v69-tools-link" onClick={()=>void(async()=>{if(await mayLeave())await supabase?.auth.signOut();})()}>
         <BrandIcon name="logout" size={18}/><span>Keluar Akun</span>
       </button>
     </div>}

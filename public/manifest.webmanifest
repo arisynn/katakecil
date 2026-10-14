@@ -1,7 +1,7 @@
 {
   "name": "KataKecil — Cerita Kecil, Makna Besar",
   "short_name": "KataKecil",
-  "description": "Cerita karya Karisyono untuk dibaca dan disimpan.",
+  "description": "Baca cerita di KataKecil. Koneksi internet diperlukan.",
   "lang": "id",
   "start_url": "/",
   "scope": "/",
@@ -13,13 +13,35 @@
       "src": "/brand/katakecil-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/brand/katakecil-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/katakecil-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Beranda",
+      "url": "/"
+    },
+    {
+      "name": "Temukan",
+      "url": "/temukan"
+    },
+    {
+      "name": "Koleksi",
+      "url": "/koleksi"
     }
   ]
 }

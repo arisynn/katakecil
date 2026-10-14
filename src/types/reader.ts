@@ -68,4 +68,5 @@ export interface StoryFile {
   path: string;
   content: string;
   episodeNumbers?: number[];
+  previewEpisode?: {episodeNumber:number;title:string;arc:string;content:string};
 }

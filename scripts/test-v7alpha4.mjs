@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 const read = (file) => readFileSync(file, 'utf8');
 const pkg = JSON.parse(read('package.json'));
-assert.match(pkg.version, /^7\.0\.0-(?:alpha\.4|beta\.[12])$/);
+assert.match(pkg.version, /^(?:7\.0\.0-(?:alpha\.4|beta\.[12])|7\.1\.0-rc\.1)$/);
 const reader = read('src/SecureReaderApp.tsx');
 const controls = read('src/components/ReaderControls.tsx');
 const contents = read('src/components/ReaderPanels.tsx');

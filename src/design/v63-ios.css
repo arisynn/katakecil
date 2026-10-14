@@ -807,7 +807,7 @@ html[data-app-theme='dark'] {
     border-radius:50%;
     backdrop-filter:blur(12px);
   }
-  .v6-public .v6-detail-back span {
+  .v6-public .v6-detail-back > span:not(.kk-brand-icon) {
     display:none;
   }
   .v6-public .v6-detail-hero {

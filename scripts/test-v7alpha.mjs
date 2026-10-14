@@ -13,7 +13,7 @@ const oldCollection = read('src/utils/collection.ts');
 const logo = read('public/brand/katakecil-mark.svg');
 const icon = read('public/brand/katakecil-icon.svg');
 const pkg = JSON.parse(read('package.json'));
-assert.ok(/^7\.0\.0-(?:alpha\.\d+|beta\.\d+)$/.test(pkg.version), 'V7 alpha semver');
+assert.ok(/^(?:7\.0\.0-(?:alpha\.\d+|beta\.\d+)|7\.1\.0-rc\.1)$/.test(pkg.version), 'V7 alpha semver');
 assert.match(nav, /label:'Temukan',icon:'compass'/);
 assert.match(nav, /label:'Koleksi',icon:'bookmark'/);
 assert.match(nav, /const visibleLinks = links;/);

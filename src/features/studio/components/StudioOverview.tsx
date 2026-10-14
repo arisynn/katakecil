@@ -31,7 +31,8 @@ export function Dashboard({ books, episodes, user }: {
     {lastEdited && currentBook ? <section className="v69-resume v72-resume" aria-label="Lanjutkan menulis">
       <div className="v69-resume-kicker"><BrandIcon name="file-pen" size={17}/> LANJUTKAN MENULIS</div>
       <h2>{lastEdited.title || `Bab ${lastEdited.episode_number}`}</h2>
-      <p>{currentBook.title} · Bab {lastEdited.episode_number} · Draft</p>
+      <p>{currentBook.title} · {lastEdited.episode_number === 0 ? 'Prolog' : `Bab ${lastEdited.episode_number}`} · Draft</p>
+      <small className="kk-v71-resume-timestamp">Terakhir diedit: {formatWib(lastEdited.updated_at)}</small>
       <B to={`/studio/editor/${lastEdited.id}`} className="studio-primary">
         Buka editor <BrandIcon name="arrow-right" size={17}/>
       </B>
@@ -132,6 +133,7 @@ export function StudioSettings() {
   return <><div className="studio-page-head"><span className="studio-kicker">PREFERENSI & KEAMANAN</span>
     <h1>Pengaturan</h1><p>Preferensi tampilan dan informasi akses Studio.</p>
   </div><section className="studio-panel v6-settings-panel">
+    <h2>Aplikasi</h2><p>Pasang KataKecil ke layar utama. Membaca dan menyimpan tetap memerlukan internet.</p><button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Pasang KataKecil</button>
     <h2>Tampilan</h2><p>Tema Terang dan Gelap di bilah atas berlaku untuk seluruh KataKecil, termasuk Reader.</p>
     <h2>Keamanan Studio</h2><p>Hanya akun yang terdaftar sebagai penulis yang dapat mengelola cerita.
       Alat database, jadwal, dan sampah tersedia melalui menu Alat Studio.</p>

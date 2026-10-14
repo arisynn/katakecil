@@ -12,7 +12,7 @@ const client={
  rpc: async()=>({data:mode!=='limited',error:null}),
  from:(table)=>{
   const query={
-   select(){return this;},eq(){return this;},lte(){return this;},
+   select(){return this;},eq(){return this;},is(){return this;},lte(){return this;},
    async maybeSingle(){getRows++;if(table==='qr_books')return {data:mode==='private'?null:{id:'contoh'},error:null};
     return {data:mode==='unreleased'?null:releasedEpisode,error:null};}
   };return query;

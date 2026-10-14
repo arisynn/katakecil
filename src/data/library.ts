@@ -1,12 +1,12 @@
 import { supabase } from './supabase';
 export type Book = {
   id: string; slug: string; title: string; synopsis: string; genre: string;
-  cover_url: string | null; status: 'ongoing' | 'completed' | 'hiatus';
+  cover_url: string | null; private_cover_path?: string | null; status: 'ongoing' | 'completed' | 'hiatus';
   is_published: boolean; is_featured: boolean; deleted_at?: string | null; created_at: string; updated_at: string;
 };
 export type Episode = {
   id: string; book_id: string; episode_number: number; arc_title: string;
-  title: string; content_md: string; release_at: string | null; is_enabled: boolean;
+  title: string; content_md: string; content_length?: number; content_hash?: string; release_at: string | null; is_enabled: boolean;
   deleted_at?: string | null; is_finale?: boolean; created_at: string; updated_at: string;
 };
 export type EpisodeSummary = Pick<Episode, 'book_id'|'episode_number'|'arc_title'|'title'|'release_at'> & {is_finale?:boolean};
@@ -43,14 +43,19 @@ export async function getStudioLibrary() {
     if ((data ?? []).length < size) break;
   }
   for (let start = 0; start < 6000; start += size) {
-    const { data, error } = await supabase.rpc('qr_author_get_episodes', {p_offset:start, p_limit:size});
+    const { data, error } = await supabase.rpc('qr_author_episode_metadata_v72', {p_offset:start, p_limit:size});
     if (error) throw error;
-    episodes.push(...((data ?? []) as Episode[]).filter(ep=>!ep.deleted_at));
+    episodes.push(...((data ?? []) as Episode[]).filter(ep=>!ep.deleted_at).map(ep=>({...ep,content_md:''}))); 
     if ((data ?? []).length < size) break;
   }
   // Hide children of books in Trash; their drafts/schedules remain preserved in DB.
   const activeBookIds = new Set(books.map(book => book.id));
   return { books, episodes: episodes.filter(ep => activeBookIds.has(ep.book_id)) };
+}
+export async function getAuthorEpisode(id:string):Promise<Episode>{
+  if(!supabase)throw Error('Supabase belum dikonfigurasi.');
+  const {data,error}=await supabase.rpc('qr_author_episode_v72',{p_episode_id:id});
+  if(error)throw Error(error.message);if(!data)throw Error('Episode tidak tersedia atau berada di Sampah.');return data as Episode;
 }
 export function formatWib(value: string | null) {
   if (!value) return 'Belum dijadwalkan';

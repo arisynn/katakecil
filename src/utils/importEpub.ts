@@ -2,6 +2,7 @@
  * only Markdown/plain text can leave this module. Never inject EPUB HTML into the DOM.
  */
 import JSZip from 'jszip';
+import {inspectZip,boundedRead} from '../features/import/zip';
 import {cleanText,titleInfo,classifyEpubSection} from './importManuscript';
 import type {ImportChapter, ParsedManuscript} from './importManuscript';
 
@@ -86,6 +87,8 @@ function splitDocument(doc:Document,source:string,tocTitle:string,arc:string,ind
   const chapterHeads=headings.filter(h=>chapterName.test(readHeading(h)));
   const out:ImportChapter[]=[];
   const withAnchor=tocEntries.filter(t=>t.fragment).map(t=>({entry:t,element:Array.from(body.getElementsByTagName('*')).find(x=>x.id===t.fragment)})).filter(x=>x.element) as {entry:TocEntry;element:Element}[];
+  const firstBoundary=chapterHeads.length>=2?chapterHeads[0]:withAnchor.length>=2?withAnchor[0].element:null;
+  if(firstBoundary){const range=doc.createRange();range.setStart(body,0);range.setEndBefore(firstBoundary);const prefix=htmlToMarkdown(range.cloneContents());if(prefix)out.push({key:`epub-${index}-prefix`,episode_number:null,title:'Pembuka sebelum bab',arc_title:arc,content_md:prefix,include:true,confidence:'periksa',reviewed:false,origin:source,reason:'Teks sebelum batas bab; pastikan apakah prolog atau halaman pembuka.',candidate_kind:'review'});}
   if(chapterHeads.length<2 && withAnchor.length>=2){
     const range=doc.createRange();
     for(let i=0;i<withAnchor.length;i++){
@@ -103,7 +106,9 @@ function splitDocument(doc:Document,source:string,tocTitle:string,arc:string,ind
       const bodyMd=htmlToMarkdown(range.cloneContents());
       if(!bodyMd)continue;
       const info=titleInfo(readHeading(current));
-      out.push({key:`epub-${index}-${i}`,episode_number:info.number,title:info.title,arc_title:arc,content_md:bodyMd,include:true,confidence:'tinggi',origin:source});
+      const precedingArc=headings.filter(h=>arcName.test(readHeading(h))&&(h.compareDocumentPosition(current)&Node.DOCUMENT_POSITION_FOLLOWING)).at(-1);
+      const currentArc=precedingArc?readHeading(precedingArc):arc;
+      out.push({key:`epub-${index}-${i}`,episode_number:info.number,title:info.title,arc_title:currentArc,content_md:bodyMd,include:true,confidence:'tinggi',origin:source});
     }
   } else {
     const rawHeading=chapterHeads[0]||headings.find(h=>chapterName.test(readHeading(h)))||headings[0];
@@ -152,32 +157,22 @@ function findNcx(doc:Document,packageFile:string):TocEntry[]{
   return entries;
 }
 
-export async function parseEpubFile(file:File):Promise<ParsedManuscript> {
+export async function parseEpubFile(file:File,maxExpanded=MAX_UNCOMPRESSED):Promise<ParsedManuscript> {
   if(!/\.epub$/i.test(file.name))throw Error('Pilih berkas berakhiran .epub.');
   if(file.size<50||file.size>MAX_ARCHIVE)throw Error('Ukuran EPUB harus 50 byte–18 MB.');
   const header=new Uint8Array(await file.slice(0,4).arrayBuffer());
   if(header[0]!==0x50||header[1]!==0x4b)throw Error('Berkas bukan arsip EPUB/ZIP yang valid.');
-  let archive:JSZip;
-  try{archive=await JSZip.loadAsync(await file.arrayBuffer());}catch{throw Error('EPUB rusak, terenkripsi, atau tidak dapat dibuka.');}
-  const paths=Object.values(archive.files).filter(f=>!f.dir);
-  if(paths.length>MAX_FILES)throw Error(`Terlalu banyak berkas dalam EPUB (maks. ${MAX_FILES}).`);
-  let declaredTotal=0;
-  const seen=new Set<string>();
-  for(const entry of paths){
-    const original=(entry as typeof entry & {unsafeOriginalName?:string}).unsafeOriginalName||entry.name;
-    if(original.includes('\\')||original.startsWith('/')||original.split('/').includes('..')||/[\u0000-\u001f]/.test(original))throw Error('Nama berkas EPUB tidak aman.');
-    const key=entry.name.normalize('NFC').toLowerCase();if(seen.has(key))throw Error('EPUB memiliki nama berkas duplikat.');seen.add(key);
-    const size=(entry as typeof entry & {_data?:{uncompressedSize?:number}})._data?.uncompressedSize;
-    if(typeof size!=='number'||!Number.isFinite(size)||size<0)throw Error('Ukuran isi EPUB tidak dapat divalidasi.');
-    declaredTotal+=size;
-    if(declaredTotal>MAX_UNCOMPRESSED)throw Error('EPUB terlalu besar setelah diekstraksi.');
-    if(/\.(?:html?|xhtml|xml|ncx|opf)$/i.test(entry.name)&&size>MAX_DOC)throw Error('Salah satu dokumen EPUB melebihi batas 3 MB.');
-  }
+  const archiveBytes=new Uint8Array(await file.arrayBuffer());
+  const directory=inspectZip(archiveBytes);
+  if(directory.length>MAX_FILES)throw Error(`Terlalu banyak berkas dalam EPUB (maks. ${MAX_FILES}).`);
+  if(directory.reduce((sum,e)=>sum+e.size,0)>Math.min(MAX_UNCOMPRESSED,maxExpanded))throw Error('EPUB terlalu besar setelah diekstraksi.');
+  const archive=await JSZip.loadAsync(archiveBytes);
+  const entryMap=new Map(directory.map(e=>[e.name,e]));
   if(archive.file('META-INF/encryption.xml'))throw Error('EPUB memiliki bagian terenkripsi/DRM atau obfuscation. Gunakan EPUB yang tidak dienkripsi.');
   const warnings:string[]=[];
   const get=async(name:string):Promise<string>=>{
-    const entry=archive.file(name);if(!entry)throw Error(`Bagian EPUB tidak ditemukan: ${name}`);
-    const raw=await entry.async('string');if(raw.length>MAX_DOC)throw Error(`Dokumen ${name} terlalu besar.`);return raw;
+    const entry=entryMap.get(name);if(!entry)throw Error(`Bagian EPUB tidak ditemukan: ${name}`);
+    return new TextDecoder('utf-8',{fatal:true}).decode(await boundedRead(archive,entry,MAX_DOC));
   };
   const container=xml(await get('META-INF/container.xml'));
   const rootfile=elements(container,'rootfile')[0];if(!rootfile)throw Error('EPUB tidak memiliki rootfile OPF.');
@@ -242,8 +237,8 @@ export async function parseEpubFile(file:File):Promise<ParsedManuscript> {
   const coverID=elements(opf,'meta').find(x=>getAttr(x,'name')==='cover')?.getAttribute('content');
   const coverItem=(coverID&&items.get(coverID))||Array.from(items.values()).find(x=>x.props.split(/\s+/).includes('cover-image'));
   if(coverItem && /^image\/(?:png|jpeg|webp)$/.test(coverItem.type)){
-    const z=archive.file(coverItem.path);
-    if(z){const bytes=await z.async('uint8array');if(bytes.byteLength<=5_000_000)cover={data:new Blob([Uint8Array.from(bytes)],{type:coverItem.type}),mime:coverItem.type};else warnings.push('Sampul terlalu besar untuk diunggah otomatis (maks. 5 MB).');}
+    const z=entryMap.get(coverItem.path);
+    if(z&&z.size<=5_000_000){const bytes=await boundedRead(archive,z,5_000_000);cover={data:new Blob([Uint8Array.from(bytes)],{type:coverItem.type}),mime:coverItem.type};}else if(z)warnings.push('Sampul terlalu besar untuk diunggah otomatis (maks. 5 MB).');
   }
   return {name:file.name,format:'epub',title:cleanText(title),creator,language,chapters:chapterList,warnings,cover};
 }

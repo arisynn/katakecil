@@ -2,12 +2,13 @@ import BrandIcon from '../../../components/BrandIcon';
 import React from 'react';
 import { navigate } from '../../../utils/nav';
 
-export function Action({ children, to, className = '' }: {
+export function Action({ children, to, className = '', label }: {
     children: React.ReactNode;
     to: string;
     className?: string;
+    label?: string;
 }) {
-    return <button type="button" className={className} onClick={() => navigate(to)}>{children}</button>;
+    return <button type="button" className={className} aria-label={label} onClick={() => navigate(to)}>{children}</button>;
 }
 
 /**

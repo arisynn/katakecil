@@ -28,7 +28,7 @@ export function ContentsPanel({
     const query = filter.trim().toLocaleLowerCase('id');
     if (!query) return chapters;
     return chapters.filter((chapter, index) => {
-      const number = /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? String(index + 1);
+      const number = String(chapter.displayNumber ?? /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? index + 1);
       return chapter.title.toLocaleLowerCase('id').includes(query)
         || number.includes(query)
         || (chapter.arc ?? '').toLocaleLowerCase('id').includes(query);
@@ -41,18 +41,18 @@ export function ContentsPanel({
         <div><div className="panel-eyebrow">KATAKECIL READER</div><h2>Daftar Isi</h2></div>
         <button type="button" className="control-icon" aria-label="Tutup daftar isi" data-reader-autofocus onClick={onClose}><BrandIcon name="close" size={20} /></button>
       </div>
-      <div className="panel-tabs" style={{ borderColor: theme.border }} role="tablist" aria-label="Konten panel">
-        <button type="button" role="tab" aria-selected={tab === 'contents'} className={tab === 'contents' ? 'selected' : ''} onClick={() => setTab('contents')}><BrandIcon name="book-open" size={17} /> Bab</button>
-        <button type="button" role="tab" aria-selected={tab === 'bookmarks'} className={tab === 'bookmarks' ? 'selected' : ''} onClick={() => setTab('bookmarks')}><BrandIcon name="bookmark" size={17} /> Penanda ({bookmarks.length})</button>
+      <div className="panel-tabs" style={{ borderColor: theme.border }} role="tablist" aria-label="Konten panel" onKeyDown={event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const next=event.key==='Home'?'contents':event.key==='End'?'bookmarks':tab==='contents'?'bookmarks':'contents';setTab(next);document.getElementById(`kk-tab-${next}`)?.focus();}}>
+        <button type="button" role="tab" id="kk-tab-contents" aria-controls="kk-contents-panel" tabIndex={tab==='contents'?0:-1} aria-selected={tab === 'contents'} className={tab === 'contents' ? 'selected' : ''} onClick={() => setTab('contents')}><BrandIcon name="book-open" size={17} /> Bab</button>
+        <button type="button" role="tab" id="kk-tab-bookmarks" aria-controls="kk-contents-panel" tabIndex={tab==='bookmarks'?0:-1} aria-selected={tab === 'bookmarks'} className={tab === 'bookmarks' ? 'selected' : ''} onClick={() => setTab('bookmarks')}><BrandIcon name="bookmark" size={17} /> Penanda ({bookmarks.length})</button>
       </div>
       {tab === 'contents' && <div className="v610-chapter-filter">
         <BrandIcon name="search" size={17} aria-hidden="true" />
         <input type="search" value={filter} onChange={event => setFilter(event.target.value)} placeholder="Cari judul atau nomor bab" aria-label="Cari judul atau nomor bab" />
       </div>}
-      <div className="panel-list" role="tabpanel">
+      <div className="panel-list" id="kk-contents-panel" aria-labelledby={`kk-tab-${tab}`} role="tabpanel">
         {tab === 'contents' && (visibleChapters.length ? visibleChapters.map(chapter => {
           const originalIndex = chapters.findIndex(item => item.id === chapter.id);
-          const number = /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? String(originalIndex + 1);
+          const number = String(chapter.displayNumber ?? /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? originalIndex + 1);
           const active = currentChapterId === chapter.id;
           const heading = readerHeading(chapter.title, chapter.displayNumber ?? Number(number));
           const metadata = [
@@ -62,8 +62,8 @@ export function ContentsPanel({
           return <button type="button" key={chapter.id} className={`panel-row v610-chapter-row${active ? ' is-active' : ''}`} aria-current={active ? 'location' : undefined} onClick={() => { onChapter(chapter); onClose(); }}>
             <span className="episode-count">{String(number).padStart(2, '0')}</span>
             <span className="panel-row-main">
-              {chapter.arc && <small>{chapter.arc}</small>}
               <strong>{heading.title || heading.eyebrow}</strong>
+              {chapter.arc && <small>{chapter.arc}</small>}
               {metadata && <small>{metadata}</small>}
             </span>
             {completedEpisodeNumbers.includes(Number(number)) ? <span className="v74-completed-label" aria-label="Bab selesai"><BrandIcon name="check-circle" size={15} aria-hidden="true" /> Selesai</span> : active && <span className="v610-current-label">Dibaca</span>}

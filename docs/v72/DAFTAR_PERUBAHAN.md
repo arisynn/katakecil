@@ -1,0 +1,72 @@
+# Daftar perubahan V7.2 RC1
+
+Dibandingkan sumber V7.1 RC1 yang diberikan. Paket tidak memuat dependency terpasang, hasil build, kredensial, atau screenshot QA.
+
+| Status | Berkas |
+|---|---|
+| Diubah | `README.md` |
+| Baru | `START_HERE_V72.md` |
+| Baru | `docs/v72/ARSITEKTUR_DAN_PRIVASI.md` |
+| Baru | `docs/v72/AUDIT_SUPABASE.md` |
+| Baru | `docs/v72/PANDUAN_PENULIS.md` |
+| Baru | `docs/v72/QA_DAN_DEPLOY.md` |
+| Baru | `docs/v72/RENCANA_DISETUJUI.md` |
+| Baru | `package-lock.json` |
+| Diubah | `package.json` |
+| Baru | `public/brand/katakecil-maskable-512.png` |
+| Baru | `public/brand/katakecil-maskable.svg` |
+| Diubah | `public/manifest.webmanifest` |
+| Baru | `public/sw.js` |
+| Baru | `scripts/fixtures/v72/index.html` |
+| Baru | `scripts/fixtures/v72/main.tsx` |
+| Baru | `scripts/test-current.mjs` |
+| Baru | `scripts/test-utils/load-ts.mjs` |
+| Diubah | `scripts/test-v42-security.mjs` |
+| Diubah | `scripts/test-v45.mjs` |
+| Baru | `scripts/test-v72-browser.mjs` |
+| Baru | `scripts/test-v72-database.mjs` |
+| Baru | `scripts/test-v72-import.mjs` |
+| Baru | `scripts/test-v72-reader-pwa.mjs` |
+| Diubah | `src/App.tsx` |
+| Diubah | `src/ReaderApp.tsx` |
+| Diubah | `src/SecureReaderApp.tsx` |
+| Diubah | `src/components/ReaderPanels.tsx` |
+| Diubah | `src/components/public/PublicHeader.tsx` |
+| Diubah | `src/data/library.ts` |
+| Baru | `src/data/manuscriptImport.ts` |
+| Diubah | `src/data/supabase.ts` |
+| Diubah | `src/design/studio-experience.css` |
+| Diubah | `src/design/v63-ios.css` |
+| Baru | `src/design/v72.css` |
+| Baru | `src/features/import/readZip.ts` |
+| Baru | `src/features/import/zip.ts` |
+| Baru | `src/features/import/zip.worker.ts` |
+| Diubah | `src/features/public/components/LibraryUI.tsx` |
+| Baru | `src/features/pwa/PwaExperience.tsx` |
+| Diubah | `src/features/studio/components/BookManagement.tsx` |
+| Diubah | `src/features/studio/components/ChapterEditor.tsx` |
+| Baru | `src/features/studio/components/ChapterEditorLoader.tsx` |
+| Diubah | `src/features/studio/components/StudioNavigation.tsx` |
+| Diubah | `src/features/studio/components/StudioOverview.tsx` |
+| Baru | `src/hooks/useLeaveGuard.ts` |
+| Diubah | `src/main.tsx` |
+| Diubah | `src/pages/ManuscriptImporter.tsx` |
+| Diubah | `src/pages/PublicLibrary.tsx` |
+| Diubah | `src/pages/Studio.tsx` |
+| Diubah | `src/types/reader.ts` |
+| Diubah | `src/utils/importEpub.ts` |
+| Diubah | `src/utils/importManuscript.ts` |
+| Diubah | `src/utils/importMarkdown.ts` |
+| Baru | `src/utils/importStructure.ts` |
+| Diubah | `src/utils/nav.ts` |
+| Baru | `src/utils/privacy.ts` |
+| Diubah | `src/utils/readerHeading.ts` |
+| Baru | `supabase/REVIEW_ONLY_v72_reader_access.sql` |
+| Diubah | `supabase/functions/secure-episode/index.ts` |
+| Diubah | `supabase/functions/secure-reader/index.ts` |
+| Baru | `supabase/migrations/20261014085124_v72_online_pwa_smart_import.sql` |
+| Diubah | `tsconfig.json` |
+| Diubah | `vercel.json` |
+| Diubah | `vite.config.ts` |
+
+Validasi saat pengemasan: TypeScript, 9 suite regresi aktif, struktur, build produksi, dan integrasi Chromium lulus. Baca QA_DAN_DEPLOY.md untuk batas uji dan staging yang masih diperlukan.

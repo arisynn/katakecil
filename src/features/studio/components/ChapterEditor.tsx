@@ -1,6 +1,7 @@
 import BrandIcon from '../../../components/BrandIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReaderApp from '../../../ReaderApp';
+import {useLeaveGuard} from '../../../hooks/useLeaveGuard';
 import { supabase } from '../../../data/supabase';
 import { episodeStatus, type Book, type Episode } from '../../../data/library';
 import { toWibInput } from '../../../utils/releasePlanning';
@@ -17,6 +18,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   onUpdate: (value: Episode) => void;
   onDelete: () => Promise<void>;
 }) {
+  const version=useRef(ep.updated_at);
   const manuscriptRef = useRef<HTMLTextAreaElement>(null);
   const [title, setTitle] = useState(ep.title);
   const [arc, setArc] = useState(ep.arc_title);
@@ -38,7 +40,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   const wordCount = body.trim() ? body.trim().split(/\s+/u).length : 0;
   const isLive = episodeStatus(ep) === 'Terbit';
 
-  useEffect(() => () => { mounted.current = false; }, []);
+  useEffect(() => {mounted.current=true;return()=>{ mounted.current = false; };}, []);
 
   const save = useCallback(async (): Promise<boolean> => {
     if (!supabase) return false;
@@ -56,10 +58,11 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           arc_title: snapshot.arc,
           content_md: snapshot.body,
         })
-        .eq('id', ep.id)
+        .eq('id', ep.id).eq('updated_at',version.current).is('deleted_at',null)
         .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
         .single();
-      if (dbError) throw dbError;
+      if(dbError)throw Error(dbError.code==='PGRST116'?'Bab berubah di tab lain atau dipindahkan ke Sampah. Salin perubahan lokal sebelum memuat ulang; isi terbaru tidak ditimpa.':dbError.message);
+      version.current=data.updated_at;
       lastSaved.current = snapshot;
       onUpdate({ ...data, content_md: snapshot.body, is_finale: ep.is_finale } as Episode);
       if (mounted.current) {
@@ -99,30 +102,10 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
     return () => window.clearTimeout(timer);
   }, [dirty, title, arc, body, save]);
 
-  useEffect(() => {
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (same(current.current, lastSaved.current)) return;
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    const onInternalNavigation = (event: Event) => {
-      if (same(current.current, lastSaved.current)) return;
-      const navigation = event as CustomEvent<{ path: string }>;
-      if (!navigation.detail?.path) return;
-      event.preventDefault();
-      void latestFlush.current().then(ok => {
-        if (ok && same(current.current, lastSaved.current)) navigate(navigation.detail.path);
-      });
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    window.addEventListener('quiet:before-navigate', onInternalNavigation);
-    return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      window.removeEventListener('quiet:before-navigate', onInternalNavigation);
-      // Best effort if a route is replaced externally; navigation guard handles app links.
-      if (!same(current.current, lastSaved.current)) void latestSave.current();
-    };
-  }, []);
+  useLeaveGuard(dirty || publishing, async () => {
+    if(publishing)return false;
+    return await latestFlush.current();
+  });
 
   const updateRelease = async (mode: 'now' | 'schedule' | 'draft') => {
     if (!supabase || publishing) return;
@@ -154,10 +137,11 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           : 'Tarik bab ini dari publik dan kembalikan menjadi draft?';
       if (!window.confirm(confirmation)) return;
       const { data, error: dbError } = await supabase.from('qr_episodes')
-        .update({ release_at, is_enabled }).eq('id', ep.id)
+        .update({ release_at, is_enabled }).eq('id', ep.id).eq('updated_at',version.current).is('deleted_at',null)
         .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
         .single();
-      if (dbError) throw dbError;
+      if(dbError)throw Error(dbError.code==='PGRST116'?'Bab berubah di tab lain atau dipindahkan ke Sampah. Salin perubahan lokal sebelum memuat ulang; isi terbaru tidak ditimpa.':dbError.message);
+      version.current=data.updated_at;
       onUpdate({ ...data, content_md: current.current.body, is_finale: ep.is_finale } as Episode);
       setStatus(mode === 'now' ? 'Diterbitkan' : mode === 'schedule' ? 'Terjadwal' : 'Menjadi draft');
       setReviewOpen(false);
@@ -192,10 +176,12 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
     id: `preview-${ep.id}`,
     title: book.title,
     path: '',
-    content: `# ${book.title}\n\n${arc ? `## ${arc}\n\n` : ''}### ${title || `Episode ${ep.episode_number}`}\n\n${body || 'Belum ada isi episode.'}`,
+    content: body,
+    episodeNumbers: [ep.episode_number],
+    previewEpisode: {episodeNumber:ep.episode_number,title:title||`Episode ${ep.episode_number}`,arc,content:body||'Belum ada isi episode.'},
   });
   if (preview) return <ReaderApp key={`${ep.id}-preview`} bookId={`preview-${ep.id}`}
-    bookTitle={book.title} onExit={() => setPreview(false)} previewStory={makePreview()}/>;
+    bookTitle={book.title} episodeNumber={ep.episode_number} onExit={() => setPreview(false)} previewStory={makePreview()}/>;
 
   return <div className={`v69-writing-shell ${focusMode ? 'v69-focus-mode' : ''}`}>
     <div className="v69-editor-top">
@@ -207,6 +193,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
         </strong>
       </div>
       <div className="v69-editor-actions">
+        {status === 'Gagal menyimpan' && <button type="button" className="kk-v71-save-retry" aria-label="Coba simpan ulang" onClick={() => void latestFlush.current()}><BrandIcon name="rotate" size={16}/><span>Coba simpan</span></button>}
         <button type="button" className="v69-icon-button" title="Pratinjau" aria-label="Pratinjau"
           onClick={() => setPreview(true)}><BrandIcon name="eye" size={19}/></button>
         <button type="button" className="v69-icon-button" title="Mode fokus" aria-label={focusMode ? 'Keluar mode fokus' : 'Mode fokus'}
@@ -214,6 +201,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
       </div>
     </div>
 
+    {error && <div className="studio-error kk-v71-editor-alert" role="alert">{error}</div>}
     {isLive && <p className="v69-live-notice" role="note">Bab ini sudah terbit. Perubahan yang tersimpan akan langsung terlihat oleh pembaca.</p>}
     <div className="v69-editor-layout">
       <section className="v69-writing-paper" aria-label="Kanvas menulis">
@@ -239,7 +227,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           value={body} onChange={event => { setBody(event.target.value); setStatus('Belum disimpan'); }}/>
         <div className="v69-writing-footer">
           <span>{wordCount.toLocaleString('id-ID')} kata</span>
-          <span><BrandIcon name="check-circle" size={15}/>{dirty ? 'Autosave aktif' : status}</span>
+          <span role="status"><BrandIcon name={status === 'Gagal menyimpan' ? 'alert' : 'check-circle'} size={15}/>{status === 'Gagal menyimpan' ? status : dirty && status !== 'Menyimpan…' ? 'Belum disimpan · Autosave aktif' : status}</span>
         </div>
         <details className="v69-editor-extra"><summary>Alat tambahan</summary>
           <label className="v69-import-file"><BrandIcon name="upload" size={16}/> Impor Markdown / TXT
@@ -294,6 +282,5 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
         </details>
       </aside>}
     </div>
-    {error && <div className="studio-error v69-editor-error" role="alert">{error}</div>}
   </div>;
 }

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import SecureReaderApp from './SecureReaderApp';
 import PublicLibrary from './pages/PublicLibrary';
-import Studio from './pages/Studio';
+const Studio=lazy(()=>import('./pages/Studio')); 
 import StudioErrorBoundary from './components/StudioErrorBoundary';
 import ReaderErrorBoundary from './components/ReaderErrorBoundary';
 import { isConfigured, supabase } from './data/supabase';
@@ -41,11 +41,14 @@ import './design/v70-alpha3.css';
 import './design/v70-alpha4.css';
 import './design/v70-beta1.css';
 import './design/v70-beta2.css';
+import './design/public-experience.css';
+import './design/studio-experience.css';
 
 export default function App(){
-  const [path,setPath]=useState(window.location.pathname);
+  const [route,setPath]=useState(window.location.pathname+window.location.search);
+  const path=route.split('?')[0];
   const [readerLookup,setReaderLookup]=useState<{slug:string;book:Book|null;resolved:boolean}>({slug:'',book:null,resolved:false});
-  useEffect(()=>{const update=()=>setPath(window.location.pathname); window.addEventListener('popstate',update);window.addEventListener('quiet:navigate',update);return()=>{window.removeEventListener('popstate',update);window.removeEventListener('quiet:navigate',update);};},[]);
+  useEffect(()=>{const update=()=>setPath(window.location.pathname+window.location.search); window.addEventListener('popstate',update);window.addEventListener('quiet:navigate',update);return()=>{window.removeEventListener('popstate',update);window.removeEventListener('quiet:navigate',update);};},[]);
   useEffect(()=>{
     const updatePrivacy=()=>{
       const sensitiveRoute=window.location.pathname.startsWith('/baca/');
@@ -78,7 +81,7 @@ export default function App(){
     setReaderLookup({slug,book:null,resolved:false});
     if(!supabase){setReaderLookup({slug,book:null,resolved:true});return;}
     // Keep route resolution keyed to its slug; stale requests cannot display another story.
-    supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle().then(({data,error})=>{
+    Promise.resolve(supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle()).then(({data,error})=>{
       if(!active)return;
       const book=(!error&&data)?data as Book:error&&slug===legacyBookId?
         {id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''} as Book:null;
@@ -91,6 +94,6 @@ export default function App(){
     const readerBook=readerLookup.book;
     return readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/cerita/${readerBook.slug}`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/temukan')}>Kembali ke Temukan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
   }
-  if(path.startsWith('/studio')) return <StudioErrorBoundary><Studio path={path}/></StudioErrorBoundary>;
+  if(path.startsWith('/studio')) return <StudioErrorBoundary><Suspense fallback={<ThemeLoading context="studio" text="Menyiapkan Studio…"/>}><Studio path={path}/></Suspense></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;
 }

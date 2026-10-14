@@ -6,18 +6,14 @@ import {
   type AnnouncementInput, type StudioAnnouncement,
 } from '../../../data/announcements';
 import { navigate } from '../../../utils/nav';
+import { fromWib, toWibInput } from '../../../utils/releasePlanning';
 
-function toLocalInput(iso: string | null): string {
-  if (!iso) return '';
-  const date = new Date(iso);
-  if (!Number.isFinite(date.getTime())) return '';
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
-}
-function toIso(local: string): string | null {
-  if (!local) return null;
-  const date = new Date(local);
-  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
+function toIsoWib(input: string): string | null {
+  if (!input) return null;
+  const parts = /^(\d{4}-\d{2}-\d{2})T([0-2]\d:[0-5]\d)$/.exec(input);
+  if (!parts) return null;
+  try { return fromWib(parts[1], parts[2]); }
+  catch { return null; }
 }
 function newDraft(): AnnouncementInput {
   return {
@@ -44,7 +40,7 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | 'new' | null>(null);
   const [draft, setDraft] = useState<AnnouncementInput>(newDraft);
-  const [startInput, setStartInput] = useState(() => toLocalInput(new Date().toISOString()));
+  const [startInput, setStartInput] = useState(() => toWibInput(new Date().toISOString()));
   const [endInput, setEndInput] = useState('');
   const load = useCallback(async () => {
     try { setItems(await getStudioAnnouncements()); setError(''); }
@@ -58,19 +54,21 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
       status: item.status, starts_at: item.starts_at, ends_at: item.ends_at,
     } : newDraft();
     setDraft(next);
-    setStartInput(toLocalInput(next.starts_at));
-    setEndInput(toLocalInput(next.ends_at));
+    setStartInput(toWibInput(next.starts_at));
+    setEndInput(toWibInput(next.ends_at));
     setEditing(item?.id ?? 'new');
     setError(''); setMessage('');
   };
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
-    const start = toIso(startInput);
-    if (!start) { setError('Tanggal mulai tidak valid.'); return; }
-    if (endInput && !toIso(endInput)) { setError('Tanggal selesai tidak valid.'); return; }
+    const start = toIsoWib(startInput);
+    const end = toIsoWib(endInput);
+    if (!start) { setError('Tanggal mulai WIB tidak valid.'); return; }
+    if (endInput && !end) { setError('Tanggal selesai WIB tidak valid.'); return; }
+    if (end && Date.parse(end) <= Date.parse(start)) { setError('Tanggal selesai harus setelah tanggal mulai (WIB).'); return; }
     setBusy(true); setError(''); setMessage('');
     try {
-      await saveAnnouncement({ ...draft, starts_at: start, ends_at: toIso(endInput) }, editing === 'new' ? undefined : editing ?? undefined);
+      await saveAnnouncement({ ...draft, starts_at: start, ends_at: end }, editing === 'new' ? undefined : editing ?? undefined);
       setEditing(null);
       await load();
       setMessage('Pengumuman berhasil disimpan.');
@@ -113,10 +111,10 @@ export default function AnnouncementManager({ books }: { books: Book[] }) {
         </select>
       </label>
       <div className="kk-v73-dates">
-        <label>Mulai tampil <input type="datetime-local" required value={startInput} onChange={event => setStartInput(event.target.value)}/></label>
-        <label>Berakhir (opsional) <input type="datetime-local" value={endInput} min={startInput} onChange={event => setEndInput(event.target.value)}/></label>
+        <label>Mulai tampil (WIB) <input type="datetime-local" required value={startInput} onChange={event => setStartInput(event.target.value)}/></label>
+        <label>Berakhir (WIB, opsional) <input type="datetime-local" value={endInput} min={startInput} onChange={event => setEndInput(event.target.value)}/></label>
       </div>
-      <p className="kk-v73-hint"><BrandIcon name="calendar-clock" size={15}/> Jadwal dimasukkan sesuai zona waktu perangkatmu. Waktu ditampilkan sebagai WIB pada daftar.</p>
+      <p className="kk-v73-hint"><BrandIcon name="calendar-clock" size={15}/> Masukkan tanggal dan jam WIB (UTC+07:00). Jadwal tetap sama meskipun perangkat menggunakan zona waktu lain.</p>
       <label>Status
         <select value={draft.status} onChange={event => setDraft(prev => ({ ...prev, status: event.target.value as AnnouncementInput['status'] }))}>
           <option value="draft">Draft — hanya terlihat di Studio</option>

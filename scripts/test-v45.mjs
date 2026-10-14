@@ -24,7 +24,7 @@ const client={
   },
   from(table){return {
     select(_columns){this.columns=_columns;return this;},
-    eq(){return this;},lte(){return this;},order(){return this;},limit(){return this;},
+    eq(){return this;},is(){return this;},lte(){return this;},order(){return this;},limit(){return this;},
     async maybeSingle(){
       if(table==='qr_books')return {data:mode==='private'?null:{id:'novel'},error:null};
       if(mode==='unreleased')return {data:null,error:null};
