@@ -20,15 +20,21 @@ import { readerHeading } from '../utils/readerHeading';
 import { matchesStoryStatus, type StoryStatusFilter } from '../features/public/storyFilters';
 // Preview-only records. These are never inserted into Supabase or exposed as published works.
 const demoDate = '2026-10-01T00:00:00.000Z';
-const demoData: Array<[string, string, string, string]> = [
-    ['Senja di Ujung Kota', 'Romansa', 'Tentang dua hati yang selalu bertemu di waktu yang salah, namun tetap memilih untuk tinggal.', '/assets/v73/senja.jpg'],
-    ['Langit yang Sama', 'Romansa', 'Satu langit, dua perjalanan, dan hal-hal kecil yang membuat kita kembali.', '/assets/v73/langit.jpg'],
-    ['Jejak di Kertas', 'Slice of Life', 'Di antara halaman dan ingatan, ada cerita yang belum selesai.', '/assets/v73/jejak.jpg'],
-    ['Rumah Kedua', 'Keluarga', 'Pulang tidak selalu berarti kembali ke tempat yang sama.', '/assets/v73/rumah.jpg'],
-    ['Sebelum Hujan', 'Romansa', 'Ketika langit berubah warna, ada janji yang masih menunggu.', '/assets/v73/hujan.jpg'],
-    ['Bunga Terakhir', 'Fantasi', 'Di taman yang terlupakan, satu bunga menyimpan harapan.', '/assets/v73/bunga.jpg'],
+const demoData: Array<[
+    string,
+    string,
+    string
+]> = [
+    ['Senja di Ujung Kota', 'Romansa', 'Tentang dua hati yang selalu bertemu di waktu yang salah, namun tetap memilih untuk tinggal.'],
+    ['Langit yang Sama', 'Romansa', 'Satu langit, dua perjalanan, dan hal-hal kecil yang membuat kita kembali.'],
+    ['Jejak di Kertas', 'Slice of Life', 'Di antara halaman dan ingatan, ada cerita yang belum selesai.'],
+    ['Ruang di Antara', 'Drama', 'Sebuah perjalanan menemukan rumah di antara dua dunia.'],
+    ['Sebelum Hujan', 'Romansa', 'Ketika langit berubah warna, ada janji yang masih menunggu.'],
+    ['Rumah Kedua', 'Keluarga', 'Pulang tidak selalu berarti kembali ke tempat yang sama.'],
+    ['Kisah yang Tertunda', 'Drama', 'Tidak semua perpisahan berarti sebuah akhir.'],
+    ['Bunga Terakhir', 'Fantasi', 'Di taman yang terlupakan, satu bunga menyimpan harapan.'],
 ];
-const demoBooks: Book[] = demoData.map(([title, genre, synopsis, cover], i) => ({ id: `v6-demo-${i}`, slug: `v6-demo-${i}`, title, genre, synopsis, cover_url: cover, status: 'ongoing', is_published: true, is_featured: i < 4, created_at: demoDate, updated_at: demoDate }));
+const demoBooks: Book[] = demoData.map(([title, genre, synopsis], i) => ({ id: `v6-demo-${i}`, slug: `v6-demo-${i}`, title, genre, synopsis, cover_url: null, status: 'ongoing', is_published: true, is_featured: i === 0, created_at: demoDate, updated_at: demoDate }));
 function useLibrary() {
     const [data, setData] = useState<{
         books: Book[];
@@ -219,8 +225,8 @@ function Detail({ book, episodes, schedules, demo }: {
                 <BrandIcon name="arrow-left" size={17}/><span>Temukan</span>
             </Action>
             <section className="v6-detail-hero">
-                <div className="v6-detail-cover kk-smart-detail">
-                    <Cover book={book} size="large" eager surface="detail"/>
+                <div className="v6-detail-cover">
+                    <Cover book={book} size="large" eager/>
                 </div>
                 <div className="v6-detail-info">
                     <h1>{book.title}</h1>
@@ -330,7 +336,7 @@ export default function PublicLibrary({ path }: {
     if (loading && path !== '/tentang')
         return <ThemeLoading context="public" text="Menyiapkan KataKecil…"/>;
     return <div className={`site-shell v6-public ${slug ? 'v63-public-detail' : ''}`} data-kk-theme={theme}><PublicHeader path={path}/>
-    {demo && <div className="v6-demo-notice"><BrandIcon name="sparkle" size={14}/> Mode pratinjau: enam cerita di layar memakai rasio sampul yang berbeda, bukan konten terbit.</div>}
+    {demo && <div className="v6-demo-notice"><BrandIcon name="sparkle" size={14}/> Mode pratinjau: delapan cerita di layar adalah contoh visual, bukan konten terbit.</div>}
     {error && path !== '/tentang' ? <main className="kk-v7-page kk-v71-load-error" aria-label="Katalog tidak dapat dimuat">
       <div className="kk-v71-error-panel" role="alert"><BrandIcon name="alert" size={26}/><h1>Katalog belum bisa dimuat</h1>
         <p>Periksa koneksi internetmu, lalu coba lagi. Cerita dan posisi baca yang tersimpan di perangkat tidak berubah.</p>

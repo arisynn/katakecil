@@ -5,8 +5,6 @@ import BookSections from '../../../pages/BookSections';
 import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../../../data/library';
 import { supabase } from '../../../data/supabase';
 import { bulkPublishDrafts } from '../../../data/bulkPublishing';
-import { measureImageUrl, prepareCoverBlob, type PreparedCover } from '../../../utils/coverFit';
-import { CoverFields } from './CoverFields';
 import { B, Pill, errMsg } from './StudioShared';
 
 const BOOK_STATUS: Record<Book['status'], string> = { ongoing: 'Berlangsung', completed: 'Tamat', hiatus: 'Jeda' };
@@ -71,10 +69,15 @@ export function BookForm({ existing, onSaved }: {
     const [published, setPublished] = useState(existing?.is_published || false);
     const [featured, setFeatured] = useState(existing?.is_featured || false);
     const [cover, setCover] = useState(existing?.cover_url || '');
-    const [prepared, setPrepared] = useState<PreparedCover | null>(null);
+    const [upload, setUpload] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState('');
     const [privatePreview,setPrivatePreview]=useState('');
     const [publishPrivate,setPublishPrivate]=useState(false);
     useEffect(()=>{let active=true,url='';if(existing?.private_cover_path&&supabase)void supabase.storage.from('story-covers-private').download(existing.private_cover_path).then(({data})=>{if(data&&active){url=URL.createObjectURL(data);setPrivatePreview(url);}});return()=>{active=false;if(url)URL.revokeObjectURL(url);};},[existing?.private_cover_path]);
+    useEffect(() => { if (!upload) {
+        setPreviewUrl('');
+        return;
+    } const url = URL.createObjectURL(upload); setPreviewUrl(url); return () => URL.revokeObjectURL(url); }, [upload]);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const slug = existing?.slug || slugify(title);
@@ -89,23 +92,21 @@ export function BookForm({ existing, onSaved }: {
                 throw new Error('Isi judul terlebih dahulu.');
             let cover_url = cover || null;
             const id = existing?.id || slug;
-            let selectedCover:Blob|null=prepared?.blob ?? null;
-            if(publishPrivate&&existing?.private_cover_path&&!prepared){const {data,error}=await supabase.storage.from('story-covers-private').download(existing.private_cover_path);if(error)throw error;const ready=await prepareCoverBlob(data,'sampul-privat');if('error' in ready)throw Error(ready.error);selectedCover=ready.blob;URL.revokeObjectURL(ready.previewUrl);}
+            let selectedCover:Blob|null=upload;
+            if(publishPrivate&&existing?.private_cover_path&&!upload){const {data,error}=await supabase.storage.from('story-covers-private').download(existing.private_cover_path);if(error)throw error;selectedCover=data;}
             if (selectedCover) {
                 if(!window.confirm('Sampul ini akan disalin ke penyimpanan publik dan dapat diakses lewat URL. Lanjutkan?')){setBusy(false);return;}
-                const type = selectedCover.type || 'image/webp';
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(type))
+                const bitmap=await createImageBitmap(selectedCover);const valid=bitmap.width>0&&bitmap.height>0&&bitmap.width<=8000&&bitmap.height<=8000;bitmap.close();if(!valid)throw Error('Dimensi sampul tidak valid.');
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(selectedCover.type))
                     throw new Error('Gunakan gambar JPG, PNG, atau WebP.');
                 if (selectedCover.size > 5242880)
                     throw new Error('Maksimum sampul 5 MB.');
-                const ext = type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg';
+                const ext = selectedCover.type === 'image/png' ? 'png' : selectedCover.type === 'image/webp' ? 'webp' : 'jpg';
                 const name = `${id}/${Date.now()}.${ext}`;
-                const { error } = await supabase.storage.from('story-covers').upload(name, selectedCover, { contentType: type, upsert: false });
+                const { error } = await supabase.storage.from('story-covers').upload(name, selectedCover, { contentType: selectedCover.type, upsert: false });
                 if (error)
                     throw error;
                 cover_url = supabase.storage.from('story-covers').getPublicUrl(name).data.publicUrl;
-            } else if (cover.trim()) {
-                await measureImageUrl(cover.trim());
             }
             const values = { title: title.trim(), slug, id, synopsis: synopsis.trim(), genre: genre.trim() || 'Fiksi', status, is_published: published, is_featured: featured, cover_url };
             const q = existing ? supabase.from('qr_books').update(values).eq('id', existing.id) : supabase.from('qr_books').insert(values);
@@ -128,7 +129,7 @@ export function BookForm({ existing, onSaved }: {
   <div className="studio-form-pair"><label className="studio-label">Genre<input maxLength={70} value={genre} onChange={e => setGenre(e.target.value)}/></label><label className="studio-label">Status cerita<select value={status} onChange={e => setStatus(e.target.value as Book['status'])}><option value="ongoing">Berlangsung</option><option value="completed">Tamat</option><option value="hiatus">Jeda</option></select></label></div>
   <label className="studio-check"><input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)}/><span><strong>Tampilkan novel di perpustakaan</strong><small>Episode tetap tersembunyi sampai tanggal rilisnya.</small></span></label>
   <label className="studio-check"><input type="checkbox" checked={featured} onChange={e => setFeatured(e.target.checked)}/><span><strong>Jadikan cerita unggulan</strong><small>Prioritaskan di bagian utama beranda.</small></span></label>
- </div><CoverFields slug={slug} title={title} genre={genre} cover={cover} privatePreview={privatePreview} hasPrivate={Boolean(existing?.private_cover_path)} publishPrivate={publishPrivate} onCover={setCover} onPublishPrivate={setPublishPrivate} onPrepared={setPrepared}/></div>
+ </div><div className="studio-cover-fields"><span className="studio-label-text">Sampul cerita</span><div className="studio-cover-preview"><Cover book={{ id: slug || 'new', title: title || 'Judul ceritamu', genre, cover_url: previewUrl || cover || privatePreview }} size="large"/></div><label className="studio-upload"><BrandIcon name="image-plus" size={18}/>{upload ? upload.name : 'Pilih sampul dari HP'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e => setUpload(e.target.files?.[0] || null)}/></label><p className="studio-small-muted">JPG, PNG, WebP · maks. 5 MB. Upload melalui pengaturan ini membuat sampul publik setelah konfirmasi.</p>{existing?.private_cover_path&&<label className="studio-check"><input type="checkbox" checked={publishPrivate} onChange={e=>setPublishPrivate(e.target.checked)}/><span>Publikasikan salinan sampul privat dari impor</span></label>}<label className="studio-label">Atau URL sampul<input value={cover} onChange={e => setCover(e.target.value)} type="url" placeholder="https://..."/></label></div></div>
  {error && <div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy || !slug || !title.trim()} type="submit"><BrandIcon name="save" size={17}/>{busy ? 'Menyimpan…' : existing ? 'Simpan perubahan' : 'Buat novel'}</button></form>;
 }
 
