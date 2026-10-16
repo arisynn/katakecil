@@ -18,6 +18,7 @@ export type ImportChapter = {
   candidate_kind?: 'episode'|'frontmatter'|'arc'|'ignored'|'review'|'unsupported';
   section_type?: 'frontmatter' | 'arc';
 };
+export type ImportCover={data:Blob;mime:string;name:string;origin:string;reason:string;score:number;width:number;height:number};
 export type ParsedManuscript = {
   name: string;
   format: 'epub' | 'md' | 'txt' | 'zip';
@@ -27,6 +28,7 @@ export type ParsedManuscript = {
   chapters: ImportChapter[];
   warnings: string[];
   cover?: {data: Blob; mime: string};
+  covers?:ImportCover[];
 };
 
 export const MAX_IMPORT_EPISODES = 120;

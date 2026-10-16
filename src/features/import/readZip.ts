@@ -1,3 +1,4 @@
+import {COVER_LIMITS} from '../covers/model';
 import type {ZipResult} from './zip';
 import type {ParsedManuscript} from '../../utils/importManuscript';
 export async function readZip(file:File,signal:AbortSignal,progress:(value:string)=>void):Promise<ParsedManuscript>{
@@ -19,7 +20,9 @@ export async function readZip(file:File,signal:AbortSignal,progress:(value:strin
     const {parseEpubFile}=await import('../../utils/importEpub');
     const parsed=await parseEpubFile(new File([Uint8Array.from(entry.bytes)],entry.name,{type:'application/epub+zip'}),70_000_000-result.expanded);
     result.parsed.chapters.push(...parsed.chapters.map(c=>({...c,key:`nested-${c.key}`,origin:`${entry.name}/${c.origin}`})));
-    result.parsed.warnings.push(...parsed.warnings);result.parsed.cover??=parsed.cover;
+    result.parsed.warnings.push(...parsed.warnings);
+    const candidates=[...(result.parsed.covers||[]),...(parsed.covers||[]).map(c=>({...c,origin:`${entry.name}/${c.origin}`}))].sort((a,b)=>b.score-a.score);
+    let total=0;result.parsed.covers=candidates.filter((c,i)=>{total+=c.data.size;return i<COVER_LIMITS.candidates&&total<=COVER_LIMITS.candidateBytes;});result.parsed.cover=result.parsed.covers[0];
   }
   if(signal.aborted)throw new DOMException('Dibatalkan','AbortError');
   return result.parsed;

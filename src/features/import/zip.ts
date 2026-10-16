@@ -1,3 +1,5 @@
+import {COVER_LIMITS} from '../covers/model';
+import {inspectImage} from '../covers/inspect';
 import JSZip from 'jszip';
 import {parsePlainManuscript,type ImportChapter,type ParsedManuscript} from '../../utils/importManuscript';
 export const ZIP_LIMITS={archive:20_000_000,expanded:70_000_000,entries:1000,depth:10,text:8_000_000};
@@ -47,7 +49,7 @@ export async function boundedRead(zip:JSZip,e:Entry,cap:number):Promise<Uint8Arr
 }
 export type ZipResult={parsed:ParsedManuscript;epubs:{name:string;bytes:Uint8Array}[];expanded:number};
 export async function parseZip(bytes:Uint8Array,name:string,progress:(message:string)=>void=()=>{}):Promise<ZipResult>{
-  const entries=inspectZip(bytes);const zip=await JSZip.loadAsync(bytes);const chapters:ImportChapter[]=[],epubs:ZipResult['epubs']=[];let cover:ParsedManuscript['cover'];
+  const entries=inspectZip(bytes);const zip=await JSZip.loadAsync(bytes);const chapters:ImportChapter[]=[],epubs:ZipResult['epubs']=[];const covers:NonNullable<ParsedManuscript['covers']>=[],coverWarnings:string[]=[];let coverBytes=0;
   for(const [i,e] of [...entries].sort((a,b)=>a.name.localeCompare(b.name,'id',{numeric:true})).entries()){
     if(e.dir)continue;progress(`Memeriksa berkas ${i+1} dari ${entries.length}…`);
     const base=e.name.split('/').pop()!;const system=/(?:^|\/)(?:__MACOSX|\.git|node_modules)(?:\/|$)/.test(e.name)||/^\./.test(base);
@@ -60,11 +62,19 @@ export async function parseZip(bytes:Uint8Array,name:string,progress:(message:st
     }else if(/\.epub$/i.test(base)){
       if(epubs.length)throw Error('ZIP memuat beberapa EPUB. Pilih satu EPUB atau impor setiap karya secara terpisah.');
       epubs.push({name:e.name,bytes:await boundedRead(zip,e,18_000_000)});
-    }else if(/^(?:cover|sampul)[^/]*\.(png|jpe?g|webp)$/i.test(base)&&!cover){
-      const raw=await boundedRead(zip,e,5_000_000);const mime=/\.png$/i.test(base)?'image/png':/\.webp$/i.test(base)?'image/webp':'image/jpeg';
-      cover={data:new Blob([Uint8Array.from(raw)],{type:mime}),mime};
-      chapters.push({key:`zip-${i}`,title:base,content_md:'',episode_number:null,arc_title:'',origin:e.name,include:false,confidence:'tinggi',reviewed:true,candidate_kind:'ignored',reason:'Calon sampul; dapat dipilih terpisah pada tujuan novel baru.'});
+    }else if(/\.(png|jpe?g|webp)$/i.test(base)){
+      let reason='Gambar dilewati.',valid=false;
+      if(covers.length>=COVER_LIMITS.candidates||e.size>COVER_LIMITS.bytes||coverBytes+e.size>COVER_LIMITS.candidateBytes){reason='Kandidat sampul melewati batas 12 gambar / 30 MiB total / 15 MiB per gambar.';coverWarnings.push(`${base}: ${reason}`);}
+      else try{
+        const raw=await boundedRead(zip,e,COVER_LIMITS.bytes);const info=inspectImage(raw);coverBytes+=raw.length;
+        const named=/(?:^|[ _.-])(cover|sampul)(?:[ _.-]|$)/i.test(base),folder=/(?:^|\/)(?:covers?|sampul)\//i.test(e.name);
+        const portrait=info.width/info.height>=.4&&info.width/info.height<=.85;
+        reason=named?'Nama berkas menunjukkan sampul; tetap periksa gambarnya.':folder?'Gambar berada dalam folder sampul.':portrait?'Rasio potret; bisa berupa sampul atau ilustrasi bab.':'Gambar tambahan; pilih hanya jika memang sampul.';
+        covers.push({data:new Blob([Uint8Array.from(raw)],{type:info.mime}),mime:info.mime,name:base,origin:e.name,reason,score:(named?80:0)+(folder?30:0)+(portrait?10:0),width:info.width,height:info.height});valid=true;
+      }catch(error){reason=error instanceof Error?error.message:'Gambar tidak terbaca.';coverWarnings.push(`${base}: ${reason}`);}
+      chapters.push({key:`zip-${i}`,title:base,content_md:'',episode_number:null,arc_title:'',origin:e.name,include:false,confidence:'tinggi',reviewed:true,candidate_kind:valid?'ignored':'unsupported',reason:valid?'Kandidat sampul; pilih terpisah. '+reason:reason});
     }else chapters.push({key:`zip-${i}`,title:base,content_md:'',episode_number:null,arc_title:'',origin:e.name,include:false,confidence:'periksa',reviewed:true,candidate_kind:'unsupported',reason:'Format belum didukung atau bukan naskah. Tidak disimpan.'});
   }
-  return {parsed:{name,format:'zip',title:name.replace(/\.zip$/i,'').replace(/_/g,' '),creator:'',language:'id',chapters,warnings:['Periksa kelompok folder jika arsip berisi lebih dari satu karya. Berkas asli tidak diubah.'],cover},epubs,expanded:entries.reduce((n,e)=>n+e.size,0)};
+  covers.sort((a,b)=>b.score-a.score||a.origin.localeCompare(b.origin));
+  return {parsed:{name,format:'zip',title:name.replace(/\.zip$/i,'').replace(/_/g,' '),creator:'',language:'id',chapters,warnings:['Periksa kelompok folder jika arsip berisi lebih dari satu karya. Berkas asli tidak diubah.',...coverWarnings],cover:covers[0],covers},epubs,expanded:entries.reduce((n,e)=>n+e.size,0)};
 }

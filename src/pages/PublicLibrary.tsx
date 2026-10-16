@@ -1,6 +1,7 @@
+import {CoverDetail} from '../features/covers/CoverDetail';
 import BrandIcon from '../components/BrandIcon';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Cover } from '../components/Cover';
+import { Cover, fallbackCover } from '../components/Cover';
 import { getPublicLibrary, type Book, type EpisodeSummary } from '../data/library';
 import { isConfigured } from '../data/supabase';
 import { navigate } from '../utils/nav';
@@ -34,7 +35,7 @@ const demoData: Array<[
     ['Kisah yang Tertunda', 'Drama', 'Tidak semua perpisahan berarti sebuah akhir.'],
     ['Bunga Terakhir', 'Fantasi', 'Di taman yang terlupakan, satu bunga menyimpan harapan.'],
 ];
-const demoBooks: Book[] = demoData.map(([title, genre, synopsis], i) => ({ id: `v6-demo-${i}`, slug: `v6-demo-${i}`, title, genre, synopsis, cover_url: null, status: 'ongoing', is_published: true, is_featured: i === 0, created_at: demoDate, updated_at: demoDate }));
+const demoBooks: Book[] = demoData.map(([title, genre, synopsis], i) => ({ id: `v6-demo-${i}`, slug: `v6-demo-${i}`, title, genre, synopsis, cover_url: fallbackCover({id:`v6-demo-${i}`,title}), status: 'ongoing', is_published: true, is_featured: i === 0, created_at: demoDate, updated_at: demoDate }));
 function useLibrary() {
     const [data, setData] = useState<{
         books: Book[];
@@ -226,7 +227,7 @@ function Detail({ book, episodes, schedules, demo }: {
             </Action>
             <section className="v6-detail-hero">
                 <div className="v6-detail-cover">
-                    <Cover book={book} size="large" eager/>
+                    <CoverDetail book={book}/>
                 </div>
                 <div className="v6-detail-info">
                     <h1>{book.title}</h1>

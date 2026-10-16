@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "7.2.0-rc.1",
+  "version": "7.4.0-rc.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,9 +19,12 @@
     "audit:v7-theme": "node scripts/audit-v7-theme.mjs",
     "audit:v7beta": "node scripts/audit-v7beta.mjs",
     "test:v72": "node scripts/test-v72-import.mjs && node scripts/test-v72-database.mjs && node scripts/test-v72-reader-pwa.mjs",
-    "test:browser": "node scripts/test-v72-browser.mjs",
+    "test:browser": "node scripts/test-browser.mjs",
     "check": "npm run lint && npm run check:structure && npm run test:current",
-    "clean:obsolete": "node scripts/clean-obsolete.mjs"
+    "clean:obsolete": "node scripts/clean-obsolete.mjs",
+    "test:v74": "node scripts/test-v74-revisions.mjs",
+    "test:v73": "node scripts/test-v73-covers.mjs",
+    "test:edge": "node scripts/test-v73-edge.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
@@ -31,6 +34,8 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",
+    "@jsquash/png": "3.1.1",
+    "@jsquash/webp": "1.5.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "24.10.1",
     "@types/react": "19.3.0",
@@ -39,7 +44,8 @@
     "playwright": "1.56.1",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "vite": "8.3.4"
+    "vite": "8.3.4",
+    "wasm-feature-detect": "1.9.0"
   },
   "engines": {
     "node": ">=22.12.0"

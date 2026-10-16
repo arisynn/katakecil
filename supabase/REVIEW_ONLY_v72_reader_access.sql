@@ -29,6 +29,13 @@ REVOKE SELECT ON TABLE public.qr_episodes FROM PUBLIC, anon, authenticated;
 REVOKE SELECT (content_md) ON public.qr_episodes FROM PUBLIC, anon, authenticated;
 GRANT SELECT (id,book_id,episode_number,arc_title,title,release_at,is_enabled,is_finale,created_at,updated_at,deleted_at)
   ON public.qr_episodes TO anon, authenticated;
+-- V7.4 may already be installed. Preserve its metadata-only release guard in either rollout order.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='qr_episodes' AND column_name='editor_version') THEN
+    GRANT SELECT (editor_version) ON public.qr_episodes TO authenticated;
+  END IF;
+END $$;
 -- Retain INSERT/UPDATE/DELETE privileges and author RLS; writes return metadata only.
 DO $$
 BEGIN

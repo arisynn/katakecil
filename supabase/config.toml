@@ -1,3 +1,7 @@
 # Public only: the handler validates publication state on the server.
 [functions.secure-episode]
 verify_jwt = false
+
+# Signed-in authors only; the handler also verifies the session and author membership.
+[functions.cover-assets]
+verify_jwt = true

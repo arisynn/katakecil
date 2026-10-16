@@ -17,3 +17,6 @@ naskah-pribadi/
 
 # Generated browser QA artifacts
 qa/
+.env.local
+.env.*.local
+supabase/.temp/

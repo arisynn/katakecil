@@ -1,3 +1,5 @@
+import {COVER_LIMITS} from '../features/covers/model';
+import {inspectImage} from '../features/covers/inspect';
 /** Browser-only EPUB 2/3 importer. Parses untrusted XHTML as inert XML/HTML;
  * only Markdown/plain text can leave this module. Never inject EPUB HTML into the DOM.
  */
@@ -233,12 +235,17 @@ export async function parseEpubFile(file:File,maxExpanded=MAX_UNCOMPRESSED):Prom
   const exclusions=chapterList.filter(x=>x.section_type==='frontmatter').length;
   if(exclusions)warnings.push(`${exclusions} halaman non-episode dikecualikan otomatis (misalnya sampul, daftar isi, atau hak cipta). Halaman tersebut tetap bisa ditinjau dan dicentang secara manual.`);
   if(chapterList.some(x=>x.confidence==='periksa'&&x.include))warnings.push('Sebagian batas/judul episode masih belum pasti. Periksa daftar sebelum menyimpan.');
-  let cover:ParsedManuscript['cover'];
+  const covers:NonNullable<ParsedManuscript['covers']>=[];let coverBytes=0;
   const coverID=elements(opf,'meta').find(x=>getAttr(x,'name')==='cover')?.getAttribute('content');
   const coverItem=(coverID&&items.get(coverID))||Array.from(items.values()).find(x=>x.props.split(/\s+/).includes('cover-image'));
-  if(coverItem && /^image\/(?:png|jpeg|webp)$/.test(coverItem.type)){
-    const z=entryMap.get(coverItem.path);
-    if(z&&z.size<=5_000_000){const bytes=await boundedRead(archive,z,5_000_000);cover={data:new Blob([Uint8Array.from(bytes)],{type:coverItem.type}),mime:coverItem.type};}else if(z)warnings.push('Sampul terlalu besar untuk diunggah otomatis (maks. 5 MB).');
+  const imageItems=Array.from(items.values()).filter(x=>/^image\/(?:png|jpeg|webp)$/.test(x.type)).sort((a,b)=>Number(b===coverItem)-Number(a===coverItem));
+  for(const item of imageItems){
+    const z=entryMap.get(item.path);if(!z)continue;
+    if(covers.length>=COVER_LIMITS.candidates||z.size>COVER_LIMITS.bytes||coverBytes+z.size>COVER_LIMITS.candidateBytes){warnings.push(`Kandidat sampul ${item.path} dilewati karena batas gambar/ukuran.`);continue;}
+    try{const bytes=await boundedRead(archive,z,COVER_LIMITS.bytes),info=inspectImage(bytes);coverBytes+=bytes.length;const named=/(?:cover|sampul)/i.test(item.path),official=item===coverItem;
+     covers.push({data:new Blob([Uint8Array.from(bytes)],{type:info.mime}),mime:info.mime,name:basename(item.path),origin:item.path,reason:official?'Ditandai sebagai sampul dalam metadata EPUB.':named?'Nama berkas menunjukkan sampul.':'Gambar EPUB; bisa berupa ilustrasi bab.',score:official?100:named?60:0,width:info.width,height:info.height});
+    }catch(e){warnings.push(`Sampul ${item.path} dilewati: ${e instanceof Error?e.message:'gambar rusak'}`);}
   }
-  return {name:file.name,format:'epub',title:cleanText(title),creator,language,chapters:chapterList,warnings,cover};
+  covers.sort((a,b)=>b.score-a.score);
+  return {name:file.name,format:'epub',title:cleanText(title),creator,language,chapters:chapterList,warnings,cover:covers[0],covers};
 }

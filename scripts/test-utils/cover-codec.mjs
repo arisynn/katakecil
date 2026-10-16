@@ -1,0 +1,10 @@
+import decodePNG,{init as initPNG} from '@jsquash/png/decode.js';
+import encodeWebP,{init as initWebP} from '@jsquash/webp/encode.js';
+import {simd} from 'wasm-feature-detect';
+import {loadTs} from './load-ts.mjs';
+const {png,webp,webpSimd}=loadTs('supabase/functions/_shared/cover-codecs/wasm.ts');
+const {createCoverRaster}=loadTs('supabase/functions/_shared/cover-raster.ts');
+if(typeof globalThis.ImageData==='undefined')globalThis.ImageData=class ImageData{constructor(data,width,height){this.data=data;this.width=width;this.height=height;}};
+const compile=bits=>WebAssembly.compile(Uint8Array.from(atob(bits),c=>c.charCodeAt(0)));
+await initPNG(await compile(png));await initWebP(await compile(await simd()?webpSimd:webp));
+export const CoverRaster=createCoverRaster(bytes=>decodePNG(new Uint8Array(bytes).buffer),(pixels,options)=>encodeWebP(pixels,options));

@@ -8,3 +8,9 @@ export const supabase = isConfigured ? createClient(url, key, {
   global: { fetch: (input,init) => fetch(input,{...init,cache:'no-store'}) },
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
 }) : null;
+
+/** A scoped SDK client lets cancellation stop in-flight Storage uploads too. */
+export function abortableStorage(signal:AbortSignal){
+ if(!supabase)throw Error('Supabase belum dikonfigurasi.');
+ return createClient(url,key,{accessToken:async()=>{const {data}=await supabase.auth.getSession();return data.session?.access_token||null;},global:{fetch:(input,init)=>fetch(input,{...init,signal,cache:'no-store'})}}).storage;
+}

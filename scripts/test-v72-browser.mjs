@@ -12,11 +12,16 @@ const context=await browser.newContext({viewport:{width:390,height:844},deviceSc
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 mkdirSync('qa/v72',{recursive:true});
 let failNext=false,committed=false,importCalls=[];const body='SENTINEL_QA_V72_PRIVATE_8372. Synthetic public test body.\n\n## Heading internal\n\n'+('Synthetic paragraph for pagination.\n\n'.repeat(40));
-let editorRow={id:'00000000-0000-4000-8000-000000000012',book_id:'synthetic',episode_number:12,title:'Judul terbaru server',arc_title:'Arc terbaru',content_md:'Synthetic original editor body.',release_at:null,is_enabled:false,is_finale:false,created_at:'2026-01-01T00:00:00Z',updated_at:'2026-01-02T00:00:00Z'},editorWrites=[];
+let editorRow={id:'00000000-0000-4000-8000-000000000012',book_id:'synthetic',episode_number:12,title:'Judul terbaru server',arc_title:'Arc terbaru',content_md:'Synthetic original editor body.',release_at:null,is_enabled:false,is_finale:false,created_at:'2026-01-01T00:00:00Z',updated_at:'2026-01-02T00:00:00Z',editor_version:0},editorWrites=[];
 await page.route('https://synthetic-qa.supabase.co/**',async route=>{
  const req=route.request(),url=req.url(),data=req.postDataJSON();let result;
  if(url.includes('/rpc/qr_author_episode_v72'))result=editorRow;
- else if(url.includes('/rest/v1/qr_episodes')&&req.method()==='PATCH'){
+ else if(url.includes('/rpc/qr_episode_save_v74')){
+  editorWrites.push({data,url});
+  if(data.p_expected_version!==editorRow.editor_version)return route.fulfill({status:409,json:{code:'40001',message:'Bab berubah di tab lain. Tinjau perubahan sebelum menyimpan.'}});
+  editorRow={...editorRow,title:data.p_document.title,arc_title:data.p_document.arc,content_md:data.p_document.body,editor_version:editorRow.editor_version+1,updated_at:new Date(Date.parse(editorRow.updated_at)+1000).toISOString()};
+  const {content_md,...metadata}=editorRow;result=metadata;
+ }else if(url.includes('/rest/v1/qr_episodes')&&req.method()==='PATCH'){
   editorWrites.push({data,url});
   if(new URL(url).searchParams.get('updated_at')!=='eq.'+editorRow.updated_at)return route.fulfill({status:406,json:{code:'PGRST116',message:'No matching version'}});
   editorRow={...editorRow,...data,updated_at:new Date(Date.parse(editorRow.updated_at)+1000).toISOString()};
@@ -95,13 +100,13 @@ try{
  await page.getByLabel('Isi bab dalam Markdown').fill('Synthetic editor saved body.');
  await page.getByRole('button',{name:'Kembali ke karya',exact:true}).click();await page.waitForURL('**/studio/cerita/synthetic');
  assert.equal(editorRow.content_md,'Synthetic editor saved body.');assert.equal(editorRow.title,'Judul terbaru server');
- assert(editorWrites.length>=1);assert(!new URL(editorWrites[0].url).searchParams.get('select').includes('content_md'));
+ assert(editorWrites.length>=1);assert(editorWrites[0].url.includes('qr_episode_save_v74'));
  await page.goto(base+fixture+'?mode=editor');await page.getByLabel('Isi bab dalam Markdown').waitFor();
  await page.getByRole('button',{name:'Pratinjau',exact:true}).click();await page.locator('.reader-book').waitFor();
  assert.equal(await page.locator('.kk-preview-label').count(),0);
  await page.locator('.reader-stage').click({position:{x:195,y:400}});
  await page.getByRole('button',{name:'Kembali ke editor',exact:true}).click();await page.getByLabel('Isi bab dalam Markdown').waitFor();
- editorRow={...editorRow,updated_at:'2026-02-01T00:00:00Z',title:'Judul diubah tab lain',content_md:'Synthetic newer remote body.'};
+ editorRow={...editorRow,editor_version:editorRow.editor_version+1,updated_at:'2026-02-01T00:00:00Z',title:'Judul diubah tab lain',content_md:'Synthetic newer remote body.'};
  await page.getByLabel('Isi bab dalam Markdown').fill('Synthetic unsaved local conflict.');
  await page.getByRole('button',{name:'Kembali ke karya',exact:true}).click();await page.getByRole('alert').filter({hasText:'Bab berubah di tab lain'}).waitFor();
  assert(page.url().includes('mode=editor'));assert.equal(await page.getByLabel('Isi bab dalam Markdown').inputValue(),'Synthetic unsaved local conflict.');

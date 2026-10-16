@@ -1,6 +1,10 @@
 import BrandIcon from '../../../components/BrandIcon';
-import React, { useEffect, useState } from 'react';
-import { Cover } from '../../../components/Cover';
+import React, { useEffect, useRef, useState } from 'react';
+import { Cover } from '../../covers/AuthorCover';
+import CoverManager from '../../covers/CoverManager';
+import {CoverEditor} from '../../covers/CoverEditor';
+import {newCoverOperation,saveCover,type CoverUploadOperation} from '../../covers/api';
+import type {PreparedCover} from '../../covers/model';
 import BookSections from '../../../pages/BookSections';
 import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../../../data/library';
 import { supabase } from '../../../data/supabase';
@@ -58,79 +62,38 @@ export function Books({ books, episodes, onCreate }: {
   </div>;
 }
 
-export function BookForm({ existing, onSaved }: {
-    existing?: Book;
-    onSaved: (book: Book) => void;
-}) {
-    const [title, setTitle] = useState(existing?.title || '');
-    const [synopsis, setSynopsis] = useState(existing?.synopsis || '');
-    const [genre, setGenre] = useState(existing?.genre || 'Fiksi');
-    const [status, setStatus] = useState<Book['status']>(existing?.status || 'ongoing');
-    const [published, setPublished] = useState(existing?.is_published || false);
-    const [featured, setFeatured] = useState(existing?.is_featured || false);
-    const [cover, setCover] = useState(existing?.cover_url || '');
-    const [upload, setUpload] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState('');
-    const [privatePreview,setPrivatePreview]=useState('');
-    const [publishPrivate,setPublishPrivate]=useState(false);
-    useEffect(()=>{let active=true,url='';if(existing?.private_cover_path&&supabase)void supabase.storage.from('story-covers-private').download(existing.private_cover_path).then(({data})=>{if(data&&active){url=URL.createObjectURL(data);setPrivatePreview(url);}});return()=>{active=false;if(url)URL.revokeObjectURL(url);};},[existing?.private_cover_path]);
-    useEffect(() => { if (!upload) {
-        setPreviewUrl('');
-        return;
-    } const url = URL.createObjectURL(upload); setPreviewUrl(url); return () => URL.revokeObjectURL(url); }, [upload]);
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState('');
-    const slug = existing?.slug || slugify(title);
-    const save = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!supabase)
-            return;
-        setBusy(true);
-        setError('');
-        try {
-            if (!title.trim() || !slug)
-                throw new Error('Isi judul terlebih dahulu.');
-            let cover_url = cover || null;
-            const id = existing?.id || slug;
-            let selectedCover:Blob|null=upload;
-            if(publishPrivate&&existing?.private_cover_path&&!upload){const {data,error}=await supabase.storage.from('story-covers-private').download(existing.private_cover_path);if(error)throw error;selectedCover=data;}
-            if (selectedCover) {
-                if(!window.confirm('Sampul ini akan disalin ke penyimpanan publik dan dapat diakses lewat URL. Lanjutkan?')){setBusy(false);return;}
-                const bitmap=await createImageBitmap(selectedCover);const valid=bitmap.width>0&&bitmap.height>0&&bitmap.width<=8000&&bitmap.height<=8000;bitmap.close();if(!valid)throw Error('Dimensi sampul tidak valid.');
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(selectedCover.type))
-                    throw new Error('Gunakan gambar JPG, PNG, atau WebP.');
-                if (selectedCover.size > 5242880)
-                    throw new Error('Maksimum sampul 5 MB.');
-                const ext = selectedCover.type === 'image/png' ? 'png' : selectedCover.type === 'image/webp' ? 'webp' : 'jpg';
-                const name = `${id}/${Date.now()}.${ext}`;
-                const { error } = await supabase.storage.from('story-covers').upload(name, selectedCover, { contentType: selectedCover.type, upsert: false });
-                if (error)
-                    throw error;
-                cover_url = supabase.storage.from('story-covers').getPublicUrl(name).data.publicUrl;
-            }
-            const values = { title: title.trim(), slug, id, synopsis: synopsis.trim(), genre: genre.trim() || 'Fiksi', status, is_published: published, is_featured: featured, cover_url };
-            const q = existing ? supabase.from('qr_books').update(values).eq('id', existing.id) : supabase.from('qr_books').insert(values);
-            const { data, error } = await q.select().single();
-            if (error)
-                throw error;
-            onSaved(data as Book);
-        }
-        catch (e) {
-            setError(errMsg(e));
-        }
-        finally {
-            setBusy(false);
-        }
-    };
-    return <form onSubmit={save} className="studio-panel studio-book-form"><h2>{existing ? 'Pengaturan novel' : 'Novel baru'}</h2><div className="studio-form-grid"><div className="studio-fieldset">
-  <label className="studio-label">Judul cerita<input required maxLength={140} value={title} onChange={e => setTitle(e.target.value)} placeholder="Judul novelmu"/></label>
+export function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=>void}) {
+ const [title,setTitle]=useState(existing?.title||''),[synopsis,setSynopsis]=useState(existing?.synopsis||''),[genre,setGenre]=useState(existing?.genre||'Fiksi');
+ const [status,setStatus]=useState<Book['status']>(existing?.status||'ongoing'),[published,setPublished]=useState(existing?.is_published||false),[featured,setFeatured]=useState(existing?.is_featured||false);
+ const [cover,setCover]=useState(existing?.cover_url||''),[prepared,setPrepared]=useState<PreparedCover|null>(null),[preparing,setPreparing]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[stage,setStage]=useState('');
+ const created=useRef<Book|null>(null),newId=useRef<string>(''),coverOperation=useRef<CoverUploadOperation|null>(null);
+ const slug=existing?.slug||slugify(title);
+ const save=async(e:React.FormEvent)=>{
+  e.preventDefault();if(!supabase||busy)return;setBusy(true);setError('');
+  try{
+   if(!title.trim()||!slug)throw Error('Isi judul terlebih dahulu.');
+   if(cover&&!existing?.cover_manifest&&!prepared){let parsedURL:URL;try{parsedURL=new URL(cover);}catch{throw Error('URL sampul tidak valid.');}if(parsedURL.protocol!=='https:')throw Error('Gunakan URL sampul HTTPS.');}
+   const current=existing||created.current;
+   newId.current||=`${slug.slice(0,58)}-${crypto.randomUUID().slice(0,8)}`;
+   const id=current?.id||newId.current;
+   const values={id,title:title.trim(),slug,synopsis:synopsis.trim(),genre:genre.trim()||'Fiksi',status,is_published:published,is_featured:featured,...(!existing?.cover_manifest?{cover_url:cover||null}:{})};
+   const q=current?supabase.from('qr_books').update(values).eq('id',id):supabase.from('qr_books').insert(values);
+   let {data,error:saveError}=await q.select().single();
+   if(saveError?.code==='23505'&&!current){const recovered=await supabase.from('qr_books').select('*').eq('id',id).maybeSingle();if(recovered.data){data=recovered.data;saveError=null;}}
+   if(saveError)throw saveError;created.current=data as Book;
+   if(prepared&&!existing){coverOperation.current??=await newCoverOperation(id,prepared);const asset=await saveCover(coverOperation.current,new AbortController().signal,setStage);data={...data,studio_cover_path:asset.manifest?.card[0]?.path};}
+   onSaved({...data,...(existing?.cover_manifest?{cover_manifest:existing.cover_manifest,cover_version:existing.cover_version}:{})} as Book);
+  }catch(e){setError(`${errMsg(e)}${created.current&&!existing?' Karya sudah dibuat; coba simpan lagi untuk melanjutkan sampul tanpa membuat karya kedua.':''}`);}finally{setBusy(false);setStage('');}
+ };
+ return <><form onSubmit={save} className="studio-panel studio-book-form"><h2>{existing?'Pengaturan novel':'Novel baru'}</h2><div className="studio-form-grid"><div className="studio-fieldset">
+  <label className="studio-label">Judul cerita<input required maxLength={140} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Judul novelmu"/></label>
   <label className="studio-label">Alamat cerita (otomatis)<input readOnly value={slug} placeholder="judul-novel"/></label>
-  <label className="studio-label">Sinopsis<textarea rows={5} maxLength={2500} value={synopsis} onChange={e => setSynopsis(e.target.value)} placeholder="Apa yang akan ditemukan pembaca di dalam cerita ini?"/></label>
-  <div className="studio-form-pair"><label className="studio-label">Genre<input maxLength={70} value={genre} onChange={e => setGenre(e.target.value)}/></label><label className="studio-label">Status cerita<select value={status} onChange={e => setStatus(e.target.value as Book['status'])}><option value="ongoing">Berlangsung</option><option value="completed">Tamat</option><option value="hiatus">Jeda</option></select></label></div>
-  <label className="studio-check"><input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)}/><span><strong>Tampilkan novel di perpustakaan</strong><small>Episode tetap tersembunyi sampai tanggal rilisnya.</small></span></label>
-  <label className="studio-check"><input type="checkbox" checked={featured} onChange={e => setFeatured(e.target.checked)}/><span><strong>Jadikan cerita unggulan</strong><small>Prioritaskan di bagian utama beranda.</small></span></label>
- </div><div className="studio-cover-fields"><span className="studio-label-text">Sampul cerita</span><div className="studio-cover-preview"><Cover book={{ id: slug || 'new', title: title || 'Judul ceritamu', genre, cover_url: previewUrl || cover || privatePreview }} size="large"/></div><label className="studio-upload"><BrandIcon name="image-plus" size={18}/>{upload ? upload.name : 'Pilih sampul dari HP'}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e => setUpload(e.target.files?.[0] || null)}/></label><p className="studio-small-muted">JPG, PNG, WebP · maks. 5 MB. Upload melalui pengaturan ini membuat sampul publik setelah konfirmasi.</p>{existing?.private_cover_path&&<label className="studio-check"><input type="checkbox" checked={publishPrivate} onChange={e=>setPublishPrivate(e.target.checked)}/><span>Publikasikan salinan sampul privat dari impor</span></label>}<label className="studio-label">Atau URL sampul<input value={cover} onChange={e => setCover(e.target.value)} type="url" placeholder="https://..."/></label></div></div>
- {error && <div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy || !slug || !title.trim()} type="submit"><BrandIcon name="save" size={17}/>{busy ? 'Menyimpan…' : existing ? 'Simpan perubahan' : 'Buat novel'}</button></form>;
+  <label className="studio-label">Sinopsis<textarea rows={5} maxLength={2500} value={synopsis} onChange={e=>setSynopsis(e.target.value)} placeholder="Apa yang akan ditemukan pembaca di dalam cerita ini?"/></label>
+  <div className="studio-form-pair"><label className="studio-label">Genre<input maxLength={70} value={genre} onChange={e=>setGenre(e.target.value)}/></label><label className="studio-label">Status cerita<select value={status} onChange={e=>setStatus(e.target.value as Book['status'])}><option value="ongoing">Berlangsung</option><option value="completed">Tamat</option><option value="hiatus">Jeda</option></select></label></div>
+  <label className="studio-check"><input type="checkbox" checked={published} onChange={e=>setPublished(e.target.checked)}/><span><strong>Tampilkan novel di perpustakaan</strong><small>Episode tetap tersembunyi sampai tanggal rilisnya.</small></span></label>
+  <label className="studio-check"><input type="checkbox" checked={featured} onChange={e=>setFeatured(e.target.checked)}/><span><strong>Jadikan cerita unggulan</strong><small>Prioritaskan di bagian utama beranda.</small></span></label>
+ </div><div className="studio-cover-fields">{!existing&&<CoverEditor value={prepared} onChange={v=>{setPrepared(v);if(v)setCover('');coverOperation.current=null;}} title={title||'Judul ceritamu'} disabled={busy} onBusy={setPreparing}/>}<label className="studio-label">{existing?.cover_manifest?'Sampul aktif dikelola di bawah':'Atau URL sampul'}<input type="url" value={existing?.cover_manifest?existing.cover_url||'':cover} readOnly={Boolean(existing?.cover_manifest)} disabled={Boolean(prepared)} onChange={e=>setCover(e.target.value)} placeholder="https://..."/></label>{!existing&&prepared&&<p className="studio-muted">Sampul disimpan privat. Terbitkan dari pengaturan karya setelah novel dibuat.</p>}</div></div>
+ {error&&<div className="studio-error" role="alert">{error}</div>}{stage&&<p role="status">{stage}</p>}<button className="studio-primary" disabled={busy||preparing||!slug||!title.trim()} type="submit"><BrandIcon name="save" size={17}/>{busy?'Menyimpan…':existing?'Simpan perubahan':'Buat novel'}</button></form>{existing&&<CoverManager key={existing.id} book={existing} onChanged={onSaved}/>}</>;
 }
 
 export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDelete, onChanged }: {
@@ -208,6 +171,6 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
    </div>
    <small className="studio-muted">Hanya setelah konfirmasi. Jika proses gagal, transaksi database membatalkan seluruh perubahan.</small>
  </details>
- <BookSections bookId={book.id}/><div id="settings"><BookForm existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan novel ke Sampah</button></section></>;
+ <BookSections bookId={book.id}/><div id="settings"><BookForm key={book.id} existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan novel ke Sampah</button></section></>;
 }
 

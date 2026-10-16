@@ -7,10 +7,10 @@ import { episodeStatus, type Book, type Episode } from '../../../data/library';
 import { toWibInput } from '../../../utils/releasePlanning';
 import { navigate } from '../../../utils/nav';
 import { Pill, errMsg } from './StudioShared';
+import RevisionReview from '../../revisions/RevisionReview';
+import {saveEpisode} from '../../revisions/api';
+import {EditorSession,EditorConflict,sameManuscript as same,type Manuscript,type SaveReason} from '../../revisions/session';
 
-type Manuscript = { title: string; arc: string; body: string };
-const same = (a: Manuscript, b: Manuscript) =>
-  a.title === b.title && a.arc === b.arc && a.body === b.body;
 
 export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   ep: Episode;
@@ -18,7 +18,6 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   onUpdate: (value: Episode) => void;
   onDelete: () => Promise<void>;
 }) {
-  const version=useRef(ep.updated_at);
   const manuscriptRef = useRef<HTMLTextAreaElement>(null);
   const [title, setTitle] = useState(ep.title);
   const [arc, setArc] = useState(ep.arc_title);
@@ -33,7 +32,17 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   const lastSaved = useRef<Manuscript>({ title: ep.title, arc: ep.arc_title, body: ep.content_md });
   const current = useRef<Manuscript>({ title, arc, body });
   current.current = { title, arc, body };
-  const queue = useRef<Promise<void>>(Promise.resolve());
+  const [revisionMode,setRevisionMode]=useState<'history'|'conflict'|null>(null);
+  const [preparingHistory,setPreparingHistory]=useState(false);
+  const [conflict,setConflict]=useState(false);
+  const revisionBase=useRef<Manuscript>({...lastSaved.current});
+  const revisionLocal=useRef<Manuscript>({...current.current});
+  const updateRef=useRef(onUpdate);updateRef.current=onUpdate;
+  const session=useRef<EditorSession|null>(null);
+  if(!session.current)session.current=new EditorSession(ep,op=>saveEpisode(ep.id,op),(data,snapshot)=>{
+    lastSaved.current={...snapshot};
+    updateRef.current({...data,content_md:snapshot.body});
+  });
   const lastSaveFailed = useRef(false);
   const mounted = useRef(true);
   const dirty = !same(current.current, lastSaved.current);
@@ -43,45 +52,18 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   useEffect(() => {mounted.current=true;return()=>{ mounted.current = false; };}, []);
 
   const save = useCallback(async (): Promise<boolean> => {
-    if (!supabase) return false;
-    const snapshot = { ...current.current };
-    if (same(snapshot, lastSaved.current)) {
-      try { await queue.current; return same(current.current, lastSaved.current); }
-      catch { return false; }
-    }
-    lastSaveFailed.current = false;
-    setStatus('Menyimpan…');
-    const action = async () => {
-      const { data, error: dbError } = await supabase!.from('qr_episodes')
-        .update({
-          title: snapshot.title.trim() || `Episode ${ep.episode_number}`,
-          arc_title: snapshot.arc,
-          content_md: snapshot.body,
-        })
-        .eq('id', ep.id).eq('updated_at',version.current).is('deleted_at',null)
-        .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
-        .single();
-      if(dbError)throw Error(dbError.code==='PGRST116'?'Bab berubah di tab lain atau dipindahkan ke Sampah. Salin perubahan lokal sebelum memuat ulang; isi terbaru tidak ditimpa.':dbError.message);
-      version.current=data.updated_at;
-      lastSaved.current = snapshot;
-      onUpdate({ ...data, content_md: snapshot.body, is_finale: ep.is_finale } as Episode);
-      if (mounted.current) {
-        setError('');
-        setStatus(same(current.current, snapshot) ? 'Tersimpan' : 'Belum disimpan');
-      }
-    };
-    const run = queue.current.catch(() => undefined).then(action);
-    queue.current = run;
-    try { await run; return same(current.current, lastSaved.current); }
-    catch (caught) {
-      lastSaveFailed.current = true;
-      if (mounted.current) {
-        setError(`Gagal menyimpan naskah: ${errMsg(caught)}`);
-        setStatus('Gagal menyimpan');
-      }
+    lastSaveFailed.current=false;
+    if(mounted.current)setStatus('Menyimpan…');
+    try{
+      await session.current!.save({...current.current});
+      if(mounted.current){setError('');setConflict(false);setStatus(same(current.current,lastSaved.current)?'Tersimpan':'Belum disimpan');}
+      return same(current.current,lastSaved.current);
+    }catch(caught){
+      lastSaveFailed.current=true;
+      if(mounted.current){setError(`Gagal menyimpan naskah: ${errMsg(caught)}`);setStatus('Gagal menyimpan');if(caught instanceof EditorConflict)setConflict(true);}
       return false;
     }
-  }, [ep.id, ep.episode_number, ep.is_finale, onUpdate]);
+  }, []);
 
   const latestSave = useRef(save);
   latestSave.current = save;
@@ -97,13 +79,13 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
   latestFlush.current = flush;
 
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty || revisionMode || preparingHistory || publishing || conflict) return;
     const timer = window.setTimeout(() => { void save(); }, 1700);
     return () => window.clearTimeout(timer);
-  }, [dirty, title, arc, body, save]);
+  }, [dirty, title, arc, body, save, revisionMode, preparingHistory, publishing, conflict]);
 
-  useLeaveGuard(dirty || publishing, async () => {
-    if(publishing)return false;
+  useLeaveGuard(dirty || publishing || preparingHistory || !!revisionMode, async () => {
+    if(publishing || preparingHistory || revisionMode)return false;
     return await latestFlush.current();
   });
 
@@ -137,16 +119,43 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           : 'Tarik bab ini dari publik dan kembalikan menjadi draft?';
       if (!window.confirm(confirmation)) return;
       const { data, error: dbError } = await supabase.from('qr_episodes')
-        .update({ release_at, is_enabled }).eq('id', ep.id).eq('updated_at',version.current).is('deleted_at',null)
-        .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at')
+        .update({ release_at, is_enabled }).eq('id', ep.id).eq('editor_version',session.current!.version).is('deleted_at',null)
+        .select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,is_finale,created_at,updated_at,editor_version')
         .single();
-      if(dbError)throw Error(dbError.code==='PGRST116'?'Bab berubah di tab lain atau dipindahkan ke Sampah. Salin perubahan lokal sebelum memuat ulang; isi terbaru tidak ditimpa.':dbError.message);
-      version.current=data.updated_at;
+      if(dbError){if(dbError.code==='PGRST116'){session.current!.blocked=true;setConflict(true);throw new EditorConflict('Bab berubah di tab lain atau dipindahkan ke Sampah. Tinjau konflik sebelum melanjutkan.');}throw Error(dbError.message);}
+      session.current!.version=data.editor_version;
       onUpdate({ ...data, content_md: current.current.body, is_finale: ep.is_finale } as Episode);
       setStatus(mode === 'now' ? 'Diterbitkan' : mode === 'schedule' ? 'Terjadwal' : 'Menjadi draft');
       setReviewOpen(false);
     } catch (caught) { setError(errMsg(caught)); }
     finally { setPublishing(false); }
+  };
+
+  const openRevisions=async(mode:'history'|'conflict')=>{
+    if(publishing||preparingHistory||revisionMode)return;
+    setPreparingHistory(true);
+    try{
+      if(mode==='history'&&!(await latestFlush.current()))return;
+      revisionBase.current={...lastSaved.current};revisionLocal.current={...current.current};
+      setRevisionMode(mode);
+    }finally{setPreparingHistory(false);}
+  };
+  const applyRevision=async(doc:Manuscript,reason:SaveReason,server:Episode)=>{
+    // Keep the reviewed result in the editor, including when the reply is lost or another conflict occurs.
+    current.current={...doc};setTitle(doc.title);setArc(doc.arc);setBody(doc.body);setStatus('Menyimpan…');
+    try{
+      await session.current!.save(doc,reason,server.editor_version??0);
+      lastSaveFailed.current=false;setConflict(false);setError('');setStatus('Tersimpan');
+      setSchedule(toWibInput(server.release_at));
+    }catch(caught){
+      lastSaveFailed.current=true;setError(errMsg(caught));setStatus('Gagal menyimpan');
+      if(caught instanceof EditorConflict)setConflict(true);
+      throw caught;
+    }
+  };
+  const checkpoint=async()=>{
+    try{await session.current!.save({...current.current},'checkpoint');setStatus('Tersimpan');setError('');}
+    catch(caught){if(caught instanceof EditorConflict){setConflict(true);setStatus('Gagal menyimpan');setError(errMsg(caught));}throw caught;}
   };
 
   const importOne = async (file?: File) => {
@@ -193,6 +202,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
         </strong>
       </div>
       <div className="v69-editor-actions">
+        <button type="button" className="v69-icon-button" title="Riwayat revisi" aria-label="Riwayat revisi" disabled={publishing||preparingHistory} onClick={()=>void openRevisions(conflict?'conflict':'history')}><BrandIcon name="history" size={19}/></button>
         {status === 'Gagal menyimpan' && <button type="button" className="kk-v71-save-retry" aria-label="Coba simpan ulang" onClick={() => void latestFlush.current()}><BrandIcon name="rotate" size={16}/><span>Coba simpan</span></button>}
         <button type="button" className="v69-icon-button" title="Pratinjau" aria-label="Pratinjau"
           onClick={() => setPreview(true)}><BrandIcon name="eye" size={19}/></button>
@@ -202,9 +212,12 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
     </div>
 
     {error && <div className="studio-error kk-v71-editor-alert" role="alert">{error}</div>}
+    {conflict&&<div className="kk-revision-conflict-action"><button type="button" className="studio-light-button" disabled={publishing||preparingHistory} onClick={()=>void openRevisions('conflict')}><BrandIcon name="merge" size={17}/> Tinjau konflik</button></div>}
+    {preparingHistory&&<p role="status">Menyiapkan riwayat revisi…</p>}
     {isLive && <p className="v69-live-notice" role="note">Bab ini sudah terbit. Perubahan yang tersimpan akan langsung terlihat oleh pembaca.</p>}
     <div className="v69-editor-layout">
       <section className="v69-writing-paper" aria-label="Kanvas menulis">
+        <fieldset className="kk-revision-editor-fields" disabled={publishing||preparingHistory||!!revisionMode}>
         <span className="v69-chapter-kicker">BAB {ep.episode_number}</span>
         <label className="v69-visually-hidden" htmlFor="v69-chapter-title">Judul bab</label>
         <input id="v69-chapter-title" className="v69-chapter-title" maxLength={180}
@@ -236,6 +249,7 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
           </label>
           <p>Impor ke bab ini akan mengganti isi sebelumnya setelah konfirmasi.</p>
         </details>
+        </fieldset>
       </section>
 
       {!focusMode && <aside className="v69-editor-workflow" aria-label="Pemeriksaan dan publikasi">
@@ -260,14 +274,16 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
             <li><BrandIcon name="check-circle" size={17}/> {wordCount} kata dalam naskah</li>
             <li><BrandIcon name="eye" size={17}/> Periksa dialog, alur, dan typo melalui pratinjau</li>
           </ul>
-          {isLive && <p className="studio-warning">Bab ini sudah publik. Perubahan isi yang tersimpan langsung terlihat oleh pembaca.</p>}
+          {conflict&&<div className="kk-revision-conflict-action"><button type="button" className="studio-light-button" disabled={publishing||preparingHistory} onClick={()=>void openRevisions('conflict')}><BrandIcon name="merge" size={17}/> Tinjau konflik</button></div>}
+    {preparingHistory&&<p role="status">Menyiapkan riwayat revisi…</p>}
+    {isLive && <p className="studio-warning">Bab ini sudah publik. Perubahan isi yang tersimpan langsung terlihat oleh pembaca.</p>}
           {!book.is_published && <p className="studio-warning">Novel masih privat. Pembaca belum dapat mengakses bab yang diterbitkan.</p>}
           <label className="studio-label">Tanggal & jam rilis (WIB)
             <input type="datetime-local" value={schedule} onChange={event => setSchedule(event.target.value)}/>
           </label>
-          <button type="button" className="studio-light-button" disabled={publishing || !body.trim()}
+          <button type="button" className="studio-light-button" disabled={publishing || preparingHistory || !!revisionMode || conflict || !body.trim()}
             onClick={() => void updateRelease('schedule')}><BrandIcon name="calendar" size={17}/> Jadwalkan</button>
-          <button type="button" className="studio-primary" disabled={publishing || !body.trim()}
+          <button type="button" className="studio-primary" disabled={publishing || preparingHistory || !!revisionMode || conflict || !body.trim()}
             onClick={() => void updateRelease('now')}><BrandIcon name="send" size={17}/> Terbitkan sekarang</button>
           <p className="studio-publish-hint"><BrandIcon name="shield" size={15}/> Tidak ada publikasi tanpa konfirmasi.</p>
         </div>}
@@ -276,11 +292,12 @@ export default function ChapterEditor({ ep, book, onUpdate, onDelete }: {
             disabled={publishing} onClick={() => void updateRelease('draft')}>
             <BrandIcon name="lock" size={16}/> Tarik ke draft
           </button>}
-          <button type="button" className="studio-danger-lite" disabled={publishing || dirty}
+          <button type="button" className="studio-danger-lite" disabled={publishing || preparingHistory || !!revisionMode || conflict || dirty}
             onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan ke Sampah</button>
           {dirty && <small>Simpan perubahan sebelum memindahkan bab ke Sampah.</small>}
         </details>
       </aside>}
     </div>
+    {revisionMode&&<RevisionReview mode={revisionMode} episodeId={ep.id} base={revisionBase.current} local={revisionLocal.current} onApply={applyRevision} onCheckpoint={checkpoint} onClose={()=>setRevisionMode(null)}/>}
   </div>;
 }

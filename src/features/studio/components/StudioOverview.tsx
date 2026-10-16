@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import BrandIcon from '../../../components/BrandIcon';
-import { Cover } from '../../../components/Cover';
+import { Cover } from '../../covers/AuthorCover';
 import { episodeStatus, formatWib, type Book, type Episode } from '../../../data/library';
 import { B, authorName } from './StudioShared';
 

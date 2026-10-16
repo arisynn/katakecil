@@ -21,9 +21,12 @@ try {
   assert.match(dry.stdout,/TOTAL 11 episode/);
   assert.match(dry.stdout,/010 \| belum dijadwalkan \| Bab 10 — Bab Baru 1/);
   assert.match(dry.stdout,/DRY RUN/);
-  const scheduled = run(['--dir',arcs,'--start','2026-10-15']);
+  const scheduled = run(['--dir',arcs,'--start','2026-10-15','--confirm-past-release']);
   assert.equal(scheduled.status,0,scheduled.stderr);
   assert.match(scheduled.stdout,/TERJADWAL: Kamis dan Minggu, 19\.00 WIB/);
+  // This is a historical fixture; separately prove the safety guard still rejects past releases.
+  const past=run(['--dir',arcs,'--start','2020-01-02']);
+  assert.notEqual(past.status,0);assert.match(past.stderr,/confirm-past-release/);
   const isoSlots = createReleaseSlots(parseStartWib('2026-10-15T19:00:00+07:00'), 5);
   assert.deepEqual(isoSlots, [
     '2026-10-15T12:00:00.000Z',
