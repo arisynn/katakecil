@@ -21,7 +21,7 @@ export function BookCard({ book, count, demo, variant = 'default' }: {
   return <article className={`kk-v7-story-card v6-story-${variant}`}>
     <button type="button" className="kk-v7-story-open" onClick={() => navigate(`/cerita/${book.slug}`)} aria-label={`Lihat detail ${book.title}`}>
       <div className="kk-v7-cover"><Cover book={book}/></div>
-      <span className="kk-v7-story-title">{book.title}</span>
+      <span className="kk-v7-story-title">{book.title}</span><span className="kk-v75-card-meta">{book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Berlangsung'} · {demo?'Pratinjau':`${count} bab`}</span>
       {variant === 'horizontal' && <span className="kk-v7-story-caption">{book.genre || 'Fiksi'} · {demo ? 'Pratinjau' : `${count} bab`}</span>}
     </button>
   </article>;

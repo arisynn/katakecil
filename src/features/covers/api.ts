@@ -4,7 +4,7 @@ export const COVER_PRIVATE='story-covers-v73-private';
 const digest=async(blob:Blob)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))).map(n=>n.toString(16).padStart(2,'0')).join('');
 function client(){if(!supabase)throw Error('Supabase belum dikonfigurasi.');return supabase;}
 function explain(error:any){return /does not exist|schema cache|PGRST202|PGRST205/i.test(error?.message||'')?'Fitur sampul membutuhkan pemasangan pembaruan server V7.3. Sampul lama tetap tersedia.':error?.message||'Koneksi gagal. Coba kembali.';}
-export type CoverUploadOperation={id:string;payload:Record<string,unknown>;prepared:PreparedCover;actor:string};
+export type CoverUploadOperation={id:string;payload:Record<string,unknown>;prepared:PreparedCover;actor:string;publishOnImport?:boolean;expectedImportVersion?:number;importPublicationId?:string};
 export async function newCoverOperation(bookId:string,value:PreparedCover):Promise<CoverUploadOperation>{
  const db=client();const {data,error}=await db.auth.getUser();if(error||!data.user)throw Error('Sesi berakhir. Masuk kembali.');
  const [sourceHash,normalizedHash]=await Promise.all([digest(value.original),digest(value.normalized)]);

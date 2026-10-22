@@ -5,6 +5,7 @@ import './index.css';
 import './design/v72.css';
 import './design/v73.css';
 import './design/v74.css';
+import './design/v75.css';
 import {installNavigation} from './utils/nav';
 import {cleanPreviewStorage} from './utils/privacy';
 installNavigation();

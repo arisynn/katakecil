@@ -1,8 +1,10 @@
 import {CoverEditor,type CoverSource} from '../features/covers/CoverEditor';
 import {CoverCandidates} from '../features/covers/CoverCandidates';
-import {newCoverOperation,saveCover,type CoverUploadOperation} from '../features/covers/api';
+import {newCoverOperation,saveCover,publishCover,type CoverUploadOperation} from '../features/covers/api';
 import type {PreparedCover} from '../features/covers/model';
 import BrandIcon from '../components/BrandIcon';
+import PublicationOptions from '../features/studio/components/PublicationOptions';
+import {defaultPublicationOptions,publicationPreview} from '../utils/publicationPlan';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Book, Episode } from '../data/library';
 import { slugify } from '../data/library';
@@ -10,7 +12,7 @@ import { supabase } from '../data/supabase';
 import { navigate } from '../utils/nav';
 import {readZip} from '../features/import/readZip';
 import {useLeaveGuard} from '../hooks/useLeaveGuard';
-import {ImportRejected,commitImport,importStatus,rememberOperation,forgetOperation,pendingOperation} from '../data/manuscriptImport';
+import {ImportRejected,commitImport,commitPublishingImport,importStatus,rememberOperation,forgetOperation,pendingOperation} from '../data/manuscriptImport';
 import { assignEpisodeNumbers, changeOrder, mergeAdjacent, parsePlainManuscript, splitChapter, validateImport, type ImportChapter, type ParsedManuscript } from '../utils/importManuscript';
 const bodyHash=async(body:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(body.trim())))).map(b=>b.toString(16).padStart(2,'0')).join('');
 const errorText = (e: unknown) => e instanceof Error ? e.message : String(e);
@@ -33,6 +35,8 @@ const newImportId = (title: string) => {
 const meaningfulFrontmatter = (title: string) => /(?:kata pengantar|prakata|pengantar|preface|foreword|dedikasi|persembahan|ucapan terima kasih|acknowledgment|about the author|tentang penulis|catatan penulis)/i.test(title);
 export default function ManuscriptImporter({ books, episodes, onChanged }: Props) {
     const [reading, setReading] = useState(false);
+    const [publication,setPublication]=useState(defaultPublicationOptions);
+    const [publishImportedCover,setPublishImportedCover]=useState(true);
     const abortRef = useRef<AbortController|null>(null);
     const operation = useRef<{id:string;payload:Record<string,unknown>}|null>(null);
     const [pendingId,setPendingId] = useState<string|null>(()=>pendingOperation());
@@ -80,6 +84,9 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     const occupiedNumbers = useMemo(() => destination === 'new' ? [] : currentEpisodes, [destination, episodes]);
     const warnings = useMemo(() => { const eps = chapters.filter(c => !c.section_type); return eps.some(c => c.include) ? validateImport(eps, occupiedNumbers) : []; }, [chapters, occupiedNumbers]);
     const selected = chapters.filter(c => c.include && !c.section_type);
+    let releasePreview:ReturnType<typeof publicationPreview>=[],publicationError='';
+    try{releasePreview=publicationPreview(selected,currentEpisodes,publication);}catch(e){publicationError=errorText(e);}
+    const finishCover=async(op:CoverUploadOperation)=>{const asset=await saveCover(op,new AbortController().signal,setSaveStage);if(op.publishOnImport){setSaveStage('Menerbitkan sampul…');await publishCover(asset.id,op.expectedImportVersion??0,op.importPublicationId!);}return asset;};
     const chosenSections = chapters.filter(c => c.include && Boolean(c.section_type));
     const dirty = chapters.some(c => c.confidence === 'periksa' && !c.reviewed && c.include);
     const sectionErrors = chosenSections.flatMap(c=>!c.title.trim()||!c.content_md.trim()?['Ada halaman tanpa judul/isi.']:c.content_md.length>1_000_000?['Halaman melebihi 1 juta karakter.']:c.confidence==='periksa'&&!c.reviewed?['Konfirmasi halaman yang perlu diperiksa.']:[]);
@@ -94,7 +101,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
         if(!pendingId)return;
         setSaving(true);setError('');
         try { const result=await importStatus(pendingId);
-            if(result){forgetOperation();operation.current=null;setPendingId(null);setParsed(null);setChapters([]);if(coverOperation.current)setCoverRetry(coverOperation.current);setSuccess(`Impor terverifikasi: ${result.imported_count} episode + ${result.sections_count} halaman. Sampul dapat diatur dari pengaturan novel.`);setDestination(result.book_id);await onChanged();}
+            if(result){forgetOperation();operation.current=null;setPendingId(null);setParsed(null);setChapters([]);if(coverOperation.current)setCoverRetry(coverOperation.current);setSuccess(`Impor terverifikasi: ${result.imported_count} episode + ${result.sections_count} halaman (${result.publication_mode&&result.publication_mode!=='draft'?'penerbitan tersimpan':'draf'}). Sampul dapat diatur dari pengaturan novel.`);setDestination(result.book_id);await onChanged();}
             else if(operation.current){setError('Belum ada transaksi tersimpan. Tekan Coba simpan lagi; identitas operasi tetap sama.');}
             else {forgetOperation();setPendingId(null);setError('Tidak ditemukan transaksi tersimpan. Pilih kembali berkas dan periksa Studio sebelum membuat impor baru.');}
         }catch(e){setError(errorText(e));}finally{setSaving(false);}
@@ -110,6 +117,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
         setPickedName(file.name || 'Berkas tanpa nama');
         setError('');
         setSuccess('');
+        setPublication(defaultPublicationOptions());setPublishImportedCover(true);
         setParsed(null);setUseCover(false);setCoverChoice(null);setCoverSource(null);setPreparedCover(null);coverOperation.current=null;
         setImportReport(null);
         setStep('upload');
@@ -221,8 +229,9 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
             setError('Judul novel baru wajib diisi.');
             return;
         }
+        if(publicationError){setError(publicationError);return;}
         const title = destination === 'new' ? bookTitle : books.find(b => b.id === destination)?.title;
-        if (!operation.current && !window.confirm(`Simpan ${chosen.length} episode dan ${sections.length} halaman buku ke “${title}”?\n\nEpisode baru tetap DRAFT, tanpa mengubah jadwal yang sudah ada.`))
+        if (!operation.current && !window.confirm(`Simpan ${chosen.length} episode dan ${sections.length} halaman buku ke “${title}”?\n\n${publication.mode==='draft'?'Episode baru tetap DRAFT.':`Penerbitan: ${releasePreview.filter(p=>!p.release_at).length} bab sekarang dan ${releasePreview.filter(p=>p.release_at).length} bab terjadwal. Novel tampil publik.`} Jadwal lama tidak diubah.`))
             return;
         if(useCover&&(!preparedCover||coverPreparing)){setError('Tunggu sampai sampul selesai disiapkan, atau pilih Tanpa sampul.');return;}
         setSaving(true);
@@ -244,19 +253,19 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
             const pages = sections.map((c, i) => ({ position: maxPosition + i + 1, section_type: c.section_type, title: c.title.trim(), content_md: c.content_md.trim() }));
             setSaveStage('Menyimpan novel, halaman, dan episode dalam satu transaksi…');
             if(!operation.current){
-                const operationPayload={book_id:bookId,new_title:destination==='new'?bookTitle.trim():'',genre:bookGenre.trim()||'Fiksi',source_name:parsed.name,format:parsed.format,title_detected:parsed.title,episodes:payload,sections:pages,decisions:chapters.map(c=>({origin:c.origin.slice(0,1024),kind:c.section_type||c.candidate_kind||'episode',action:c.include?'include':'exclude',episode_number:c.include&&!c.section_type?c.episode_number:null,reason:(c.reason||'Keputusan penulis').slice(0,255),reviewed:Boolean(c.reviewed)}))};
+                const operationPayload={book_id:bookId,new_title:destination==='new'?bookTitle.trim():'',genre:bookGenre.trim()||'Fiksi',source_name:parsed.name,format:parsed.format,title_detected:parsed.title,...(publication.mode!=='draft'?{publishing:{mode:publication.mode,plan:releasePreview.map(({episode_number,release_at})=>({episode_number,release_at})),weekdays:publication.weekdays,time:publication.time}}:{}),episodes:payload,sections:pages,decisions:chapters.map(c=>({origin:c.origin.slice(0,1024),kind:c.section_type||c.candidate_kind||'episode',action:c.include?'include':'exclude',episode_number:c.include&&!c.section_type?c.episode_number:null,reason:(c.reason||'Keputusan penulis').slice(0,255),reviewed:Boolean(c.reviewed)}))};
                 if(new TextEncoder().encode(JSON.stringify(operationPayload)).length>12_000_000)throw Error('Total naskah terpilih maksimal 12 MB. Pecah impor menjadi beberapa bagian.');
                 // Freeze payload and UUID across every ambiguous network retry.
                 operation.current={id:crypto.randomUUID(),payload:operationPayload};
                 rememberOperation(operation.current.id);setPendingId(operation.current.id);
             }
-            if(useCover&&preparedCover&&!coverOperation.current)coverOperation.current=await newCoverOperation(bookId,preparedCover);
-            const receipt=await commitImport(operation.current.id,operation.current.payload);
+            if(useCover&&preparedCover&&!coverOperation.current){coverOperation.current=await newCoverOperation(bookId,preparedCover);coverOperation.current.publishOnImport=Boolean(operation.current.payload.publishing)&&publishImportedCover;coverOperation.current.expectedImportVersion=books.find(b=>b.id===bookId)?.cover_version??0;coverOperation.current.importPublicationId=crypto.randomUUID();}
+            const receipt=await (operation.current.payload.publishing?commitPublishingImport:commitImport)(operation.current.id,operation.current.payload);
             if(receipt.book_id!==bookId||receipt.imported_count!==payload.length||receipt.sections_count!==pages.length)throw Error('Hasil impor belum sesuai. Periksa status operasi sebelum melanjutkan.');
             forgetOperation();setPendingId(null);operation.current=null;
             let coverWarning = '';
             if (coverOperation.current) {
-                try {await saveCover(coverOperation.current,new AbortController().signal,setSaveStage);coverOperation.current=null;setCoverRetry(null);}
+                try {await finishCover(coverOperation.current);coverOperation.current=null;setCoverRetry(null);}
                 catch {setCoverRetry(coverOperation.current);coverWarning=' Sampul belum berhasil disimpan. Gunakan Coba simpan sampul di bawah; tidak perlu mengimpor bab lagi.';}
             }
             setSaveStage('Memuat ulang Studio…');
@@ -268,7 +277,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
                 refreshWarning = ' Muat ulang halaman Studio untuk melihat hasilnya.';
             }
             setImportReport({ cover: Boolean(parsed.cover), parts: chapters.length, episodes: payload.length, pages: pages.length, saved: true });
-            setSuccess(`Impor berhasil: ${payload.length} episode draft + ${pages.length} halaman buku tersimpan di “${title}”.${coverWarning}${refreshWarning}`);
+            setSuccess(`Impor berhasil: ${payload.length} episode ${receipt.publication_mode&&receipt.publication_mode!=='draft'?'dengan penerbitan sesuai pratinjau':'draft'} + ${pages.length} halaman buku tersimpan di “${title}”.${coverWarning}${refreshWarning}`);
             pendingNewId.current = null;
             setChapters([]);
             setParsed(null);
@@ -287,8 +296,8 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     };
     return <>
   <button className="studio-backlink" onClick={() => navigate(destination === 'new' ? '/studio/cerita' : `/studio/cerita/${destination}`)}><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</button>
-  <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>Pilih berkas, periksa pembagian bab, lalu simpan sebagai draft. Tidak ada publikasi otomatis.</p></div>
-  <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><BrandIcon name="upload" size={15}/> 1 · Pilih file</span><BrandIcon name="arrow-right" size={16}/><span className={parsed && !success ? 'active' : ''}><BrandIcon name="book-open" size={15}/> 2 · Periksa bab</span><BrandIcon name="arrow-right" size={16}/><span className={success ? 'active' : ''}><BrandIcon name="shield" size={15}/> 3 · Simpan draft</span></div>
+  <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>Pilih berkas, periksa pembagian bab, lalu simpan draf atau atur penerbitan otomatis.</p></div>
+  <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><BrandIcon name="upload" size={15}/> 1 · Pilih file</span><BrandIcon name="arrow-right" size={16}/><span className={parsed && !success ? 'active' : ''}><BrandIcon name="book-open" size={15}/> 2 · Periksa bab</span><BrandIcon name="arrow-right" size={16}/><span className={success ? 'active' : ''}><BrandIcon name="shield" size={15}/> 3 · Atur penerbitan</span></div>
   {pendingId && <section className="studio-panel"><p>Status penyimpanan perlu dipastikan. Pemeriksaan dikunci agar retry memakai isi yang sama.</p><button disabled={saving} className="studio-light-button" onClick={()=>void recover()}>Periksa status impor</button>{operation.current && <button disabled={saving} className="studio-light-button" onClick={()=>void persist()}>Coba simpan lagi</button>}</section>}
   {error && <div className="studio-error" role="alert">{error}</div>}
   {saveStage && <div className="v5-import-stage" role="status" aria-live="polite"><span className="v4-picker-spinner"/> {saveStage}</div>}
@@ -299,18 +308,18 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
       <li><BrandIcon name="check-circle" size={17}/>Berkas {parsed?.format.toUpperCase() || pickedName.split('.').pop()?.toUpperCase() || 'naskah'} berhasil dibaca</li>
       <li><BrandIcon name="check-circle" size={17}/>{importReport.cover ? 'Sampul ditemukan' : 'Tidak ada sampul terdeteksi — bisa ditambahkan nanti'}</li>
       <li><BrandIcon name="check-circle" size={17}/>{importReport.parts} bagian ditemukan ({importReport.episodes} calon episode, {importReport.pages} halaman buku, {importReport.parts-importReport.episodes-importReport.pages} bagian lain)</li>
-      {importReport.saved && <li><BrandIcon name="check-circle" size={17}/>{importReport.episodes} episode draft berhasil dibuat</li>}
+      {importReport.saved && <li><BrandIcon name="check-circle" size={17}/>{importReport.episodes} episode berhasil disimpan</li>}
       {importReport.saved && <li><BrandIcon name="check-circle" size={17}/>Penyimpanan database berhasil diverifikasi</li>}
     </ul>}
   </section>}
-  {coverRetry&&<section className="studio-panel"><p>Naskah sudah tersimpan. Sampul masih menunggu penyelesaian.</p><button type="button" className="studio-primary" disabled={saving} onClick={()=>{setSaving(true);setError('');void saveCover(coverRetry,new AbortController().signal,setSaveStage).then(()=>{setCoverRetry(null);coverOperation.current=null;setSuccess('Sampul privat berhasil disimpan. Naskah tidak diimpor ulang.');return onChanged();}).catch(e=>setError(errorText(e))).finally(()=>{setSaving(false);setSaveStage('');});}}>Coba simpan sampul</button><button type="button" className="studio-light-button" disabled={saving} onClick={()=>{setCoverRetry(null);coverOperation.current=null;}}>Atur sampul nanti</button></section>}
+  {coverRetry&&<section className="studio-panel"><p>Naskah sudah tersimpan. Sampul masih menunggu penyelesaian.</p><button type="button" className="studio-primary" disabled={saving} onClick={()=>{setSaving(true);setError('');void finishCover(coverRetry).then(()=>{setCoverRetry(null);coverOperation.current=null;setSuccess(coverRetry.publishOnImport?'Sampul berhasil diterbitkan. Naskah tidak diimpor ulang.':'Sampul privat berhasil disimpan. Naskah tidak diimpor ulang.');return onChanged();}).catch(e=>setError(errorText(e))).finally(()=>{setSaving(false);setSaveStage('');});}}>Coba simpan sampul</button><button type="button" className="studio-light-button" disabled={saving} onClick={()=>{setCoverRetry(null);coverOperation.current=null;}}>Atur sampul nanti</button></section>}
   {success && <div className="studio-success" role="status">{success} <button className="studio-light-button" onClick={() => navigate(`/studio/cerita/${destination}`)}>Lihat novel <BrandIcon name="arrow-right" size={16}/></button></div>}
   {reading && <button className="studio-light-button" onClick={()=>abortRef.current?.abort()}>Batalkan analisis</button>}
   <section className="studio-panel v4-upload-panel" aria-label="Unggah berkas naskah">
    <label className={`v4-dropzone${reading ? ' v4-upload-reading' : ''}`}>
     <BrandIcon name="upload" size={32} aria-hidden="true"/>
     <strong>{reading ? 'Menganalisis naskah…' : parsed ? 'Pilih berkas lain' : 'Pilih ZIP, EPUB, MD, atau TXT dari HP'}</strong>
-    <small>{reading ? `Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.` : 'ZIP 20 MB · EPUB 18 MB · MD/TXT 8 MB. Berkas dibaca di browser dan tidak otomatis diterbitkan.'}</small>
+    <small>{reading ? `Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.` : 'ZIP 20 MB · EPUB 18 MB · MD/TXT 8 MB. Periksa isi dan pilih cara penerbitan sebelum menyimpan.'}</small>
     <input type="file" name="manuscript" aria-label="Pilih berkas ZIP, EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading || saving || locked} onClick={() => { setPickerOpen(true); setPickerStatus('Menunggu berkas dari pemilih file Android…'); }} onChange={handleFileSelection}/>
    </label>
    <div className="v4-picker-status" role="status" aria-live="polite">
@@ -328,12 +337,12 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     {parsed.warnings.map((w, i) => <div className="v4-warning" key={i}><BrandIcon name="alert" size={16}/>{w}</div>)}
    </section>
    <section className="studio-panel v4-target"><div className="studio-panel-top"><h2>Tujuan penyimpanan</h2><BrandIcon name="books" size={19}/></div>
-    <label className="studio-label">Simpan ke novel<select value={destination} onChange={e => setDestination(e.target.value)}><option value="new">+ Novel baru (privat)</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
-    {destination === 'new' && <div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e => setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e => setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat privat dengan ID unik, termasuk jika judul sama pernah digunakan atau berada di Sampah. Sinopsis bisa diisi kemudian.</p></div>}
+    <label className="studio-label">Simpan ke novel<select value={destination} onChange={e => setDestination(e.target.value)}><option value="new">+ Novel baru</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
+    {destination === 'new' && <div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e => setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e => setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat sesuai pilihan penerbitan. Sinopsis bisa dilengkapi kemudian.</p></div>}
     {destination !== 'new' && <p className="studio-muted">Ditemukan {currentEpisodes.length} episode lama. Nomor dan isi duplikat akan ditolak; seluruh jadwal yang sudah ada tetap utuh.</p>}
    </section>
    {!!parsed.covers?.length&&<CoverCandidates covers={parsed.covers} selected={coverChoice} disabled={saving||locked} onChoose={c=>{setUseCover(Boolean(c));setCoverChoice(c?.origin||null);setCoverSource(c?{data:c.data,name:c.name}:null);setPreparedCover(null);coverOperation.current=null;}}/>}
-   {useCover&&<section className="studio-panel"><CoverEditor value={preparedCover} onChange={v=>{setPreparedCover(v);coverOperation.current=null;}} source={coverSource} title={destination==='new'?bookTitle:books.find(b=>b.id===destination)?.title} disabled={saving||locked} onBusy={setCoverPreparing}/><p className="studio-muted">Sampul disimpan sebagai versi privat. Sampul pembaca tidak diganti otomatis; terbitkan melalui pengaturan karya.</p></section>}
+   {useCover&&<section className="studio-panel"><CoverEditor value={preparedCover} onChange={v=>{setPreparedCover(v);coverOperation.current=null;}} source={coverSource} title={destination==='new'?bookTitle:books.find(b=>b.id===destination)?.title} disabled={saving||locked} onBusy={setCoverPreparing}/><p className="studio-muted">{publication.mode!=='draft'&&publishImportedCover?'Sampul yang dipilih akan diterbitkan setelah naskah berhasil disimpan.':'Sampul disimpan privat. Kamu bisa menerbitkannya nanti melalui pengaturan karya.'}</p></section>}
    <section className="studio-panel v4-review"><div className="studio-panel-top"><h2>Periksa isi buku</h2><span className="v3-counter">{selected.length} dipilih</span></div>
     <p className="studio-muted">Kata pengantar, dedikasi, dan catatan penulis dapat disimpan sebagai halaman buku tersendiri, tanpa nomor episode. Daftar isi dan halaman hak cipta tidak dipilih otomatis. Episode 0 tetap didukung.</p>
     <div className="kk-import-toolbar"><label className="studio-label">Nomor untuk bagian yang belum bernomor<select value={numberMode} onChange={e=>setNumberMode(e.target.value as typeof numberMode)}><option value="continue">Lanjut setelah nomor terbesar</option><option value="start">Mulai dari nomor pilihan</option><option value="gaps">Isi celah nomor yang kosong</option></select></label>{numberMode==='start'&&<label className="studio-label">Nomor awal<input type="number" min="0" max="9999" value={numberStart} onChange={e=>setNumberStart(Number(e.target.value))}/></label>}</div>
@@ -359,12 +368,14 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
       </div>}
      </div>)}</div>
    </section>
-   <section className="studio-panel v4-confirm"><div className="studio-panel-top"><h2>Simpan sebagai draft</h2><BrandIcon name="shield" size={20}/></div>
+   <section className="studio-panel v4-confirm"><div className="studio-panel-top"><h2>Atur penerbitan</h2><BrandIcon name="shield" size={20}/></div>
     {allErrors.length > 0 && <div className="v4-error-list">{allErrors.slice(0, 12).map((w, i) => <p key={i}><BrandIcon name="alert" size={14}/>{w}</p>)}</div>}
     {chapters.some(c => c.include && !c.section_type && c.episode_number === null) && <div className="v4-warning"><BrandIcon name="alert" size={15}/> Masih ada nomor episode kosong. Klik “Isi nomor kosong otomatis” sebelum menyimpan.</div>}
     {dirty && <div className="v4-warning"><BrandIcon name="alert" size={15}/> Ada bagian dengan deteksi tidak pasti. Periksa atau keluarkan dari impor sebelum lanjut.</div>}
-    <p className="studio-muted">{chapters.filter(c=>!c.include).length} bagian dilewati. {selected.length>0&&`Rentang nomor: ${Math.min(...selected.map(c=>c.episode_number??0))}–${Math.max(...selected.map(c=>c.episode_number??0))}. `}Episode dan halaman buku yang dicentang disimpan. Episode baru tetap draft dan belum memiliki jadwal rilis. Tidak ada publikasi otomatis.</p>
-    <button type="button" className="studio-primary v4-confirm-button" disabled={saving || allErrors.length > 0 || (!selected.length && !chosenSections.length) || selected.some(c => c.episode_number === null)} onClick={() => void persist()}>{saving ? 'Menyimpan…' : `Simpan ${selected.length} episode + ${chosenSections.length} halaman`} <BrandIcon name="arrow-right" size={18}/></button>
+    <p className="studio-muted">{chapters.filter(c=>!c.include).length} bagian dilewati. {selected.length>0&&`Rentang nomor: ${Math.min(...selected.map(c=>c.episode_number??0))}–${Math.max(...selected.map(c=>c.episode_number??0))}. `}Episode dan halaman buku yang dicentang disimpan sesuai pilihan penerbitan di bawah.</p>
+    <PublicationOptions value={publication} onChange={setPublication} preview={releasePreview} error={publicationError} count={selected.length} hasExisting={destination!=='new'}/>
+    {useCover&&publication.mode!=='draft'&&<label className="studio-check"><input type="checkbox" checked={publishImportedCover} onChange={e=>setPublishImportedCover(e.target.checked)}/><span>Terbitkan sampul yang dipilih bersama novel</span></label>}
+    <button type="button" className="studio-primary v4-confirm-button" disabled={saving || Boolean(publicationError) || allErrors.length > 0 || (!selected.length && !chosenSections.length) || selected.some(c => c.episode_number === null)} onClick={() => void persist()}>{saving ? 'Menyimpan…' : `Simpan ${selected.length} episode + ${chosenSections.length} halaman`} <BrandIcon name="arrow-right" size={18}/></button>
    </section>
   </fieldset>}
  </>;

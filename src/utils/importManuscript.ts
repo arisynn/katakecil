@@ -31,7 +31,7 @@ export type ParsedManuscript = {
   covers?:ImportCover[];
 };
 
-export const MAX_IMPORT_EPISODES = 120;
+export const MAX_IMPORT_EPISODES = 1000;
 /** EPUB often carries navigation, legal notices, and author pages in its spine.
  * Excluded by default, but kept in the review screen so the author may opt in.
  * Prologue/Epilogue are narrative chapters; don't discard them automatically.

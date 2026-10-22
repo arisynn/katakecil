@@ -103,7 +103,7 @@ function readProgress(book: Book) {
 function Home({ books, episodes, demo }: {
     books: Book[]; episodes: EpisodeSummary[]; schedules: UpcomingChapter[]; demo: boolean;
 }) {
-    const recentChapters = useMemo(() => demo ? [] : selectRecentChapters(books, episodes), [books, episodes, demo]);
+    const recentChapters = useMemo(() => demo ? [] : selectRecentChapters(books, episodes, Date.now(), 30, 6), [books, episodes, demo]);
     const published = useMemo(() => demo ? books : books.filter(book => countFor(episodes, book) > 0), [books, episodes, demo]);
     const featured = useMemo(() => {
         const picks = published.filter(book => book.is_featured);
@@ -128,13 +128,14 @@ function Home({ books, episodes, demo }: {
           <div className="kk-v7-featured-rail">{featured.map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div>
         </section>}
         {recentChapters.length>0 && <section className="kk-v7-home-section" aria-label="Bab baru">
-          <Heading title="Bab Baru"/>
-          <div className="v68-chapter-list">{recentChapters.slice(0,2).map(({book,episode:ep})=><button key={`${book.id}:${ep.episode_number}`} type="button" className="v68-chapter-item" onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}>
+          <Heading title="Bab Baru" to="/temukan"/>
+          <div className="v68-chapter-list">{recentChapters.slice(0,6).map(({book,episode:ep})=><button key={`${book.id}:${ep.episode_number}`} type="button" className="v68-chapter-item" onClick={()=>navigate(`/baca/${book.slug}?episode=${ep.episode_number}`)}>
             <span className="v68-chapter-number" aria-hidden="true">{ep.episode_number===0?'P':ep.episode_number}</span>
             <span className="v68-chapter-copy"><strong>{ep.title}</strong><small>{book.title} · {new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date(ep.release_at!))}</small></span>
             <BrandIcon name="chevron-right" size={17} aria-hidden="true"/>
           </button>)}</div>
         </section>}
+        {published.some(b=>b.status==='completed')&&<section className="kk-v7-home-section" aria-label="Novel tamat"><Heading title="Novel Tamat" to="/temukan?status=Tamat"/><p className="kk-v75-section-note">Ikuti ceritanya sampai halaman terakhir.</p><div className="kk-v7-featured-rail">{published.filter(b=>b.status==='completed').slice(0,8).map(book=><BookCard key={book.id} book={book} count={countFor(episodes,book)} demo={demo}/>)}</div></section>}
         {featured.length===0 && <EmptyLibrary/>}
       </div>
     </main>;
@@ -145,13 +146,13 @@ function Listing({ books, episodes, schedules, announcements = [], demo, collect
     const params = new URLSearchParams(window.location.search);
     const [q, setQ] = useState(params.get('q') || '');
     const [filter, setFilter] = useState(params.get('genre') || 'Semua');
-    const [status, setStatus] = useState<StoryStatusFilter>('Semua');
+    const [status, setStatus] = useState<StoryStatusFilter>(()=>['Berlangsung','Tamat','Jeda'].includes(params.get('status')||'')?params.get('status') as StoryStatusFilter:'Semua');
     const [sort, setSort] = useState('terbaru');
     const [collectionFilter, setCollectionFilter] = useState<CollectionFilter>('semua');
     const input = useRef<HTMLInputElement>(null);
     const { ids, toggle } = useCollection();
     useEffect(() => {
-      const sync=()=>{const next=new URLSearchParams(window.location.search);setQ(next.get('q')||'');setFilter(next.get('genre')||'Semua');if(next.get('focus')==='1')requestAnimationFrame(()=>input.current?.focus());};
+      const sync=()=>{const next=new URLSearchParams(window.location.search);setQ(next.get('q')||'');setFilter(next.get('genre')||'Semua');setStatus(['Berlangsung','Tamat','Jeda'].includes(next.get('status')||'')?next.get('status') as StoryStatusFilter:'Semua');if(next.get('focus')==='1')requestAnimationFrame(()=>input.current?.focus());};
       sync();window.addEventListener('quiet:navigate',sync);return()=>window.removeEventListener('quiet:navigate',sync);
     }, []);
     const eligible = useMemo(()=>books.filter(book=>(collection||demo||countFor(episodes,book)>0)&&(!collection||ids.includes(book.id))),[books,episodes,collection,ids,demo]);

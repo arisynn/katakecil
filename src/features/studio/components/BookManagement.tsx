@@ -1,5 +1,5 @@
 import BrandIcon from '../../../components/BrandIcon';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Cover } from '../../covers/AuthorCover';
 import CoverManager from '../../covers/CoverManager';
 import {CoverEditor} from '../../covers/CoverEditor';
@@ -10,14 +10,26 @@ import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../.
 import { supabase } from '../../../data/supabase';
 import { bulkPublishDrafts } from '../../../data/bulkPublishing';
 import { B, Pill, errMsg } from './StudioShared';
+import {getReleaseRules} from '../../../data/publishing';
+import type {ReleaseRule} from '../../../utils/releasePlanning';
+import {WEEKDAYS} from '../../../utils/publicationPlan';
+import ManagementDialog from './ManagementDialog';
+import type {ManagementOperation} from '../../../data/management';
 
 const BOOK_STATUS: Record<Book['status'], string> = { ongoing: 'Berlangsung', completed: 'Tamat', hiatus: 'Jeda' };
 
-export function Books({ books, episodes, onCreate }: {
+export function Books({ books, episodes, onCreate, onChanged }: {
   books: Book[];
   episodes: Episode[];
   onCreate: () => void;
+  onChanged: () => Promise<void>;
 }) {
+  const [rules,setRules]=useState<ReleaseRule[]>([]);
+  useEffect(()=>{let active=true;getReleaseRules().then(rows=>{if(active)setRules(rows);}).catch(()=>{});return ()=>{active=false;};},[books]);
+  const ruleMap=useMemo(()=>new Map(rules.map(r=>[r.book_id,r])),[rules]);
+  const stats=useMemo(()=>{const map=new Map<string,{Terbit:number;Terjadwal:number;Draft:number}>();for(const ep of episodes){const counts=map.get(ep.book_id)??{Terbit:0,Terjadwal:0,Draft:0};counts[episodeStatus(ep)]++;map.set(ep.book_id,counts);}return map;},[episodes]);
+  const [selected,setSelected]=useState<string[]>([]),[pending,setPending]=useState<ManagementOperation|null>(null),[message,setMessage]=useState('');
+  const selectBooks=(ids:string[])=>{const items=books.filter(b=>ids.includes(b.id)).map(b=>({kind:'book' as const,id:b.id,title:b.title}));if(items.length)setPending({id:crypto.randomUUID(),action:'trash',items});};
   const [query, setQuery] = useState('');
   const [visibility, setVisibility] = useState<'Semua' | 'Publik' | 'Privat'>('Semua');
   const filtered = books.filter(book =>
@@ -45,20 +57,23 @@ export function Books({ books, episodes, onCreate }: {
       </div>
       <span className="kk-v71-books-count" role="status">{filtered.length} dari {books.length} karya</span>
     </div>}
+    {message&&<p role="status" className="studio-success">{message}</p>}
+    {books.length>0&&<div className="kk-v75-bulk-bar"><button type="button" className="studio-light-button" onClick={()=>setSelected(filtered.map(b=>b.id))}>Pilih hasil filter ({filtered.length})</button><button type="button" className="studio-light-button" onClick={()=>setSelected([])} disabled={!selected.length}>Batal pilih</button><button type="button" className="v51-permanent-button" disabled={!selected.length} onClick={()=>selectBooks(selected)}>Hapus terpilih ({selected.length})</button><button type="button" className="v51-permanent-button" onClick={()=>selectBooks(books.map(b=>b.id))}>Hapus semua novel ({books.length})</button></div>}
     {filtered.length ? <div className="studio-manage-list">
-      {filtered.map(book => <B key={book.id} to={`/studio/cerita/${book.id}`}
+      {filtered.map(book => <div key={book.id} className="kk-v75-select-row"><input type="checkbox" aria-label={`Pilih novel ${book.title}`} checked={selected.includes(book.id)} onChange={e=>setSelected(prev=>e.target.checked?[...prev,book.id]:prev.filter(id=>id!==book.id))}/><B to={`/studio/cerita/${book.id}`}
         className="studio-manage-item">
         <Cover book={book} size="mini"/>
         <span><strong>{book.title}</strong>
-          <small>{book.genre} · {episodes.filter(ep => ep.book_id === book.id).length} bab</small>
-          <em>{book.is_published ? 'Publik' : 'Privat'} · {BOOK_STATUS[book.status]}</em>
+          <small>{book.genre} · {stats.get(book.id)?.Terbit??0} terbit · {stats.get(book.id)?.Terjadwal??0} terjadwal · {stats.get(book.id)?.Draft??0} draf</small>
+          <em>{book.is_published ? 'Publik' : 'Privat'} · {BOOK_STATUS[book.status]}</em><small>{ruleMap.get(book.id)?`${ruleMap.get(book.id)!.is_active?'Terbit':'Dijeda'}: ${ruleMap.get(book.id)!.weekdays.map(d=>WEEKDAYS[d]).join(', ')} · ${ruleMap.get(book.id)!.time_wib} WIB`:'Belum ada pola rilis'}</small><small>{!book.cover_manifest&&!book.cover_url?'Belum ada sampul publik':(stats.get(book.id)?.Terjadwal??0)>0?'Jadwal siap':book.status==='completed'?'Cerita tamat':'Belum ada jadwal mendatang'}</small>
         </span><BrandIcon name="chevron-right" size={20}/>
-      </B>)}
+      </B></div>)}
     </div> : books.length ? <div className="kk-v71-studio-no-results" role="status"><p>Tidak ada karya yang cocok dengan pencarian atau filter.</p><button type="button" className="studio-light-button" onClick={reset}>Tampilkan semua karya</button></div>
       : <div className="studio-big-empty"><BrandIcon name="books" size={30}/>
           <h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dengan membuat karya pertama.</p>
           <button onClick={onCreate} className="studio-primary"><BrandIcon name="plus" size={18}/> Buat Karya</button>
         </div>}
+    {pending&&<ManagementDialog operation={pending} description={`${pending.items.length} novel beserta ${episodes.filter(e=>pending.items.some(b=>b.id===e.book_id)).length} bab akan disembunyikan dari publik.`} onClose={()=>{setPending(null);void onChanged();}} onDone={async notice=>{setPending(null);setSelected([]);setMessage(notice);await onChanged();}}/>}
   </div>;
 }
 
@@ -141,7 +156,7 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
         }
     };
     return <><B to="/studio/cerita" className="studio-backlink"><BrandIcon name="arrow-left" size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published ? 'Tayang di perpustakaan' : 'Draft (privat)'}</p></div><button onClick={onNew} className="studio-primary"><BrandIcon name="plus" size={16}/> Episode baru</button></div>
- <div className="studio-detail-tabs"><a href="#episodes">Daftar bab</a><a href="#book-sections">Halaman buku</a><a href="#bulk-publish">Terbit massal</a><a href="#settings">Pengaturan karya</a></div>
+ <div className="studio-detail-tabs"><a href="#episodes">Daftar bab</a><a href="#book-sections">Halaman buku</a><B to={`/studio/jadwal?book=${encodeURIComponent(book.id)}`}>Atur jadwal</B><a href="#bulk-publish">Terbit massal</a><a href="#settings">Pengaturan karya</a></div>
  <section className="studio-panel v69-chapter-manager" id="episodes"><div className="studio-panel-top"><h2>Daftar Bab</h2><B to={`/studio/impor?book=${encodeURIComponent(book.id)}`} className="studio-text-button"><BrandIcon name="upload" size={16}/> Impor EPUB / MD</B></div>
  
  {local.length > 0 && <div className="v69-chapter-filters">

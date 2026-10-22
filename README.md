@@ -1,8 +1,8 @@
-# KataKecil V7.4 RC1
+# KataKecil V7.5 RC1
 
 Aplikasi membaca cerita dan Studio privat penulis dengan palet Sapphire, sampul berbagai rasio, impor ZIP/EPUB/Markdown, riwayat revisi privat, tinjau konflik editor, serta PWA yang memerlukan internet untuk membaca.
 
-Mulai dari [START_HERE_V74.md](START_HERE_V74.md) untuk pemasangan, migrasi editor/sampul, pengujian, dan batas verifikasi. Paket sumber belum berarti perubahan telah diterapkan ke produksi. Frontend editor V7.4 memerlukan migrasi V7.4.
+Mulai dari [START_HERE_V75.md](START_HERE_V75.md) untuk pemasangan SQL V7.5, impor dengan penerbitan otomatis, hapus massal, pengujian, dan batas verifikasi. Paket sumber belum berarti perubahan telah diterapkan ke produksi. Fitur pengelolaan V7.5 memerlukan paket SQL V7.5 setelah seluruh migrasi V7.4.
 
 ```sh
 npm ci

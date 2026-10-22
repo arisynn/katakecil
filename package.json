@@ -1,7 +1,7 @@
 {
   "name": "katakecil-personal-library",
   "private": true,
-  "version": "7.4.0-rc.1",
+  "version": "7.5.0-rc.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,10 @@
     "clean:obsolete": "node scripts/clean-obsolete.mjs",
     "test:v74": "node scripts/test-v74-revisions.mjs",
     "test:v73": "node scripts/test-v73-covers.mjs",
-    "test:edge": "node scripts/test-v73-edge.mjs"
+    "test:edge": "node scripts/test-v73-edge.mjs",
+    "test:v75": "node scripts/test-v75.mjs",
+    "test:v75:browser": "node scripts/test-v75-browser.mjs",
+    "cleanup:deleted-covers": "node scripts/deleted-cover-cleanup.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

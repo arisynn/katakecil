@@ -1,0 +1,29 @@
+/* V7.5: compact controls, shared Sapphire tokens, native accessible confirmations. */
+.kk-v75-bulk-bar,.kk-v75-presets,.kk-v75-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0}
+.kk-v75-bulk-bar button,.kk-v75-presets button,.kk-v75-actions button{min-height:44px;white-space:normal}
+.kk-v75-presets button[aria-pressed=true]{background:var(--kk-surface-2);border-color:var(--kk-primary);color:var(--kk-primary)}
+.kk-v75-select-row{display:flex;gap:12px;align-items:center;min-width:0}
+.kk-v75-select-row>input,.v5-trash-row>input{width:22px;height:22px;flex:0 0 22px;accent-color:var(--kk-primary)}
+.kk-v75-select-row>.studio-manage-item{flex:1;min-width:0}
+.kk-v75-select-row .studio-manage-item>span{min-width:0;overflow-wrap:anywhere}
+.kk-v75-select-row small{line-height:1.6}
+.kk-v75-dialog{width:min(520px,calc(100vw - 28px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid var(--kk-border);border-radius:20px;padding:24px;background:var(--kk-surface);color:var(--kk-text);box-shadow:0 20px 80px var(--kk-shadow)}
+.kk-v75-dialog::backdrop{background:var(--kk-scrim)}
+.kk-v75-dialog h2{margin:0 0 12px;font-size:1.35rem;line-height:1.4}
+.kk-v75-dialog p,.kk-v75-targets{font-size:.92rem;line-height:1.7;overflow-wrap:anywhere}
+.kk-v75-targets{padding-left:22px;max-height:160px;overflow:auto}
+.kk-v75-dialog input{width:100%;box-sizing:border-box}
+.kk-v75-publication{display:grid;gap:14px;margin-top:18px}
+.kk-v75-release-preview{background:var(--kk-surface-2);border:1px solid var(--kk-border);border-radius:14px;padding:18px;min-width:0}
+.kk-v75-release-preview ol{padding-left:22px;margin:12px 0}
+.kk-v75-release-preview li{margin:10px 0;overflow-wrap:anywhere}
+.kk-v75-release-preview li span,.kk-v75-release-preview small{display:block;font-size:.9rem;line-height:1.5}
+.kk-v75-release-preview small,.kk-v75-card-meta,.kk-v75-section-note{color:var(--kk-muted)}
+.kk-v75-card-meta{display:block;font-size:.75rem;line-height:1.5;margin-top:5px}
+.kk-v75-section-note{font-size:.88rem;margin:-4px 0 18px}
+.kk-v75-publication .v3-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.kk-v75-publication .v3-weekdays button{min-width:0;padding-inline:3px;min-height:42px}
+.v3-plan-layout>.studio-panel>fieldset{margin-bottom:18px}
+.studio-app .v5-trash-row{flex-wrap:wrap}
+@media(max-width:480px){.kk-v75-bulk-bar>button{flex:1 1 calc(50% - 10px);font-size:.82rem}.kk-v75-dialog{padding:18px}.kk-v75-select-row{gap:8px}.kk-v75-actions>button{flex:1}.kk-v75-presets{gap:6px}.kk-v75-presets button{flex:1;min-width:75px;font-size:.8rem}.kk-v75-publication .v3-two-fields{display:grid;grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.kk-v75-dialog{scroll-behavior:auto}}

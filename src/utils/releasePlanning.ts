@@ -34,7 +34,7 @@ export function monthDays(year: number, monthIndex: number): Array<number | null
 export function makeReleasePlan(args: { bookId:string; episodes:ReleaseCandidate[]; weekdays:number[]; timeWib:string; startDate:string; count:number; nowMs?:number }): PlannedRelease[] {
   const {bookId,episodes,weekdays,timeWib,startDate,count}=args;
   const nowMs=args.nowMs ?? Date.now();
-  if (!Number.isInteger(count) || count < 1 || count > 100) throw new Error('Jumlah episode harus 1–100.');
+  if (!Number.isInteger(count) || count < 1 || count > 1000) throw new Error('Jumlah episode harus 1–1000.');
   if (!weekdays.length || weekdays.some(x=>!Number.isInteger(x)||x<0||x>6)) throw new Error('Pilih hari rilis yang valid.');
   if (new Set(weekdays).size !== weekdays.length) throw new Error('Hari rilis tidak boleh duplikat.');
   const origin=fromWib(startDate,timeWib);
@@ -43,7 +43,7 @@ export function makeReleasePlan(args: { bookId:string; episodes:ReleaseCandidate
   const occupied=new Set(episodes.filter(e=>e.book_id===bookId&&e.is_enabled&&e.release_at).map(e=>new Date(e.release_at!).toISOString()));
   const result:PlannedRelease[]=[];
   const originMs=new Date(origin).getTime();
-  for(let days=0;days<366*3 && result.length<count;days++){
+  for(let days=0;days<366*20 && result.length<count;days++){
     const ms=originMs+days*DAY;const stamp=new Date(ms);
     // WIB civil day = UTC instant + 7 hours; weekday is never inferred from browser timezone.
     const weekday=new Date(ms+7*3600000).getUTCDay();
