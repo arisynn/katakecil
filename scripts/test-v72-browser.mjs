@@ -10,6 +10,7 @@ for(let n=0;n<80;n++){try{if((await fetch(base)).ok)break;}catch{}await new Prom
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']}).catch(error=>{server.kill('SIGTERM');throw error;});
 const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.addInitScript(()=>localStorage.setItem('kk-apk-prompt-dismissed',String(Date.now())));
 mkdirSync('qa/v72',{recursive:true});
 let failNext=false,committed=false,importCalls=[];const body='SENTINEL_QA_V72_PRIVATE_8372. Synthetic public test body.\n\n## Heading internal\n\n'+('Synthetic paragraph for pagination.\n\n'.repeat(40));
 let editorRow={id:'00000000-0000-4000-8000-000000000012',book_id:'synthetic',episode_number:12,title:'Judul terbaru server',arc_title:'Arc terbaru',content_md:'Synthetic original editor body.',release_at:null,is_enabled:false,is_finale:false,created_at:'2026-01-01T00:00:00Z',updated_at:'2026-01-02T00:00:00Z',editor_version:0},editorWrites=[];
@@ -121,10 +122,9 @@ try{
  await Promise.all([page.waitForEvent('dialog').then(d=>d.dismiss()),page.evaluate(()=>history.back())]);await page.waitForTimeout(150);assert(page.url().includes('step=next'));
  await Promise.all([page.waitForEvent('dialog').then(d=>d.accept()),page.evaluate(()=>history.back())]);await page.waitForURL('**mode=guard');
  page.once('dialog',d=>d.accept());await page.goto(base+fixture+'?ep=0');await page.locator('.reader-book').waitFor();
- // Install instructions and network-only service worker fallback, with empty Cache Storage.
- await page.evaluate(()=>window.dispatchEvent(new Event('kk:install')));await page.getByRole('dialog').waitFor();await page.screenshot({path:'qa/v72/install-390.png'});await page.getByRole('button',{name:'Tutup',exact:true}).click();
+ // APK download replaces PWA installation. Notification worker never caches pages.
+ await page.evaluate(()=>window.dispatchEvent(new Event('kk:install')));await page.getByRole('dialog').waitFor();await page.screenshot({path:'qa/v72/install-390.png'});assert.equal(await page.getByRole('link',{name:'Unduh APK Android',exact:true}).getAttribute('href'),'/downloads/KataKecil.apk');await page.getByRole('button',{name:'Tetap membaca di web',exact:true}).click();
  await page.evaluate(async()=>{await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;});await page.reload();await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
- await new Promise(resolve=>{server.once('exit',resolve);server.kill('SIGTERM');});
- await context.setOffline(true);await page.goto(base+'/baca/synthetic?cold=1');await page.getByRole('heading',{name:'Koneksi diperlukan'}).waitFor();assert.equal(await page.evaluate(async()=>JSON.stringify(await caches.keys())),'[]');await context.setOffline(false);
- assert.equal(errors.length,0,errors.join('\n'));console.log('V7.2 browser: fresh editor snapshot, save-on-navigation, conflict preservation, unobstructed preview and return to editor; detail back arrow and blue/contrast icons (light/dark/mobile/desktop), preview, TOC alignment 320/390/768/1440, tab keys, failed chapter retry, online-only purge, ZIP worker review, lost-response retry, no body storage, install dialog, network-only SW passed.');
+ assert.equal(await page.evaluate(async()=>JSON.stringify(await caches.keys())),'[]');assert.equal(await page.locator('link[rel=manifest]').count(),0);
+ assert.equal(errors.length,0,errors.join('\n'));console.log('V7.2 browser: fresh editor snapshot, save-on-navigation, conflict preservation, unobstructed preview and return to editor; detail back arrow and blue/contrast icons (light/dark/mobile/desktop), preview, TOC alignment 320/390/768/1440, tab keys, failed chapter retry, online-only purge, ZIP worker review, lost-response retry, no body storage, APK download dialog, no PWA manifest, notification-only SW and empty Cache Storage passed.');
 }catch(error){console.error('Browser QA failure:',error.message,'URL:',page.url());console.error((await page.locator('body').innerText()).slice(0,1800));await page.screenshot({path:'qa/v72/failure.png',fullPage:true});throw error;}finally{await browser.close();server.kill('SIGTERM');}

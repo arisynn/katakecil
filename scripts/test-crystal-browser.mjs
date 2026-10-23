@@ -15,6 +15,7 @@ try{
  for(let n=0;n<100;n++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>localStorage.setItem('kk-apk-prompt-dismissed',String(Date.now())));
  await page.route('https://fonts.**/**',r=>r.abort());
  await page.route('https://crystal-qa.supabase.co/**',async route=>{
   const req=route.request(),url=new URL(req.url()),name=url.pathname.split('/').at(-1),body=req.postDataJSON();let result=[];
@@ -29,6 +30,7 @@ try{
    const slug=url.searchParams.get('slug')?.replace('eq.','');result=slug?books.find(b=>b.slug===slug):books;
    if(slug&&!req.headers().accept?.includes('vnd.pgrst.object'))result=result?[result]:[];
   }else if(name==='qr_episodes')result=episodes.map(({content_md,...row})=>row);
+  else if(name==='qr_public_next_chapters')result=[{book_id:'synthetic-0',episode_number:3,release_at:'2099-01-01T12:00:00Z'}];
   else if(name==='qr_author_members')result=[{user_id:uid}];
   else if(name==='qr_author_episode_metadata_v72')result=episodes.map(({content_md,...row})=>row);
   else if(name==='qr_author_episode_v72')result=editor;
@@ -39,18 +41,21 @@ try{
  });
  mkdirSync('qa/crystal',{recursive:true});
  await page.goto(base);await page.getByRole('heading',{name:'Library.',exact:true}).waitFor();await page.locator('.crystal-story').first().waitFor();
- assert.equal(await page.locator('.crystal-story').count(),2);assert.equal(await page.locator('.v6-public-bottom').count(),0);
+ assert.equal(await page.locator('.crystal-story').count(),2);assert.equal(await page.locator('.v6-public-bottom').count(),0);assert.equal(await page.locator('.crystal-story-copy').count(),0);
  assert.equal(await page.getByRole('button',{name:/^(?:Baca|Mulai Membaca|Lanjutkan Membaca)$/}).count(),0);
  for(const theme of ['light','dark'])for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});await page.evaluate(t=>{localStorage.setItem('appThemePreference',t);window.dispatchEvent(new Event('katakecil:theme-change'));},theme);
-  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Library overflow ${width}/${theme}`);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Library overflow ${width}/${theme}`);if(width<=390)assert.equal(await page.locator('.crystal-shelf').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),3);
   if(width===390||width===1440)await page.screenshot({path:`qa/crystal/library-${theme}-${width}.png`,fullPage:true});
  }
- await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Buka Awal Sebuah Cerita',exact:true}).click();
- await page.waitForURL('**/baca/synthetic-0');await page.locator('.reader-book').waitFor();
+ await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Informasi Awal Sebuah Cerita',exact:true}).click();
+ await page.getByRole('dialog',{name:'Awal Sebuah Cerita',exact:true}).waitFor();await page.getByText('Bab 3 ·',{exact:false}).waitFor();
+ for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:844});assert(await page.getByRole('dialog').evaluate(n=>n.scrollWidth<=n.clientWidth+1));if(width===390)await page.screenshot({path:'qa/crystal/book-popup.png',fullPage:true});}
+ await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Buka episode 1: Bab 1 — Uji',exact:true}).click();
+ await page.waitForURL('**/baca/synthetic-0?episode=1');await page.locator('.reader-book').waitFor();
  await page.locator('.reader-stage').click({position:{x:195,y:400}});await page.getByRole('button',{name:'Opsi pembaca lainnya'}).click();await page.getByRole('menuitem',{name:/Bab berikutnya/}).click();
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('kk-secure-progress-synthetic-0')||'null')?.ep===2);
- await page.locator('.reader-book').waitFor();await page.locator('.reader-stage').click({position:{x:195,y:400}});await page.getByRole('button',{name:'Kembali ke Library'}).click();await page.waitForURL(base+'/');await page.getByText('Terakhir di bab 2',{exact:false}).waitFor();
+ await page.locator('.reader-book').waitFor();await page.locator('.reader-stage').click({position:{x:195,y:400}});await page.getByRole('button',{name:'Kembali ke Library'}).click();await page.waitForURL(base+'/');await page.getByRole('button',{name:'Informasi Awal Sebuah Cerita',exact:true}).click();await page.getByText('Terakhir dibaca',{exact:true}).waitFor();await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'detached'});
  await page.getByRole('button',{name:'Buka menu',exact:true}).click();await page.getByRole('menuitem',{name:'Studio penulis'}).click();
  await page.getByLabel('Email',{exact:true}).fill('author@example.test');await page.getByLabel('Kata sandi',{exact:true}).fill('synthetic-test-password');await page.getByRole('button',{name:/Masuk ke Studio/}).click();
  await page.getByRole('heading',{name:'Karya.'}).waitFor();

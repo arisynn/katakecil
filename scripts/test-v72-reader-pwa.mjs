@@ -15,11 +15,14 @@ const {normalizeCompletedEpisodes}=loadTs('src/utils/readerCompletion.ts');asser
 const store=new Map([['quiet_reader_bookmarks_preview-abc','private sentinel'],['quiet_reader_anchor_preview-abc','offset'],['quiet_reader_bookmarks_book-1','metadata'],['other_app','keep']]);
 globalThis.localStorage={get length(){return store.size;},key:i=>[...store.keys()][i],removeItem:k=>store.delete(k)};
 loadTs('src/utils/privacy.ts').cleanPreviewStorage();assert.equal(store.size,2);assert(store.has('other_app'));delete globalThis.localStorage;
-const handlers={},self={location:{origin:'https://example.test'},addEventListener:(name,fn)=>handlers[name]=fn,skipWaiting:()=>{self.skipped=true;}};
-let mode='ok',fetches=[];
-vm.runInNewContext(readFileSync('public/sw.js','utf8'),{self,URL,Response,fetch:async(req,options)=>{fetches.push(options);if(mode==='offline')throw Error('Network unavailable');return new Response('live',{status:mode==='404'?404:200});}});
-async function navigate(){let response;handlers.fetch({request:{url:'https://example.test/baca/test',method:'GET',mode:'navigate'},respondWith:p=>response=p});return await response;}
-assert.equal((await navigate()).status,200);assert.equal(fetches[0].cache,'no-store');mode='404';assert.equal((await navigate()).status,404);mode='offline';let result=await navigate();assert.equal(result.status,503);assert((await result.text()).includes('Koneksi diperlukan'));assert.equal(result.headers.get('cache-control'),'no-store');
-let intercepted=false;handlers.fetch({request:{url:'https://example.test/rpc',method:'POST',mode:'cors'},respondWith:()=>intercepted=true});assert.equal(intercepted,false);
-assert(!self.skipped);handlers.message({data:{type:'SKIP_WAITING'}});assert(self.skipped);
-console.log('V7.2 reader/PWA: canonical 0/12/48/9999, Roman/Chapter headings, internal headings, completion, targeted privacy cleanup, network-only SW, HTTP errors and explicit activation passed.');
+const handlers={},notifications=[];
+const self={location:{origin:'https://example.test'},addEventListener:(name,fn)=>handlers[name]=fn,skipWaiting:()=>{self.skipped=true;},clients:{claim:async()=>{},matchAll:async()=>[],openWindow:async url=>{self.opened=url;}},registration:{showNotification:async(title,data)=>notifications.push({title,...data})}};
+vm.runInNewContext(readFileSync('public/sw.js','utf8'),{self,URL});
+assert.equal(handlers.fetch,undefined,'Notification worker must not intercept or cache pages');
+handlers.install();assert(self.skipped);let work;
+handlers.push({data:{json:()=>({title:'Bab baru',body:'Judul publik',url:'/baca/book?episode=2'})},waitUntil:p=>work=p});await work;
+assert.equal(notifications[0].data.path,'/baca/book?episode=2');
+handlers.push({data:{json:()=>({url:'https://evil.test/attack'})},waitUntil:p=>work=p});await work;assert.equal(notifications[1].data.path,'/');
+handlers.notificationclick({notification:{close(){},data:{path:'/baca/book?episode=2'}},waitUntil:p=>work=p});await work;assert.equal(self.opened,'https://example.test/baca/book?episode=2');
+assert(!readFileSync('index.html','utf8').includes('rel="manifest"'));
+console.log('PASS reader/privacy; notification-only SW, safe notification routes, no fetch caching or PWA manifest.');

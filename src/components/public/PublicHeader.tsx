@@ -6,6 +6,7 @@ import {useUiTheme} from '../../hooks/useUiTheme';
 import {navigate} from '../../utils/nav';
 import {isNativeApp} from '../../native/platform';
 import NotificationSettings from '../../features/notifications/NotificationSettings';
+import WebNotificationSettings from '../../features/notifications/WebNotificationSettings';
 
 export default function PublicHeader({path}:{path:string}) {
  const {theme,preference,setPreference}=useUiTheme();
@@ -28,11 +29,13 @@ export default function PublicHeader({path}:{path:string}) {
     <div className="crystal-menu-root" ref={root}><button ref={trigger} type="button" className="crystal-icon-button" aria-label={open?'Tutup menu':'Buka menu'} aria-expanded={open} aria-haspopup="menu" onClick={()=>setOpen(x=>!x)}><BrandIcon name={open?'close':'menu'} size={21}/></button>
      {open&&<div className="crystal-menu" role="menu" aria-label="Pengaturan KataKecil"><span className="crystal-menu-caption">RUANG KATAKECIL</span>
       <button type="button" role="menuitem" onClick={()=>{setOpen(false);navigate('/studio');}}><BrandIcon name="pen" size={18}/><span>Studio penulis</span><BrandIcon name="chevron-right" size={15}/></button>
-      {isNativeApp?<button type="button" role="menuitem" onClick={()=>{setOpen(false);setNotifications(true);}}><BrandIcon name="bell" size={18}/>Notifikasi</button>:<button type="button" role="menuitem" onClick={()=>{setOpen(false);window.dispatchEvent(new Event('kk:install'));}}><BrandIcon name="download" size={18}/>Pasang aplikasi</button>}
+      <button type="button" role="menuitem" onClick={()=>{setOpen(false);setNotifications(true);}}><BrandIcon name="bell" size={18}/>Notifikasi</button>
+      {!isNativeApp&&<button type="button" role="menuitem" onClick={()=>{setOpen(false);window.dispatchEvent(new Event('kk:install'));}}><BrandIcon name="download" size={18}/>Unduh APK Android</button>}
+      {isNativeApp&&<button type="button" role="menuitem" onClick={()=>{setOpen(false);window.dispatchEvent(new Event('kk:check-update'));}}><BrandIcon name="download" size={18}/>Periksa pembaruan</button>}
      </div>}
     </div>
    </div>
   </div></header>
-  {notifications&&<NotificationSettings onClose={()=>setNotifications(false)}/>}
+  {notifications&&(isNativeApp?<NotificationSettings onClose={()=>setNotifications(false)}/>:<WebNotificationSettings onClose={()=>setNotifications(false)}/>)}
  </>;
 }

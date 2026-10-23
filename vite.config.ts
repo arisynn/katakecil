@@ -2,10 +2,11 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
+import {webApkAssets} from './scripts/web-apk-assets';
 
 export default defineConfig(({mode}) => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(),webApkAssets(mode)],
     ...(mode === 'android' ? {build: {target: 'chrome111'}} : {}),
     resolve: {
       alias: {

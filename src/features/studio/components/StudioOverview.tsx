@@ -111,8 +111,8 @@ export function StudioSettings() {
   return <><div className="studio-page-head"><span className="studio-kicker">PREFERENSI & KEAMANAN</span>
     <h1>Pengaturan</h1><p>Preferensi tampilan dan informasi akses Studio.</p>
   </div><section className="studio-panel v6-settings-panel">
-    <h2>Aplikasi</h2><p>{isNativeApp?'KataKecil berjalan sebagai aplikasi di perangkatmu.':'Pasang KataKecil ke layar utama.'} Membaca dan menyimpan tetap memerlukan internet.</p>{!isNativeApp&&<button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Pasang KataKecil</button>}
-    {isNativeApp&&<><h2>Notifikasi</h2><p>Pengingat membaca dan kabar bab baru, sesuai pilihanmu.</p><button className="studio-light-button" onClick={()=>setNotifications(true)}>Atur notifikasi</button></>}
+    <h2>Aplikasi</h2><p>{isNativeApp?'KataKecil berjalan sebagai aplikasi di perangkatmu.':'Unduh aplikasi KataKecil untuk Android.'} Membaca dan menyimpan tetap memerlukan internet.</p>{!isNativeApp&&<button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Unduh APK Android</button>}
+    {isNativeApp&&<><button type="button" className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:check-update'))}>Periksa pembaruan</button><h2>Notifikasi</h2><p>Pengingat membaca dan kabar bab baru, sesuai pilihanmu.</p><button className="studio-light-button" onClick={()=>setNotifications(true)}>Atur notifikasi</button></>}
     <h2>Tampilan</h2><p>Tema Terang dan Gelap di bilah atas berlaku untuk seluruh KataKecil, termasuk Reader.</p>
     <h2>Keamanan Studio</h2><p>Hanya akun yang terdaftar sebagai penulis yang dapat mengelola cerita.
       Alat database, jadwal, dan sampah tersedia melalui menu Alat Studio.</p>

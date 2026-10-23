@@ -52,7 +52,7 @@ export async function installAndroidIntegration() {
   // Password auth uses the existing origin-scoped persistent SDK storage.
   // Refresh when resumed, including after device sleep; never remount Studio.
   await App.addListener('appStateChange', ({ isActive }) => {
-    if (isActive) {supabase?.auth.startAutoRefresh();void consumeNotificationRoute().catch(console.warn);}
+    if (isActive) {supabase?.auth.startAutoRefresh();void consumeNotificationRoute().catch(console.warn);window.dispatchEvent(new Event('kk:app-active'));}
     else supabase?.auth.stopAutoRefresh();
   });
 

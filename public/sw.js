@@ -1,8 +1,19 @@
-/* KataKecil 7.3.0-rc.1: network-only. Never store responses or replay mutations. */
-const connectionPage='<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081425"><title>KataKecil — Koneksi diperlukan</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#081425;color:#eff6ff;font:16px/1.6 system-ui}main{max-width:32rem;padding:2rem;text-align:center}button{padding:12px 20px;border-radius:12px;border:0;font:inherit;background:#9bc9ff;color:#081425}</style><main><h1>Koneksi diperlukan</h1><p>Hubungkan internet untuk membuka KataKecil. Cerita tidak tersedia secara offline.</p><button onclick="location.reload()">Coba lagi</button></main></html>';
-self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
-self.addEventListener('fetch',event=>{
-  const req=event.request;
-  if(req.method!=='GET'||req.mode!=='navigate'||new URL(req.url).origin!==self.location.origin)return;
-  event.respondWith(fetch(req,{cache:'no-store'}).catch(()=>new Response(connectionPage,{status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})));
+/* Notification delivery only. No fetch handler, page cache or PWA installation. */
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+function route(value){return typeof value==='string'&&/^\/baca\/[A-Za-z0-9%_-]+(?:\?episode=\d{1,4})?$/.test(value)?value:'/';}
+self.addEventListener('push',event=>{
+ let payload={};try{payload=event.data?.json()||{};}catch{}
+ const title=typeof payload.title==='string'?payload.title.slice(0,140):'Kabar dari KataKecil';
+ const body=typeof payload.body==='string'?payload.body.slice(0,240):'Ada cerita yang menunggumu di Library.';
+ event.waitUntil(self.registration.showNotification(title,{body,icon:'/brand/app-icon.png',badge:'/brand/notification-badge.png',tag:typeof payload.tag==='string'?payload.tag.slice(0,100):'katakecil-update',data:{path:route(payload.url)}}));
+});
+self.addEventListener('notificationclick',event=>{
+ event.notification.close();const path=route(event.notification.data?.path);
+ event.waitUntil((async()=>{
+  const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  const target=windows.find(client=>new URL(client.url).origin===self.location.origin);
+  if(target){target.postMessage({type:'KATAKECIL_OPEN_READER',path});await target.focus();}
+  else await self.clients.openWindow(new URL(path,self.location.origin).href);
+ })());
 });

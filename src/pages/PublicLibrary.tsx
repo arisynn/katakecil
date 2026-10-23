@@ -7,6 +7,7 @@ import {isConfigured} from '../data/supabase';
 import {navigate} from '../utils/nav';
 import {useUiTheme} from '../hooks/useUiTheme';
 import PublicHeader from '../components/public/PublicHeader';
+import BookDialog from '../features/public/components/BookDialog';
 import {BookmarkButton} from '../features/public/components/StoryCard';
 import {Action, EmptyLibrary} from '../features/public/components/LibraryUI';
 import {getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter} from '../data/publicSchedule';
@@ -19,7 +20,6 @@ const demoBooks:Book[]=[
  ['Langit yang Sama','Fiksi','Dua perjalanan, satu langit, dan sebuah tempat untuk kembali.'],
  ['Jejak di Kertas','Slice of Life','Di antara halaman dan ingatan, ada cerita yang belum selesai.'],
 ].map(([title,genre,synopsis],i)=>({id:`v6-demo-${i}`,slug:`v6-demo-${i}`,title,genre,synopsis,cover_url:fallbackCover({id:`v6-demo-${i}`,title}),status:'ongoing',is_published:true,is_featured:false,created_at:demoDate,updated_at:demoDate}));
-const countFor=(episodes:EpisodeSummary[],book:Book)=>episodes.filter(e=>e.book_id===book.id).length;
 function readProgress(book:Book){try{return parseReadingProgress(JSON.parse(localStorage.getItem(`kk-secure-progress-${book.id}`)||'null'));}catch{return null;}}
 
 function useLibrary(){
@@ -39,24 +39,21 @@ function useLibrary(){
 
 function LibraryShelf({books,episodes,demo}:{books:Book[];episodes:EpisodeSummary[];demo:boolean}){
  const [query,setQuery]=useState(()=>new URLSearchParams(location.search).get('q')||'');
- const eligible=useMemo(()=>books.filter(book=>demo||countFor(episodes,book)>0),[books,episodes,demo]);
+ const [selected,setSelected]=useState<Book|null>(null);
+ const eligible=books;
  const shown=useMemo(()=>eligible.filter(book=>`${book.title} ${book.genre}`.toLocaleLowerCase('id-ID').includes(query.trim().toLocaleLowerCase('id-ID'))),[eligible,query]);
  return <main className="crystal-library" aria-label="Library KataKecil">
-  <header className="crystal-library-intro"><span className="crystal-eyebrow">SEBUAH RUANG UNTUK CERITA</span><h1>Library<span>.</span></h1><p>Temukan tempatmu di antara halaman.</p></header>
+  <header className="crystal-library-intro"><h1>Library<span>.</span></h1></header>
   {demo&&<p className="crystal-preview-note">Pratinjau tampilan · cerita contoh</p>}
   {(eligible.length>6||query)&&<label className="crystal-search"><BrandIcon name="search" size={18}/><input type="search" aria-label="Cari cerita di Library" placeholder="Cari sebuah cerita…" value={query} onChange={e=>setQuery(e.target.value)}/></label>}
   {shown.length?<div className="crystal-shelf">{shown.map((book,i)=>{
-   const rows=episodes.filter(ep=>ep.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number);
-   const progress=readProgress(book);const position=progress?rows.findIndex(ep=>ep.episode_number===progress.ep):-1;
    return <article className="crystal-story" key={book.id} style={{'--story-index':Math.min(i,8)} as React.CSSProperties}>
-    <button type="button" className="crystal-story-link" aria-label={`${position>=0?'Lanjutkan':'Buka'} ${book.title}`} onClick={()=>navigate(`${demo?'/cerita/':'/baca/'}${book.slug}`)}>
-     <div className="crystal-cover"><Cover book={book} eager={i<3}/><span className="crystal-cover-shine" aria-hidden="true"/></div>
-     <span className="crystal-story-copy"><span className="crystal-story-genre">{book.genre||'Fiksi'}</span><strong>{book.title}</strong><span className="crystal-synopsis">{book.synopsis}</span><span className="crystal-story-meta">{position>=0?`Terakhir di ${progress!.ep===0?'prolog':`bab ${progress!.ep}`}`:demo?'Pratinjau':`${rows.length} bab`}<span aria-hidden="true"> · </span>{book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Bersambung'}</span>
-     {position>=0&&<span className="crystal-progress" aria-label={`Posisi bab ${position+1} dari ${rows.length}`}><span style={{width:`${(position+1)/rows.length*100}%`}}/></span>}</span>
+    <button type="button" className="crystal-story-link" aria-label={`Informasi ${book.title}`} aria-haspopup="dialog" onClick={()=>setSelected(book)}>
+     <div className="crystal-cover"><Cover book={book} eager={i<6}/><span className="crystal-cover-shine" aria-hidden="true"/></div>
     </button>
    </article>;
   })}</div>:query?<div className="crystal-empty"><h2>Cerita belum ditemukan.</h2><button type="button" onClick={()=>setQuery('')}>Tampilkan semua cerita</button></div>:<EmptyLibrary/>}
-  <footer className="crystal-library-footer"><span>Satu cerita. Satu waktu.</span><span>KataKecil</span></footer>
+  {selected&&<BookDialog key={selected.id} book={selected} episodes={episodes} progress={readProgress(selected)?.ep??null} demo={demo} onClose={()=>setSelected(null)}/>}
  </main>;
 }
 

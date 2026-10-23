@@ -10,11 +10,12 @@ try {
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
   const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  let releaseCode=3,invalidRelease=false;await page.route('https://katakecil.vercel.app/downloads/latest.json',route=>route.fulfill({headers:{'access-control-allow-origin':'*'},json:{packageId:'app.katakecil.mobile',versionCode:releaseCode,versionName:'1.3-test',url:invalidRelease?'https://evil.test/bad.apk':'https://katakecil.vercel.app/downloads/KataKecil.apk',sha256:'a'.repeat(64),size:6000000,releaseNotes:['Perbaikan sintetis.']}}));
   await page.route('https://synthetic-android.supabase.co/**',route=>route.fulfill({json:[]}));
   await page.addInitScript(()=>{
     window.androidBridge={};window.nativeCalls=[];window.nativeHandlers={};window.notificationSettings={reminder:false,chapters:false,time:"20:00",lastChecked:0,allowed:false};
     window.Capacitor={PluginHeaders:[
-      {name:'App',methods:[{name:'addListener',rtype:'callback'},{name:'removeListener',rtype:'promise'},{name:'minimizeApp',rtype:'promise'}]},
+      {name:'App',methods:[{name:'addListener',rtype:'callback'},{name:'removeListener',rtype:'promise'},{name:'minimizeApp',rtype:'promise'},{name:'getInfo',rtype:'promise'}]},
       {name:'Browser',methods:[{name:'open',rtype:'promise'}]},
       {name:'Filesystem',methods:[{name:'writeFile',rtype:'promise'}]},
       {name:'Share',methods:[{name:'share',rtype:'promise'}]},
@@ -23,6 +24,7 @@ try {
       {name:'LocalNotifications',methods:['checkPermissions','requestPermissions','createChannel','schedule','cancel'].map(name=>({name,rtype:'promise'})).concat([{name:'addListener',rtype:'callback'}])},
       {name:'SystemBars',methods:[{name:'setStyle',rtype:'promise'}]},
     ],nativePromise:async(plugin,method,args)=>{window.nativeCalls.push({plugin,method,args});if(plugin==='Filesystem')return {uri:'file:///cache/exports/synthetic.csv'};
+      if(plugin==='App'&&method==='getInfo')return {id:'app.katakecil.mobile',build:'3',version:'1.2-shelf'};
       if(plugin==='ChapterAlerts'){
         if(method==='getSettings')return {...window.notificationSettings};
         if(method==='consumeRoute')return {route:''};
@@ -85,6 +87,9 @@ try {
   await page.getByRole('status').filter({hasText:'Pengingat membaca dimatikan'}).waitFor();
   assert(await page.evaluate(()=>window.nativeCalls.some(c=>c.plugin==='LocalNotifications'&&c.method==='cancel')));
   await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'detached'});
+  releaseCode=4;await page.getByRole('button',{name:'Buka menu',exact:true}).click();await page.getByRole('menuitem',{name:'Periksa pembaruan',exact:true}).click();await page.getByRole('dialog',{name:'Pembaruan tersedia',exact:true}).waitFor();await page.getByRole('button',{name:'Unduh pembaruan',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});assert(await page.evaluate(()=>window.nativeCalls.some(c=>c.plugin==='Browser'&&c.args.url==='https://katakecil.vercel.app/downloads/KataKecil.apk')));
+  invalidRelease=true;await page.evaluate(()=>window.dispatchEvent(new Event('kk:check-update')));await page.getByRole('status').filter({hasText:'Informasi pembaruan belum valid'}).waitFor();assert.equal(await page.getByRole('dialog').count(),0);
+  invalidRelease=false;releaseCode=3;await page.evaluate(()=>window.dispatchEvent(new Event('kk:check-update')));await page.getByRole('status').filter({hasText:'sudah menggunakan versi terbaru'}).waitFor();
   assert.deepEqual(errors,[]);
-  console.log('PASS native bridge contract: no startup errors, local viewport, no SW, installed notice, guarded Back, history, minimize, external browser, theme bars, native export, opt-in permission denial/grant, inexact reading reminders, chapter worker configuration, test notification, cancellation. Desktop mocks only.');
+  console.log('PASS native bridge contract: no startup errors, local viewport, no SW, installed notice, guarded Back, history, minimize, external browser, theme bars, native export, opt-in permission denial/grant, inexact reading reminders, chapter worker configuration, test notification, cancellation; APK version check, update offer/browser download, same-version result and cross-origin URL rejection. Desktop mocks only.');
 }finally{await browser?.close();server.kill();}

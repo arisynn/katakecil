@@ -18,7 +18,7 @@ const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','1
 for(let i=0;i<80;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']}).catch(e=>{server.kill();throw e;});
 const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[];
-page.on('pageerror',e=>errors.push(e.message));mkdirSync('qa/v74',{recursive:true});
+await page.addInitScript(()=>localStorage.setItem('kk-apk-prompt-dismissed',String(Date.now())));page.on('pageerror',e=>errors.push(e.message));mkdirSync('qa/v74',{recursive:true});
 let writes=[],bodyReads=0,loseReply=false,missingMigration=false;
 await context.route('https://synthetic-qa.supabase.co/**',async route=>{
  const path=new URL(route.request().url()).pathname,name=path.split('/').at(-1),args=route.request().postDataJSON()??{};

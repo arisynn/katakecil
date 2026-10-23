@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "node scripts/verify-public-build.mjs && vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
     "import:episodes": "node scripts/import-episodes.mjs",
     "test:v3": "node scripts/test-v3-planning.mjs",
     "test:v42": "node scripts/test-v42-security.mjs",
@@ -33,7 +33,10 @@
     "android:open": "cap open android",
     "test:android": "node scripts/test-android-integration.mjs",
     "android:apk": "npm run build:android && cd android && ./gradlew assembleRelease",
-    "test:crystal": "node scripts/test-crystal-browser.mjs"
+    "test:crystal": "node scripts/test-crystal-browser.mjs",
+    "release:web": "node scripts/prepare-web-release.mjs && npm run build",
+    "test:push": "node scripts/test-web-push.mjs",
+    "test:shelf": "node scripts/test-crystal-browser.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
@@ -47,7 +50,8 @@
     "@supabase/supabase-js": "2.117.3",
     "jszip": "3.10.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "web-push": "3.6.7"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.3",
@@ -58,6 +62,7 @@
     "@types/node": "24.10.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/web-push": "3.6.4",
     "@vitejs/plugin-react": "6.1.2",
     "playwright": "1.56.1",
     "tailwindcss": "4.3.3",

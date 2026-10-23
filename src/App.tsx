@@ -45,6 +45,7 @@ import './design/public-experience.css';
 import './design/studio-experience.css';
 import './design/crystal.css';
 import './design/writer.css';
+import './design/shelf.css';
 
 export default function App(){
   const [route,setPath]=useState(window.location.pathname+window.location.search);

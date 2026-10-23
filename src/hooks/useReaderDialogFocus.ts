@@ -9,7 +9,7 @@ export function useReaderDialogFocus<T extends HTMLElement>(onClose: () => void)
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const focusable = () => Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button:not(:disabled),input:not(:disabled),summary,[tabindex="0"]',
+      'a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),summary,[tabindex="0"]',
     ) ?? []).filter(element => element.getClientRects().length > 0);
     const initial = dialogRef.current?.querySelector<HTMLElement>('[data-reader-autofocus]') ?? focusable()[0];
     initial?.focus();
