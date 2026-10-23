@@ -11,6 +11,7 @@ import {chapterFromEpisode} from './utils/episodeChapter';
 import {DEFAULT_SETTINGS,THEMES} from './utils/theme';
 import type {Bookmark,Chapter,ReadingSettings,TextAnchor} from './types/reader';
 import './index.css';
+import {savedReaderProgress,type ReaderSource} from './data/readerSource';
 import { useUiTheme } from './hooks/useUiTheme';
 import { readerModeFor } from './utils/globalTheme';
 import { pinchAction } from './utils/readerGesture';
@@ -24,8 +25,9 @@ function readLocal<T>(key:string,fallback:T):T {try{return JSON.parse(localStora
 function marker(ep:number){return `secure-episode-${ep}-part-0`;}
 function readMarker(id:string){const m=/^secure-episode-(\d+)-part-(\d+)$/.exec(id);return m?{ep:Number(m[1]),part:Number(m[2])}:null;}
 
-type Props={bookId:string;bookTitle:string;onExit:()=>void;episodeNumber?:number;previewEpisode?:ReaderEpisode};
-export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,previewEpisode}:Props){
+type Props={bookId:string;bookTitle:string;onExit:()=>void;episodeNumber?:number;previewEpisode?:ReaderEpisode;source?:ReaderSource};
+export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,previewEpisode,source}:Props){
+ const preview=!!previewEpisode||source?.preview===true;
  const progressKey=`kk-secure-progress-${bookId}`;
  const bookmarkKey=`kk-secure-bookmarks-${bookId}`;
  const completedKey=completionStorageKey(bookId);
@@ -47,14 +49,16 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
  const [controls,setControls]=useState(false);
  const [modal,setModal]=useState<'none'|'contents'|'settings'|'search'>('none');
  const [fullscreen,setFullscreen]=useState(!!document.fullscreenElement);
- const [bookmarks,setBookmarks]=useState<Bookmark[]>(()=>{if(previewEpisode)return [];const value=readLocal<unknown>(bookmarkKey,[]);return Array.isArray(value)?value.filter(b=>b?.anchor&&typeof b.anchor.chapterId==='string'&&Number.isFinite(b.anchor.offset)).map(b=>({...b,snippet:'Penanda bacaan'})):[];});
- const [completedEpisodes,setCompletedEpisodes]=useState<number[]>(()=>previewEpisode?[]:normalizeCompletedEpisodes(readLocal<unknown>(completedKey,[])));
+ const [bookmarks,setBookmarks]=useState<Bookmark[]>(()=>{if(preview)return [];const value=readLocal<unknown>(bookmarkKey,[]);return Array.isArray(value)?value.filter(b=>b?.anchor&&typeof b.anchor.chapterId==='string'&&Number.isFinite(b.anchor.offset)).map(b=>({...b,snippet:'Penanda bacaan'})):[];});
+ const [completedEpisodes,setCompletedEpisodes]=useState<number[]>(()=>preview?[]:normalizeCompletedEpisodes(readLocal<unknown>(completedKey,[])));
  const [status,setStatus]=useState('');
  const [returnAt,setReturnAt]=useState<{ep:number;offset:number}|null>(null);
  const measuringNode=useRef<HTMLElement|null>(null);
  const offsetRef=useRef(0);
  const pendingEdge=useRef<'start'|'end'|'offset'>('start');
  const pendingOffset=useRef(0);
+ const pendingRatio=useRef<number|undefined>(undefined);
+ const controller=useRef<AbortController|null>(null);
  const requestRef=useRef(0);
  const loadingTarget=useRef<number|undefined>(undefined);
  const touch=useRef<{x:number;y:number;moved:boolean;pinch:boolean;distance?:number}|null>(null);
@@ -71,64 +75,69 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
   '--reader-menu-scale':String(menuPlacement.scale),
   '--reader-menu-offset-y':`${menuPlacement.offsetY}px`,
  } as React.CSSProperties;
- const chapter=useMemo(()=>segment?chapterFromEpisode(segment.episodeNumber,segment.title,segment.arc,segment.content):undefined,[segment]);
+ const chapter=useMemo(()=>segment?chapterFromEpisode(segment.episodeNumber,segment.title,segment.arc,segment.content,segment.blocks):undefined,[segment]);
  // Stable array identity: an inline [chapter] causes PageMeasurer's layout effect
  // to run on every render, triggering an endless measure/setPages loop.
  const measuredChapters=useMemo(()=>chapter?[chapter]:[],[chapter]);
- const storedPos=()=>previewEpisode?null:readLocal<{ep:number;part?:number;offset:number}|null>(progressKey,null);
- const persistProgress=(ep:number,offset:number)=>{if(previewEpisode)return;try{localStorage.setItem(progressKey,JSON.stringify({ep,part:0,offset,updatedAt:Date.now()}));}catch{}};
+ const storedPos=()=>preview?null:savedReaderProgress(bookId);
+ const persistProgress=(ep:number,offset:number)=>{if(preview)return;try{localStorage.setItem(progressKey,JSON.stringify({ep,part:0,offset,sourceVersion:segmentRef.current?.sourceVersion,updatedAt:Date.now()}));}catch{}};
 
  // Episode boundaries, not arbitrary network chunks, determine reading progression.
  const loadEpisode=useCallback(async(ep:number,edge:'start'|'end'|'offset'='start',offset=0)=>{
   if(!indexRef.current.some(x=>x.episode_number===ep))return;
+  controller.current?.abort();controller.current=new AbortController();
   const token=++requestRef.current;
   loadingTarget.current=ep;
   setLoading(true);setControls(false);setError('');pendingEdge.current=edge;pendingOffset.current=offset;offsetRef.current=offset;
   try{
-   if(!previewEpisode&&!navigator.onLine)throw Error('Koneksi diperlukan untuk membaca.');
-   const incoming=previewEpisode||await loadReaderEpisode(bookId,ep);
+   if(!preview&&!navigator.onLine)throw Error('Koneksi diperlukan untuk membaca.');
+   const incoming=previewEpisode||(source?await source.loadEpisode(ep,controller.current.signal):await loadReaderEpisode(bookId,ep));
    if(token!==requestRef.current)return;
+   const saved=storedPos();
+   if(edge==='offset'&&saved?.sourceVersion&&incoming.sourceVersion&&saved.sourceVersion!==incoming.sourceVersion){pendingOffset.current=0;offsetRef.current=0;offset=0;}
+   pendingRatio.current=edge==='offset'?incoming.resumeRatio:undefined;
    segmentRef.current=incoming;
    setSegment(incoming);setPages([]);setPageIndex(0);
    persistProgress(ep,edge==='offset'?offset:0);
   }catch(e){if(token===requestRef.current){setSegment(null);segmentRef.current=null;setPages([]);setError(e instanceof Error?e.message:'Tidak bisa memuat episode.');}}
   finally{if(token===requestRef.current)setLoading(false);}
- },[bookId,progressKey,previewEpisode]);
+ },[bookId,progressKey,previewEpisode,source,preview]);
  useEffect(()=>{
   let active=true;
   void (async()=>{
    try{
-    const episodes=previewEpisode?[{episode_number:previewEpisode.episodeNumber,title:previewEpisode.title,arc_title:previewEpisode.arc,release_at:''}]:await loadReleasedIndex(bookId);
+    const episodes=previewEpisode?[{episode_number:previewEpisode.episodeNumber,title:previewEpisode.title,arc_title:previewEpisode.arc,release_at:''}]:(source?await source.loadIndex():await loadReleasedIndex(bookId));
     if(!active)return;
     setIndex(episodes);indexRef.current=episodes;
     if(!episodes.length){setError('Belum ada episode yang diterbitkan.');setLoading(false);return;}
     const saved=storedPos();
     const wanted=episodeNumber!==undefined&&episodes.some(e=>e.episode_number===episodeNumber)?episodeNumber:
       saved&&episodes.some(e=>e.episode_number===saved.ep)?saved.ep:episodes[0].episode_number;
-    const useSaved=episodeNumber===undefined&&saved?.ep===wanted&&(saved?.part===0||saved?.part===undefined);
+    const useSaved=(episodeNumber===undefined||source!==undefined)&&saved?.ep===wanted&&(saved?.part===0||saved?.part===undefined);
     await loadEpisode(wanted,useSaved?'offset':'start',useSaved?saved!.offset:0);
    }catch(e){if(active){setError(e instanceof Error?e.message:'Daftar episode tidak tersedia.');setLoading(false);}}
   })();
-  return()=>{active=false;requestRef.current++;};
- },[bookId,episodeNumber,loadEpisode,previewEpisode]);
+  return()=>{active=false;requestRef.current++;controller.current?.abort();};
+ },[bookId,episodeNumber,loadEpisode,previewEpisode,source]);
+ useEffect(()=>()=>source?.dispose?.(),[source]);
  useEffect(()=>{
-  if(previewEpisode)return;
+  if(preview)return;
   let hiddenAt=0;
   const refresh=()=>{const ep=loadingTarget.current??segmentRef.current?.episodeNumber;if(ep!==undefined&&navigator.onLine)void loadEpisode(ep,'offset',offsetRef.current);};
-  const offline=()=>{requestRef.current++;setSegment(null);segmentRef.current=null;setPages([]);setControls(false);setModal('none');setLoading(false);setError('Koneksi diperlukan untuk membaca. Hubungkan internet lalu coba lagi.');};
+  const offline=()=>{requestRef.current++;controller.current?.abort();setSegment(null);segmentRef.current=null;setPages([]);setControls(false);setModal('none');setLoading(false);setError('Koneksi diperlukan untuk membaca. Hubungkan internet lalu coba lagi.');};
   const visibility=()=>{if(document.visibilityState==='hidden')hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>60_000)refresh();};
   const restored=(event:PageTransitionEvent)=>{if(event.persisted)refresh();};
   window.addEventListener('offline',offline);window.addEventListener('online',refresh);window.addEventListener('pageshow',restored);document.addEventListener('visibilitychange',visibility);
   return()=>{window.removeEventListener('offline',offline);window.removeEventListener('online',refresh);window.removeEventListener('pageshow',restored);document.removeEventListener('visibilitychange',visibility);};
- },[loadEpisode,previewEpisode]);
+ },[loadEpisode,preview]);
  useEffect(()=>{
   const full=()=>setFullscreen(!!document.fullscreenElement);
   document.addEventListener('fullscreenchange',full);
   return()=>document.removeEventListener('fullscreenchange',full);
  },[]);
  useEffect(()=>{try{localStorage.setItem('quiet_reader_settings',JSON.stringify(effectiveSettings));}catch{}},[effectiveSettings]);
- useEffect(()=>{if(previewEpisode)return;try{localStorage.setItem(bookmarkKey,JSON.stringify(bookmarks));}catch{}},[bookmarks,bookmarkKey]);
- useEffect(()=>{if(previewEpisode)return;try{localStorage.setItem(completedKey,JSON.stringify(completedEpisodes));}catch{}},[completedKey,completedEpisodes]);
+ useEffect(()=>{if(preview)return;try{localStorage.setItem(bookmarkKey,JSON.stringify(bookmarks));}catch{}},[bookmarks,bookmarkKey,preview]);
+ useEffect(()=>{if(preview)return;try{localStorage.setItem(completedKey,JSON.stringify(completedEpisodes));}catch{}},[completedKey,completedEpisodes,preview]);
  useEffect(()=>{if(!status)return;const timer=setTimeout(()=>setStatus(''),2500);return()=>clearTimeout(timer);},[status]);
  const onMeasured=useCallback((counts:number[],nodes:HTMLElement[])=>{
   measuringNode.current=nodes[0]||null;
@@ -142,6 +151,11 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
     const at=columnAnchor(nodes[0],chapter,count-1,geometry.bodyWidth).offset;
     offsetRef.current=at;pendingOffset.current=at;persistProgress(active.episodeNumber,at);
    }
+  }
+  else if(pendingRatio.current!==undefined&&active&&chapter&&nodes[0]){
+   const page=Math.min(count-1,Math.floor(pendingRatio.current*count));pendingRatio.current=undefined;
+   const offset=columnAnchor(nodes[0],chapter,page,geometry.bodyWidth).offset;
+   pendingOffset.current=offset;offsetRef.current=offset;setPageIndex(page);persistProgress(active.episodeNumber,offset);
   }
   else if(pendingEdge.current==='offset'&&active&&nodes[0]){
    offsetRef.current=pendingOffset.current;
@@ -193,6 +207,10 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
  const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,displayNumber:ep.episode_number,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
  const onTap=(e:React.MouseEvent)=>{
   if(loading||!!error||!pages.length)return;
+  const link=(e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-reader-anchor]');
+  if(link){e.preventDefault();const href=link.dataset.readerAnchor||'',fragment=href.split('#')[1];let id='';try{id=decodeURIComponent(fragment||'');}catch{}
+   const offset=segment?.anchors?.[id];if(typeof offset==='number'&&Number.isFinite(offset)&&segment)jumpTo({chapterId:marker(segment.episodeNumber),offset});else setStatus('Gunakan daftar isi untuk berpindah bab.');return;
+  }
   if((e.target as HTMLElement).closest('button,input,textarea,a'))return;
   if(ignoreClick.current){ignoreClick.current=false;return;}
   if(controls){setControls(false);return;}
@@ -267,16 +285,16 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
  const loadingEpisodeNumber=loadingTarget.current;
  const loadingEpisode=index.find(entry=>entry.episode_number===loadingEpisodeNumber);
  const first=pages[pageIndex],second=spread?pages[pageIndex+1]:undefined;
- return <div className={`quiet-app ${previewEpisode?'reader-author-preview':'reader-protected'}`} data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text,...layoutVars}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+ return <div className={`quiet-app ${preview?'reader-author-preview':'reader-protected'}`} data-reader-view={modal!=='none'?'panel':controls?'menu':'reading'} data-reader-theme={effectiveReaderTheme} style={{backgroundColor:theme.bg,color:theme.text,...layoutVars}} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
   {chapter&&<PageMeasurer chapters={measuredChapters} settings={effectiveSettings} geometry={geometry} onMeasured={onMeasured} hideIntro={false}/>}
-  <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>{if(!previewEpisode)e.preventDefault();}} onCut={e=>{if(!previewEpisode)e.preventDefault();}} onDragStart={e=>{if(!previewEpisode)e.preventDefault();}} onContextMenu={e=>{if(!previewEpisode)e.preventDefault();}} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
+  <main className={`reader-stage ${controls?'showing-controls':''}`} onCopy={e=>{if(!preview)e.preventDefault();}} onCut={e=>{if(!preview)e.preventDefault();}} onDragStart={e=>{if(!preview)e.preventDefault();}} onContextMenu={e=>{if(!preview)e.preventDefault();}} onClick={onTap} aria-label="Halaman pembaca, ketuk tengah untuk menu">
    {chapter&&pages.length>0&&!loading&&!error?<div className={`reader-book ${spread?'reader-book-spread':''}`} style={{background:theme.pageBg,gap:spread?16:0}}>
     {first!==undefined&&<ReaderPage chapter={chapter} columnIndex={first} pageNumber={pageIndex+1} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
     {spread&&second!==undefined&&<ReaderPage chapter={chapter} columnIndex={second} pageNumber={pageIndex+2} totalPages={pages.length} settings={effectiveSettings} theme={theme} geometry={geometry} hideIntro={false}/>}
-   </div>:<ReaderEpisodeLoading phase={error?'error':loading?'fetch':!index.length?'empty':'layout'} storyTitle={bookTitle} episodeNumber={loadingEpisodeNumber} episodeTitle={loadingEpisode?.title} message={error||undefined} onRetry={error?()=>{if(loadingTarget.current!==undefined)void loadEpisode(loadingTarget.current);else window.location.reload();}:undefined}/>}
+   </div>:<ReaderEpisodeLoading phase={error?'error':loading?'fetch':!index.length?'empty':'layout'} storyTitle={bookTitle} episodeNumber={loadingEpisodeNumber} episodeTitle={loadingEpisode?.title} message={error||undefined} onBack={onExit} backLabel={preview?'Kembali ke editor':'Kembali ke Library'} onRetry={error?()=>{if(loadingTarget.current!==undefined)void loadEpisode(loadingTarget.current);else window.location.reload();}:undefined}/>}
   </main>
   <div className={`controls-shell ${controls?'controls-open':''}`} aria-hidden={!controls}>
-   {controls && <ReaderControls exitLabel={previewEpisode ? 'Kembali ke editor' : 'Kembali ke Library'} onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1} estimatedMinutesRemaining={minutesRemaining} chapterCompleted={isChapterCompleted} onToggleChapterCompleted={toggleChapterCompleted}/>}
+   {controls && <ReaderControls exitLabel={preview ? 'Kembali ke editor' : 'Kembali ke Library'} onExit={onExit} theme={theme} title={bookTitle} chapterTitle={displayedTitle} page={pageIndex+1} total={pages.length||1} isBookmarked={activeBookmarks.length>0} fullscreen={fullscreen} canReturn={!!returnAt} onContents={()=>setModal('contents')} onSettings={()=>setModal('settings')} onSearch={()=>{setStatus('Pencarian dalam episode yang sedang dibaca.');setModal('search');}} onBookmark={toggleBookmark} onFullscreen={()=>{if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});else void document.documentElement.requestFullscreen?.().catch(()=>{});}} onClose={()=>setControls(false)} onReturn={()=>{if(returnAt){void loadEpisode(returnAt.ep,'offset',returnAt.offset);setReturnAt(null);}}} onPage={n=>goTo(n-1)} onPrevChapter={()=>{if(index[currentIndex-1])jumpEpisode(index[currentIndex-1].episode_number);}} onNextChapter={()=>{if(index[currentIndex+1])jumpEpisode(index[currentIndex+1].episode_number);}} prevChapter={currentIndex>0} nextChapter={currentIndex<index.length-1} estimatedMinutesRemaining={minutesRemaining} chapterCompleted={isChapterCompleted} onToggleChapterCompleted={toggleChapterCompleted}/>}
   </div>
   {status&&<div className="quiet-status" role="status" style={{background:theme.barBg,color:theme.secondaryText}}>{status}</div>}
   {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} completedEpisodeNumbers={completedEpisodes} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}

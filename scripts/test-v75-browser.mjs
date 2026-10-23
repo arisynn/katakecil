@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import {mkdirSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import {chromium} from 'playwright';
-import JSZip from 'jszip';
 import {createDatabase,author,rpc} from './test-v75.mjs';
 const db=await createDatabase();
 let queue=Promise.resolve();const serial=fn=>{const job=queue.then(fn);queue=job.catch(()=>{});return job;};
@@ -46,11 +45,8 @@ await context.route('https://synthetic-qa.supabase.co/**',async route=>{
 async function goto(mode){await page.goto(`${base}${fixture}?mode=${mode}`);}
 async function screenshot(name){await page.screenshot({path:`qa/v75/${name}.png`,fullPage:true});}
 try{
- // Real EPUB parsing -> confirmation -> actual PostgreSQL import/publication transaction.
- const zip=new JSZip();zip.file('mimetype','application/epub+zip');zip.file('META-INF/container.xml','<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
- zip.file('OPS/content.opf',`<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book">qa-v75</dc:identifier><dc:title>EPUB Sintetis</dc:title><dc:language>id</dc:language></metadata><manifest>${[1,2,3,4,5,6].map(i=>`<item id="c${i}" href="chapter-${i}.xhtml" media-type="application/xhtml+xml"/>`).join('')}</manifest><spine>${[1,2,3,4,5,6].map(i=>`<itemref idref="c${i}"/>`).join('')}</spine></package>`);
- for(let i=1;i<=6;i++)zip.file(`OPS/chapter-${i}.xhtml`,`<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Bab ${i}</title></head><body><h1>Bab ${i}</h1><p>Isi bab sintetis nomor ${i}. Seluruh teks ini hanya dipakai sebagai data uji penerbitan.</p></body></html>`);
- await goto('import');await page.locator('input[type=file][name=manuscript]').setInputFiles({name:'synthetic.epub',mimeType:'application/epub+zip',buffer:await zip.generateAsync({type:'nodebuffer'})});
+ // Markdown episode import retains mixed publishing; intact EPUB is covered by test-epub.
+ await goto('import');await page.locator('input[type=file][name=manuscript]').setInputFiles({name:'Markdown Sintetis.md',mimeType:'text/markdown',buffer:Buffer.from(Array.from({length:6},(_,i)=>`# Bab ${i+1}\n\nIsi bab sintetis nomor ${i+1}. Seluruh teks ini hanya dipakai sebagai data uji penerbitan.`).join('\n\n'))});
  await page.getByLabel('Setelah impor').waitFor();await page.getByLabel('Setelah impor').selectOption('mixed');
  await page.getByRole('button',{name:'3× seminggu',exact:true}).click();
  await page.getByLabel('Pratinjau penerbitan').getByText('3 bab terbit sekarang · 3 bab terjadwal').waitFor();
@@ -60,7 +56,7 @@ try{
  }
  await page.setViewportSize({width:390,height:844});await screenshot('import-mobile');
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:/Simpan 6 episode/}).click();await page.getByRole('status').filter({hasText:'Impor berhasil:'}).waitFor();
- let imported=(await sql("select e.* from qr_episodes e join qr_books b on b.id=e.book_id where b.title='EPUB Sintetis' order by e.episode_number")).rows;
+ let imported=(await sql("select e.* from qr_episodes e join qr_books b on b.id=e.book_id where b.title='Markdown Sintetis' order by e.episode_number")).rows;
  assert.equal(imported.length,6);assert.equal(imported.filter(e=>Date.parse(e.release_at)<=Date.now()).length,3);assert.equal(imported.filter(e=>Date.parse(e.release_at)>Date.now()).length,3);
  const importedBook=imported[0].book_id;
  // Pause future chapters, then resume using a visible, newly confirmed release plan.
@@ -93,6 +89,6 @@ try{
  await goto('books');await page.getByText('Kelola beberapa karya',{exact:true}).click();await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('HAPUS');await page.getByRole('dialog').getByRole('button',{name:'Pindahkan ke Sampah',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});
  await goto('trash');await page.getByRole('button',{name:'Kosongkan Sampah',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('HAPUS PERMANEN');await page.getByRole('dialog').getByRole('button',{name:'Hapus permanen',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});assert.equal((await sql('select count(*)::int n from qr_books')).rows[0].n,0);
  assert.deepEqual(errors,[]);
- console.log('V7.5 browser + PostgreSQL: real EPUB -> mixed 3-now/3-scheduled publication, presets, pause/resume, global delete across filters, lost-reply replay, private restoration, minimal Library shelf, 320–1440 layouts, both themes and no manuscript persistence passed.');
+ console.log('V7.5 browser + PostgreSQL: real Markdown -> mixed 3-now/3-scheduled publication, presets, pause/resume, global delete across filters, lost-reply replay, private restoration, minimal Library shelf, 320–1440 layouts, both themes and no manuscript persistence passed.');
 }catch(e){console.error(e.message);console.error((await page.locator('body').innerText()).slice(-4500));await screenshot('failure');throw e;}
 finally{await browser.close();server.kill('SIGTERM');await db.close();}

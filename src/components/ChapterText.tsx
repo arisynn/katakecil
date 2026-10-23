@@ -1,6 +1,15 @@
 import React from 'react';
-import type { Chapter } from '../types/reader';
+import type { Chapter, ReaderInline } from '../types/reader';
 import { readerHeading } from '../utils/readerHeading';
+
+function richInline(node:ReaderInline,index:number){
+ let content:React.ReactNode=node.text;
+ if(node.script==='sup')content=<sup>{content}</sup>;else if(node.script==='sub')content=<sub>{content}</sub>;
+ if(node.code)content=<code>{content}</code>;if(node.italic)content=<em>{content}</em>;if(node.bold)content=<strong>{content}</strong>;
+ if(node.href)content=<a href={node.href} target="_blank" rel="noopener noreferrer">{content}</a>;
+ else if(node.internal)content=<a href="#" data-reader-anchor={node.internal}>{content}</a>;
+ return <React.Fragment key={index}>{content}</React.Fragment>;
+}
 
 /** One DOM content tree shared by the pagination measurer and visible reader. */
 export function ChapterText({ chapter, hideIntro=false }: { chapter: Chapter; hideIntro?: boolean }) {
@@ -18,7 +27,10 @@ export function ChapterText({ chapter, hideIntro=false }: { chapter: Chapter; hi
         <div className="chapter-arc">{heading.eyebrow}</div>
         {heading.title && <h2>{heading.title}</h2>}
       </div>}
-      {chapter.paragraphs.map((p, i) => <p key={i} data-paragraph-index={i}>{inline(p)}</p>)}
+      {chapter.blocks?chapter.blocks.map((block,i)=>block.kind==='image'&&block.image?
+        <figure key={i} data-paragraph-index={i} className="reader-illustration"><img src={block.image.src} alt={block.image.alt} width={block.image.width} height={block.image.height} decoding="async"/><figcaption>{block.text}</figcaption></figure>:
+        <p key={i} data-paragraph-index={i} className={`reader-rich-${block.kind}`}>{block.nodes.map(richInline)}</p>
+      ):chapter.paragraphs.map((p, i) => <p key={i} data-paragraph-index={i}>{inline(p)}</p>)}
     </div>
   );
 }

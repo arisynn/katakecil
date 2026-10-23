@@ -3,7 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import {useLeaveGuard} from '../hooks/useLeaveGuard';
 import {mayLeave} from '../utils/nav';
 import { loadBookSections, saveBookSection, type BookSection } from '../data/bookSections';
-import { trashItem } from '../data/trash';
+import ManagementDialog from '../features/studio/components/ManagementDialog';
+import type {ManagementOperation} from '../data/management';
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : String(error);
 export default function BookSections({ bookId }: {
     bookId: string;
@@ -17,6 +18,7 @@ export default function BookSections({ bookId }: {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [pendingTrash,setPendingTrash]=useState<ManagementOperation|null>(null);
     const baseline=useRef('');
     const snapshot=JSON.stringify({title,body,type});
     useLeaveGuard(busy||(open&&snapshot!==baseline.current),()=>!busy&&(!open||snapshot===baseline.current||window.confirm('Tinggalkan halaman buku yang belum disimpan?')));
@@ -43,23 +45,7 @@ export default function BookSections({ bookId }: {
             setBusy(false);
         }
     };
-    const remove = async (item: BookSection) => {
-        if (!window.confirm(`Pindahkan halaman “${item.title}” ke Sampah? Kamu masih bisa memulihkannya.`))
-            return;
-        setBusy(true);
-        setError('');
-        try {
-            await trashItem('section', item.id);
-            await reload();
-            setMessage('Halaman dipindahkan ke Sampah.');
-        }
-        catch (e) {
-            setError(errorMessage(e));
-        }
-        finally {
-            setBusy(false);
-        }
-    };
+    const remove = (item:BookSection)=>setPendingTrash({id:crypto.randomUUID(),action:'trash',items:[{kind:'section',id:item.id,title:item.title}]});
     return <section className="studio-panel v5-book-sections" id="book-sections">
   <div className="studio-panel-top"><h2>Halaman buku</h2><button className="studio-light-button" onClick={() => edit()}><BrandIcon name="file-plus" size={16}/> Tambah halaman</button></div>
   <p className="studio-muted">Simpan kata pengantar, dedikasi, atau catatan penulis terpisah dari episode. Semua halaman baru bersifat privat di Studio.</p>
@@ -71,5 +57,6 @@ export default function BookSections({ bookId }: {
    <label className="studio-label">Isi Markdown<textarea aria-label="Isi Markdown" rows={9} value={body} onChange={e => setBody(e.target.value)} placeholder="Tulis kata pengantar atau dedikasi di sini…"/></label>
    <button className="studio-primary" disabled={busy || !title.trim() || !body.trim()} onClick={() => void save()}><BrandIcon name="save" size={16}/>{busy ? 'Menyimpan…' : 'Simpan halaman'}</button>
   </div>}
+ {pendingTrash&&<ManagementDialog operation={pendingTrash} description="Halaman buku disembunyikan dan dapat dipulihkan melalui Sampah." onClose={()=>setPendingTrash(null)} onDone={async notice=>{if(editing?.id===pendingTrash.items[0].id)setOpen(false);await reload();setMessage(notice);setPendingTrash(null);}}/>}
  </section>;
 }

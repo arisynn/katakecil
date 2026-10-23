@@ -1,0 +1,378 @@
+/* Shared finish for the active Library, Studio, dialogs and hybrid reader.
+   Page geometry and manuscript typography remain owned by the reader. */
+:root {
+  --ui-radius: 16px;
+  --ui-control: 11px;
+  --ui-line: color-mix(in srgb, var(--kk-border) 82%, transparent);
+  --ui-glass: color-mix(in srgb, var(--kk-surface) 92%, transparent);
+  --ui-shadow: 0 8px 28px rgb(20 47 83 / .045), inset 0 1px rgb(255 255 255 / .55);
+  --ui-modal-shadow: 0 24px 80px rgb(3 15 32 / .18), inset 0 1px rgb(255 255 255 / .45);
+}
+html[data-app-theme=dark] {
+  --ui-glass: color-mix(in srgb, var(--kk-surface) 94%, transparent);
+  --ui-shadow: 0 8px 28px rgb(0 0 0 / .09), inset 0 1px rgb(205 228 255 / .035);
+  --ui-modal-shadow: 0 24px 80px rgb(0 0 0 / .32), inset 0 1px rgb(205 228 255 / .06);
+}
+:where(.crystal-public,.writer-shell,.writer-login,.crystal-dialog,.book-dialog) { -webkit-font-smoothing: antialiased; }
+:where(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--kk-primary); outline-offset: 3px; }
+:where(.writer-shell,.crystal-public,.crystal-dialog,.book-dialog) button { touch-action: manipulation; }
+:where(.writer-shell,.crystal-public,.writer-login) ::placeholder { color: var(--kk-muted); opacity: .85; }
+:where(.writer-shell,.crystal-public,.crystal-dialog,.book-dialog) button:disabled { cursor: default; }
+:where(.crystal-menu,.writer-menu,.book-dialog,.crystal-dialog) { animation: ui-surface-in .18s ease-out; }
+
+/* A single header language, with aligned content edges. */
+.crystal-header,.writer-header { border-color: var(--ui-line); background: var(--cr-glass); }
+.crystal-header-inner,.writer-header-inner { max-width: 1120px; min-height: 64px; height: auto; padding: 8px 28px; gap: 24px; }
+.crystal-brand { font-size: 22px; letter-spacing: -.9px; gap: 8px; }
+.crystal-brand img { width: 34px; height: 36px; }
+.crystal-header-actions,.writer-header-actions { gap: 6px; }
+.crystal-header .crystal-icon-button,.crystal-header .v53-theme-toggle,.writer-header .v53-theme-toggle,.writer-menu-trigger {
+  width: 44px!important; height: 44px!important; min-height: 44px!important; border-radius: var(--ui-control)!important;
+  border: 1px solid var(--ui-line)!important; background: color-mix(in srgb,var(--kk-surface) 65%,transparent)!important;
+}
+.writer-brand-label { font-size: 10px; letter-spacing: .12em; padding-left: 14px; }
+.writer-account { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.crystal-menu,.writer-menu { padding: 8px; border-radius: var(--ui-radius); border-color: var(--kk-border); background: var(--ui-glass); box-shadow: var(--ui-modal-shadow); backdrop-filter: blur(20px); }
+.crystal-menu { top: 52px; min-width: 240px; }
+.writer-menu { top: 52px; }
+.crystal-menu button,.writer-menu button { min-height: 44px; padding: 10px 12px; font-size: 13px; border-radius: 9px; }
+.crystal-menu-caption,.writer-menu .writer-eyebrow { font-size: 10px; padding: 10px 12px 8px; letter-spacing: .1em; }
+.writer-navigation { max-width: 1064px; gap: 8px; margin: auto; padding: 0 0 8px; }
+.writer-navigation button { min-height: 42px; padding: 0 18px; border-radius: 10px; font-size: 12px; }
+.writer-navigation button[aria-current=page] { color: var(--kk-primary); background: var(--kk-surface-2); }
+.writer-navigation button[aria-current=page]::after { display: none; }
+
+/* The public shelf remains covers only, with three columns on a phone. */
+.crystal-public .crystal-library { max-width: 1120px; padding: 24px 28px 32px; }
+.crystal-public .crystal-library-intro { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.crystal-public .crystal-library-intro h1 { font-size: 29px; letter-spacing: -.95px; line-height: 1.35; }
+.library-count { color: var(--kk-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.crystal-public .crystal-shelf { gap: 20px 18px; }
+.crystal-public .crystal-cover { border-radius: 4px 9px 9px 4px; border-color: var(--ui-line); box-shadow: 2px 5px 14px rgb(15 42 77 / .09); }
+.crystal-search { max-width: none; margin-bottom: 18px; min-height: 44px; padding: 0 12px; border-radius: var(--ui-control); }
+.crystal-search input { min-height: 44px; font-size: 16px; }
+.crystal-preview-note { margin: 0 0 16px; font-size: 11px; }
+.crystal-public .crystal-skeletons { grid-template-columns: repeat(6,minmax(0,1fr)); gap: 20px 18px; }
+.crystal-public .crystal-skeleton { height: auto; aspect-ratio: 2/3; border-radius: 6px; }
+.crystal-empty { min-height: 220px; padding: 32px 20px; gap: 12px; }
+.crystal-empty p { margin: 0; }
+
+/* Floating, bounded dialogs with independently scrolling chapter lists. */
+.book-dialog-scrim,.crystal-dialog-scrim { padding: max(16px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); place-items: center; background: rgb(3 12 24 / .44); backdrop-filter: blur(9px); }
+.book-dialog,.crystal-dialog { border: 1px solid var(--kk-border); border-radius: 20px; background: var(--ui-glass); box-shadow: var(--ui-modal-shadow); }
+.book-dialog { width: min(100%,560px); max-height: min(760px,84dvh); padding: 20px; }
+.book-dialog-heading { gap: 12px; }
+.book-dialog-cover { width: 56px; height: 84px; flex-basis: 56px; }
+.book-dialog-title h2 { font-size: 23px; margin: 3px 0; line-height: 1.35; letter-spacing: -.6px; }
+.book-dialog-title>span,.book-dialog-title>small { font-size: 11px; line-height: 1.6; }
+.book-dialog-close,.crystal-dialog .dialog-close { width: 44px; height: 44px; min-height: 44px; flex-basis: 44px; border-radius: var(--ui-control); }
+.book-dialog-info { margin: 12px 0; max-height: 15dvh; }
+.book-dialog-info p { font-size: 13px; line-height: 1.7; }
+.book-dialog-info>button { min-height: 36px; font-size: 12px; }
+.book-dialog-schedule { border-color: var(--ui-line); padding: 9px 11px; gap: 10px; border-radius: var(--ui-control); font-size: 12px; line-height: 1.55; }
+.book-dialog-schedule strong { font-size: 11px; }
+.book-dialog-list-heading { margin-top: 14px; padding-bottom: 8px; }
+.book-dialog-list-heading>span { font-size: 11px; }
+.book-dialog-search { margin: 8px 0; min-height: 44px; border-radius: var(--ui-control); }
+.book-dialog-search input { min-height: 44px; outline: none!important; padding: 8px 0; }
+.book-dialog-episodes { flex: 0 1 auto; scrollbar-color: var(--kk-border) transparent; }
+.book-dialog-episode { gap: 10px; padding: 10px 0; min-height: 48px; }
+.book-dialog-number { flex-basis: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--kk-bg); font: 500 12px/1.4 'Plus Jakarta Sans',sans-serif; }
+.book-dialog-episode-title strong { font-size: 13px; line-height: 1.55; }
+.book-dialog-episode-title small { font-size: 11px; }
+.book-dialog-episode:hover { color: var(--kk-primary); }
+.crystal-dialog { width: min(100%,400px); max-height: 84dvh; padding: 20px; box-sizing: border-box; overscroll-behavior: contain; }
+.crystal-dialog .notification-heading { gap: 10px; margin-bottom: 8px; }
+.crystal-dialog .notification-heading h2 { font-size: 23px; }
+.crystal-dialog .crystal-notification-row { padding: 12px 0; }
+.notification-option { min-height: 44px; cursor: pointer; }
+.notification-option small { font-size: 12px; line-height: 1.55; }
+.notification-option input[type=checkbox] { appearance: none; position: relative; width: 44px; height: 26px; flex: 0 0 44px; border: 1px solid var(--kk-border); border-radius: 20px; background: var(--kk-surface-2); margin: 0; cursor: pointer; }
+.notification-option input[type=checkbox]::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--kk-muted); transition: transform .16s ease,background .16s ease; }
+.notification-option input:checked { background: var(--kk-primary); border-color: var(--kk-primary); }
+.notification-option input:checked::after { transform: translateX(18px); background: var(--kk-on-primary); }
+.notification-option input:disabled { opacity: .45; cursor: default; }
+.crystal-dialog>p { font-size: 12px; line-height: 1.65; }
+.crystal-notification-actions { gap: 8px; margin-top: 12px; }
+.crystal-dialog button { border-radius: var(--ui-control); }
+.download-heading img { width: 44px; height: 44px; flex-basis: 44px; }
+.crystal-dialog .download-heading h2 { font-size: 24px; }
+.download-heading span { font-size: 10px; }
+.download-dialog>p { margin: 12px 0; font-size: 13px; line-height: 1.7; }
+.download-apk { border-radius: var(--ui-control); font-size: 13px; }
+.download-dialog>small { font-size: 11px; }
+
+/* Studio: compact groups, legible labels, consistent form and card surfaces. */
+.writer-content { max-width: 1120px; padding: 24px 28px; }
+.writer-content--editor { max-width: 960px; }
+.writer-footer { max-width: 1064px; margin: 0 auto; padding: 14px 0 calc(18px + env(safe-area-inset-bottom)); font-size: 11px; }
+.writer-page-heading,.writer-shell .studio-head-with-action { gap: 16px; margin-bottom: 16px; }
+.writer-eyebrow,.writer-shell .studio-kicker { font-size: 10px; letter-spacing: .12em; }
+.writer-page-heading h1,.writer-shell .studio-page-head h1 { margin: 4px 0; font-size: clamp(26px,3vw,32px); letter-spacing: -.9px; line-height: 1.3; }
+.writer-shell :is(.studio-primary,.studio-light-button,.studio-danger-lite,.v51-permanent-button) { font-size: 13px; padding: 10px 14px; min-height: 44px; border-radius: var(--ui-control); }
+.writer-shell :is(.studio-panel,.studio-book-form) { padding: 20px; border-radius: var(--ui-radius); border-color: var(--ui-line); box-shadow: var(--ui-shadow); margin-bottom: 16px; }
+.writer-shell .studio-panel h2 { font-size: 22px; line-height: 1.4; }
+.writer-shell .studio-panel-top { gap: 10px; margin-bottom: 14px; }
+.writer-shell .studio-label { gap: 6px; margin-bottom: 14px; font-size: 13px; }
+.writer-shell :where(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),select,textarea) { min-height: 44px; padding: 10px 12px; border-radius: var(--ui-control); }
+.writer-shell .studio-form-grid { margin-top: 16px; gap: 20px; }
+.writer-shell .studio-form-pair { gap: 12px; }
+.writer-shell .studio-check { margin: 16px 0; gap: 10px; }
+.writer-shell .studio-check small,.writer-shell .studio-pill { font-size: 11px; }
+.writer-works-tools { gap: 10px; margin-bottom: 14px; }
+.writer-search,.writer-shell .v69-search-field { min-height: 44px; padding: 0 12px; border-radius: var(--ui-control); }
+.writer-shell .writer-search input,.writer-shell .v69-search-field input { padding: 10px 0; min-height: 44px; font-size: 16px; outline: none; }
+.writer-shell .writer-filter select { min-width: 104px; font-size: 14px; }
+.writer-book-grid { grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 12px; }
+.writer-book-card { border-color: var(--ui-line); border-radius: var(--ui-radius); box-shadow: var(--ui-shadow); }
+.writer-book-open { padding: 16px; gap: 12px; align-items: center; flex: 1; }
+.writer-book-cover { width: 52px; flex-basis: 52px; }
+.writer-book-copy { gap: 5px; }
+.writer-book-copy strong { font-size: 19px; line-height: 1.4; }
+.writer-book-status,.writer-book-copy small { font-size: 11px; line-height: 1.55; }
+.writer-resume { padding: 12px 0; margin: 0 16px; gap: 8px; font-size: 11px; }
+.writer-management { padding-top: 12px; margin-top: 18px; font-size: 12px; }
+.writer-selection-list { grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 10px; margin: 14px 0; }
+.writer-selection-list label { border: 1px solid var(--ui-line); border-radius: 10px; padding: 10px; font-size: 12px; }
+.writer-empty { min-height: 180px; gap: 12px; padding: 24px; }
+.writer-empty p { margin: 0; font-size: 13px; }
+.writer-book-tabs { gap: 4px; padding: 4px; border: 1px solid var(--ui-line); border-radius: 12px; background: var(--kk-surface); margin-bottom: 14px; }
+.writer-book-tabs button { flex: 1; min-height: 44px; padding: 8px; border-radius: 8px; font-size: 12px; }
+.writer-book-tabs button[aria-selected=true] { background: var(--kk-surface-2); color: var(--kk-primary); }
+.writer-book-tabs button[aria-selected=true]::after { display: none; }
+.writer-shell .studio-episode-item { gap: 12px; padding: 12px 0; }
+.writer-shell .studio-episode-index { font-size: 15px; }
+.writer-shell .studio-episode-text strong { font-size: 14px; }
+.writer-shell .studio-episode-text small,.writer-shell .kk-v71-chapter-count { font-size: 12px; }
+.writer-shell :is(.studio-error,.studio-warning,.v4-warning,.v4-error-list,.kk-revision-conflict-action) { padding: 12px; line-height: 1.65; border-radius: var(--ui-control); }
+.writer-shell .v69-status-filter { flex-wrap: wrap; gap: 4px; }
+.writer-shell .v69-status-filter button { min-height: 40px; font-size: 12px; }
+
+/* Manuscript paper stays easy to write on, with less blank chrome. */
+.writer-shell .v69-editor-top { margin-bottom: 14px; }
+.writer-shell .v69-editor-heading>span,.writer-shell .v69-editor-heading strong { font-size: 12px; line-height: 1.5; }
+.writer-shell .v69-live-notice { font-size: 12px; line-height: 1.65; margin-bottom: 14px; }
+.writer-shell .v69-writing-paper { padding: 24px 28px 18px; border-radius: var(--ui-radius); box-shadow: var(--ui-shadow); }
+.writer-shell .v69-chapter-kicker { font-size: 10px; margin-bottom: 8px; }
+.writer-shell input.v69-chapter-title { font-size: 29px; line-height: 1.4; min-height: 46px; padding: 0; }
+.writer-shell input.v69-chapter-arc { margin-bottom: 8px; padding: 6px 0; font-size: 13px; }
+.writer-shell .v69-editor-toolbar { gap: 6px; margin-bottom: 18px; padding: 4px 0; }
+.writer-shell .v69-editor-toolbar button { width: 44px; height: 44px; border-radius: 8px; }
+.writer-shell textarea.v69-manuscript { padding: 0; min-height: 240px; font-size: 17px; line-height: 1.9; }
+.writer-shell .v69-writing-footer { padding-top: 12px; margin-top: 16px; font-size: 12px; }
+.writer-shell .v69-editor-extra { margin-top: 10px; font-size: 12px; }
+.writer-shell .v69-editor-layout { gap: 14px; }
+.writer-shell .v69-editor-workflow { padding: 14px 16px; border-radius: var(--ui-radius); }
+.writer-shell .v69-editor-workflow-status,.writer-shell .v69-editor-danger { font-size: 12px; }
+.writer-shell .v69-editor-danger { padding-top: 6px; }
+.writer-shell .v69-editor-danger button { margin-top: 10px; }
+
+/* Import, calendar, data tools and EPUB releases share the same density. */
+.writer-shell .v4-dropzone { min-height: 150px; gap: 8px; padding: 20px; border-radius: 12px; }
+.writer-shell .v4-dropzone strong { font-size: 20px; }
+.writer-shell .v4-progress { gap: 6px; margin-bottom: 16px; }
+.writer-shell .v4-progress span { font-size: 11px; padding: 6px 10px; }
+.writer-shell :is(.v3-two-fields,.v4-chapter-fields,.v4-import-settings,.v3-plan-layout) { gap: 14px; }
+.writer-shell .v3-metrics,.writer-shell .studio-stats { gap: 10px; margin-bottom: 16px; }
+.writer-shell .v3-metrics>div,.writer-shell .studio-stats>div { padding: 14px; gap: 4px; border-radius: 12px; }
+.writer-shell .v3-metrics span,.writer-shell .studio-stats span { font-size: 11px; line-height: 1.5; }
+.writer-shell .v3-metrics strong,.writer-shell .studio-stats strong { font-size: 27px; line-height: 1.3; }
+.writer-shell .v3-calendar-header { margin-bottom: 12px; }
+.writer-shell .v3-days { gap: 4px; }
+.writer-shell .v3-days>span,.writer-shell .v3-calendar-legend { font-size: 11px; }
+.writer-shell .v3-days button { font-size: 12px; min-height: 34px; }
+.writer-shell .v3-calendar-legend { margin-top: 14px; gap: 8px; }
+.writer-shell .v3-note,.writer-shell .v4-picker-status,.writer-shell .studio-footnote { font-size: 12px; line-height: 1.65; }
+.writer-shell .v5-trash-row { padding: 12px 0; gap: 10px; }
+.writer-shell .v5-trash-row .v51-row-actions { gap: 6px; }
+.writer-shell .epub-studio>.studio-panel-top h2 { font-size: 21px; }
+.writer-shell .epub-file-summary { padding: 10px 12px; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--kk-bg); gap: 4px 12px; margin: 12px 0; }
+.writer-shell .epub-studio>p { margin: 10px 0 14px; font-size: 13px; line-height: 1.65; }
+.writer-shell .epub-release-heading { gap: 10px; margin-top: 16px; }
+.writer-shell .epub-release-row { grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; padding: 10px 0; border-color: var(--ui-line); }
+.writer-shell .epub-release-row>strong { font-weight: 500; font-size: 13px; line-height: 1.5; }
+.writer-shell .epub-release-controls { gap: 6px; }
+.writer-shell .epub-release-controls :is(select,input,button) { min-height: 40px!important; padding: 7px 9px!important; border-radius: 9px; }
+.writer-settings-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; align-items: start; }
+.writer-settings-grid .studio-panel { margin: 0; }
+.writer-settings-grid .studio-panel>h2 { display: flex; align-items: center; gap: 10px; }
+.writer-settings-grid .studio-panel>p { font-size: 13px; line-height: 1.7; color: var(--kk-muted); margin: 12px 0; }
+.writer-settings-grid .writer-action-row { gap: 8px; }
+.writer-shell :is(.kk-v75-dialog,.kk-revision-dialog) { border: 1px solid var(--kk-border); border-radius: 20px; padding: 20px; box-shadow: var(--ui-modal-shadow); max-height: 84dvh; overscroll-behavior: contain; }
+.writer-shell .kk-v75-dialog h2 { font: 500 24px/1.4 var(--cr-serif); margin: 0 0 12px; }
+.writer-shell .kk-v75-dialog p { font-size: 13px; line-height: 1.65; }
+.writer-shell .kk-v75-targets { border-radius: 10px; padding: 10px 12px 10px 28px; }
+.writer-shell .kk-v75-actions { gap: 8px; margin-top: 16px; }
+
+/* Login and recovery states use a compact, readable card. */
+.writer-login { padding: max(24px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom)); }
+.writer-login-form { width: min(100%,400px); padding: 28px; border-radius: 20px; box-shadow: var(--ui-shadow); }
+.writer-login-icon img { width: 44px; height: 44px; margin-bottom: 14px; }
+.writer-login-form h1 { font-size: 30px; line-height: 1.35; letter-spacing: -.8px; margin: 10px 0; }
+.writer-login-form p { font-size: 13px; line-height: 1.7; margin: 0 0 18px; }
+.writer-login-form label { margin: 14px 0; gap: 6px; font-size: 13px; }
+.writer-login-form input { min-height: 46px; padding: 10px 12px; border-radius: var(--ui-control); }
+.writer-login-form>small { font-size: 11px; margin-top: 14px; }
+.writer-login>.studio-backlink { margin-bottom: 16px; font-size: 12px; }
+.writer-login-tools { top: 16px; right: 16px; }
+
+/* Reader controls and panels use the same finish; measured text is untouched. */
+.quiet-app .reader-control-header,.quiet-app .reader-control-footer { border-radius: 18px; box-shadow: var(--ui-shadow); }
+.quiet-app .v610-control-inner .control-title { font-size: 13px; }
+.quiet-app .v610-control-inner .control-subtitle { font-size: 11px; line-height: 1.4; }
+.quiet-app .v610-footer-inner { padding: 10px 14px 8px; }
+.quiet-app .v610-progress-label { gap: 10px; }
+.quiet-app .v610-footer-chapter { font-size: 12px; }
+.quiet-app .v610-progress-percent { font-size: 11px; white-space: nowrap; }
+.quiet-app .v611-page-summary { font-size: 12px; padding-top: 2px; }
+.quiet-app .v610-more-menu { border-radius: 14px; max-width: calc(100vw - 40px); }
+.quiet-app .v610-more-menu button { min-height: 44px; font-size: 13px; }
+.quiet-app .v610-drawer,.quiet-app .v610-settings-sheet { border-radius: 20px; }
+.quiet-app .panel-heading h2,.v610-settings-sheet .v6-reader-settings-header h2 { font-size: 24px; letter-spacing: -.5px; }
+.quiet-app .panel-eyebrow { font-size: 10px; }
+.quiet-app .v610-chapter-row { padding: 12px 16px; gap: 12px; }
+.quiet-app .panel-row-main strong { font-size: 14px; line-height: 1.5; }
+.quiet-app .panel-row-main small { font-size: 12px; }
+.v610-settings-sheet .v6-reader-settings-scroll { padding: 16px 18px; }
+.v610-settings-sheet .v6-reader-settings-group { margin-bottom: 18px; }
+.v610-settings-sheet .v610-theme-choices>button { min-height: 68px; padding: 10px; }
+.v610-settings-sheet .v610-theme-icon { width: 30px; height: 30px; }
+.v610-settings-sheet .v6-settings-segments button { min-height: 44px; font-size: 12px; }
+.kk-reader-load__content { max-width: 340px; padding: 24px; }
+.kk-reader-load__title { font-size: 24px; }
+.kk-reader-load__detail { font-size: 13px; line-height: 1.7; }
+.reader-recovery-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; }
+.reader-recovery-actions .kk-reader-load__retry { margin: 0; }
+.reader-recovery-back { min-height: 44px; padding: 10px 14px; border: 1px solid var(--kk-border); border-radius: 10px; background: transparent; color: inherit; font-size: 13px; }
+:is(.writer-search,.v69-search-field,.crystal-search,.book-dialog-search):focus-within { outline: 2px solid var(--kk-primary); outline-offset: 2px; }
+:is(.writer-search,.v69-search-field,.crystal-search,.book-dialog-search) input:focus-visible { outline: none; }
+
+@media(hover:hover) {
+  .writer-book-card:hover { border-color: var(--kk-primary); }
+  .writer-shell .studio-light-button:hover,.crystal-dialog button:not(:disabled):hover { background: var(--kk-surface-2); }
+  .crystal-dialog .crystal-primary:not(:disabled):hover { background: var(--kk-primary); filter: brightness(.96); }
+}
+@media(min-width:700px) {
+  .book-dialog-episodes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 16px; }
+  .book-dialog-episodes>.book-dialog-empty,.book-dialog-episodes>.book-dialog-more { grid-column: 1/-1; }
+}
+@media(max-width:1120px) { .writer-navigation,.writer-footer { margin-inline: 28px; } }
+@media(max-width:800px) { .writer-settings-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) {
+  .crystal-header-inner,.writer-header-inner { min-height: 60px; padding: 7px 16px; gap: 12px; }
+  .crystal-brand { font-size: 21px; }
+  .writer-header .crystal-brand { font-size: 20px; }
+  .writer-brand { gap: 10px; }
+  .writer-brand-label { font-size: 9px; padding-left: 10px; }
+  .writer-navigation { margin-inline: 16px; gap: 4px; padding-bottom: 7px; }
+  .writer-navigation button { padding: 0 8px; font-size: 12px; }
+  .crystal-public .crystal-library { padding: 20px 16px 28px; }
+  .crystal-public .crystal-shelf,.crystal-public .crystal-skeletons { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px 12px; }
+  .crystal-public .crystal-library-intro { margin-bottom: 16px; }
+  .book-dialog { padding: 16px; width: min(100%,440px); border-radius: 18px; }
+  .book-dialog-title h2 { font-size: 21px; }
+  .book-dialog-info p { font-size: 13px; }
+  .book-dialog-close { width: 40px; height: 40px; min-height: 40px; flex-basis: 40px; }
+  .crystal-dialog { padding: 18px; }
+  .writer-content { padding: 20px 16px; }
+  .writer-footer { margin-inline: 16px; font-size: 11px; }
+  .writer-page-heading h1,.writer-shell .studio-page-head h1 { font-size: 27px; }
+  .writer-page-heading .studio-primary { font-size: 12px; padding: 10px 12px; }
+  .writer-shell :is(.studio-panel,.studio-book-form) { padding: 16px; }
+  .writer-book-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .writer-book-open { flex-direction: row; align-items: flex-start; padding: 14px 12px; gap: 10px; }
+  .writer-book-cover { width: 42px; height: 63px; flex: 0 0 42px; }
+  .writer-book-copy { width: auto; flex: 1; gap: 5px; }
+  .writer-book-copy strong { font-size: 15px; line-height: 1.45; letter-spacing: -.25px; -webkit-line-clamp: 3; }
+  .writer-book-status,.writer-book-copy small { font-size: 11px; }
+  .writer-book-open>.kk-brand-icon { display: none; }
+  .writer-resume { margin-inline: 12px; }
+  .writer-shell .v69-writing-paper { padding: 18px 16px 14px; }
+  .writer-shell input.v69-chapter-title { font-size: 26px; }
+  .writer-shell textarea.v69-manuscript { font-size: 16px; line-height: 1.95; min-height: 220px; }
+  .writer-shell .v69-editor-heading>span { max-width: none; font-size: 11px; }
+  .writer-shell .v69-editor-heading strong { font-size: 11px; }
+  .writer-shell .v69-icon-button { width: 40px; height: 44px; flex-basis: 40px; min-height: 44px; }
+  .writer-shell .v69-editor-actions { gap: 0; }
+  .writer-shell .v69-editor-top { gap: 6px; }
+  .writer-shell .v4-dropzone { min-height: 130px; padding: 16px; }
+  .writer-shell .v3-metrics,.writer-shell .studio-stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .writer-shell .v3-metrics>div,.writer-shell .studio-stats>div { padding: 12px; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; }
+  .writer-shell .v3-metrics strong,.writer-shell .studio-stats strong { font-size: 24px; }
+  .writer-shell .epub-release-row { grid-template-columns: 22px minmax(0,1fr) auto; }
+  .writer-shell .epub-release-controls { grid-column: 3; flex-wrap: nowrap; }
+  .writer-shell .epub-release-controls:has(input) { grid-column: 2/-1; flex-wrap: wrap; justify-content: flex-start; }
+  .writer-shell .epub-release-controls select { min-width: 86px; max-width: 104px; }
+  .writer-shell .epub-release-controls button { font-size: 12px!important; }
+  .writer-shell .epub-release-heading { flex-wrap: wrap; }
+  .writer-shell .epub-release-heading input { width: 128px; font-size: 16px; min-height: 44px; }
+  .writer-settings-grid { grid-template-columns: 1fr; gap: 12px; }
+  .writer-login-form { padding: 24px; }
+  .quiet-app .v610-control-inner .control-title { font-size: 12px; }
+  .quiet-app .v610-control-inner .control-subtitle { font-size: 11px; }
+  .quiet-app .v610-footer-chapter { font-size: 11px; }
+}
+@media(max-width:359px) {
+  .writer-book-open { flex-direction: column; gap: 8px; }
+  .writer-book-copy { width: 100%; }
+  .writer-shell .epub-release-row { grid-template-columns: 20px minmax(0,1fr); }
+  .writer-shell .epub-release-controls { grid-column: 2; justify-content: flex-start; }
+  .book-dialog-cover { width: 46px; height: 69px; flex-basis: 46px; }
+  .book-dialog-title h2 { font-size: 19px; }
+  .book-dialog-heading { gap: 9px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  :where(.crystal-menu,.writer-menu,.book-dialog,.crystal-dialog) { animation: none; }
+  .notification-option input::after { transition: none!important; }
+}
+@supports not (backdrop-filter:blur(1px)) { .book-dialog,.crystal-dialog,.writer-menu,.crystal-menu { background: var(--kk-surface); } }
+@keyframes ui-surface-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Remove legacy minimums from empty panels and focus decoration from inner fields. */
+body:has(dialog[open]) { overflow: hidden; }
+.writer-shell .v3-calendar-layout { align-items: start; gap: 14px; margin-bottom: 0; }
+.writer-shell .v3-day-detail { min-height: 0; }
+.writer-shell .studio-panel-empty { min-height: 100px; padding: 16px 8px; gap: 8px; }
+.writer-shell .studio-panel-empty p { margin: 0; font-size: 12px; }
+:is(.writer-search,.v69-search-field,.crystal-search,.book-dialog-search) input:focus { outline: none!important; box-shadow: none!important; border: 0!important; }
+.writer-shell :is(input,select,textarea):focus { box-shadow: none; }
+@media(min-width:360px) and (max-width:600px) {
+  .writer-settings-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .writer-settings-grid>.studio-panel:first-child { grid-column: 1/-1; }
+  .writer-settings-grid .studio-panel>h2 { font-size: 20px; gap: 8px; }
+  .writer-settings-grid .studio-panel>p { font-size: 12px; line-height: 1.7; }
+}
+@media(max-height:540px) {
+  .book-dialog { overflow-y: auto; padding: 14px; }
+  .book-dialog-info { display: none; }
+  .book-dialog-cover { width: 40px; height: 60px; flex-basis: 40px; }
+  .book-dialog-title h2 { font-size: 20px; -webkit-line-clamp: 2; }
+  .book-dialog-schedule { margin-top: 10px; }
+  .book-dialog-episodes { flex: none; max-height: 40dvh; }
+  .book-dialog-heading,.book-dialog-list-heading { flex-shrink: 0; }
+}
+
+/* Existing book-detail URLs, cover tools and loading states keep the same finish. */
+.crystal-public .v6-detail-page { padding-top: 24px!important; }
+.crystal-public .v6-detail-content { max-width: 1120px!important; padding-inline: 28px; }
+.crystal-public .v6-detail-hero { gap: 28px; margin-top: 18px; }
+.crystal-public .v6-detail-info h1 { font-size: clamp(26px,3.5vw,38px); line-height: 1.3!important; letter-spacing: -.8px; }
+.crystal-public .v6-detail-info>p { font-size: 14px!important; line-height: 1.75!important; }
+.crystal-public .v6-detail-bottom { gap: 16px; }
+.crystal-public :is(.v6-chapters,.v6-detail-extra) { border-radius: var(--ui-radius); border-color: var(--ui-line); box-shadow: var(--ui-shadow); padding: 20px; }
+.crystal-public .v6-chapter { min-height: 52px; padding-block: 12px; }
+.crystal-public .v6-chapter strong { font-size: 14px; }
+.crystal-public .v6-chapter small { font-size: 11px; }
+.writer-shell .kk-cover-editor { border-radius: 12px; }
+.writer-shell .kk-cover-previews { gap: 12px; }
+.writer-shell .kk-revision-dialog :is(input,select,textarea) { font-size: 16px; }
+.kk-v611-loader__eyebrow { font-size: 10px; letter-spacing: .12em; }
+.kk-v611-loader__tagline,.kk-v611-loader__message { font-size: 12px; line-height: 1.65; }
+@media(max-width:600px) {
+  .crystal-public .v6-detail-content { padding-inline: 16px; }
+  .crystal-public .v6-detail-hero { gap: 18px; }
+  .crystal-public :is(.v6-chapters,.v6-detail-extra) { padding: 16px; }
+}
+@supports not (background:color-mix(in srgb,white 50%,transparent)) {
+  :root { --ui-glass: var(--kk-surface); --ui-line: var(--kk-border); }
+}

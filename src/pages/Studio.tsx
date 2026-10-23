@@ -8,7 +8,8 @@ import { DatabaseManager, ScheduleManager } from './StudioManagement';
 import ManuscriptImporter from './ManuscriptImporter';
 import TrashManager from './TrashManager';
 import AnnouncementManager from '../features/studio/components/AnnouncementManager';
-import { trashItem } from '../data/trash';
+import ManagementDialog from '../features/studio/components/ManagementDialog';
+import type {ManagementOperation} from '../data/management';
 import { useUiTheme, type UiTheme, type AppThemePreference } from '../hooks/useUiTheme';
 import ThemeToggle from '../components/ThemeToggle';
 import ThemeLoading from '../components/ThemeLoading';
@@ -61,6 +62,7 @@ export default function Studio({ path }: {
     const [episodes, setEpisodes] = useState<Episode[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [pendingTrash,setPendingTrash]=useState<ManagementOperation|null>(null),[trashNotice,setTrashNotice]=useState('');
     const generation=useRef(0);
     const refresh = useCallback(async () => { const ticket=generation.current;try {
         const result = await getStudioLibrary();
@@ -141,25 +143,14 @@ export default function Studio({ path }: {
     const onUpdateBook = (b: Book) => { setBooks(prev => [b, ...prev.filter(x => x.id !== b.id)]); navigate(`/studio/cerita/${b.id}`); };
     const onUpdateEpisode = useCallback((e: Episode) => setEpisodes(prev => prev.map(x => x.id === e.id ? {...e,content_length:e.content_md.trim().length,content_md:'',content_hash:undefined} : x)), []);
     const moveToTrash = async (kind: 'book' | 'episode', id: string, title: string) => {
-        const confirmText = kind === 'book' ? window.prompt(`Memindahkan novel ke Sampah membuatnya privat. Ketik judul tepat untuk mengonfirmasi: ${title}`) : null;
-        if (kind === 'book' && confirmText !== title)
-            return;
-        if (kind === 'episode' && !window.confirm(`Pindahkan episode “${title}” ke Sampah? Jadwalnya akan dibatalkan agar tidak terbit tanpa sengaja.`))
-            return;
-        try {
-            await trashItem(kind, id);
-            await refresh();
-            navigate(kind === 'book' ? '/studio/cerita' : '/studio/sampah');
-        }
-        catch (e) {
-            setError(`Gagal memindahkan ke Sampah: ${errMsg(e)}`);
-        }
+        setTrashNotice('');setPendingTrash({id:crypto.randomUUID(),action:'trash',items:[{kind,id,title}]});
     };
     const createEpisode = async (bookId: string, requestedZero = false) => {
         if (!supabase)
             return;
         setError('');
         try {
+            if(books.find(book=>book.id===bookId)?.reading_format==='epub')throw Error('Atur penerbitan dari daftar bagian EPUB di halaman buku.');
             const local = episodes.filter(e => e.book_id === bookId);
             if (requestedZero && local.some(e => e.episode_number === 0))
                 throw Error('Episode 0 sudah ada.');
@@ -187,6 +178,6 @@ export default function Studio({ path }: {
     const editorEpisode = sections[1] === 'editor' ? episodes.find(e => e.id === sections[2]) : undefined;
     const displayName = authorName(user);
     return <StudioShell path={path} displayName={displayName} theme={theme} preference={preference} onPreferenceChange={setPreference}>
- <div className="writer-page-body">{error && <div className="studio-error" role="alert">{error}</div>}{loading ? <Busy /> : sections[1] === 'impor' ? <ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'jadwal' ? <ScheduleManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'database' ? <DatabaseManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'sampah' ? <TrashManager onChanged={refresh}/> : sections[1] === 'pengumuman' ? <AnnouncementManager books={books}/> : sections[1] === 'editor' ? (editorEpisode ? <ChapterEditor key={editorEpisode.id} ep={editorEpisode} book={books.find(b => b.id === editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={() => moveToTrash('episode', editorEpisode.id, editorEpisode.title)}/> : <p>Episode tidak ditemukan.</p>) : sections[1] === 'cerita' && sections[2] === 'baru' ? <><B className="studio-backlink" to="/studio/cerita"><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></> : sections[1] === 'cerita' && sections[2] ? (book ? <BookDetails key={book.id} book={book} episodes={episodes} onNew={() => void createEpisode(book.id)} onNewZero={() => void createEpisode(book.id, true)} onUpdate={onUpdateBook} onDelete={() => moveToTrash('book', book.id, book.title)} onChanged={refresh}/> : <p>Novel tidak ditemukan.</p>) : sections[1] === 'cerita' ? <Books books={books} episodes={episodes} onChanged={refresh} onCreate={() => navigate('/studio/cerita/baru')}/> : sections[1] === 'analytics' ? <Analytics books={books} episodes={episodes}/> : sections[1] === 'settings' ? <StudioSettings /> : <Books books={books} episodes={episodes} onChanged={refresh} onCreate={()=>navigate('/studio/cerita/baru')}/>}
- </div></StudioShell>;
+ <div className="writer-page-body">{trashNotice&&<p className="studio-success" role="status">{trashNotice}</p>}{error && <div className="studio-error" role="alert">{error}</div>}{loading ? <Busy /> : sections[1] === 'impor' ? <ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'jadwal' ? <ScheduleManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'database' ? <DatabaseManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'sampah' ? <TrashManager onChanged={refresh}/> : sections[1] === 'pengumuman' ? <AnnouncementManager books={books}/> : sections[1] === 'editor' ? (editorEpisode ? <ChapterEditor key={editorEpisode.id} ep={editorEpisode} book={books.find(b => b.id === editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={() => moveToTrash('episode', editorEpisode.id, editorEpisode.title)}/> : <p>Episode tidak ditemukan.</p>) : sections[1] === 'cerita' && sections[2] === 'baru' ? <><B className="studio-backlink" to="/studio/cerita"><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></> : sections[1] === 'cerita' && sections[2] ? (book ? <BookDetails key={book.id} book={book} episodes={episodes} onNew={() => void createEpisode(book.id)} onNewZero={() => void createEpisode(book.id, true)} onUpdate={onUpdateBook} onDelete={() => moveToTrash('book', book.id, book.title)} onChanged={refresh}/> : <p>Novel tidak ditemukan.</p>) : sections[1] === 'cerita' ? <Books books={books} episodes={episodes} onChanged={refresh} onCreate={() => navigate('/studio/cerita/baru')}/> : sections[1] === 'analytics' ? <Analytics books={books} episodes={episodes}/> : sections[1] === 'settings' ? <StudioSettings /> : <Books books={books} episodes={episodes} onChanged={refresh} onCreate={()=>navigate('/studio/cerita/baru')}/>}
+ </div>{pendingTrash&&<ManagementDialog operation={pendingTrash} description={pendingTrash.items[0].kind==='book'?'Buku beserta seluruh bab disembunyikan dari pembaca dan tetap dapat dipulihkan.':'Episode disembunyikan dan jadwalnya dibatalkan. Kamu dapat memulihkannya dari Sampah.'} onClose={()=>setPendingTrash(null)} onDone={async notice=>{const kind=pendingTrash.items[0].kind;setPendingTrash(null);setTrashNotice(notice);await refresh();navigate(kind==='book'?'/studio/cerita':'/studio/sampah');}}/>}</StudioShell>;
 }

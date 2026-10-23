@@ -6,6 +6,7 @@ import {CoverEditor} from '../../covers/CoverEditor';
 import {newCoverOperation,saveCover,type CoverUploadOperation} from '../../covers/api';
 import type {PreparedCover} from '../../covers/model';
 import BookSections from '../../../pages/BookSections';
+import EpubStudio from '../../epub/EpubStudio';
 import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../../../data/library';
 import { supabase } from '../../../data/supabase';
 import { bulkPublishDrafts } from '../../../data/bulkPublishing';
@@ -40,7 +41,7 @@ export function Books({ books, episodes, onCreate, onChanged }: {
     {filtered.length?<div className="writer-book-grid">{filtered.map(book=>{
       const lastDraft=episodes.filter(ep=>ep.book_id===book.id&&episodeStatus(ep)==='Draft').sort((a,b)=>Date.parse(b.updated_at)-Date.parse(a.updated_at))[0];
       return <article className="writer-book-card" key={book.id}>
-        <B to={`/studio/cerita/${book.id}`} className="writer-book-open"><div className="writer-book-cover"><Cover book={book} size="mini"/></div><span className="writer-book-copy"><span className="writer-book-status">{book.is_published?'Publik':'Privat'} · {BOOK_STATUS[book.status]}</span><strong>{book.title}</strong><small>{episodes.filter(ep=>ep.book_id===book.id).length} bab · {stats.get(book.id)?.Draft??0} draft</small></span><BrandIcon name="chevron-right" size={17}/></B>
+        <B to={`/studio/cerita/${book.id}`} className="writer-book-open"><div className="writer-book-cover"><Cover book={book} size="mini"/></div><span className="writer-book-copy"><span className="writer-book-status">{book.is_published?'Publik':'Privat'} · {BOOK_STATUS[book.status]}</span><strong>{book.title}</strong><small>{book.epub?`EPUB utuh · ${book.epub.toc.length} bagian`:`${episodes.filter(ep=>ep.book_id===book.id).length} bab · ${stats.get(book.id)?.Draft??0} draft`}</small></span><BrandIcon name="chevron-right" size={17}/></B>
         {lastDraft&&<B to={`/studio/editor/${lastDraft.id}`} className="writer-resume"><BrandIcon name="file-pen" size={16}/><span>Lanjutkan <strong>{lastDraft.title||`Bab ${lastDraft.episode_number}`}</strong></span><BrandIcon name="arrow-right" size={16}/></B>}
       </article>;
     })}</div>:books.length?<div className="writer-empty"><h2>Belum ada karya yang cocok.</h2><button type="button" className="studio-light-button" onClick={reset}>Reset pencarian</button></div>:<div className="writer-empty"><BrandIcon name="book-open" size={34}/><h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dari judul. Bab pertamamu menyusul.</p><button type="button" className="studio-primary" onClick={onCreate}>Buat cerita pertama</button></div>}
@@ -75,7 +76,7 @@ export function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=
    if(saveError)throw saveError;created.current=data as Book;
    if(prepared&&!existing){coverOperation.current??=await newCoverOperation(id,prepared);const asset=await saveCover(coverOperation.current,new AbortController().signal,setStage);data={...data,studio_cover_path:asset.manifest?.card[0]?.path};}
    savedSnapshot.current=snapshot;
-   onSaved({...data,...(existing?.cover_manifest?{cover_manifest:existing.cover_manifest,cover_version:existing.cover_version}:{})} as Book);
+   onSaved({...data,...(existing?.epub?{epub:existing.epub,reading_format:'epub'}:{}),...(existing?.cover_manifest?{cover_manifest:existing.cover_manifest,cover_version:existing.cover_version}:{})} as Book);
   }catch(e){setError(`${errMsg(e)}${created.current&&!existing?' Karya sudah dibuat; coba simpan lagi untuk melanjutkan sampul tanpa membuat karya kedua.':''}`);}finally{setBusy(false);setStage('');}
  };
  return <><form onSubmit={save} className="studio-panel studio-book-form"><h2>{existing?'Pengaturan novel':'Novel baru'}</h2><div className="studio-form-grid"><div className="studio-fieldset">
@@ -133,6 +134,7 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
             setPublishing(false);
         }
     };
+    if(book.epub)return <><B to="/studio/cerita" className="studio-backlink">← Semua karya</B><header className="writer-page-heading"><div><span className="writer-eyebrow">KELOLA EPUB</span><h1>{book.title}</h1></div></header><EpubStudio book={book} asset={book.epub} onChanged={onChanged}/><details className="studio-panel"><summary>Pengaturan buku & sampul</summary><BookForm existing={book} onSaved={onUpdate}/></details><section className="studio-panel"><button className="studio-danger-lite" onClick={()=>void onDelete()}>Pindahkan buku ke Sampah</button></section></>;
     return <><B to="/studio/cerita" className="studio-backlink"><BrandIcon name="arrow-left" size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published ? 'Tayang di perpustakaan' : 'Draft (privat)'}</p></div><button onClick={onNew} className="studio-primary"><BrandIcon name="plus" size={16}/> Episode baru</button></div>
  <div className="writer-book-tabs" role="tablist" aria-label="Bagian pengelolaan karya">{([['chapters','Bab'],['pages','Halaman buku'],['settings','Pengaturan']] as const).map(([value,label])=><button type="button" role="tab" id={`writer-tab-${value}`} aria-controls={`writer-panel-${value}`} aria-selected={tab===value} tabIndex={tab===value?0:-1} key={value} onKeyDown={event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const nodes=[...event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>('[role=tab]')],index=nodes.indexOf(event.currentTarget);const next=nodes[event.key==='Home'?0:event.key==='End'?nodes.length-1:(index+(event.key==='ArrowRight'?1:-1)+nodes.length)%nodes.length];next.focus();next.click();}} onClick={()=>void(async()=>{if(await mayLeave())setTab(value);})()}>{label}</button>)}</div>
  {tab==='chapters'&&<div role="tabpanel" id="writer-panel-chapters" aria-labelledby="writer-tab-chapters">

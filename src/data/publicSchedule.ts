@@ -15,15 +15,16 @@ export type UpcomingChapter = {
  */
 export async function getPublicUpcomingChapters(): Promise<UpcomingChapter[]> {
   if (!supabase) return [];
+  const epub=await supabase.from('qr_epub_schedule').select('book_id,episode_number,release_at').gt('release_at',new Date().toISOString()).order('release_at');
   const { data, error } = await supabase.rpc('qr_public_next_chapters');
   if (error) {
     // A missing optional RPC must not break the public reading experience.
     console.warn('Jadwal bab publik belum tersedia:', error.message);
-    return [];
+    return (epub.data||[]) as UpcomingChapter[];
   }
-  if (!Array.isArray(data)) return [];
+  if (!Array.isArray(data)) return (epub.data||[]) as UpcomingChapter[];
   const now = Date.now();
-  return data.filter((row): row is UpcomingChapter =>
+  return [...data,...(epub.data||[])].filter((row): row is UpcomingChapter =>
     row !== null && typeof row === 'object' &&
     typeof row.book_id === 'string' &&
     Number.isSafeInteger(row.episode_number) && row.episode_number >= 0 &&

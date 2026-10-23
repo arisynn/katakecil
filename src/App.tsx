@@ -1,6 +1,8 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import SecureReaderApp from './SecureReaderApp';
 import PublicLibrary from './pages/PublicLibrary';
+import {isEpubBook} from './features/epub/api';
+import {createEpubReaderSource} from './features/epub/readerSource';
 const Studio=lazy(()=>import('./pages/Studio')); 
 import StudioErrorBoundary from './components/StudioErrorBoundary';
 import ReaderErrorBoundary from './components/ReaderErrorBoundary';
@@ -46,6 +48,8 @@ import './design/studio-experience.css';
 import './design/crystal.css';
 import './design/writer.css';
 import './design/shelf.css';
+import './design/epub.css';
+import './design/interface.css';
 
 export default function App(){
   const [route,setPath]=useState(window.location.pathname+window.location.search);
@@ -84,18 +88,20 @@ export default function App(){
     setReaderLookup({slug,book:null,resolved:false});
     if(!supabase){setReaderLookup({slug,book:null,resolved:true});return;}
     // Keep route resolution keyed to its slug; stale requests cannot display another story.
-    Promise.resolve(supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle()).then(({data,error})=>{
+    Promise.resolve(supabase.from('qr_books').select('*').eq('slug',slug).eq('is_published',true).is('deleted_at',null).maybeSingle()).then(async({data,error})=>{
       if(!active)return;
       const book=(!error&&data)?data as Book:error&&slug===legacyBookId?
         {id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''} as Book:null;
-      setReaderLookup({slug,book,resolved:true});
+      if(book&&await isEpubBook(book.id))book.reading_format='epub';
+      if(active)setReaderLookup({slug,book,resolved:true});
     }).catch(()=>{if(active)setReaderLookup({slug,book:null,resolved:true});});
     return()=>{active=false;};
   },[slug,isReader]);
+  const readerSource=useMemo(()=>readerLookup.book?.reading_format==='epub'?createEpubReaderSource(readerLookup.book.id):undefined,[readerLookup.book?.id,readerLookup.book?.reading_format]);
   if(isReader) {
     if(readerLookup.slug!==slug||!readerLookup.resolved) return <ThemeLoading context="reader" text="Menyiapkan halaman cerita…"/>;
     const readerBook=readerLookup.book;
-    return readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/')}>Kembali ke Library</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
+    return readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} source={readerSource} bookTitle={readerBook.title} onExit={()=>navigate(`/`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/')}>Kembali ke Library</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
   }
   if(path.startsWith('/studio')) return <StudioErrorBoundary><Suspense fallback={<ThemeLoading context="studio" text="Menyiapkan Studio…"/>}><Studio path={path}/></Suspense></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;

@@ -1,7 +1,7 @@
 /* Writer Studio: a separate, deliberately small layout system. */
 .writer-shell { --st-bg:var(--kk-bg);--st-card:var(--kk-surface);--st-text:var(--kk-text);--st-muted:var(--kk-muted);--st-border:var(--kk-border);--st-primary:var(--kk-primary);--st-on-primary:var(--kk-on-primary);--st-raised:var(--kk-surface-2);min-height:100dvh;background:var(--kk-bg);color:var(--kk-text);font:400 14px/1.75 'Plus Jakarta Sans',sans-serif; }
 .writer-shell *, .writer-login * { box-sizing:border-box; }
-.writer-header { border-bottom:1px solid var(--kk-border);background:var(--cr-glass);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);padding-top:env(safe-area-inset-top); }
+.writer-header { position:relative;z-index:20;border-bottom:1px solid var(--kk-border);background:var(--cr-glass);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);padding-top:env(safe-area-inset-top); }
 .writer-header-inner { max-width:1180px;min-height:66px;padding:0 32px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px; }
 .writer-brand { display:flex;align-items:center;gap:20px;border:0;background:none;color:var(--kk-text);padding:0; }
 .writer-brand-label { border-left:1px solid var(--kk-border);padding-left:20px;font-size:9px;letter-spacing:.16em;color:var(--kk-muted); }

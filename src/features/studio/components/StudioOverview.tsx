@@ -110,11 +110,9 @@ export function StudioSettings() {
   const [notifications,setNotifications]=useState(false);
   return <><div className="studio-page-head"><span className="studio-kicker">PREFERENSI & KEAMANAN</span>
     <h1>Pengaturan</h1><p>Preferensi tampilan dan informasi akses Studio.</p>
-  </div><section className="studio-panel v6-settings-panel">
-    <h2>Aplikasi</h2><p>{isNativeApp?'KataKecil berjalan sebagai aplikasi di perangkatmu.':'Unduh aplikasi KataKecil untuk Android.'} Membaca dan menyimpan tetap memerlukan internet.</p>{!isNativeApp&&<button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Unduh APK Android</button>}
-    {isNativeApp&&<><button type="button" className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:check-update'))}>Periksa pembaruan</button><h2>Notifikasi</h2><p>Pengingat membaca dan kabar bab baru, sesuai pilihanmu.</p><button className="studio-light-button" onClick={()=>setNotifications(true)}>Atur notifikasi</button></>}
-    <h2>Tampilan</h2><p>Tema Terang dan Gelap di bilah atas berlaku untuk seluruh KataKecil, termasuk Reader.</p>
-    <h2>Keamanan Studio</h2><p>Hanya akun yang terdaftar sebagai penulis yang dapat mengelola cerita.
-      Alat database, jadwal, dan sampah tersedia melalui menu Alat Studio.</p>
-  </section>{notifications&&<NotificationSettings onClose={()=>setNotifications(false)}/>}</>;
+  </div><div className="writer-settings-grid" aria-label="Pengaturan Studio">
+    <section className="studio-panel"><h2><BrandIcon name="download" size={20}/> Aplikasi</h2><p>{isNativeApp?'KataKecil sudah terpasang di perangkatmu.':'Baca cerita melalui aplikasi KataKecil untuk Android.'} Membaca dan menyimpan memerlukan internet.</p><div className="writer-action-row">{!isNativeApp?<button type="button" className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Unduh APK Android</button>:<button type="button" className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:check-update'))}>Periksa pembaruan</button>}</div></section>
+    <section className="studio-panel"><h2><BrandIcon name="settings" size={20}/> Preferensi</h2><p>Tema Terang dan Gelap di bilah atas berlaku untuk Library, Studio, dan halaman membaca.</p>{isNativeApp&&<><p>Atur pengingat membaca dan kabar bab baru sesuai pilihanmu.</p><button type="button" className="studio-light-button" onClick={()=>setNotifications(true)}>Atur notifikasi</button></>}</section>
+    <section className="studio-panel"><h2><BrandIcon name="shield" size={20}/> Keamanan</h2><p>Studio hanya dapat dibuka oleh akun penulis yang terdaftar.</p><p>Ekspor data, jadwal, dan Sampah tetap tersedia melalui menu Studio.</p></section>
+  </div>{notifications&&<NotificationSettings onClose={()=>setNotifications(false)}/>}</>;
 }

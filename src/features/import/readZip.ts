@@ -1,4 +1,3 @@
-import {COVER_LIMITS} from '../covers/model';
 import type {ZipResult} from './zip';
 import type {ParsedManuscript} from '../../utils/importManuscript';
 export async function readZip(file:File,signal:AbortSignal,progress:(value:string)=>void):Promise<ParsedManuscript>{
@@ -14,16 +13,7 @@ export async function readZip(file:File,signal:AbortSignal,progress:(value:strin
     worker.onmessage=event=>{const msg=event.data;if(msg.type==='progress')progress(msg.message);else{finish();if(msg.type==='result')resolve(msg.result);else reject(Error(msg.message));}};
     worker.postMessage({bytes,name:file.name},[bytes]);
   });
-  for(const entry of result.epubs){
-    if(signal.aborted)throw new DOMException('Dibatalkan','AbortError');
-    progress('Membaca struktur EPUB dalam ZIP…');
-    const {parseEpubFile}=await import('../../utils/importEpub');
-    const parsed=await parseEpubFile(new File([Uint8Array.from(entry.bytes)],entry.name,{type:'application/epub+zip'}),70_000_000-result.expanded);
-    result.parsed.chapters.push(...parsed.chapters.map(c=>({...c,key:`nested-${c.key}`,origin:`${entry.name}/${c.origin}`})));
-    result.parsed.warnings.push(...parsed.warnings);
-    const candidates=[...(result.parsed.covers||[]),...(parsed.covers||[]).map(c=>({...c,origin:`${entry.name}/${c.origin}`}))].sort((a,b)=>b.score-a.score);
-    let total=0;result.parsed.covers=candidates.filter((c,i)=>{total+=c.data.size;return i<COVER_LIMITS.candidates&&total<=COVER_LIMITS.candidateBytes;});result.parsed.cover=result.parsed.covers[0];
-  }
+  if(result.epubs.length)throw Error('ZIP memuat EPUB. Pilih berkas .epub langsung agar tetap utuh; EPUB tidak lagi dikonversi menjadi episode.');
   if(signal.aborted)throw new DOMException('Dibatalkan','AbortError');
   return result.parsed;
 }

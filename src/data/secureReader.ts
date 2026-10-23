@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type {ReaderBlock} from '../types/reader';
 
 export type ReleasedEpisode = {
   episode_number:number; title:string; arc_title:string; release_at:string;
@@ -8,6 +9,7 @@ export type ReaderSegment = {
 };
 export type ReaderEpisode = {
   episodeNumber:number; title:string; arc:string; content:string;
+  blocks?:ReaderBlock[];anchors?:Record<string,number>;sourceVersion?:string;resumeRatio?:number;
 };
 
 const idOkay=(value:string)=>/^[a-z0-9][a-z0-9_-]{0,95}$/i.test(value);

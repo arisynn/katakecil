@@ -2,7 +2,7 @@ import ManagementDialog from '../features/studio/components/ManagementDialog';
 import type {ManagementOperation,BulkItem} from '../data/management';
 import BrandIcon from '../components/BrandIcon';
 import React, { useEffect, useState } from 'react';
-import { loadTrash, restoreItem, permanentlyDeleteItem, type TrashIndex, type TrashRecord } from '../data/trash';
+import { loadTrash, permanentlyDeleteItem, type TrashIndex, type TrashRecord } from '../data/trash';
 const toError = (e: unknown) => e instanceof Error ? e.message : String(e);
 type Kind = 'book' | 'episode' | 'section';
 type Pending = {
@@ -30,25 +30,7 @@ export default function TrashManager({ onChanged }: {
         setBusy(false);
     } };
     useEffect(() => { void reload(); }, []);
-    const restore = async (kind: Kind, id: string) => {
-        if (!window.confirm('Pulihkan sebagai privat/draft? Konten tidak akan langsung terbit.'))
-            return;
-        setBusy(true);
-        setError('');
-        setMessage('');
-        try {
-            await restoreItem(kind, id);
-            await onChanged();
-            setItems(await loadTrash());
-            setMessage('Dipulihkan. Status publikasi tetap privat/draft.');
-        }
-        catch (e) {
-            setError(toError(e));
-        }
-        finally {
-            setBusy(false);
-        }
-    };
+    const restore = (kind:Kind,item:TrashRecord)=>setBulk({id:crypto.randomUUID(),action:'restore',items:[{kind,id:item.id,title:item.title}]});
     const askDelete = (kind: Kind, item: TrashRecord) => { setPending({ kind, item }); setConfirmation(''); setMessage(''); setError(''); };
     const doDelete = async () => {
         if (!pending || busy || confirmation !== pending.item.title)
@@ -84,7 +66,7 @@ export default function TrashManager({ onChanged }: {
  {error && <div className="studio-error" role="alert">{error}</div>}{message && <div className="studio-success" role="status">{message}</div>}
  {allItems.length>0&&<div className="kk-v75-bulk-bar"><button type="button" className="studio-light-button" disabled={busy} onClick={()=>setSelected(allItems.map(i=>`${i.kind}:${i.id}`))}>Pilih semua ({allItems.length})</button><button type="button" className="studio-light-button" disabled={!picked.length||busy} onClick={()=>setSelected([])}>Batal pilih</button><button type="button" className="studio-light-button" disabled={!picked.length||busy} onClick={()=>openBulk('restore',picked)}>Pulihkan terpilih ({picked.length})</button><button type="button" className="v51-permanent-button" disabled={!picked.length||busy} onClick={()=>openBulk('delete',picked)}>Hapus permanen terpilih</button><button type="button" className="v51-permanent-button" disabled={busy} onClick={()=>openBulk('delete',allItems)}>Kosongkan Sampah</button></div>}
  {blocks.map(group => <section className="studio-panel" key={group.kind}><div className="studio-panel-top"><h2>{group.title}</h2><span className="v3-counter">{group.records.length}</span></div>
-  {group.records.length ? group.records.map(item => <div key={item.id} className="v5-trash-row"><input type="checkbox" aria-label={`Pilih ${item.title} di Sampah`} checked={selected.includes(`${group.kind}:${item.id}`)} disabled={busy} onChange={e=>setSelected(prev=>e.target.checked?[...prev,`${group.kind}:${item.id}`]:prev.filter(id=>id!==`${group.kind}:${item.id}`))}/><BrandIcon name="delete" size={17}/><div><strong>{item.title}</strong><small>{new Date(item.deleted_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' })} WIB</small></div><div className="v51-row-actions"><button disabled={busy} className="studio-light-button" onClick={() => void restore(group.kind, item.id)}><BrandIcon name="restore" size={16}/> Pulihkan</button><button disabled={busy} className="v51-permanent-button" onClick={() => askDelete(group.kind, item)}><BrandIcon name="delete" size={15}/> Hapus permanen</button></div></div>) : <p className="studio-muted">Tidak ada {group.title.toLowerCase()} di Sampah.</p>}
+  {group.records.length ? group.records.map(item => <div key={item.id} className="v5-trash-row"><input type="checkbox" aria-label={`Pilih ${item.title} di Sampah`} checked={selected.includes(`${group.kind}:${item.id}`)} disabled={busy} onChange={e=>setSelected(prev=>e.target.checked?[...prev,`${group.kind}:${item.id}`]:prev.filter(id=>id!==`${group.kind}:${item.id}`))}/><BrandIcon name="delete" size={17}/><div><strong>{item.title}</strong><small>{new Date(item.deleted_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' })} WIB</small></div><div className="v51-row-actions"><button disabled={busy} className="studio-light-button" onClick={() => void restore(group.kind, item)}><BrandIcon name="restore" size={16}/> Pulihkan</button><button disabled={busy} className="v51-permanent-button" onClick={() => askDelete(group.kind, item)}><BrandIcon name="delete" size={15}/> Hapus permanen</button></div></div>) : <p className="studio-muted">Tidak ada {group.title.toLowerCase()} di Sampah.</p>}
  </section>)}
  <p className="studio-footnote"><BrandIcon name="book-open" size={15}/> Memulihkan episode tidak mengembalikan jadwal sebelumnya. Penghapusan permanen novel menghapus semua episode dan halaman buku miliknya, termasuk riwayat impor dan jadwal.</p>
  {bulk&&<ManagementDialog operation={bulk} onClose={()=>{setBulk(null);void reload();}} onDone={async notice=>{await onChanged();setItems(await loadTrash());setSelected([]);setMessage(notice);setBulk(null);}}/>}

@@ -16,7 +16,10 @@ export default function PublicHeader({path}:{path:string}) {
  useEffect(()=>{
   if(!open)return;
   const outside=(e:PointerEvent)=>{if(!root.current?.contains(e.target as Node))setOpen(false);};
-  const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}};
+  const key=(e:KeyboardEvent)=>{
+   if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}
+   if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const items=[...root.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')||[]],index=items.indexOf(document.activeElement as HTMLButtonElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(index+(e.key==='ArrowDown'?1:-1)+items.length)%items.length]?.focus();}
+  };
   document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);
   root.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
   return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key);};

@@ -1,94 +1,150 @@
-# Push web — aktivasi server terpisah
+# Web Push: Supabase Edge Functions + Cron
 
-Kode tersedia dan diuji lokal; push **belum diaktifkan di produksi**. Tidak ada
-langganan pembaca asli yang dibuat atau notifikasi langsung yang dikirim dalam
-pengujian. Jangan menganggap tombol atau service worker saja sudah cukup untuk
-mengirim push.
+Frontend tetap di Vercel. Push memakai tiga Edge Functions dan satu Supabase Cron
+15 menit. API Vercel dan workflow pengirim lama sudah dihapus dari source.
+**Belum diterapkan ke produksi.** Tidak ada VAPID baru, langganan asli, pengiriman
+nyata, perubahan cerita, kebijakan Auth, atau jadwal cerita yang dibuat saat QA.
 
-## Arsitektur
+## Audit dan arsitektur
 
-Browser meminta izin hanya setelah pengguna mengaktifkan pilihan Notifikasi web.
-Browser menyimpan subscription Push API dan capability acak 256 bit. API satu
-origin menyimpan subscription privat ke dua tabel baru Supabase. Semua akses
-anon/authenticated ke tabel dan RPC ini ditolak; hanya server memakai secret.
-Capability di-hash sebelum disimpan dan diperlukan untuk mengubah/menghapus
-subscription yang sama. Pendaftaran dibatasi 30 percobaan per kelompok IP/jam;
-IP hanya dipakai untuk HMAC, bukan disimpan mentah.
+Audit read-only pada proyek yang cocok dengan konfigurasi frontend mengonfirmasi
+`qr_web_push_subscriptions`, `qr_web_push_limits`, RLS dan RPC push lama tersedia.
+Kolom/grant sesuai migration awal. pg_cron/pg_net belum aktif dan belum ada Edge
+Function push. Tabel EPUB belum terpasang pada proyek itu; buku episode lama tetap
+bekerja. Tidak ada isi naskah, endpoint pembaca, atau nilai secret yang diambil.
 
-`/sw.js` hanya menerima push dan membuka route pembaca yang tervalidasi. Tidak
-memasang PWA, mengintersep request, atau menyimpan halaman/naskah. Manifest PWA
-dan UI pemasangan PWA dihapus. Safari iOS biasanya memerlukan instalasi Home
-Screen untuk web push; karena alur itu tidak disediakan, browser tersebut dapat
-menampilkan keadaan tidak didukung. Situs tetap dapat dipakai untuk membaca.
+- `web-push-subscribe`: GET kesiapan + VAPID **publik**, POST opt-in.
+- `web-push-unsubscribe`: POST endpoint + capability milik browser.
+- `web-push-dispatch`: POST bearer secret khusus Cron, tanpa pesan bebas dari klien.
+- Browser menghubungi `${VITE_SUPABASE_URL}/functions/v1/...`, memakai publishable
+  key yang sudah ada. Tidak menghubungi API push Vercel.
+- Subscription/capability tetap kompatibel: tabel dan key localStorage lama
+  dipertahankan. Capability 256-bit di-hash; registrasi dibatasi 30/IP-HMAC/jam.
+  Origin diperiksa persis, provider endpoint dibatasi, JSON maksimal 8 KiB.
+- `verify_jwt=false` disengaja: pembaca anonim memakai capability, Cron memakai
+  bearer secret yang diverifikasi handler. JWT penulis tidak pernah diteruskan ke
+  query metadata; RLS publik tetap menentukan episode yang terlihat.
+- Hanya metadata buku/episode publik terbit yang dibaca, termasuk rilis EPUB jika
+  tabelnya ada. Tidak membaca `content_md`/EPUB asli atau mengubah sistem rilis.
+- Pengiriman menggunakan WebCrypto AES128GCM + VAPID dan fetch, kompatibel Deno.
+  Subscription di-lease, diurutkan adil, dan memakai cutoff waktu database.
 
-Pengirim mengambil **metadata episode publik yang sudah terbit** melalui client
-Supabase publik/RLS, terpisah dari client server untuk subscription. Tidak pernah
-mengambil `content_md` atau token penulis. Pemeriksaan pertama subscription
-dimulai pada waktu pendaftaran, sehingga tidak mengirim backlog lama.
+## Konfigurasi server: pindahkan nilai lama, jangan buat ulang VAPID
 
-## Konfigurasi
+Simpan environment Edge di berkas lokal yang diabaikan Git, misalnya
+`.env.web-push.local` (mode 0600). Isi **nilai asli yang sudah digunakan**:
 
-1. Tinjau migration tambahan
-   `supabase/migrations/20261023101426_web_push_opt_in.sql` dan jalankan pada
-   lingkungan uji terlebih dahulu. Migration hanya membuat tabel/index/RPC push
-   baru dan tidak mengubah record novel, Auth, atau kebijakan tabel lama. Tidak
-   dijalankan oleh build atau workflow APK.
-2. Jalankan `node scripts/create-web-push-env.mjs`. Hasilnya
-   `.env.web-push.local`, diabaikan Git dan tidak menampilkan kunci di terminal.
-   Script menolak menimpa berkas yang sudah ada. Simpan pasangan VAPID untuk
-   penggunaan berikutnya; mengganti pasangan kunci memerlukan subscription baru.
-3. Isi email pemilik yang valid (`WEB_PUSH_SUBJECT`, format `mailto:`), URL
-   Supabase, public key, dan secret/service-role key proyek yang sudah ada.
-   Pasang variabel ini hanya di environment server Vercel. Jangan memberi
-   awalan `VITE_` pada private key, secret backend, atau dispatch secret.
-4. Atur `WEB_PUSH_SITE_ORIGIN` ke origin HTTPS website persis, tanpa trailing
-   slash. Sesudah tabel/API terpasang di deployment yang ditinjau, set
-   `WEB_PUSH_ENABLED=true`. GET `/api/web-push` hanya mengembalikan status dan
-   VAPID public key. Jika konfigurasi hilang/tidak valid, UI menyatakan belum
-   diaktifkan, tanpa meminta izin browser.
-5. Aktifkan workflow terpisah **Send public chapter web notifications** dengan
-   Actions variable `WEB_PUSH_DISPATCH_ENABLED=true`, variable
-   `WEB_PUSH_DISPATCH_URL=https://DOMAIN/api/web-push-dispatch`, dan Actions secret
-   `WEB_PUSH_DISPATCH_SECRET` yang sama dengan server. Workflow memanggil POST
-   terautentikasi setiap 15 menit atau secara manual. Tidak perlu cron Vercel
-   berbayar; GitHub Actions dapat menunda jadwal atau menonaktifkan jadwal repo
-   yang lama tidak aktif. Penggunaan hosting/Actions tetap mengikuti akunmu.
-6. Uji dengan browser/perangkat uji sendiri setelah memberi izin, kemudian bab
-   uji publik yang memang boleh diterbitkan. Tidak ada endpoint publik untuk
-   mengirim pesan bebas ke semua pembaca.
-
-Untuk menjalankan API bersama frontend lokal, gunakan `vercel dev` dengan
-environment server yang benar dan origin uji HTTPS yang sesuai. `npm run dev`
-sendiri menyediakan frontend; tanpa API, keadaan notifikasi belum aktif adalah
-hasil yang diharapkan. Tes otomatis memakai PostgreSQL lokal/backend sintetis:
-
-```sh
-npm run lint
-npm run test:push
-node scripts/test-web-delivery.mjs
+```dotenv
+WEB_PUSH_ENABLED=true
+WEB_PUSH_SITE_ORIGIN=https://katakecil.vercel.app
+WEB_PUSH_VAPID_PUBLIC_KEY=<existing-public-key>
+WEB_PUSH_VAPID_PRIVATE_KEY=<existing-private-key>
+WEB_PUSH_SUBJECT=<existing-mailto-subject>
+WEB_PUSH_DISPATCH_SECRET=<existing-dispatch-secret-at-least-32-characters>
 ```
 
-## Batas MVP
+Tidak ada script pembuat VAPID lagi. Memakai pasangan berbeda akan memutus
+subscription yang sudah ada. `SUPABASE_URL` dan server keys disediakan runtime
+Supabase. Handler mendukung secret/publishable key baru maupun service-role/anon
+legacy. Bila public key runtime tidak tersedia, pasang
+`WEB_PUSH_SUPABASE_PUBLIC_KEY` dengan publishable key proyek yang sama.
+**Jangan memakai awalan VITE_ untuk private key, dispatch secret atau server key.**
+Frontend hanya perlu `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` lama.
 
-- Ini push browser sungguhan dengan Web Push/VAPID, tetapi deteksi episode
-  dilakukan lewat pemeriksaan server berkala, bukan webhook saat transaksi
-  publish. Tidak menjamin notifikasi seketika atau tampil saat perangkat offline.
-- Setiap pemanggilan mengklaim hingga 50 subscription, lima pengiriman paralel,
-  dengan lease database untuk mencegah pekerjaan bersamaan memproses baris sama.
-  Maksimal 100 metadata episode dibaca per subscription per batch, memakai cursor
-  waktu dan UUID. Backlog dilanjutkan pada batch berikutnya.
-- Satu pesan terbaru per buku per batch. Kegagalan sementara mempertahankan cursor
-  untuk dicoba lagi; kegagalan sebagian dapat menghasilkan pengiriman ulang,
-  memakai tag episode yang sama. Endpoint 404/410 dihapus. Data rate limit yang
-  kedaluwarsa dibersihkan dari tabel push sendiri.
-- Publikasi dengan waktu rilis sengaja dimundurkan ke sebelum cursor dapat tidak
-  terdeteksi. Alur publish normal yang memakai waktu kini dan episode terjadwal
-  didukung. Tidak ada trigger baru pada tabel episode produksi.
-- Mematikan pilihan menghentikan subscription browser dan meminta penghapusan
-  server. Jika request server gagal, endpoint browser tetap dihentikan; data
-  server tersisa dibersihkan ketika pengiriman berikutnya mendapat 404/410.
-- Kunci service-role adalah akses server yang kuat. Kode memisahkannya dari bundle
-  web/APK; pemilik deployment tetap harus menjaga environment server dan kunci
-  VAPID. ZIP ini tidak memuat kunci privat atau credential server.
-- Push nyata lintas provider/perangkat dan perilaku browser saat ditutup belum
-  diuji di lingkungan ini. Uji mock dan kompilasi tidak menggantikannya.
+## Urutan staging dan cutover
+
+1. Cadangkan konfigurasi/scheduler lama. Cocokkan riwayat migrasi tujuan terlebih
+   dahulu; jangan menjalankan ulang migrasi seluruh aplikasi secara membabi buta.
+   Tabel push lama tidak perlu dibuat ulang. Tinjau lalu jalankan hanya migration
+   tambahan `supabase/migrations/20261023121650_edge_web_push_delivery.sql` pada
+   staging. Migration menambah JSON receipt dan empat RPC khusus server; tidak
+   mereset subscription/cursor dan tidak menyentuh tabel novel atau Auth.
+2. Dari CLI Supabase yang sudah login, targetkan proyek staging secara eksplisit:
+
+   ```sh
+   supabase secrets set --env-file .env.web-push.local --project-ref PROJECT_REF
+   supabase functions deploy web-push-subscribe --project-ref PROJECT_REF
+   supabase functions deploy web-push-unsubscribe --project-ref PROJECT_REF
+   supabase functions deploy web-push-dispatch --project-ref PROJECT_REF
+   ```
+
+   Config ketiga function sudah `verify_jwt=false`; pengaman berada di handler.
+   Deno imports dan lockfile dipin per function. Jangan mengubah function reader.
+3. Jalankan `supabase/cron/setup-web-push.sql` sebagai administrator. Ini memasang
+   ekstensi yang diperlukan, wrapper privat dan **satu job dalam keadaan mati**.
+   Mengulang setup tetap satu job dan menonaktifkannya; aktivasi terpisah.
+4. Di dashboard Vault, simpan dua secret bernama
+   `katakecil_web_push_project_url` (URL https proyek tanpa trailing slash) dan
+   `katakecil_web_push_dispatch_secret` (**nilai sama dengan dispatch secret lama
+   dan Edge**). Gunakan editor secret, jangan memasukkan nilainya ke source,
+   command history, screenshot atau job SQL. VAPID tetap di Edge secrets.
+5. Deploy frontend uji yang telah ditinjau. GET subscribe dengan Origin frontend
+   harus menunjukkan `available:true` dan public key lama; Origin lain ditolak.
+   Dispatch tanpa bearer/secret salah harus 401. Dengan browser uji sendiri,
+   aktifkan izin, tutup/buka kembali browser, lalu nonaktifkan. Uji episode milik
+   akun uji di staging, termasuk kegagalan sementara, dua dispatch bersamaan,
+   jadwal mendatang, buku privat, EPUB, dan 404/410 provider. Tidak memakai data
+   atau endpoint pembaca produksi untuk pengujian.
+6. Saat rollout yang ditinjau: **hentikan workflow/GitHub scheduler/Vercel Cron lama
+   sebelum mengaktifkan pengirim baru**; tunggu invocation/lease lama selesai
+   (lease lama empat menit). Deploy migrasi + Edge + frontend sebagai cutover yang
+   dikoordinasikan. Tidak ada kompatibilitas permanen `/api/web-push` di Vercel;
+   tab web lama perlu reload untuk subscribe/unsubscribe melalui endpoint baru.
+   Subscription lama tetap menerima pesan dari tabel yang sama.
+7. Setelah smoke test lolos, jalankan `supabase/cron/enable-web-push.sql`.
+   Periksa job `katakecil-web-push-15m`, jadwal `*/15 * * * *`, hasil
+   `cron.job_run_details`, respons `net._http_response`, log Edge tanpa secret,
+   serta notifikasi pada perangkat uji. Error HTTP tidak otomatis menjadi error
+   job Cron karena pg_net asinkron: periksa respons HTTP juga.
+8. Hapus konfigurasi secret push lama dari Vercel/Actions hanya setelah masa
+   observasi dan rollback selesai. Vercel masih menjalankan API EPUB v1.3;
+   penghapusan ketergantungan Vercel pada pembaruan ini khusus **Web Push**.
+
+**Rollback:** jalankan `supabase/cron/disable-web-push.sql` dahulu. Jangan menghapus
+subscription/kolom receipt. Kembalikan frontend/API lama jika diperlukan, kemudian
+aktifkan hanya pengirim lama. Jangan menjalankan dua scheduler bersamaan.
+
+## Duplikasi dan batas operasional
+
+Receipt keberhasilan disimpan sebelum cursor maju sehingga kegagalan buku kedua
+tidak mengulang buku pertama. Lease menolak worker lama; worker memeriksa ulang
+visibilitas dan lease sebelum mengirim. Event ID deterministik menjadi Topic
+provider, tag notifikasi, dan receipt IndexedDB pada service worker (7 hari,
+maksimal 2.048 ID, tanpa naskah). Delivery duplikat ditekan bahkan setelah
+notifikasi ditutup atau service worker restart.
+
+HTTP push tidak memiliki transaksi bersama Postgres. Crash sesudah provider
+menerima dan sebelum receipt DB tersimpan masih dapat mengulang **transport**;
+receipt service worker mencegah tampilan ulang selama tersimpan. Storage browser
+yang dihapus/tidak tersedia dan delivery sangat terlambat di luar retensi tidak
+memungkinkan jaminan exactly-once. Satu pesan terbaru per buku per batch; bukan
+satu pesan untuk setiap bab jika beberapa terbit bersamaan.
+
+Maksimal 50 subscription/claim, 5 worker, 80 send dan anggaran 85 detik per request;
+request HTTP ber-timeout. Backlog dilanjutkan melalui cursor/receipt dan lease.
+Interval Cron, pembatasan provider dan kebijakan OS memengaruhi keterlambatan.
+Waktu publikasi yang sengaja dimundurkan sebelum cursor bisa tidak terdeteksi.
+Tidak ada trigger baru, perubahan jadwal cerita, atau sinkronisasi offline.
+
+`sw.js` hanya notifikasi, tanpa cache/fetch handler/PWA installer. Browser Android
+Chrome dan PWA yang mendukung Push API memakai standar yang sama. Safari iOS
+memerlukan Home Screen; alur instalasi PWA tetap dihapus sesuai v1.3. Capacitor
+WebView tidak menyediakan Push API: notifikasi lokal/WorkManager Android v1.3
+tetap terpisah dan tidak berubah menjadi FCM otomatis oleh migrasi ini.
+
+## Verifikasi lokal
+
+```sh
+npm ci
+npm run check
+npm run test:push
+node scripts/test-web-delivery.mjs
+npm run build
+```
+
+`test:push` menjalankan SQL PostgreSQL lokal (PGlite), receipt service worker,
+kontrak SQL Cron, typecheck tiga function dan uji runtime Deno/enkripsi nyata.
+Kontrak Cron memakai stub ekstensi; Docker Supabase PostgreSQL tidak berhasil
+dipasang karena batas ruang saat ekstraksi. **Scheduler pg_cron/pg_net terkelola,
+pengiriman provider nyata, credentials, dan perangkat nyata harus diuji pada
+staging**. Detail hasil ada di `WEB_PUSH_EDGE_TEST_REPORT.md`.

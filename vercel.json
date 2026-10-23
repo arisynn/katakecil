@@ -99,8 +99,8 @@
     }
   ],
   "functions": {
-    "api/web-push-dispatch.ts": {
-      "maxDuration": 180
+    "api/epub-episode.ts": {
+      "maxDuration": 60
     }
   }
 }

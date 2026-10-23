@@ -1,14 +1,14 @@
 {
   "packageId": "app.katakecil.mobile",
-  "versionCode": 3,
-  "versionName": "1.2-shelf",
+  "versionCode": 6,
+  "versionName": "1.5-polish",
   "url": "https://katakecil.vercel.app/downloads/KataKecil.apk",
-  "sha256": "d0b0d1b421784e2e57a9725ebcca261af2a2cb7d37e47c77d5e6900192b383aa",
-  "size": 6122656,
+  "sha256": "4c21cd1302d0a756ed2191092632250800769196e0131834dd737c9ddb8998a0",
+  "size": 6136305,
   "signingCertificateSha256": "45b782d7140d15b02682faed337056c0786dc1bf0cf7b626faf18ceffa07ff48",
   "releaseNotes": [
-    "Rak sampul dan popup informasi buku.",
-    "Pilihan notifikasi lebih ringkas dan ikon baru.",
-    "Pemeriksaan pembaruan APK tanpa uninstall."
+    "Antarmuka Library, Studio dan reader dirapikan dengan gaya kristal yang konsisten.",
+    "Popup lebih ringkas, kontrol mudah disentuh dan panel Studio lebih padat.",
+    "Reader hybrid, progres dan alur penerbitan tetap dipertahankan."
   ]
 }

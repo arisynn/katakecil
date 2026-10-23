@@ -12,6 +12,7 @@ import {BookmarkButton} from '../features/public/components/StoryCard';
 import {Action, EmptyLibrary} from '../features/public/components/LibraryUI';
 import {getPublicUpcomingChapters, formatUpcomingChapter, type UpcomingChapter} from '../data/publicSchedule';
 import {parseReadingProgress} from '../utils/readingProgress';
+import {savedReaderProgress} from '../data/readerSource';
 import {readerHeading} from '../utils/readerHeading';
 
 const demoDate='2026-10-01T00:00:00.000Z';
@@ -20,7 +21,7 @@ const demoBooks:Book[]=[
  ['Langit yang Sama','Fiksi','Dua perjalanan, satu langit, dan sebuah tempat untuk kembali.'],
  ['Jejak di Kertas','Slice of Life','Di antara halaman dan ingatan, ada cerita yang belum selesai.'],
 ].map(([title,genre,synopsis],i)=>({id:`v6-demo-${i}`,slug:`v6-demo-${i}`,title,genre,synopsis,cover_url:fallbackCover({id:`v6-demo-${i}`,title}),status:'ongoing',is_published:true,is_featured:false,created_at:demoDate,updated_at:demoDate}));
-function readProgress(book:Book){try{return parseReadingProgress(JSON.parse(localStorage.getItem(`kk-secure-progress-${book.id}`)||'null'));}catch{return null;}}
+function readProgress(book:Book){return parseReadingProgress(savedReaderProgress(book.id));}
 
 function useLibrary(){
  const [data,setData]=useState<{books:Book[];episodes:EpisodeSummary[]}>({books:[],episodes:[]});
@@ -43,7 +44,7 @@ function LibraryShelf({books,episodes,demo}:{books:Book[];episodes:EpisodeSummar
  const eligible=books;
  const shown=useMemo(()=>eligible.filter(book=>`${book.title} ${book.genre}`.toLocaleLowerCase('id-ID').includes(query.trim().toLocaleLowerCase('id-ID'))),[eligible,query]);
  return <main className="crystal-library" aria-label="Library KataKecil">
-  <header className="crystal-library-intro"><h1>Library<span>.</span></h1></header>
+  <header className="crystal-library-intro"><h1>Library<span>.</span></h1><span className="library-count">{shown.length} cerita</span></header>
   {demo&&<p className="crystal-preview-note">Pratinjau tampilan · cerita contoh</p>}
   {(eligible.length>6||query)&&<label className="crystal-search"><BrandIcon name="search" size={18}/><input type="search" aria-label="Cari cerita di Library" placeholder="Cari sebuah cerita…" value={query} onChange={e=>setQuery(e.target.value)}/></label>}
   {shown.length?<div className="crystal-shelf">{shown.map((book,i)=>{

@@ -17,6 +17,6 @@ const signature=execFileSync(join(tools,'apksigner'),['verify','--print-certs',a
 const certificate=signature.match(/Signer #1 certificate SHA-256 digest: ([0-9a-f]+)/)?.[1];if(!certificate)throw Error('APK signature could not be verified.');
 const origin=new URL(process.env.KATAKECIL_PUBLIC_ORIGIN||'https://katakecil.vercel.app');
 if(origin.protocol!=='https:')throw Error('Public release origin must use HTTPS');
-const metadata={packageId:found[1],versionCode:Number(found[2]),versionName:found[3],url:new URL('/downloads/KataKecil.apk',origin).href,sha256:createHash('sha256').update(bytes).digest('hex'),size:bytes.length,signingCertificateSha256:certificate,releaseNotes:['Rak sampul dan popup informasi buku.','Pilihan notifikasi lebih ringkas dan ikon baru.','Pemeriksaan pembaruan APK tanpa uninstall.']};
+const metadata={packageId:found[1],versionCode:Number(found[2]),versionName:found[3],url:new URL('/downloads/KataKecil.apk',origin).href,sha256:createHash('sha256').update(bytes).digest('hex'),size:bytes.length,signingCertificateSha256:certificate,releaseNotes:['Antarmuka Library, Studio dan reader dirapikan dengan gaya kristal yang konsisten.','Popup lebih ringkas, kontrol mudah disentuh dan panel Studio lebih padat.','Reader hybrid, progres dan alur penerbitan tetap dipertahankan.']};
 mkdirSync('releases',{recursive:true});copyFileSync(apk,'releases/KataKecil.apk');writeFileSync('releases/latest.json',JSON.stringify(metadata,null,2)+'\n');
 console.log(`Prepared APK download and update manifest: ${metadata.versionName}, ${bytes.length} bytes.`);

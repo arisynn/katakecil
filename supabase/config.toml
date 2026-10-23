@@ -5,3 +5,14 @@ verify_jwt = false
 # Signed-in authors only; the handler also verifies the session and author membership.
 [functions.cover-assets]
 verify_jwt = true
+
+# Anonymous reader opt-in: handlers validate origin, endpoint and ownership capability.
+[functions.web-push-subscribe]
+verify_jwt = false
+
+[functions.web-push-unsubscribe]
+verify_jwt = false
+
+# Cron uses a dedicated shared secret, checked by the handler (not an Auth JWT).
+[functions.web-push-dispatch]
+verify_jwt = false

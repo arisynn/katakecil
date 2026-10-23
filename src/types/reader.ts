@@ -29,6 +29,8 @@ export interface ReadingSettings {
   textAlign: TextAlign;
   spreadMode: SpreadMode;
 }
+export type ReaderInline={text:string;bold?:boolean;italic?:boolean;code?:boolean;script?:'sup'|'sub';href?:string;internal?:string};
+export type ReaderBlock={kind:'text'|'heading'|'image'|'quote'|'pre';text:string;nodes:ReaderInline[];image?:{src:string;alt:string;width:number;height:number}};
 export interface Chapter {
   id: string;
   title: string;
@@ -36,6 +38,7 @@ export interface Chapter {
   /** Episode number for the displayed heading; never used to renumber stored data. */
   displayNumber?: number;
   paragraphs: string[];
+  blocks?: ReaderBlock[];
   plainParagraphs: string[];
   plainText: string;
   level: number;

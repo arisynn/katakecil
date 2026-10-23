@@ -10,10 +10,12 @@ interface Props {
   episodeTitle?: string;
   message?: string;
   onRetry?: () => void;
+  onBack?: () => void;
+  backLabel?:string;
 }
 
 /** Loading lives OUTSIDE reader-book, so no watermark or fake page appears. */
-export function ReaderEpisodeLoading({ phase, storyTitle, episodeNumber, episodeTitle, message, onRetry }: Props) {
+export function ReaderEpisodeLoading({ phase, storyTitle, episodeNumber, episodeTitle, message, onRetry,onBack,backLabel="Kembali ke Library" }: Props) {
   const headingMeta = episodeNumber !== undefined ? readerHeading(episodeTitle || '', episodeNumber) : null;
   const isBusy = phase === 'fetch' || phase === 'layout';
   const heading = phase === 'fetch' ? 'Menyiapkan bab…' : phase === 'layout' ? 'Menata halaman…' :
@@ -34,7 +36,7 @@ export function ReaderEpisodeLoading({ phase, storyTitle, episodeNumber, episode
       <h2 className="kk-reader-load__title">{heading}</h2>
       <p className="kk-reader-load__detail">{detail}</p>
       {isBusy ? <div className="kk-reader-load__activity" aria-hidden="true"><span/><span/><span/></div> :
-        onRetry && phase === 'error' ? <button className="kk-reader-load__retry" type="button" onClick={onRetry}>Coba lagi</button> : null}
+        <div className="reader-recovery-actions">{onRetry&&phase==='error'&&<button className="kk-reader-load__retry" type="button" onClick={onRetry}>Coba lagi</button>}{onBack&&<button className="reader-recovery-back" type="button" onClick={onBack}>{backLabel}</button>}</div>}
     </div>
   </div>;
 }

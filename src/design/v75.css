@@ -7,8 +7,8 @@
 .kk-v75-select-row>.studio-manage-item{flex:1;min-width:0}
 .kk-v75-select-row .studio-manage-item>span{min-width:0;overflow-wrap:anywhere}
 .kk-v75-select-row small{line-height:1.6}
-.kk-v75-dialog{width:min(520px,calc(100vw - 28px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid var(--kk-border);border-radius:20px;padding:24px;background:var(--kk-surface);color:var(--kk-text);box-shadow:0 20px 80px var(--kk-shadow)}
-.kk-v75-dialog::backdrop{background:var(--kk-scrim)}
+.kk-v75-dialog{position:fixed;inset:0;margin:auto;width:min(520px,calc(100vw - 28px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid var(--kk-border);border-radius:20px;padding:20px;background:var(--kk-surface);color:var(--kk-text);box-shadow:0 20px 80px var(--kk-shadow)}
+.kk-v75-dialog::backdrop{background:var(--kk-scrim);backdrop-filter:blur(6px)}
 .kk-v75-dialog h2{margin:0 0 12px;font-size:1.35rem;line-height:1.4}
 .kk-v75-dialog p,.kk-v75-targets{font-size:.92rem;line-height:1.7;overflow-wrap:anywhere}
 .kk-v75-targets{padding-left:22px;max-height:160px;overflow:auto}

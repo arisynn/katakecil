@@ -28,15 +28,17 @@
     "test:v75": "node scripts/test-v75.mjs",
     "test:v75:browser": "node scripts/test-v75-browser.mjs",
     "cleanup:deleted-covers": "node scripts/deleted-cover-cleanup.mjs",
-    "build:android": "node scripts/verify-android-env.mjs && npm run build -- --mode android && cap sync android",
+    "build:android": "node scripts/verify-android-env.mjs && npm run build -- --mode android && node scripts/verify-android-assets.mjs && cap sync android",
     "android:debug": "npm run build:android && cd android && ./gradlew assembleDebug",
     "android:open": "cap open android",
     "test:android": "node scripts/test-android-integration.mjs",
     "android:apk": "npm run build:android && cd android && ./gradlew assembleRelease",
     "test:crystal": "node scripts/test-crystal-browser.mjs",
     "release:web": "node scripts/prepare-web-release.mjs && npm run build",
-    "test:push": "node scripts/test-web-push.mjs",
-    "test:shelf": "node scripts/test-crystal-browser.mjs"
+    "test:push": "node scripts/test-web-push.mjs && node scripts/test-web-push-worker.mjs && node scripts/test-web-push-cron.mjs && deno check --frozen --config supabase/functions/web-push-dispatch/deno.json supabase/functions/web-push-subscribe/index.ts supabase/functions/web-push-unsubscribe/index.ts supabase/functions/web-push-dispatch/index.ts && deno test --frozen --config supabase/functions/web-push-dispatch/deno.json supabase/functions/_shared/web-push/runtime_test.ts",
+    "test:epub": "node scripts/test-epub.mjs && node scripts/test-epub-browser.mjs",
+    "test:shelf": "node scripts/test-crystal-browser.mjs",
+    "verify:apk": "node scripts/verify-android-apk.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",
@@ -48,12 +50,13 @@
     "@capacitor/share": "8.0.3",
     "@capacitor/splash-screen": "8.0.2",
     "@supabase/supabase-js": "2.117.3",
+    "@xmldom/xmldom": "0.9.12",
     "jszip": "3.10.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "web-push": "3.6.7"
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@block65/webcrypto-web-push": "2.0.0",
     "@capacitor/cli": "8.5.3",
     "@electric-sql/pglite": "0.5.9",
     "@jsquash/png": "3.1.1",
@@ -62,8 +65,9 @@
     "@types/node": "24.10.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@types/web-push": "3.6.4",
     "@vitejs/plugin-react": "6.1.2",
+    "deno": "2.9.6",
+    "fake-indexeddb": "6.2.4",
     "playwright": "1.56.1",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",

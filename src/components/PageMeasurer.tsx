@@ -22,11 +22,13 @@ export function PageMeasurer({ chapters, settings, geometry, onMeasured, hideInt
       const counts = nodes.map(node => Math.max(1, Math.ceil((node.scrollWidth - 1) / Math.max(1, geometry.bodyWidth))));
       onMeasured(counts, nodes);
     };
+    const images=refs.current.flatMap(node=>Array.from(node?.querySelectorAll('img')||[]));
+    images.forEach(image=>{image.addEventListener('load',measure);image.addEventListener('error',measure);});
     measure();
     document.fonts?.ready.then(measure).catch(() => {});
-    return () => { cancelled = true; };
+    return () => { cancelled = true;images.forEach(image=>{image.removeEventListener('load',measure);image.removeEventListener('error',measure);}); };
   }, [chapters, geometry.bodyWidth, geometry.bodyHeight, settings.fontSize, settings.fontFamily, settings.lineHeight, settings.textAlign, onMeasured, hideIntro]);
   return <div className="reader-measure-host" aria-hidden="true">
-    {chapters.map((chapter, i) => <div key={chapter.id} ref={node => { refs.current[i] = node; }} className="reader-columns" style={{ ...textStyles(settings), width: geometry.bodyWidth, height: geometry.bodyHeight, columnWidth: geometry.bodyWidth }}><ChapterText chapter={chapter} hideIntro={hideIntro}/></div>)}
+    {chapters.map((chapter, i) => <div key={chapter.id} ref={node => { refs.current[i] = node; }} className="reader-columns" style={{ ...textStyles(settings), '--reader-body-height': `${geometry.bodyHeight}px`, width: geometry.bodyWidth, height: geometry.bodyHeight, columnWidth: geometry.bodyWidth } as React.CSSProperties}><ChapterText chapter={chapter} hideIntro={hideIntro}/></div>)}
   </div>;
 }

@@ -30,6 +30,12 @@ public class ChapterCheckWorker extends Worker {
                 Map<String, JSONObject> catalog = new HashMap<>();
                 for (int i=0; i<books.length(); i++) { JSONObject b=books.getJSONObject(i); catalog.put(b.getString("id"), b); }
                 JSONArray rows = read(base + "/rest/v1/qr_episodes?select=book_id,episode_number,title,release_at&is_enabled=eq.true&deleted_at=is.null&release_at=lte.now&order=release_at.desc&limit=200", key);
+                // EPUB rollout is optional. Its original file and future titles
+                // are never queried by the worker, only released public metadata.
+                try {
+                    JSONArray epub = read(base + "/rest/v1/qr_epub_releases?select=book_id,episode_number,title,release_at&is_enabled=eq.true&release_at=lte.now&order=release_at.desc&limit=200", key);
+                    for(int i=0;i<epub.length();i++) rows.put(epub.getJSONObject(i));
+                } catch(java.io.IOException unavailable) { /* Retry optional EPUB metadata on the next periodic check. */ }
                 LinkedHashSet<String> seen = new LinkedHashSet<>();
                 boolean baseline = !prefs.contains("seen");
                 JSONArray stored = new JSONArray(prefs.getString("seen", "[]"));

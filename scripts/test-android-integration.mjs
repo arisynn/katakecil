@@ -2,13 +2,15 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {chromium} from 'playwright';
+let browser,page;
+const errors=[],serverMessages=[];
 const port=4197,base=`http://127.0.0.1:${port}`;
-const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'],{stdio:'ignore',env:{...process.env,DISABLE_HMR:'true',VITE_SUPABASE_URL:'https://synthetic-android.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_synthetic'}});
-let browser;
+const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'],{stdio:['ignore','pipe','pipe'],env:{...process.env,DISABLE_HMR:'true',VITE_SUPABASE_URL:'https://synthetic-android.supabase.co',VITE_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_synthetic'}});
+server.stdout.on('data',data=>{serverMessages.push(data.toString());if(serverMessages.length>40)serverMessages.shift();});server.stderr.on('data',data=>{serverMessages.push(data.toString());if(serverMessages.length>40)serverMessages.shift();});
 try {
   for(let i=0;i<100;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
   browser=await chromium.launch({headless:true,args:['--no-sandbox']});
-  const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];
+  page=await browser.newPage({viewport:{width:390,height:844}});
   page.on('pageerror',e=>errors.push(e.message));
   let releaseCode=3,invalidRelease=false;await page.route('https://katakecil.vercel.app/downloads/latest.json',route=>route.fulfill({headers:{'access-control-allow-origin':'*'},json:{packageId:'app.katakecil.mobile',versionCode:releaseCode,versionName:'1.3-test',url:invalidRelease?'https://evil.test/bad.apk':'https://katakecil.vercel.app/downloads/KataKecil.apk',sha256:'a'.repeat(64),size:6000000,releaseNotes:['Perbaikan sintetis.']}}));
   await page.route('https://synthetic-android.supabase.co/**',route=>route.fulfill({json:[]}));
@@ -92,4 +94,4 @@ try {
   invalidRelease=false;releaseCode=3;await page.evaluate(()=>window.dispatchEvent(new Event('kk:check-update')));await page.getByRole('status').filter({hasText:'sudah menggunakan versi terbaru'}).waitFor();
   assert.deepEqual(errors,[]);
   console.log('PASS native bridge contract: no startup errors, local viewport, no SW, installed notice, guarded Back, history, minimize, external browser, theme bars, native export, opt-in permission denial/grant, inexact reading reminders, chapter worker configuration, test notification, cancellation; APK version check, update offer/browser download, same-version result and cross-origin URL rejection. Desktop mocks only.');
-}finally{await browser?.close();server.kill();}
+}catch(error){console.error('Native QA diagnostic:',{url:page?.url(),errors,server:serverMessages.join(''),state:await page?.evaluate(()=>({handlers:Object.keys(window.nativeHandlers||{}),calls:window.nativeCalls,platform:window.Capacitor?.getPlatform?.(),body:document.body.innerText.slice(0,1200)}))});throw error;}finally{await browser?.close();server.kill();}

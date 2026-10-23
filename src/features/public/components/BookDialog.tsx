@@ -14,10 +14,6 @@ export default function BookDialog({book,episodes,progress,onClose,demo=false}:{
  const rows=useMemo(()=>episodes.filter(ep=>ep.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number),[book.id,episodes]);
  const filtered=useMemo(()=>rows.filter(ep=>`${ep.episode_number} ${ep.title}`.toLocaleLowerCase('id').includes(query.toLocaleLowerCase('id').trim())),[rows,query]);
  useEffect(()=>{
-  const old=document.body.style.overflow;document.body.style.overflow='hidden';
-  return()=>{document.body.style.overflow=old;};
- },[]);
- useEffect(()=>{
   if(demo)return;let active=true;
   const load=()=>void getPublicUpcomingChapters().then(result=>{if(active)setNext(result.find(row=>row.book_id===book.id)??null);}).catch(()=>{if(active)setNext(null);}).finally(()=>{if(active)setLoading(false);});
   load();window.addEventListener('online',load);
@@ -25,7 +21,7 @@ export default function BookDialog({book,episodes,progress,onClose,demo=false}:{
  },[book.id,demo]);
  const status=book.status==='completed'?'Tamat':book.status==='hiatus'?'Jeda':'Bersambung';
  return <div className="book-dialog-scrim" onClick={onClose}><section ref={ref} role="dialog" aria-modal="true" aria-labelledby="book-dialog-title" className="book-dialog" onClick={event=>event.stopPropagation()}>
-  <header className="book-dialog-heading"><div className="book-dialog-cover"><Cover book={book} eager/></div><div className="book-dialog-title"><span>{book.genre||'Fiksi'} · {status}</span><h2 id="book-dialog-title">{book.title}</h2><small>{rows.length} episode terbit</small></div><button type="button" className="book-dialog-close" onClick={onClose} aria-label="Tutup informasi buku"><BrandIcon name="close" size={19}/></button></header>
+  <header className="book-dialog-heading"><div className="book-dialog-cover"><Cover book={book} eager/></div><div className="book-dialog-title"><span>{book.genre||'Fiksi'} · {status}</span><h2 id="book-dialog-title">{book.title}</h2><small>{book.reading_format==='epub'?'EPUB · ':''}{rows.length} episode terbit</small></div><button type="button" className="book-dialog-close" onClick={onClose} aria-label="Tutup informasi buku"><BrandIcon name="close" size={19}/></button></header>
   <div className="book-dialog-info"><p className={expanded?'':'is-clamped'}>{book.synopsis||'Sinopsis belum tersedia.'}</p>{book.synopsis.length>160&&<button type="button" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded?'Ringkas':'Selengkapnya'}</button>}</div>
   <div className="book-dialog-schedule" role="status"><BrandIcon name="calendar-clock" size={17}/><div><strong>Update berikutnya</strong><span>{loading?'Memuat jadwal…':next?formatUpcomingChapter(next):book.status==='completed'?'Cerita sudah tamat.':'Jadwal berikutnya belum tersedia.'}</span></div></div>
   <div className="book-dialog-list-heading"><h3>Daftar episode</h3><span>{rows.length}</span></div>

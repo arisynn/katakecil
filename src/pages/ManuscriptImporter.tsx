@@ -3,6 +3,7 @@ import {CoverCandidates} from '../features/covers/CoverCandidates';
 import {newCoverOperation,saveCover,publishCover,type CoverUploadOperation} from '../features/covers/api';
 import type {PreparedCover} from '../features/covers/model';
 import BrandIcon from '../components/BrandIcon';
+import EpubUpload from '../features/epub/EpubUpload';
 import PublicationOptions from '../features/studio/components/PublicationOptions';
 import {defaultPublicationOptions,publicationPreview} from '../utils/publicationPlan';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -34,6 +35,7 @@ const newImportId = (title: string) => {
 };
 const meaningfulFrontmatter = (title: string) => /(?:kata pengantar|prakata|pengantar|preface|foreword|dedikasi|persembahan|ucapan terima kasih|acknowledgment|about the author|tentang penulis|catatan penulis)/i.test(title);
 export default function ManuscriptImporter({ books, episodes, onChanged }: Props) {
+    const [epubFile,setEpubFile]=useState<File|undefined>(undefined),[epubMode,setEpubMode]=useState(false);
     const [reading, setReading] = useState(false);
     const [publication,setPublication]=useState(defaultPublicationOptions);
     const [publishImportedCover,setPublishImportedCover]=useState(true);
@@ -68,7 +70,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     const [parsed, setParsed] = useState<ParsedManuscript | null>(null);
     const [chapters, setChapters] = useState<ImportChapter[]>([]);
     const initialBook = new URLSearchParams(window.location.search).get('book') || '';
-    const [destination, setDestination] = useState(books.some(b => b.id === initialBook) ? initialBook : 'new');
+    const [destination, setDestination] = useState(books.some(b => b.id === initialBook&&b.reading_format!=='epub') ? initialBook : 'new');
     const [bookTitle, setBookTitle] = useState('');
     const [bookGenre, setBookGenre] = useState('Fiksi');
     const [useCover,setUseCover]=useState(false),[coverSource,setCoverSource]=useState<CoverSource|null>(null),[coverChoice,setCoverChoice]=useState<string|null>(null),[preparedCover,setPreparedCover]=useState<PreparedCover|null>(null),[coverPreparing,setCoverPreparing]=useState(false),[coverRetry,setCoverRetry]=useState<CoverUploadOperation|null>(null);
@@ -109,6 +111,9 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     const importFile = async (file?: File) => {
         if (!file)
             return;
+        if(/\.epub$/i.test(file.name)||file.type==='application/epub+zip'){
+            abortRef.current?.abort();setParsed(null);setChapters([]);setEpubFile(file);setEpubMode(true);return;
+        }
         abortRef.current?.abort();
         const controller=new AbortController();abortRef.current=controller;
         pendingNewId.current = null;
@@ -133,12 +138,6 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
             const mime = file.type.toLowerCase();
             let result: ParsedManuscript;
             if(kind.endsWith('.zip')) { result=await readZip(file,controller.signal,setReadPhase); }
-            else if (kind.endsWith('.epub') || mime === 'application/epub+zip') {
-                if(file.size>18_000_000)throw Error('EPUB maksimal 18 MB.');
-                const {parseEpubFile}=await import('../utils/importEpub');
-                setReadPhase('Membaca EPUB dan mencari struktur episode…');
-                result = await parseEpubFile(file);
-            }
             else if (/\.(md|txt)$/.test(kind) || mime === 'text/markdown' || mime === 'text/plain') {
                 setReadPhase('Mengenali pembagian episode…');
                 const text=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());
@@ -294,9 +293,11 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
             setSaveStage('');
         }
     };
+    if(epubMode)return <><div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>EPUB utuh.</h1><p>File tetap utuh; penerbitan dapat diatur per episode.</p></div><EpubUpload initialFile={epubFile} onChanged={onChanged} onCancel={()=>{setEpubMode(false);setEpubFile(undefined);}}/></>;
     return <>
   <button className="studio-backlink" onClick={() => navigate(destination === 'new' ? '/studio/cerita' : `/studio/cerita/${destination}`)}><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</button>
-  <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>Pilih berkas, periksa pembagian bab, lalu simpan draf atau atur penerbitan otomatis.</p></div>
+  <div className="studio-page-head"><span className="studio-kicker">RUANG UPLOAD</span><h1>Upload Naskah</h1><p>EPUB disimpan utuh. ZIP, Markdown, dan TXT memakai impor episode.</p></div>
+  <button type="button" className="studio-light-button" disabled={reading||saving||locked||Boolean(parsed)} onClick={()=>setEpubMode(true)}>Unggah EPUB utuh</button>
   <div className="v4-progress v69-upload-steps" aria-label="Tahapan impor"><span className={!parsed && !success ? 'active' : ''}><BrandIcon name="upload" size={15}/> 1 · Pilih file</span><BrandIcon name="arrow-right" size={16}/><span className={parsed && !success ? 'active' : ''}><BrandIcon name="book-open" size={15}/> 2 · Periksa bab</span><BrandIcon name="arrow-right" size={16}/><span className={success ? 'active' : ''}><BrandIcon name="shield" size={15}/> 3 · Atur penerbitan</span></div>
   {pendingId && <section className="studio-panel"><p>Status penyimpanan perlu dipastikan. Pemeriksaan dikunci agar retry memakai isi yang sama.</p><button disabled={saving} className="studio-light-button" onClick={()=>void recover()}>Periksa status impor</button>{operation.current && <button disabled={saving} className="studio-light-button" onClick={()=>void persist()}>Coba simpan lagi</button>}</section>}
   {error && <div className="studio-error" role="alert">{error}</div>}
@@ -319,7 +320,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
    <label className={`v4-dropzone${reading ? ' v4-upload-reading' : ''}`}>
     <BrandIcon name="upload" size={32} aria-hidden="true"/>
     <strong>{reading ? 'Menganalisis naskah…' : parsed ? 'Pilih berkas lain' : 'Pilih ZIP, EPUB, MD, atau TXT dari HP'}</strong>
-    <small>{reading ? `Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.` : 'ZIP 20 MB · EPUB 18 MB · MD/TXT 8 MB. Periksa isi dan pilih cara penerbitan sebelum menyimpan.'}</small>
+    <small>{reading ? `Berkas diterima: ${pickedName}. Sedang membaca isi dan pembagian episode.` : 'ZIP 20 MB · EPUB 18 MB (tetap utuh) · MD/TXT 8 MB.'}</small>
     <input type="file" name="manuscript" aria-label="Pilih berkas ZIP, EPUB, MD, atau TXT" accept={ACCEPT} disabled={reading || saving || locked} onClick={() => { setPickerOpen(true); setPickerStatus('Menunggu berkas dari pemilih file Android…'); }} onChange={handleFileSelection}/>
    </label>
    <div className="v4-picker-status" role="status" aria-live="polite">
@@ -337,7 +338,7 @@ export default function ManuscriptImporter({ books, episodes, onChanged }: Props
     {parsed.warnings.map((w, i) => <div className="v4-warning" key={i}><BrandIcon name="alert" size={16}/>{w}</div>)}
    </section>
    <section className="studio-panel v4-target"><div className="studio-panel-top"><h2>Tujuan penyimpanan</h2><BrandIcon name="books" size={19}/></div>
-    <label className="studio-label">Simpan ke novel<select value={destination} onChange={e => setDestination(e.target.value)}><option value="new">+ Novel baru</option>{books.map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
+    <label className="studio-label">Simpan ke novel<select value={destination} onChange={e => setDestination(e.target.value)}><option value="new">+ Novel baru</option>{books.filter(b=>b.reading_format!=='epub').map(b => <option key={b.id} value={b.id}>{b.title}</option>)}</select></label>
     {destination === 'new' && <div className="v4-target-fields"><label className="studio-label">Judul novel hasil deteksi<input maxLength={180} value={bookTitle} onChange={e => setBookTitle(e.target.value)}/></label><label className="studio-label">Genre<input maxLength={70} value={bookGenre} onChange={e => setBookGenre(e.target.value)}/></label><p className="studio-muted">Novel baru dibuat sesuai pilihan penerbitan. Sinopsis bisa dilengkapi kemudian.</p></div>}
     {destination !== 'new' && <p className="studio-muted">Ditemukan {currentEpisodes.length} episode lama. Nomor dan isi duplikat akan ditolak; seluruh jadwal yang sudah ada tetap utuh.</p>}
    </section>

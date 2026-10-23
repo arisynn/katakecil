@@ -1,7 +1,8 @@
 import type {PublicCoverManifest} from '../features/covers/model';
 import { supabase } from './supabase';
+import type {BookEpub} from '../features/epub/api';
 export type Book = {
-  id: string; slug: string; title: string; synopsis: string; genre: string;
+  id: string; slug: string; title: string; synopsis: string; genre: string; reading_format?:'epub'; epub?:BookEpub;
   cover_url: string | null; cover_manifest?:PublicCoverManifest|null; cover_version?:number; studio_cover_path?:string|null; private_cover_path?: string | null; status: 'ongoing' | 'completed' | 'hiatus';
   is_published: boolean; is_featured: boolean; deleted_at?: string | null; created_at: string; updated_at: string;
 };
@@ -25,8 +26,13 @@ export async function getPublicLibrary() {
   if (b.error) throw new Error(b.error.message);
   const books = (a.data ?? []) as Book[];
   await attachCovers(books,false);
+  await attachEpubs(books,false);
   const finaleKeys=new Set((finaleQuery.error?[]:finaleQuery.data??[]).map(e=>`${e.book_id}:${e.episode_number}`));
   const episodes = ((b.data ?? []) as EpisodeSummary[]).map(ep=>({...ep,is_finale:finaleKeys.has(`${ep.book_id}:${ep.episode_number}`)}));
+  if(books.some(book=>book.reading_format==='epub')){
+   const result=await supabase.from('qr_epub_releases').select('book_id,episode_number,title,release_at').eq('is_enabled',true).lte('release_at',new Date().toISOString()).order('episode_number');if(result.error)throw result.error;
+   episodes.push(...(result.data||[]).map(row=>({...row,arc_title:'',is_finale:false})));
+  }
   const newest = (book: Book) => Math.max(new Date(book.updated_at).getTime(), ...episodes.filter(ep => ep.book_id === book.id).map(ep => new Date(ep.release_at ?? '').getTime() || 0));
   books.sort((x, y) => newest(y) - newest(x));
   return { books, episodes };
@@ -53,7 +59,15 @@ export async function getStudioLibrary() {
   // Hide children of books in Trash; their drafts/schedules remain preserved in DB.
   const activeBookIds = new Set(books.map(book => book.id));
   await attachCovers(books,true);
+  await attachEpubs(books,true);
   return { books, episodes: episodes.filter(ep => activeBookIds.has(ep.book_id)) };
+}
+async function attachEpubs(books:Book[],author:boolean){
+ if(!supabase||!books.length)return;
+ const {data,error}=await supabase.from('qr_epub_catalog').select('book_id').in('book_id',books.map(book=>book.id));
+ if(error){if(['42P01','PGRST205'].includes(error.code))return;throw Error('Format buku belum dapat dimuat. Periksa koneksi lalu coba lagi.');}
+ for(const row of data||[]){const book=books.find(book=>book.id===row.book_id);if(book)book.reading_format='epub';}
+ if(author){const result=await supabase.from('qr_book_epubs').select('*').in('book_id',books.map(book=>book.id));if(result.error&&result.error.code!=='PGRST205')throw result.error;for(const asset of result.data||[]){const book=books.find(book=>book.id===asset.book_id);if(book)book.epub=asset as BookEpub;}}
 }
 export async function getAuthorEpisode(id:string):Promise<Episode>{
   if(!supabase)throw Error('Supabase belum dikonfigurasi.');
