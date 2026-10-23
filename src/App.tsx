@@ -43,6 +43,8 @@ import './design/v70-beta1.css';
 import './design/v70-beta2.css';
 import './design/public-experience.css';
 import './design/studio-experience.css';
+import './design/crystal.css';
+import './design/writer.css';
 
 export default function App(){
   const [route,setPath]=useState(window.location.pathname+window.location.search);
@@ -92,7 +94,7 @@ export default function App(){
   if(isReader) {
     if(readerLookup.slug!==slug||!readerLookup.resolved) return <ThemeLoading context="reader" text="Menyiapkan halaman cerita…"/>;
     const readerBook=readerLookup.book;
-    return readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/cerita/${readerBook.slug}`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/cerita/${readerBook.slug}`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/temukan')}>Kembali ke Temukan</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
+    return readerBook?<ReaderErrorBoundary onBack={()=>navigate(`/`)}><SecureReaderApp key={readerBook.id} bookId={readerBook.id} bookTitle={readerBook.title} onExit={()=>navigate(`/`)} episodeNumber={(() => {const raw=new URLSearchParams(window.location.search).get('episode');return raw!==null&&/^\d+$/.test(raw)?Number(raw):undefined;})()}/></ReaderErrorBoundary>:<div className="reader-route-loading"><h2>Cerita tidak tersedia.</h2><button onClick={()=>navigate('/')}>Kembali ke Library</button>{!isConfigured&&<p>Supabase belum dikonfigurasi.</p>}</div>;
   }
   if(path.startsWith('/studio')) return <StudioErrorBoundary><Suspense fallback={<ThemeLoading context="studio" text="Menyiapkan Studio…"/>}><Studio path={path}/></Suspense></StudioErrorBoundary>;
   return <PublicLibrary path={path}/>;

@@ -1,3 +1,6 @@
+import {useState} from 'react';
+import {isNativeApp} from '../../../native/platform';
+import NotificationSettings from '../../notifications/NotificationSettings';
 import type { User } from '@supabase/supabase-js';
 import BrandIcon from '../../../components/BrandIcon';
 import { Cover } from '../../covers/AuthorCover';
@@ -17,7 +20,6 @@ export function Dashboard({ books, episodes, user }: {
     new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0];
   const currentBook = books.find(book => book.id === lastEdited?.book_id);
   const name = authorName(user);
-  const liveBooks = books.filter(book => book.is_published).length;
   const mostRecent = [...books].sort((a, b) =>
     new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 4);
 
@@ -25,7 +27,7 @@ export function Dashboard({ books, episodes, user }: {
     <header className="studio-page-head v69-welcome">
       <span className="studio-kicker">KATAKECIL · STUDIO PENULIS</span>
       <h1>Halo, {name}.</h1>
-      <p>Mulai dari naskah yang sedang dikerjakan. Semua angka di halaman ini berasal dari karya dan bab yang tersimpan.</p>
+      <p>Ruang tenang untuk melanjutkan cerita.</p>
     </header>
 
     {lastEdited && currentBook ? <section className="v69-resume v72-resume" aria-label="Lanjutkan menulis">
@@ -46,9 +48,8 @@ export function Dashboard({ books, episodes, user }: {
     </section>}
 
     <nav className="v72-quick-actions" aria-label="Tindakan cepat Studio">
-      <B to="/studio/impor"><BrandIcon name="upload" size={17}/> Upload Naskah</B>
-      <B to="/studio/jadwal"><BrandIcon name="calendar" size={17}/> Jadwal Terbit</B>
-      <B to="/studio/pengumuman"><BrandIcon name="megaphone" size={17}/> Pengumuman</B>
+      <B to="/studio/impor"><BrandIcon name="upload" size={17}/> Impor naskah</B>
+      <B to="/studio/jadwal"><BrandIcon name="calendar" size={17}/> Atur jadwal</B>
     </nav>
 
     <section className="v69-dashboard-stats v72-dashboard-stats" aria-label="Ringkasan status bab">
@@ -72,31 +73,7 @@ export function Dashboard({ books, episodes, user }: {
         </B>) : <p className="studio-muted">Belum ada karya. Mulai dari tombol Buat Karya di atas.</p>}
       </section>
 
-      <div className="v72-dashboard-side">
-        <section className="studio-panel v72-writing-guide" aria-label="Ringkasan alur penerbitan">
-          <div className="studio-panel-top"><h2>Alur Penerbitan</h2><BrandIcon name="shield" size={18}/></div>
-          <ul>
-            <li><BrandIcon name={books.length ? 'check-circle' : 'books'} size={18}/>
-              <span>{books.length ? `${books.length} karya di Studio` : 'Mulai dari sebuah karya'}
-                <small>{liveBooks} karya berstatus publik</small></span></li>
-            <li><BrandIcon name={drafts.length ? 'file-pen' : 'check-circle'} size={18}/>
-              <span>{drafts.length ? `${drafts.length} draft perlu ditinjau` : 'Tidak ada draft tertunda'}
-                <small>Periksa judul dan isi sebelum menerbitkan</small></span></li>
-            <li><BrandIcon name={scheduled.length ? 'calendar' : 'info'} size={18}/>
-              <span>{scheduled.length ? `${scheduled.length} bab menunggu jadwal` : 'Belum ada bab terjadwal'}
-                <small>Jadwal hanya dihitung dari data publikasi</small></span></li>
-          </ul>
-          <B to="/studio/cerita" className="v72-guide-action">Kelola karya <BrandIcon name="arrow-right" size={15}/></B>
-        </section>
-        {scheduled[0] && <section className="studio-panel v69-next-release v72-next-release">
-          <div className="studio-panel-top"><h2>Publikasi Terdekat</h2><BrandIcon name="calendar" size={18}/></div>
-          <B to={`/studio/editor/${scheduled[0].id}`} className="v69-next-release-link">
-            <span><strong>{scheduled[0].title}</strong>
-              <small>{formatWib(scheduled[0].release_at)}</small></span>
-            <BrandIcon name="chevron-right" size={18}/>
-          </B>
-        </section>}
-      </div>
+
     </div>
     <p className="studio-footnote"><BrandIcon name="shield" size={15}/> Studio privat · Akun {user.email}</p>
   </div>;
@@ -130,12 +107,14 @@ export function Analytics({ books, episodes }: { books: Book[]; episodes: Episod
 }
 
 export function StudioSettings() {
+  const [notifications,setNotifications]=useState(false);
   return <><div className="studio-page-head"><span className="studio-kicker">PREFERENSI & KEAMANAN</span>
     <h1>Pengaturan</h1><p>Preferensi tampilan dan informasi akses Studio.</p>
   </div><section className="studio-panel v6-settings-panel">
-    <h2>Aplikasi</h2><p>Pasang KataKecil ke layar utama. Membaca dan menyimpan tetap memerlukan internet.</p><button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Pasang KataKecil</button>
+    <h2>Aplikasi</h2><p>{isNativeApp?'KataKecil berjalan sebagai aplikasi di perangkatmu.':'Pasang KataKecil ke layar utama.'} Membaca dan menyimpan tetap memerlukan internet.</p>{!isNativeApp&&<button className="studio-light-button" onClick={()=>window.dispatchEvent(new Event('kk:install'))}>Pasang KataKecil</button>}
+    {isNativeApp&&<><h2>Notifikasi</h2><p>Pengingat membaca dan kabar bab baru, sesuai pilihanmu.</p><button className="studio-light-button" onClick={()=>setNotifications(true)}>Atur notifikasi</button></>}
     <h2>Tampilan</h2><p>Tema Terang dan Gelap di bilah atas berlaku untuk seluruh KataKecil, termasuk Reader.</p>
     <h2>Keamanan Studio</h2><p>Hanya akun yang terdaftar sebagai penulis yang dapat mengelola cerita.
       Alat database, jadwal, dan sampah tersedia melalui menu Alat Studio.</p>
-  </section></>;
+  </section>{notifications&&<NotificationSettings onClose={()=>setNotifications(false)}/>}</>;
 }

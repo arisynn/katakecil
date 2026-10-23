@@ -1,7 +1,7 @@
 {
-  "name": "KataKecil — Cerita Kecil, Makna Besar",
+  "name": "KataKecil",
   "short_name": "KataKecil",
-  "description": "Baca cerita di KataKecil. Koneksi internet diperlukan.",
+  "description": "Library kecil untuk cerita yang berarti.",
   "lang": "id",
   "start_url": "/",
   "scope": "/",
@@ -32,16 +32,8 @@
   "prefer_related_applications": false,
   "shortcuts": [
     {
-      "name": "Beranda",
+      "name": "Library",
       "url": "/"
-    },
-    {
-      "name": "Temukan",
-      "url": "/temukan"
-    },
-    {
-      "name": "Koleksi",
-      "url": "/koleksi"
     }
   ]
 }

@@ -10,7 +10,7 @@ export default function ThemeLoading({ context = 'public', text }: Props) {
   return <div className={`kk-v611-loader kk-v611-loader--${context}`} role="status" aria-live="polite" aria-busy="true" aria-label={message}>
     <div className="kk-v611-loader__content">
       <span className="kk-v611-loader__eyebrow">{eyebrow}</span>
-      <div className="kk-v611-loader__symbol" aria-hidden="true"><img src="/brand/katakecil-mark.svg" width="58" height="58" alt=""/></div>
+      <div className="kk-v611-loader__symbol" aria-hidden="true"><img src="/brand/crystal-mark.png" width="58" height="58" alt=""/></div>
       <strong className="kk-v611-loader__brand">KataKecil</strong>
       <p className="kk-v611-loader__tagline">Setiap cerita punya tempat untuk kembali.</p>
       <div className="kk-v611-loader__dots" aria-hidden="true"><span/><span/><span/></div>

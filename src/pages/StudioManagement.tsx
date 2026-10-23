@@ -1,3 +1,4 @@
+import {isNativeApp} from '../native/platform';
 import BrandIcon from '../components/BrandIcon';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Book, Episode } from '../data/library';
@@ -9,7 +10,7 @@ import { fromWib, makeReleasePlan, monthDays, toWibDate, type PlannedRelease, ty
 import { navigate } from '../utils/nav';
 const WEEK = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 function errMsg(e: unknown) { return e instanceof Error ? e.message : String(e); }
-function download(name: string, contents: string, type: string) { const blob = new Blob([contents], { type }); const uri = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = uri; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(uri), 1500); }
+function download(name: string, contents: string, type: string) { if(isNativeApp){void import('../native/export').then(m=>m.shareStudioExport(name,contents)).catch(e=>window.alert(`Ekspor gagal: ${errMsg(e)}`));return;} const blob = new Blob([contents], { type }); const uri = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = uri; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(uri), 1500); }
 function stamp(date: string) { return date.slice(0, 10); }
 function toYmd(year: number, month: number, day: number) { return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; }
 function nextMonth(y: number, m: number, offset: number) { const d = new Date(Date.UTC(y, m + offset, 1)); return [d.getUTCFullYear(), d.getUTCMonth()] as const; }

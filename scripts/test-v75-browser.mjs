@@ -72,7 +72,7 @@ try{
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Konfirmasi 3 jadwal',exact:true}).click();await page.getByRole('status').filter({hasText:'3 bab berhasil dijadwalkan'}).waitFor();await screenshot('schedule-mobile');
  assert.equal((await sql('select count(*)::int n from qr_episodes where book_id=$1 and is_enabled',[importedBook])).rows[0].n,6);
  // Global delete intentionally includes novels hidden by the title filter. Lost reply retries identical operation.
- await goto('books');await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).waitFor();await page.getByPlaceholder('Cari judul atau genre…').fill('Sintetis A');
+ await goto('books');await page.getByText('Kelola beberapa karya',{exact:true}).click();await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).waitFor();await page.getByPlaceholder('Cari judul atau genre…').fill('Sintetis A');
  await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).click();await page.getByRole('dialog').waitFor();assert(await page.getByRole('dialog').getByText('Cerita Sintetis B',{exact:true}).isVisible());
  for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});assert(await page.getByRole('dialog').evaluate(n=>n.scrollWidth<=n.clientWidth+1));}
  await page.setViewportSize({width:390,height:844});await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'detached'});assert.equal((await sql('select count(*)::int n from qr_books where deleted_at is not null')).rows[0].n,0,'Escape must cancel without a mutation');await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).click();
@@ -83,16 +83,16 @@ try{
  await goto('trash');await page.getByRole('button',{name:'Pilih semua (3)',exact:true}).click();await page.getByRole('button',{name:'Pulihkan terpilih (3)',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('PULIHKAN');await page.getByRole('dialog').getByRole('button',{name:'Pulihkan',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});
  assert((await sql('select * from qr_books')).rows.every(b=>!b.deleted_at&&!b.is_published));
  await sql("update qr_books set is_published=true where id='synthetic-a'");
- await goto('home');await page.getByRole('region',{name:'Novel tamat',exact:true}).waitFor();assert.equal(await page.locator('.v68-chapter-item').count(),6);
+ await goto('home');await page.getByRole('main',{name:'Library KataKecil',exact:true}).waitFor();assert.equal(await page.locator('.crystal-story').count(),1);assert.equal(await page.locator('.v68-chapter-item').count(),0);
  for(const theme of ['light','dark'])for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});await page.evaluate(t=>{localStorage.setItem('appThemePreference',t);window.dispatchEvent(new Event('katakecil:theme-change'));},theme);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`home overflow at ${width}`);
   if(width===390)await screenshot(`home-${theme}-mobile`);
  }
  assert(!await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}).includes('SENTINEL_V75_PRIVATE_QA')));
- await goto('books');await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('HAPUS');await page.getByRole('dialog').getByRole('button',{name:'Pindahkan ke Sampah',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});
+ await goto('books');await page.getByText('Kelola beberapa karya',{exact:true}).click();await page.getByRole('button',{name:'Hapus semua novel (3)',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('HAPUS');await page.getByRole('dialog').getByRole('button',{name:'Pindahkan ke Sampah',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});
  await goto('trash');await page.getByRole('button',{name:'Kosongkan Sampah',exact:true}).click();await page.getByRole('dialog').getByRole('textbox').fill('HAPUS PERMANEN');await page.getByRole('dialog').getByRole('button',{name:'Hapus permanen',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});assert.equal((await sql('select count(*)::int n from qr_books')).rows[0].n,0);
  assert.deepEqual(errors,[]);
- console.log('V7.5 browser + PostgreSQL: real EPUB -> mixed 3-now/3-scheduled publication, presets, pause/resume, global delete across filters, lost-reply replay, private restoration, 6 recent chapters, completed shelf, 320–1440 layouts, both themes and no manuscript persistence passed.');
+ console.log('V7.5 browser + PostgreSQL: real EPUB -> mixed 3-now/3-scheduled publication, presets, pause/resume, global delete across filters, lost-reply replay, private restoration, minimal Library shelf, 320–1440 layouts, both themes and no manuscript persistence passed.');
 }catch(e){console.error(e.message);console.error((await page.locator('body').innerText()).slice(-4500));await screenshot('failure');throw e;}
 finally{await browser.close();server.kill('SIGTERM');await db.close();}

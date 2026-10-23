@@ -1,3 +1,4 @@
+import {isNativeApp} from '../../native/platform';
 import {useEffect,useRef,useState} from 'react';
 import {hasPendingWork,mayLeave} from '../../utils/nav';
 import {useReaderDialogFocus} from '../../hooks/useReaderDialogFocus';
@@ -16,7 +17,7 @@ export default function PwaExperience(){
   const [installed,setInstalled]=useState(()=>matchMedia('(display-mode: standalone)').matches||Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
   const others=useRef(new Map<string,{busy:boolean;at:number}>());const reloadAllowed=useRef(false);
   useEffect(()=>{
-    const before=(e:Event)=>{e.preventDefault();setInstall(e as InstallEvent);};const done=()=>{setInstalled(true);setInstall(null);};const show=()=>setOpen(true);
+    const before=(e:Event)=>{e.preventDefault();setInstall(e as InstallEvent);};const done=()=>{setInstalled(true);setInstall(null);};const show=()=>{if(isNativeApp)setNotice('KataKecil sudah terpasang di perangkat ini.');else setOpen(true);};
     const network=()=>{setOffline(!navigator.onLine);document.documentElement.dataset.kkOffline=String(!navigator.onLine);};network();
     window.addEventListener('beforeinstallprompt',before);window.addEventListener('appinstalled',done);window.addEventListener('kk:install',show);window.addEventListener('online',network);window.addEventListener('offline',network);
     return()=>{window.removeEventListener('beforeinstallprompt',before);window.removeEventListener('appinstalled',done);window.removeEventListener('kk:install',show);window.removeEventListener('online',network);window.removeEventListener('offline',network);};
@@ -29,7 +30,7 @@ export default function PwaExperience(){
     return()=>{clearInterval(timer);window.removeEventListener('kk:guard-change',announce);channel.postMessage({id,busy:false});channel.close();};
   },[]);
   useEffect(()=>{
-    if(!import.meta.env.PROD||!('serviceWorker'in navigator))return;let active=true;
+    if(isNativeApp||!import.meta.env.PROD||!('serviceWorker'in navigator))return;let active=true;
     const change=()=>{if(reloadAllowed.current)location.reload();};navigator.serviceWorker.addEventListener('controllerchange',change);
     void navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'}).then(reg=>{
       if(!active)return;if(reg.waiting)setWaiting(reg.waiting);

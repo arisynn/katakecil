@@ -1,5 +1,10 @@
 # KataKecil V7.5 RC1
 
+**Versi Library & Writer Studio:** [petunjuk web/APK dan batas notifikasi](docs/CRYSTAL.md)
+serta [laporan uji](docs/CRYSTAL_TEST_REPORT.md). Versi ini menyederhanakan beranda,
+merombak Studio dengan tata letak padat, dan menambahkan Android Capacitor.
+Integrasi antarmuka ini tidak menjalankan SQL atau mengubah produksi.
+
 Aplikasi membaca cerita dan Studio privat penulis dengan palet Sapphire, sampul berbagai rasio, impor ZIP/EPUB/Markdown, riwayat revisi privat, tinjau konflik editor, serta PWA yang memerlukan internet untuk membaca.
 
 Mulai dari [START_HERE_V75.md](START_HERE_V75.md) untuk pemasangan SQL V7.5, impor dengan penerbitan otomatis, hapus massal, pengujian, dan batas verifikasi. Paket sumber belum berarti perubahan telah diterapkan ke produksi. Fitur pengelolaan V7.5 memerlukan paket SQL V7.5 setelah seluruh migrasi V7.4.

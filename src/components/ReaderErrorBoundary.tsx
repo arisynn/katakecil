@@ -19,7 +19,7 @@ export default class ReaderErrorBoundary extends React.Component<Props,State> {
     <p>Terjadi kendala saat menata halaman. Ceritamu tetap aman tersimpan.</p>
     <div className="reader-recovery-actions">
      <button type="button" onClick={()=>window.location.reload()}>Coba lagi</button>
-     <button type="button" onClick={this.props.onBack}>Kembali ke cerita</button>
+     <button type="button" onClick={this.props.onBack}>Kembali ke Library</button>
     </div>
    </section>
   </main>;

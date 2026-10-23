@@ -20,3 +20,8 @@ qa/
 .env.local
 .env.*.local
 supabase/.temp/
+
+# Local Android deliverables and signing material
+artifacts/
+*.keystore
+*.jks

@@ -1,5 +1,5 @@
 import BrandIcon from '../../../components/BrandIcon';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Cover } from '../../covers/AuthorCover';
 import CoverManager from '../../covers/CoverManager';
 import {CoverEditor} from '../../covers/CoverEditor';
@@ -10,10 +10,9 @@ import { episodeStatus, formatWib, slugify, type Book, type Episode } from '../.
 import { supabase } from '../../../data/supabase';
 import { bulkPublishDrafts } from '../../../data/bulkPublishing';
 import { B, Pill, errMsg } from './StudioShared';
-import {getReleaseRules} from '../../../data/publishing';
-import type {ReleaseRule} from '../../../utils/releasePlanning';
-import {WEEKDAYS} from '../../../utils/publicationPlan';
 import ManagementDialog from './ManagementDialog';
+import {useLeaveGuard} from '../../../hooks/useLeaveGuard';
+import {mayLeave} from '../../../utils/nav';
 import type {ManagementOperation} from '../../../data/management';
 
 const BOOK_STATUS: Record<Book['status'], string> = { ongoing: 'Berlangsung', completed: 'Tamat', hiatus: 'Jeda' };
@@ -24,9 +23,6 @@ export function Books({ books, episodes, onCreate, onChanged }: {
   onCreate: () => void;
   onChanged: () => Promise<void>;
 }) {
-  const [rules,setRules]=useState<ReleaseRule[]>([]);
-  useEffect(()=>{let active=true;getReleaseRules().then(rows=>{if(active)setRules(rows);}).catch(()=>{});return ()=>{active=false;};},[books]);
-  const ruleMap=useMemo(()=>new Map(rules.map(r=>[r.book_id,r])),[rules]);
   const stats=useMemo(()=>{const map=new Map<string,{Terbit:number;Terjadwal:number;Draft:number}>();for(const ep of episodes){const counts=map.get(ep.book_id)??{Terbit:0,Terjadwal:0,Draft:0};counts[episodeStatus(ep)]++;map.set(ep.book_id,counts);}return map;},[episodes]);
   const [selected,setSelected]=useState<string[]>([]),[pending,setPending]=useState<ManagementOperation|null>(null),[message,setMessage]=useState('');
   const selectBooks=(ids:string[])=>{const items=books.filter(b=>ids.includes(b.id)).map(b=>({kind:'book' as const,id:b.id,title:b.title}));if(items.length)setPending({id:crypto.randomUUID(),action:'trash',items});};
@@ -37,52 +33,33 @@ export function Books({ books, episodes, onCreate, onChanged }: {
     `${book.title} ${book.genre}`.toLocaleLowerCase('id-ID')
       .includes(query.trim().toLocaleLowerCase('id-ID')));
   const reset = () => { setQuery(''); setVisibility('Semua'); };
-  return <div className="v69-books-page">
-    <div className="studio-page-head studio-head-with-action">
-      <div><span className="studio-kicker">PERPUSTAKAAN PENULIS</span>
-        <h1>Karya Saya</h1><p>Semua cerita, bab, dan jadwal dalam satu tempat.</p></div>
-      {books.length > 0 && <button onClick={onCreate} className="studio-primary">
-        <BrandIcon name="plus" size={17}/> Karya Baru
-      </button>}
-    </div>
-    {books.length > 0 && <div className="kk-v71-books-toolbar">
-      <label className="v69-search-field">
-        <BrandIcon name="search" size={18}/><span className="v69-visually-hidden">Cari karya</span>
-        <input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Cari judul atau genre…"/>
-      </label>
-      <div className="kk-v71-books-filter" role="group" aria-label="Filter visibilitas karya">
-        {(['Semua', 'Publik', 'Privat'] as const).map(value => <button type="button" key={value}
-          aria-pressed={visibility === value} className={visibility === value ? 'is-active' : ''}
-          onClick={() => setVisibility(value)}>{value}</button>)}
-      </div>
-      <span className="kk-v71-books-count" role="status">{filtered.length} dari {books.length} karya</span>
-    </div>}
+  return <div className="writer-works">
+    <header className="writer-page-heading"><div><span className="writer-eyebrow">RUANG MENULIS</span><h1>Karya.</h1><p>Naskah, bab, dan jadwal di satu tempat.</p></div><button type="button" className="studio-primary" onClick={onCreate}><BrandIcon name="plus" size={17}/> Cerita baru</button></header>
+    {books.length>0&&<div className="writer-works-tools"><label className="writer-search"><BrandIcon name="search" size={17}/><input type="search" aria-label="Cari karya" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari judul atau genre…"/></label><label className="writer-filter"><span>Visibilitas</span><select aria-label="Filter visibilitas karya" value={visibility} onChange={e=>setVisibility(e.target.value as typeof visibility)}>{(['Semua','Publik','Privat'] as const).map(value=><option key={value}>{value}</option>)}</select></label></div>}
     {message&&<p role="status" className="studio-success">{message}</p>}
-    {books.length>0&&<div className="kk-v75-bulk-bar"><button type="button" className="studio-light-button" onClick={()=>setSelected(filtered.map(b=>b.id))}>Pilih hasil filter ({filtered.length})</button><button type="button" className="studio-light-button" onClick={()=>setSelected([])} disabled={!selected.length}>Batal pilih</button><button type="button" className="v51-permanent-button" disabled={!selected.length} onClick={()=>selectBooks(selected)}>Hapus terpilih ({selected.length})</button><button type="button" className="v51-permanent-button" onClick={()=>selectBooks(books.map(b=>b.id))}>Hapus semua novel ({books.length})</button></div>}
-    {filtered.length ? <div className="studio-manage-list">
-      {filtered.map(book => <div key={book.id} className="kk-v75-select-row"><input type="checkbox" aria-label={`Pilih novel ${book.title}`} checked={selected.includes(book.id)} onChange={e=>setSelected(prev=>e.target.checked?[...prev,book.id]:prev.filter(id=>id!==book.id))}/><B to={`/studio/cerita/${book.id}`}
-        className="studio-manage-item">
-        <Cover book={book} size="mini"/>
-        <span><strong>{book.title}</strong>
-          <small>{book.genre} · {stats.get(book.id)?.Terbit??0} terbit · {stats.get(book.id)?.Terjadwal??0} terjadwal · {stats.get(book.id)?.Draft??0} draf</small>
-          <em>{book.is_published ? 'Publik' : 'Privat'} · {BOOK_STATUS[book.status]}</em><small>{ruleMap.get(book.id)?`${ruleMap.get(book.id)!.is_active?'Terbit':'Dijeda'}: ${ruleMap.get(book.id)!.weekdays.map(d=>WEEKDAYS[d]).join(', ')} · ${ruleMap.get(book.id)!.time_wib} WIB`:'Belum ada pola rilis'}</small><small>{!book.cover_manifest&&!book.cover_url?'Belum ada sampul publik':(stats.get(book.id)?.Terjadwal??0)>0?'Jadwal siap':book.status==='completed'?'Cerita tamat':'Belum ada jadwal mendatang'}</small>
-        </span><BrandIcon name="chevron-right" size={20}/>
-      </B></div>)}
-    </div> : books.length ? <div className="kk-v71-studio-no-results" role="status"><p>Tidak ada karya yang cocok dengan pencarian atau filter.</p><button type="button" className="studio-light-button" onClick={reset}>Tampilkan semua karya</button></div>
-      : <div className="studio-big-empty"><BrandIcon name="books" size={30}/>
-          <h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dengan membuat karya pertama.</p>
-          <button onClick={onCreate} className="studio-primary"><BrandIcon name="plus" size={18}/> Buat Karya</button>
-        </div>}
+    {filtered.length?<div className="writer-book-grid">{filtered.map(book=>{
+      const lastDraft=episodes.filter(ep=>ep.book_id===book.id&&episodeStatus(ep)==='Draft').sort((a,b)=>Date.parse(b.updated_at)-Date.parse(a.updated_at))[0];
+      return <article className="writer-book-card" key={book.id}>
+        <B to={`/studio/cerita/${book.id}`} className="writer-book-open"><div className="writer-book-cover"><Cover book={book} size="mini"/></div><span className="writer-book-copy"><span className="writer-book-status">{book.is_published?'Publik':'Privat'} · {BOOK_STATUS[book.status]}</span><strong>{book.title}</strong><small>{episodes.filter(ep=>ep.book_id===book.id).length} bab · {stats.get(book.id)?.Draft??0} draft</small></span><BrandIcon name="chevron-right" size={17}/></B>
+        {lastDraft&&<B to={`/studio/editor/${lastDraft.id}`} className="writer-resume"><BrandIcon name="file-pen" size={16}/><span>Lanjutkan <strong>{lastDraft.title||`Bab ${lastDraft.episode_number}`}</strong></span><BrandIcon name="arrow-right" size={16}/></B>}
+      </article>;
+    })}</div>:books.length?<div className="writer-empty"><h2>Belum ada karya yang cocok.</h2><button type="button" className="studio-light-button" onClick={reset}>Reset pencarian</button></div>:<div className="writer-empty"><BrandIcon name="book-open" size={34}/><h2>Sebuah dunia menunggu ditulis.</h2><p>Mulai dari judul. Bab pertamamu menyusul.</p><button type="button" className="studio-primary" onClick={onCreate}>Buat cerita pertama</button></div>}
+    {books.length>0&&<details className="writer-management"><summary>Kelola beberapa karya</summary><p>Pilih karya yang ingin dipindahkan ke Sampah. Konfirmasi tetap diperlukan.</p><div className="writer-selection-list">{filtered.map(book=><label key={book.id}><input type="checkbox" aria-label={`Pilih novel ${book.title}`} checked={selected.includes(book.id)} onChange={e=>setSelected(prev=>e.target.checked?[...prev,book.id]:prev.filter(id=>id!==book.id))}/>{book.title}</label>)}</div><div className="writer-action-row"><button type="button" className="studio-light-button" onClick={()=>setSelected(filtered.map(b=>b.id))}>Pilih hasil filter ({filtered.length})</button><button type="button" className="studio-light-button" onClick={()=>setSelected([])} disabled={!selected.length}>Batal pilih</button><button type="button" className="studio-danger-lite" disabled={!selected.length} onClick={()=>selectBooks(selected)}>Hapus terpilih ({selected.length})</button><button type="button" className="studio-danger-lite" onClick={()=>selectBooks(books.map(b=>b.id))}>Hapus semua novel ({books.length})</button></div></details>}
     {pending&&<ManagementDialog operation={pending} description={`${pending.items.length} novel beserta ${episodes.filter(e=>pending.items.some(b=>b.id===e.book_id)).length} bab akan disembunyikan dari publik.`} onClose={()=>{setPending(null);void onChanged();}} onDone={async notice=>{setPending(null);setSelected([]);setMessage(notice);await onChanged();}}/>}
   </div>;
 }
 
 export function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=>void}) {
  const [title,setTitle]=useState(existing?.title||''),[synopsis,setSynopsis]=useState(existing?.synopsis||''),[genre,setGenre]=useState(existing?.genre||'Fiksi');
- const [status,setStatus]=useState<Book['status']>(existing?.status||'ongoing'),[published,setPublished]=useState(existing?.is_published||false),[featured,setFeatured]=useState(existing?.is_featured||false);
+ const [status,setStatus]=useState<Book['status']>(existing?.status||'ongoing'),[published,setPublished]=useState(existing?.is_published||false);
+ const featured=existing?.is_featured||false;
  const [cover,setCover]=useState(existing?.cover_url||''),[prepared,setPrepared]=useState<PreparedCover|null>(null),[preparing,setPreparing]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[stage,setStage]=useState('');
  const created=useRef<Book|null>(null),newId=useRef<string>(''),coverOperation=useRef<CoverUploadOperation|null>(null);
  const slug=existing?.slug||slugify(title);
+ const snapshot=JSON.stringify({title,synopsis,genre,status,published,featured,cover,prepared:prepared?.name||''});
+ const savedSnapshot=useRef(snapshot);
+ useLeaveGuard(busy||snapshot!==savedSnapshot.current,()=>snapshot===savedSnapshot.current||(!busy&&window.confirm('Tinggalkan pengaturan yang belum disimpan?')));
+
  const save=async(e:React.FormEvent)=>{
   e.preventDefault();if(!supabase||busy)return;setBusy(true);setError('');
   try{
@@ -97,6 +74,7 @@ export function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=
    if(saveError?.code==='23505'&&!current){const recovered=await supabase.from('qr_books').select('*').eq('id',id).maybeSingle();if(recovered.data){data=recovered.data;saveError=null;}}
    if(saveError)throw saveError;created.current=data as Book;
    if(prepared&&!existing){coverOperation.current??=await newCoverOperation(id,prepared);const asset=await saveCover(coverOperation.current,new AbortController().signal,setStage);data={...data,studio_cover_path:asset.manifest?.card[0]?.path};}
+   savedSnapshot.current=snapshot;
    onSaved({...data,...(existing?.cover_manifest?{cover_manifest:existing.cover_manifest,cover_version:existing.cover_version}:{})} as Book);
   }catch(e){setError(`${errMsg(e)}${created.current&&!existing?' Karya sudah dibuat; coba simpan lagi untuk melanjutkan sampul tanpa membuat karya kedua.':''}`);}finally{setBusy(false);setStage('');}
  };
@@ -106,7 +84,6 @@ export function BookForm({existing,onSaved}:{existing?:Book;onSaved:(book:Book)=
   <label className="studio-label">Sinopsis<textarea rows={5} maxLength={2500} value={synopsis} onChange={e=>setSynopsis(e.target.value)} placeholder="Apa yang akan ditemukan pembaca di dalam cerita ini?"/></label>
   <div className="studio-form-pair"><label className="studio-label">Genre<input maxLength={70} value={genre} onChange={e=>setGenre(e.target.value)}/></label><label className="studio-label">Status cerita<select value={status} onChange={e=>setStatus(e.target.value as Book['status'])}><option value="ongoing">Berlangsung</option><option value="completed">Tamat</option><option value="hiatus">Jeda</option></select></label></div>
   <label className="studio-check"><input type="checkbox" checked={published} onChange={e=>setPublished(e.target.checked)}/><span><strong>Tampilkan novel di perpustakaan</strong><small>Episode tetap tersembunyi sampai tanggal rilisnya.</small></span></label>
-  <label className="studio-check"><input type="checkbox" checked={featured} onChange={e=>setFeatured(e.target.checked)}/><span><strong>Jadikan cerita unggulan</strong><small>Prioritaskan di bagian utama beranda.</small></span></label>
  </div><div className="studio-cover-fields">{!existing&&<CoverEditor value={prepared} onChange={v=>{setPrepared(v);if(v)setCover('');coverOperation.current=null;}} title={title||'Judul ceritamu'} disabled={busy} onBusy={setPreparing}/>}<label className="studio-label">{existing?.cover_manifest?'Sampul aktif dikelola di bawah':'Atau URL sampul'}<input type="url" value={existing?.cover_manifest?existing.cover_url||'':cover} readOnly={Boolean(existing?.cover_manifest)} disabled={Boolean(prepared)} onChange={e=>setCover(e.target.value)} placeholder="https://..."/></label>{!existing&&prepared&&<p className="studio-muted">Sampul disimpan privat. Terbitkan dari pengaturan karya setelah novel dibuat.</p>}</div></div>
  {error&&<div className="studio-error" role="alert">{error}</div>}{stage&&<p role="status">{stage}</p>}<button className="studio-primary" disabled={busy||preparing||!slug||!title.trim()} type="submit"><BrandIcon name="save" size={17}/>{busy?'Menyimpan…':existing?'Simpan perubahan':'Buat novel'}</button></form>{existing&&<CoverManager key={existing.id} book={existing} onChanged={onSaved}/>}</>;
 }
@@ -124,6 +101,7 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
     const drafts = local.filter(e => episodeStatus(e) === 'Draft');
     const blankDrafts = drafts.filter(e => (e.content_length ?? e.content_md.trim().length) === 0);
     const [search, setSearch] = useState('');
+    const [tab,setTab]=useState<'chapters'|'pages'|'settings'>('chapters');
     const [filter, setFilter] = useState<'Semua' | 'Draft' | 'Terjadwal' | 'Terbit'>('Semua');
     const visible = local.filter(ep => (filter === 'Semua' || episodeStatus(ep) === filter) &&
         `${ep.episode_number} ${ep.title} ${ep.arc_title}`.toLocaleLowerCase('id-ID')
@@ -156,7 +134,8 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
         }
     };
     return <><B to="/studio/cerita" className="studio-backlink"><BrandIcon name="arrow-left" size={16}/> Semua karya</B><div className="studio-page-head studio-head-with-action"><div><span className="studio-kicker">KELOLA NOVEL</span><h1>{book.title}</h1><p>{local.length} episode · {book.is_published ? 'Tayang di perpustakaan' : 'Draft (privat)'}</p></div><button onClick={onNew} className="studio-primary"><BrandIcon name="plus" size={16}/> Episode baru</button></div>
- <div className="studio-detail-tabs"><a href="#episodes">Daftar bab</a><a href="#book-sections">Halaman buku</a><B to={`/studio/jadwal?book=${encodeURIComponent(book.id)}`}>Atur jadwal</B><a href="#bulk-publish">Terbit massal</a><a href="#settings">Pengaturan karya</a></div>
+ <div className="writer-book-tabs" role="tablist" aria-label="Bagian pengelolaan karya">{([['chapters','Bab'],['pages','Halaman buku'],['settings','Pengaturan']] as const).map(([value,label])=><button type="button" role="tab" id={`writer-tab-${value}`} aria-controls={`writer-panel-${value}`} aria-selected={tab===value} tabIndex={tab===value?0:-1} key={value} onKeyDown={event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const nodes=[...event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>('[role=tab]')],index=nodes.indexOf(event.currentTarget);const next=nodes[event.key==='Home'?0:event.key==='End'?nodes.length-1:(index+(event.key==='ArrowRight'?1:-1)+nodes.length)%nodes.length];next.focus();next.click();}} onClick={()=>void(async()=>{if(await mayLeave())setTab(value);})()}>{label}</button>)}</div>
+ {tab==='chapters'&&<div role="tabpanel" id="writer-panel-chapters" aria-labelledby="writer-tab-chapters">
  <section className="studio-panel v69-chapter-manager" id="episodes"><div className="studio-panel-top"><h2>Daftar Bab</h2><B to={`/studio/impor?book=${encodeURIComponent(book.id)}`} className="studio-text-button"><BrandIcon name="upload" size={16}/> Impor EPUB / MD</B></div>
  
  {local.length > 0 && <div className="v69-chapter-filters">
@@ -186,6 +165,8 @@ export function BookDetails({ book, episodes, onNew, onNewZero, onUpdate, onDele
    </div>
    <small className="studio-muted">Hanya setelah konfirmasi. Jika proses gagal, transaksi database membatalkan seluruh perubahan.</small>
  </details>
- <BookSections bookId={book.id}/><div id="settings"><BookForm key={book.id} existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan novel ke Sampah</button></section></>;
+ </div>}
+ {tab==='pages'&&<div role="tabpanel" id="writer-panel-pages" aria-labelledby="writer-tab-pages"><BookSections bookId={book.id}/></div>}
+ {tab==='settings'&&<div role="tabpanel" id="writer-panel-settings" aria-labelledby="writer-tab-settings"><div id="settings"><BookForm key={book.id} existing={book} onSaved={onUpdate}/></div><section className="studio-panel v5-danger-zone"><h2>Pengelolaan novel</h2><p className="studio-muted">Pindahkan novel ke Sampah (bukan hapus permanen). Novel langsung menjadi privat, sedangkan semua episode dan halaman tetap tersimpan.</p><button type="button" className="studio-danger-lite" onClick={() => void onDelete()}><BrandIcon name="delete" size={16}/> Pindahkan novel ke Sampah</button></section></div>}</>;
 }
 

@@ -29,7 +29,7 @@ export function ReaderEpisodeLoading({ phase, storyTitle, episodeNumber, episode
         {headingMeta.title && <strong>{headingMeta.title}</strong>}
       </div>}
       <div className="kk-reader-load__symbol" aria-hidden="true">
-        <img src="/brand/katakecil-mark.svg" width="54" height="54" alt=""/>
+        <img src="/brand/crystal-mark.png" width="54" height="54" alt=""/>
       </div>
       <h2 className="kk-reader-load__title">{heading}</h2>
       <p className="kk-reader-load__detail">{detail}</p>

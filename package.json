@@ -27,15 +27,30 @@
     "test:edge": "node scripts/test-v73-edge.mjs",
     "test:v75": "node scripts/test-v75.mjs",
     "test:v75:browser": "node scripts/test-v75-browser.mjs",
-    "cleanup:deleted-covers": "node scripts/deleted-cover-cleanup.mjs"
+    "cleanup:deleted-covers": "node scripts/deleted-cover-cleanup.mjs",
+    "build:android": "node scripts/verify-android-env.mjs && npm run build -- --mode android && cap sync android",
+    "android:debug": "npm run build:android && cd android && ./gradlew assembleDebug",
+    "android:open": "cap open android",
+    "test:android": "node scripts/test-android-integration.mjs",
+    "android:apk": "npm run build:android && cd android && ./gradlew assembleRelease",
+    "test:crystal": "node scripts/test-crystal-browser.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/local-notifications": "8.3.1",
+    "@capacitor/share": "8.0.3",
+    "@capacitor/splash-screen": "8.0.2",
     "@supabase/supabase-js": "2.117.3",
     "jszip": "3.10.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.3",
     "@electric-sql/pglite": "0.5.9",
     "@jsquash/png": "3.1.1",
     "@jsquash/webp": "1.5.0",

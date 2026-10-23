@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Original KataKecil feather paths; centered in the adaptive icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="240dp" android:height="240dp" android:viewportWidth="108" android:viewportHeight="108">
+ <group android:translateX="13" android:translateY="12" android:scaleX="0.66" android:scaleY="0.66">
+  <path android:fillColor="#9BC9FF" android:pathData="M107,16C76,14 42,28 29,59c-7,16 -5,30 2,39 18,5 39,-4 53,-22 15,-19 23,-41 23,-60Z"/>
+  <path android:strokeColor="#F4F8FD" android:strokeWidth="5.5" android:strokeLineCap="round" android:pathData="M20,114C36,81 59,54 96,28"/>
+  <path android:strokeColor="#F4F8FD" android:strokeAlpha="0.8" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M43,82l-11,-11M56,63l-11,-14M71,51l-7,-17M81,41l13,-13"/>
+  <path android:strokeColor="#9BC9FF" android:strokeWidth="2.8" android:strokeLineCap="round" android:pathData="M24,19v12M18,25h12"/>
+ </group>
+</vector>

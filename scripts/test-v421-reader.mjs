@@ -13,6 +13,6 @@ assert.match(reader,/<PageMeasurer chapters=\{measuredChapters\}/,'The measurer 
 assert.doesNotMatch(reader,/<PageMeasurer chapters=\{\[chapter\]\}/,'The crash-inducing inline array must not return.');
 assert.match(reader,/setPages\(previous => previous.length === count/,'Duplicate page measurements must not force rerenders.');
 assert.match(app,/<ReaderErrorBoundary onBack=/,'Reader needs a recoverable runtime error boundary.');
-assert.match(boundary,/Kembali ke cerita/,'Reader recovery must let the user exit safely.');
+assert.match(boundary,/Kembali ke Library/,'Reader recovery must let the user exit safely to Library.');
 
 console.log('PASS V4.2.1: stable pagination dependencies, no forced measurements, reader error recovery.');

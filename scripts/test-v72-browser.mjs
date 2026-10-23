@@ -44,7 +44,7 @@ try{
  for(const theme of ['light','dark']) for(const width of [320,390,1440]){
   await page.setViewportSize({width,height:900});await page.goto(base+fixture+'?mode=detail');
   await page.evaluate(t=>{localStorage.setItem('appThemePreference',t);window.dispatchEvent(new Event('katakecil:theme-change'));},theme);
-  const back=page.getByRole('button',{name:'Kembali ke Temukan',exact:true});await back.waitFor();
+  const back=page.getByRole('button',{name:'Kembali ke Library',exact:true});await back.waitFor();
   const icon=back.locator('.kk-brand-icon');assert(await icon.isVisible());
   const detail=await icon.evaluate(n=>{const s=getComputedStyle(n);return{color:s.color,mask:s.maskImage,w:n.getBoundingClientRect().width};});
   assert.equal(detail.color,theme==='light'?'rgb(35, 93, 180)':'rgb(155, 201, 255)');assert(detail.mask.includes('arrow-left.svg'));assert(detail.w>=17);
@@ -52,7 +52,7 @@ try{
   assert.equal(await readIcon.evaluate(n=>getComputedStyle(n).color),theme==='light'?'rgb(255, 255, 255)':'rgb(8, 20, 37)');
   assert((await page.request.get(base+'/assets/v7/icons/arrow-left.svg')).ok());
   if(width===390)await page.screenshot({path:`qa/v72/detail-${theme}-390.png`,fullPage:true});
-  await back.click();await page.waitForURL('**/temukan');
+  await back.click();await page.waitForURL(base+'/');
  }
  await page.evaluate(()=>{localStorage.setItem('appThemePreference','light');});
  await page.setViewportSize({width:390,height:844});
