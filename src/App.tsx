@@ -1,3 +1,4 @@
+import {isStudioBook,createStudioReaderSource} from './features/studio-next/readerSource';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import SecureReaderApp from './SecureReaderApp';
 import PublicLibrary from './pages/PublicLibrary';
@@ -92,12 +93,12 @@ export default function App(){
       if(!active)return;
       const book=(!error&&data)?data as Book:error&&slug===legacyBookId?
         {id:legacyBookId,slug:legacyBookId,title:legacyBookTitle,genre:'Fiksi',synopsis:'',cover_url:null,status:'ongoing',is_published:true,is_featured:true,created_at:'',updated_at:''} as Book:null;
-      if(book&&await isEpubBook(book.id))book.reading_format='epub';
+      if(book){if(await isStudioBook(book.id))book.reading_format='studio';else if(await isEpubBook(book.id))book.reading_format='epub';}
       if(active)setReaderLookup({slug,book,resolved:true});
     }).catch(()=>{if(active)setReaderLookup({slug,book:null,resolved:true});});
     return()=>{active=false;};
   },[slug,isReader]);
-  const readerSource=useMemo(()=>readerLookup.book?.reading_format==='epub'?createEpubReaderSource(readerLookup.book.id):undefined,[readerLookup.book?.id,readerLookup.book?.reading_format]);
+  const readerSource=useMemo(()=>readerLookup.book?.reading_format==='studio'?createStudioReaderSource(readerLookup.book.id):readerLookup.book?.reading_format==='epub'?createEpubReaderSource(readerLookup.book.id):undefined,[readerLookup.book?.id,readerLookup.book?.reading_format]);
   if(isReader) {
     if(readerLookup.slug!==slug||!readerLookup.resolved) return <ThemeLoading context="reader" text="Menyiapkan halaman cerita…"/>;
     const readerBook=readerLookup.book;

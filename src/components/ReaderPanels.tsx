@@ -54,13 +54,13 @@ export function ContentsPanel({
           const originalIndex = chapters.findIndex(item => item.id === chapter.id);
           const number = String(chapter.displayNumber ?? /^secure-episode-(\d+)-part-0$/.exec(chapter.id)?.[1] ?? originalIndex + 1);
           const active = currentChapterId === chapter.id;
-          const heading = readerHeading(chapter.title, chapter.displayNumber ?? Number(number));
+          const heading = readerHeading(chapter.title, chapter.displayNumber ?? Number(number),chapter.sectionKind);
           const metadata = [
             chapter.wordCount > 0 ? `${chapter.wordCount.toLocaleString('id-ID')} kata` : null,
             chapter.estimatedMinutes > 0 ? `${chapter.estimatedMinutes} menit` : null,
           ].filter(Boolean).join(' · ');
           return <button type="button" key={chapter.id} className={`panel-row v610-chapter-row${active ? ' is-active' : ''}`} aria-current={active ? 'location' : undefined} onClick={() => { onChapter(chapter); onClose(); }}>
-            <span className="episode-count">{String(number).padStart(2, '0')}</span>
+            <span className="episode-count">{chapter.sectionKind&&chapter.sectionKind!=='chapter'?'•':String(number).padStart(2, '0')}</span>
             <span className="panel-row-main">
               <strong>{heading.title || heading.eyebrow}</strong>
               {chapter.arc && <small>{chapter.arc}</small>}

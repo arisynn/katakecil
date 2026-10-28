@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {PGlite} from '@electric-sql/pglite';
+import JSZip from 'jszip';
 import {loadTs} from './test-utils/load-ts.mjs';
 import {epubFixture} from './test-utils/epub-fixture.mjs';
 const {openEpub,epubPath}=loadTs('src/features/epub/archive.ts');
@@ -15,6 +16,18 @@ assert.throws(()=>epubPath('OPS/test.xhtml','../../escape'),/luar/);assert.throw
 for(const option of [{drm:true},{fixed:true},{broken:true}])await assert.rejects(openEpub(new Blob([await epubFixture(option)]),serverDom));
 const epub2=await openEpub(new Blob([await epubFixture({epub2:true})]),serverDom);assert.equal(epub2.metadata.toc.length,4);assert((await epub2.renderSection(0)).html.includes('PUBLIC_FIRST_BODY'));
 assert.equal(createHash('sha256').update(bytes).digest('hex'),sha,'Source bytes must remain unchanged');
+
+// A publisher may split a single chapter over several spine documents.
+const continuedZip=await JSZip.loadAsync(bytes);
+const continuedOpf=await continuedZip.file('OPS/book.opf').async('string');
+continuedZip.file('OPS/book.opf',continuedOpf.replace('</manifest>','<item id="tail" href="continuation.xhtml" media-type="application/xhtml+xml"/></manifest>').replace('<itemref idref="after"/>','<itemref idref="tail"/><itemref idref="after"/>'));
+continuedZip.file('OPS/continuation.xhtml','<html xmlns="http://www.w3.org/1999/xhtml"><body><p>THIRD_CHAPTER_CONTINUED</p></body></html>');
+const continued=await openEpub(new Blob([await continuedZip.generateAsync({type:'nodebuffer'})]),serverDom);
+assert.equal(continued.metadata.toc.length,4,'A continuation document must not become a separate chapter');
+const chapterRange=await continued.renderSection(2);
+assert(chapterRange.html.includes('THIRD_SECRET_BODY')&&chapterRange.html.includes('THIRD_CHAPTER_CONTINUED'));
+assert(!chapterRange.html.includes('AFTERWORD_BODY'),'The next chapter stays isolated');
+chapterRange.dispose();
 
 const config={url:'https://synthetic.supabase.co',publicKey:'sb_publishable_synthetic',secretKey:'server-test-only',origin:'https://reader.example.test'},id='00000000-0000-4000-8000-000000000001';
 const released={id,book_id:'epub-book',section_index:0,episode_number:1,title:'Pengantar',is_enabled:true,release_at:'2026-01-01T00:00:00Z',book:{id:'epub-book',is_published:true,deleted_at:null}};

@@ -1,3 +1,4 @@
+import type {SectionKind} from '../features/studio-next/model';
 export type ThemeMode = 'white' | 'night';
 export type FontFamily = 'literata' | 'sans' | 'merriweather' | 'mono';
 export type LineHeight = 'compact' | 'normal' | 'loose';
@@ -36,7 +37,8 @@ export interface Chapter {
   title: string;
   arc?: string;
   /** Episode number for the displayed heading; never used to renumber stored data. */
-  displayNumber?: number;
+  displayNumber?: number | null;
+  sectionKind?: SectionKind;
   paragraphs: string[];
   blocks?: ReaderBlock[];
   plainParagraphs: string[];

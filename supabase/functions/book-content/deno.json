@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.3",
+    "@xmldom/xmldom": "npm:@xmldom/xmldom@0.9.12",
+    "jszip": "npm:jszip@3.10.1",
+    "sanitize-html": "npm:sanitize-html@2.18.1",
+    "marked": "npm:marked@17.0.6"
+  }
+}

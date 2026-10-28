@@ -20,7 +20,7 @@ export function ChapterText({ chapter, hideIntro=false }: { chapter: Chapter; hi
     if (part.startsWith('`') && part.endsWith('`')) return <span key={index}>{part.slice(1, -1)}</span>;
     return <React.Fragment key={index}>{part}</React.Fragment>;
   });
-  const heading = readerHeading(chapter.title, chapter.displayNumber);
+  const heading = readerHeading(chapter.title, chapter.displayNumber,chapter.sectionKind);
   return (
     <div className="chapter-content">
       {!hideIntro && <div className="chapter-intro">

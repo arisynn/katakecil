@@ -12,3 +12,10 @@ export async function shareStudioExport(name: string, contents: string) {
   // Android manage this cache file's lifetime rather than deleting it early.
   await Share.share({ title: 'Ekspor KataKecil', files: [file.uri], dialogTitle: 'Simpan atau bagikan ekspor' });
 }
+
+/** Binary exports must be written as base64 without a UTF-8 encoding option. */
+export async function shareStudioBlob(name:string,blob:Blob){
+ const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);});
+ const file=await Filesystem.writeFile({path:`exports/${name.replace(/[^a-zA-Z0-9._-]/g,'_')}`,data,directory:Directory.Cache,recursive:true});
+ await Share.share({title:'Ekspor KataKecil',files:[file.uri],dialogTitle:'Simpan atau bagikan ekspor'});
+}

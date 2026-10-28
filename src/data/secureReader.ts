@@ -1,15 +1,16 @@
+import type {SectionKind} from '../features/studio-next/model';
 import { supabase } from './supabase';
 import type {ReaderBlock} from '../types/reader';
 
 export type ReleasedEpisode = {
-  episode_number:number; title:string; arc_title:string; release_at:string;
+  episode_number:number; title:string; arc_title:string; release_at:string;kind?:SectionKind;display_number?:number|null;position?:number;
 };
 export type ReaderSegment = {
   episodeNumber:number; title:string; arc:string; part:number; totalParts:number; content:string;
 };
 export type ReaderEpisode = {
   episodeNumber:number; title:string; arc:string; content:string;
-  blocks?:ReaderBlock[];anchors?:Record<string,number>;sourceVersion?:string;resumeRatio?:number;
+  kind?:SectionKind;displayNumber?:number|null;blocks?:ReaderBlock[];anchors?:Record<string,number>;sourceVersion?:string;resumeRatio?:number;
 };
 
 const idOkay=(value:string)=>/^[a-z0-9][a-z0-9_-]{0,95}$/i.test(value);

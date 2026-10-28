@@ -1,8 +1,10 @@
+import {heading,type SectionKind} from '../features/studio-next/model';
 import {numberValue} from './importStructure';
 /** Presentation-only chapter headings. Never rewrite titles or episode records. */
 export type ReaderHeading = { eyebrow: string; title: string };
 
-export function readerHeading(title: string, episodeNumber?: number): ReaderHeading {
+export function readerHeading(title: string, episodeNumber?: number|null,kind?:SectionKind): ReaderHeading {
+  if(kind)return heading(kind,title,episodeNumber);
   const original = (title || '').trim();
   const special = /^(prolog|prologue|epilog|epilogue)(?:\s*[:—–-]\s*(.*))?$/i.exec(original);
   if (special) return { eyebrow: special[1].toLocaleUpperCase('id-ID'), title: (special[2] || '').trim() };

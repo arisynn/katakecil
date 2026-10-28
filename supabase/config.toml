@@ -16,3 +16,6 @@ verify_jwt = false
 # Cron uses a dedicated shared secret, checked by the handler (not an Auth JWT).
 [functions.web-push-dispatch]
 verify_jwt = false
+
+[functions.book-content]
+verify_jwt = false

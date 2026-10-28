@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 /** Public-safe metadata. No unpublished title, synopsis or manuscript body. */
 export type UpcomingChapter = {
   book_id: string;
-  episode_number: number;
+  episode_number: number;kind?:string;display_number?:number|null;
   release_at: string;
 };
 
@@ -15,16 +15,18 @@ export type UpcomingChapter = {
  */
 export async function getPublicUpcomingChapters(): Promise<UpcomingChapter[]> {
   if (!supabase) return [];
+  const catalog=await supabase.from('qr_studio_books').select('book_id');const converted=new Set((catalog.data||[]).map(b=>b.book_id));
+  const studio=await supabase.from('qr_studio_schedule').select('book_id,reader_number,display_number,kind,release_at').gt('release_at',new Date().toISOString()).order('release_at');const newer=(studio.data||[]).map(r=>({...r,episode_number:r.reader_number}));
   const epub=await supabase.from('qr_epub_schedule').select('book_id,episode_number,release_at').gt('release_at',new Date().toISOString()).order('release_at');
   const { data, error } = await supabase.rpc('qr_public_next_chapters');
   if (error) {
     // A missing optional RPC must not break the public reading experience.
     console.warn('Jadwal bab publik belum tersedia:', error.message);
-    return (epub.data||[]) as UpcomingChapter[];
+    return [...(epub.data||[]).filter(r=>!converted.has(r.book_id)),...newer] as UpcomingChapter[];
   }
-  if (!Array.isArray(data)) return (epub.data||[]) as UpcomingChapter[];
+  if (!Array.isArray(data)) return [...(epub.data||[]).filter(r=>!converted.has(r.book_id)),...newer] as UpcomingChapter[];
   const now = Date.now();
-  return [...data,...(epub.data||[])].filter((row): row is UpcomingChapter =>
+  return [...data,...(epub.data||[])].filter(row=>!converted.has(row.book_id)).concat(newer).filter((row): row is UpcomingChapter =>
     row !== null && typeof row === 'object' &&
     typeof row.book_id === 'string' &&
     Number.isSafeInteger(row.episode_number) && row.episode_number >= 0 &&
@@ -39,6 +41,6 @@ export function formatUpcomingChapter(chapter: UpcomingChapter): string {
     day: 'numeric', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: false,
   }).format(new Date(chapter.release_at));
-  const chapterName = chapter.episode_number === 0 ? 'Prolog' : `Bab ${chapter.episode_number}`;
+  const chapterName = chapter.kind==='prologue'?'Prolog':chapter.kind==='epilogue'?'Epilog':chapter.episode_number === 0 ? 'Prolog' : `Bab ${chapter.display_number??chapter.episode_number}`;
   return `${chapterName} · ${when} WIB`;
 }

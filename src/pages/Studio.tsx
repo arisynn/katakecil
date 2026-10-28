@@ -1,183 +1,255 @@
-import BrandIcon from '../components/BrandIcon';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
-import { getStudioLibrary, type Book, type Episode } from '../data/library';
-import { isConfigured, supabase } from '../data/supabase';
-import { navigate } from '../utils/nav';
-import { DatabaseManager, ScheduleManager } from './StudioManagement';
-import ManuscriptImporter from './ManuscriptImporter';
-import TrashManager from './TrashManager';
-import AnnouncementManager from '../features/studio/components/AnnouncementManager';
-import ManagementDialog from '../features/studio/components/ManagementDialog';
-import type {ManagementOperation} from '../data/management';
-import { useUiTheme, type UiTheme, type AppThemePreference } from '../hooks/useUiTheme';
-import ThemeToggle from '../components/ThemeToggle';
-import ThemeLoading from '../components/ThemeLoading';
-import StudioShell from '../features/studio/components/StudioNavigation';
-import ChapterEditor from '../features/studio/components/ChapterEditorLoader';
-import {forgetOperation} from '../data/manuscriptImport';
-import { Analytics, StudioSettings } from '../features/studio/components/StudioOverview';
-import { B, authorName, errMsg } from '../features/studio/components/StudioShared';
-import { Books, BookForm, BookDetails } from '../features/studio/components/BookManagement';
-function Busy({ text = 'Memuat Studio...' }: {
-    text?: string;
-}) { return <ThemeLoading context="studio" text={text}/>; }
-function Login({ onSuccess, theme, preference, onPreferenceChange }: {
-    onSuccess: () => void;
-    theme: UiTheme;
-    preference: AppThemePreference;
-    onPreferenceChange: (next: AppThemePreference) => void;
-}) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [busy, setBusy] = useState(false);
-    const [error, setError] = useState('');
-    const submit = async (e: React.FormEvent) => { e.preventDefault(); if (!supabase)
-        return; setBusy(true); setError(''); try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error)
-            throw error;
-        onSuccess();
-    }
-    catch (e) {
-        setError(errMsg(e));
-    }
-    finally {
-        setBusy(false);
-    } };
-    return <div className="writer-login"><div className="writer-login-tools"><ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange}/></div><B to="/" className="studio-backlink"><BrandIcon name="arrow-left" size={17}/> Kembali ke Library</B><form className="writer-login-form" onSubmit={submit}><div className="writer-login-icon"><img src="/brand/app-icon.png" width="33" height="33" alt=""/></div><span className="studio-kicker">RUANG PRIBADI PENULIS</span><h1>Tempat cerita<br/>bertumbuh.</h1><p>Masuk ke ruang menulismu. Mulai dari satu kalimat, lanjutkan sebuah dunia.</p>
-   <label>Email<input type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} placeholder="email@contoh.com"/></label><label>Kata sandi<input type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"/></label>
-   {error && <div className="studio-error" role="alert">{error}</div>}<button className="studio-primary" disabled={busy} type="submit">{busy ? 'Masuk…' : 'Masuk ke Studio'} <BrandIcon name="arrow-right" size={17}/></button><small><BrandIcon name="lock" size={13}/> Hanya akun penulis yang diizinkan.</small></form></div>;
+import Workspace from "../features/studio-next/Workspace";
+import BrandIcon from "../components/BrandIcon";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { getStudioLibrary, type Book, type Episode } from "../data/library";
+import { isConfigured, supabase } from "../data/supabase";
+import { useUiTheme, type UiTheme, type AppThemePreference } from "../hooks/useUiTheme";
+import ThemeToggle from "../components/ThemeToggle";
+import ThemeLoading from "../components/ThemeLoading";
+import { forgetOperation } from "../data/manuscriptImport";
+import { B, errMsg } from "../features/studio/components/StudioShared";
+function Busy({ text = "Memuat Studio..." }: { text?: string }) {
+  return <ThemeLoading context="studio" text={text} />;
 }
-export default function Studio({ path }: {
-    path: string;
+function Login({
+  onSuccess,
+  theme,
+  preference,
+  onPreferenceChange,
+}: {
+  onSuccess: () => void;
+  theme: UiTheme;
+  preference: AppThemePreference;
+  onPreferenceChange: (next: AppThemePreference) => void;
 }) {
-    const { theme, preference, setPreference } = useUiTheme();
-    const authSequence=useRef(0);
-    const userIdRef = useRef<string | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [authorized, setAuthorized] = useState(false);
-    const [authLoading, setAuthLoading] = useState(true);
-    const [books, setBooks] = useState<Book[]>([]);
-    const [episodes, setEpisodes] = useState<Episode[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [pendingTrash,setPendingTrash]=useState<ManagementOperation|null>(null),[trashNotice,setTrashNotice]=useState('');
-    const generation=useRef(0);
-    const refresh = useCallback(async () => { const ticket=generation.current;try {
-        const result = await getStudioLibrary();
-        if(ticket!==generation.current)return;
-        setBooks(result.books);
-        setEpisodes(result.episodes);
-        setError('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase) return;
+    setBusy(true);
+    setError("");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      onSuccess();
+    } catch (e) {
+      setError(errMsg(e));
+    } finally {
+      setBusy(false);
     }
-    catch (e) {
-        if(ticket===generation.current)setError(errMsg(e));
+  };
+  return (
+    <div className="writer-login">
+      <div className="writer-login-tools">
+        <ThemeToggle theme={theme} preference={preference} onPreferenceChange={onPreferenceChange} />
+      </div>
+      <B to="/" className="studio-backlink">
+        <BrandIcon name="arrow-left" size={17} /> Kembali ke Library
+      </B>
+      <form className="writer-login-form" onSubmit={submit}>
+        <div className="writer-login-icon">
+          <img src="/brand/app-icon.png" width="33" height="33" alt="" />
+        </div>
+        <span className="studio-kicker">RUANG PRIBADI PENULIS</span>
+        <h1>
+          Tempat cerita
+          <br />
+          bertumbuh.
+        </h1>
+        <p>Masuk ke ruang menulismu. Mulai dari satu kalimat, lanjutkan sebuah dunia.</p>
+        <label>
+          Email
+          <input
+            type="email"
+            autoComplete="username"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email@contoh.com"
+          />
+        </label>
+        <label>
+          Kata sandi
+          <input
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+          />
+        </label>
+        {error && (
+          <div className="studio-error" role="alert">
+            {error}
+          </div>
+        )}
+        <button className="studio-primary" disabled={busy} type="submit">
+          {busy ? "Masuk…" : "Masuk ke Studio"} <BrandIcon name="arrow-right" size={17} />
+        </button>
+        <small>
+          <BrandIcon name="lock" size={13} /> Hanya akun penulis yang diizinkan.
+        </small>
+      </form>
+    </div>
+  );
+}
+export default function Studio({ path }: { path: string }) {
+  const { theme, preference, setPreference } = useUiTheme();
+  const authSequence = useRef(0);
+  const userIdRef = useRef<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const generation = useRef(0);
+  const refresh = useCallback(async () => {
+    const ticket = generation.current;
+    try {
+      const result = await getStudioLibrary();
+      if (ticket !== generation.current) return;
+      setBooks(result.books);
+      setEpisodes(result.episodes);
+      setError("");
+    } catch (e) {
+      if (ticket === generation.current) setError(errMsg(e));
+    } finally {
+      if (ticket === generation.current) setLoading(false);
     }
-    finally {
-        if(ticket===generation.current)setLoading(false);
-    } }, []);
-    // Do not remount the Studio on tab navigation or refresh credentials every time
-    // Chrome Android opens its document picker. Auth is verified on entry/sign-in;
-    // token refreshes do not replace the file importer or its File object.
-    const checkAuth = useCallback(async () => {
-        const ticket=++authSequence.current;
-        if (!supabase) {
-            setAuthLoading(false);
-            return;
-        }
-        try {
-            const { data, error } = await supabase.auth.getUser();
-            if(ticket!==authSequence.current)return;
-            if (error || !data.user) {
-                setUser(null);
-                setAuthorized(false);
-                return;
-            }
-            const { data: member, error: memberErr } = await supabase.from('qr_author_members').select('user_id').eq('user_id', data.user.id).maybeSingle();
-            if(ticket!==authSequence.current)return;
-            if (memberErr) {
-                setError(`Gagal memeriksa izin penulis: ${memberErr.message}`);
-                setAuthorized(false);
-                return;
-            }
-            userIdRef.current = data.user.id;
-            setUser(data.user);
-            setAuthorized(Boolean(member));
-        }
-        catch (e) {
-            setError(`Pemeriksaan akun gagal: ${errMsg(e)}`);
-            setAuthorized(false);
-        }
-        finally {
-            setAuthLoading(false);
-        }
-    }, []);
-    useEffect(() => {
-        let mounted = true;
-        void checkAuth();
-        const { data } = supabase?.auth.onAuthStateChange((event) => {
-            if (!mounted)
-                return;
-            if (event === 'SIGNED_OUT') {
-                authSequence.current++;
-                generation.current++;setBooks([]);setEpisodes([]);forgetOperation();
-                userIdRef.current = null;
-                setUser(null);
-                setAuthorized(false);
-                setAuthLoading(false);
-            }
-            else if (event === 'SIGNED_IN' && userIdRef.current === null) {
-                // Defer async auth calls outside Supabase's synchronous callback.
-                window.setTimeout(() => { if (mounted)
-                    void checkAuth(); }, 0);
-            }
-            // INITIAL_SESSION and TOKEN_REFRESHED must not reset the mobile importer.
-        }) ?? { data: null };
-        return () => { mounted = false; data?.subscription.unsubscribe(); };
-    }, [checkAuth]);
-    useEffect(() => { if (authorized) {
-        setLoading(true);
-        void refresh();
-    } else {generation.current++;setBooks([]);setEpisodes([]);} }, [authorized, refresh]);
-    const onUpdateBook = (b: Book) => { setBooks(prev => [b, ...prev.filter(x => x.id !== b.id)]); navigate(`/studio/cerita/${b.id}`); };
-    const onUpdateEpisode = useCallback((e: Episode) => setEpisodes(prev => prev.map(x => x.id === e.id ? {...e,content_length:e.content_md.trim().length,content_md:'',content_hash:undefined} : x)), []);
-    const moveToTrash = async (kind: 'book' | 'episode', id: string, title: string) => {
-        setTrashNotice('');setPendingTrash({id:crypto.randomUUID(),action:'trash',items:[{kind,id,title}]});
+  }, []);
+  // Do not remount the Studio on tab navigation or refresh credentials every time
+  // Chrome Android opens its document picker. Auth is verified on entry/sign-in;
+  // token refreshes do not replace the file importer or its File object.
+  const checkAuth = useCallback(async () => {
+    const ticket = ++authSequence.current;
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (ticket !== authSequence.current) return;
+      if (error || !data.user) {
+        setUser(null);
+        setAuthorized(false);
+        return;
+      }
+      const { data: member, error: memberErr } = await supabase
+        .from("qr_author_members")
+        .select("user_id")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      if (ticket !== authSequence.current) return;
+      if (memberErr) {
+        setError(`Gagal memeriksa izin penulis: ${memberErr.message}`);
+        setAuthorized(false);
+        return;
+      }
+      userIdRef.current = data.user.id;
+      setUser(data.user);
+      setAuthorized(Boolean(member));
+    } catch (e) {
+      setError(`Pemeriksaan akun gagal: ${errMsg(e)}`);
+      setAuthorized(false);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    let mounted = true;
+    void checkAuth();
+    const { data } = supabase?.auth.onAuthStateChange((event) => {
+      if (!mounted) return;
+      if (event === "SIGNED_OUT") {
+        authSequence.current++;
+        generation.current++;
+        setBooks([]);
+        setEpisodes([]);
+        forgetOperation();
+        userIdRef.current = null;
+        setUser(null);
+        setAuthorized(false);
+        setAuthLoading(false);
+      } else if (event === "SIGNED_IN" && userIdRef.current === null) {
+        // Defer async auth calls outside Supabase's synchronous callback.
+        window.setTimeout(() => {
+          if (mounted) void checkAuth();
+        }, 0);
+      }
+      // INITIAL_SESSION and TOKEN_REFRESHED must not reset the mobile importer.
+    }) ?? { data: null };
+    return () => {
+      mounted = false;
+      data?.subscription.unsubscribe();
     };
-    const createEpisode = async (bookId: string, requestedZero = false) => {
-        if (!supabase)
-            return;
-        setError('');
-        try {
-            if(books.find(book=>book.id===bookId)?.reading_format==='epub')throw Error('Atur penerbitan dari daftar bagian EPUB di halaman buku.');
-            const local = episodes.filter(e => e.book_id === bookId);
-            if (requestedZero && local.some(e => e.episode_number === 0))
-                throw Error('Episode 0 sudah ada.');
-            const number = requestedZero ? 0 : local.reduce((a, e) => Math.max(a, e.episode_number), 0) + 1;
-            const { data, error } = await supabase.from('qr_episodes').insert({ book_id: bookId, episode_number: number, title: `Episode ${number}`, arc_title: '', content_md: '', release_at: null, is_enabled: false }).select('id,book_id,episode_number,arc_title,title,release_at,is_enabled,created_at,updated_at').single();
-            if (error)
-                throw error;
-            setEpisodes(prev => [...prev, { ...data, content_md: '' } as Episode]);
-            navigate(`/studio/editor/${data.id}`);
-        }
-        catch (e) {
-            setError(errMsg(e));
-        }
-    };
-    if (!isConfigured)
-        return <div className="studio-unavailable"><BrandIcon name="pen" size={36}/><h1>Hubungkan Studio ke Supabase</h1><p>Untuk mengaktifkan login dan publikasi, isi variabel VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY, lalu jalankan migrasi V2 dan daftarkan akun penulis.</p><B to="/" className="studio-primary">Kembali ke Library</B></div>;
-    if (authLoading)
-        return <Busy text="Memverifikasi akses Studio…"/>;
-    if (!user)
-        return <Login theme={theme} preference={preference} onPreferenceChange={setPreference} onSuccess={() => void checkAuth()}/>;
-    if (!authorized)
-        return <div className="studio-unavailable"><BrandIcon name="lock" size={35}/><h1>Akun belum memiliki izin penulis</h1><p>Masuk dengan akun yang sudah terdaftar di tabel qr_author_members. Keanggotaan harus diberikan oleh admin database, bukan lewat browser.</p>{error && <p className="studio-error">{error}</p>}<button className="studio-light-button" onClick={() => void supabase?.auth.signOut()}>Keluar akun</button></div>;
-    const sections = path.split('/').filter(Boolean);
-    const book = sections[1] === 'cerita' && sections[2] && sections[2] !== 'baru' ? books.find(b => b.id === decodeURIComponent(sections[2])) : undefined;
-    const editorEpisode = sections[1] === 'editor' ? episodes.find(e => e.id === sections[2]) : undefined;
-    const displayName = authorName(user);
-    return <StudioShell path={path} displayName={displayName} theme={theme} preference={preference} onPreferenceChange={setPreference}>
- <div className="writer-page-body">{trashNotice&&<p className="studio-success" role="status">{trashNotice}</p>}{error && <div className="studio-error" role="alert">{error}</div>}{loading ? <Busy /> : sections[1] === 'impor' ? <ManuscriptImporter books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'jadwal' ? <ScheduleManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'database' ? <DatabaseManager books={books} episodes={episodes} onChanged={refresh}/> : sections[1] === 'sampah' ? <TrashManager onChanged={refresh}/> : sections[1] === 'pengumuman' ? <AnnouncementManager books={books}/> : sections[1] === 'editor' ? (editorEpisode ? <ChapterEditor key={editorEpisode.id} ep={editorEpisode} book={books.find(b => b.id === editorEpisode.book_id)!} onUpdate={onUpdateEpisode} onDelete={() => moveToTrash('episode', editorEpisode.id, editorEpisode.title)}/> : <p>Episode tidak ditemukan.</p>) : sections[1] === 'cerita' && sections[2] === 'baru' ? <><B className="studio-backlink" to="/studio/cerita"><BrandIcon name="arrow-left" size={16}/> Kembali ke karya</B><BookForm onSaved={onUpdateBook}/></> : sections[1] === 'cerita' && sections[2] ? (book ? <BookDetails key={book.id} book={book} episodes={episodes} onNew={() => void createEpisode(book.id)} onNewZero={() => void createEpisode(book.id, true)} onUpdate={onUpdateBook} onDelete={() => moveToTrash('book', book.id, book.title)} onChanged={refresh}/> : <p>Novel tidak ditemukan.</p>) : sections[1] === 'cerita' ? <Books books={books} episodes={episodes} onChanged={refresh} onCreate={() => navigate('/studio/cerita/baru')}/> : sections[1] === 'analytics' ? <Analytics books={books} episodes={episodes}/> : sections[1] === 'settings' ? <StudioSettings /> : <Books books={books} episodes={episodes} onChanged={refresh} onCreate={()=>navigate('/studio/cerita/baru')}/>}
- </div>{pendingTrash&&<ManagementDialog operation={pendingTrash} description={pendingTrash.items[0].kind==='book'?'Buku beserta seluruh bab disembunyikan dari pembaca dan tetap dapat dipulihkan.':'Episode disembunyikan dan jadwalnya dibatalkan. Kamu dapat memulihkannya dari Sampah.'} onClose={()=>setPendingTrash(null)} onDone={async notice=>{const kind=pendingTrash.items[0].kind;setPendingTrash(null);setTrashNotice(notice);await refresh();navigate(kind==='book'?'/studio/cerita':'/studio/sampah');}}/>}</StudioShell>;
+  }, [checkAuth]);
+  useEffect(() => {
+    if (authorized) {
+      setLoading(true);
+      void refresh();
+    } else {
+      generation.current++;
+      setBooks([]);
+      setEpisodes([]);
+    }
+  }, [authorized, refresh]);
+  if (!isConfigured)
+    return (
+      <div className="studio-unavailable">
+        <BrandIcon name="pen" size={36} />
+        <h1>Hubungkan Studio ke Supabase</h1>
+        <p>
+          Untuk mengaktifkan login dan publikasi, isi variabel VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY, lalu
+          jalankan migrasi V2 dan daftarkan akun penulis.
+        </p>
+        <B to="/" className="studio-primary">
+          Kembali ke Library
+        </B>
+      </div>
+    );
+  if (authLoading) return <Busy text="Memverifikasi akses Studio…" />;
+  if (!user)
+    return (
+      <Login
+        theme={theme}
+        preference={preference}
+        onPreferenceChange={setPreference}
+        onSuccess={() => void checkAuth()}
+      />
+    );
+  if (!authorized)
+    return (
+      <div className="studio-unavailable">
+        <BrandIcon name="lock" size={35} />
+        <h1>Akun belum memiliki izin penulis</h1>
+        <p>
+          Masuk dengan akun yang sudah terdaftar di tabel qr_author_members. Keanggotaan harus diberikan oleh admin
+          database, bukan lewat browser.
+        </p>
+        {error && <p className="studio-error">{error}</p>}
+        <button className="studio-light-button" onClick={() => void supabase?.auth.signOut()}>
+          Keluar akun
+        </button>
+      </div>
+    );
+  if (loading) return <Busy />;
+  return (
+    <Workspace
+      path={path}
+      user={user}
+      books={books}
+      episodes={episodes}
+      refresh={refresh}
+      theme={theme}
+      preference={preference}
+      onPreferenceChange={setPreference}
+    />
+  );
 }

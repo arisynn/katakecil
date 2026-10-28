@@ -75,7 +75,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
   '--reader-menu-scale':String(menuPlacement.scale),
   '--reader-menu-offset-y':`${menuPlacement.offsetY}px`,
  } as React.CSSProperties;
- const chapter=useMemo(()=>segment?chapterFromEpisode(segment.episodeNumber,segment.title,segment.arc,segment.content,segment.blocks):undefined,[segment]);
+ const chapter=useMemo(()=>segment?chapterFromEpisode(segment.episodeNumber,segment.title,segment.arc,segment.content,segment.blocks,segment.kind,segment.displayNumber):undefined,[segment]);
  // Stable array identity: an inline [chapter] causes PageMeasurer's layout effect
  // to run on every render, triggering an endless measure/setPages loop.
  const measuredChapters=useMemo(()=>chapter?[chapter]:[],[chapter]);
@@ -204,7 +204,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
   if(activeBookmarks.length){const ids=new Set(activeBookmarks.map(b=>b.id));setBookmarks(old=>old.filter(b=>!ids.has(b.id)));setStatus('Penanda dihapus');}
   else{const at={...bookmarkAnchor};setBookmarks(old=>[{id:`bk-${Date.now()}`,anchor:at,chapterTitle:segment.title,snippet:'Penanda bacaan',createdAt:new Date().toLocaleDateString('id-ID')},...old]);setStatus('Penanda tersimpan');}
  };
- const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,displayNumber:ep.episode_number,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
+ const allChapters:Chapter[]=index.map((ep)=>({id:marker(ep.episode_number),title:ep.title,arc:ep.arc_title,displayNumber:ep.kind?ep.display_number:ep.episode_number,sectionKind:ep.kind,paragraphs:[],plainParagraphs:[],plainText:'',level:2,wordCount:0,estimatedMinutes:0,startPageIndex:0}));
  const onTap=(e:React.MouseEvent)=>{
   if(loading||!!error||!pages.length)return;
   const link=(e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-reader-anchor]');
@@ -272,7 +272,7 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme.pageBg);
   return()=>{delete document.documentElement.dataset.readerTheme;};
  },[effectiveReaderTheme,theme.pageBg]);
- const displayedHeading=readerHeading(segment?.title||'',segment?.episodeNumber);
+ const displayedHeading=readerHeading(segment?.title||'',segment?.kind?segment.displayNumber:segment?.episodeNumber,segment?.kind);
  const displayedTitle=displayedHeading.title?`${displayedHeading.eyebrow} · ${displayedHeading.title}`:displayedHeading.eyebrow;
  const isChapterCompleted=segment!==null&&completedEpisodes.includes(segment.episodeNumber);
  const minutesRemaining=chapter?estimateRemainingMinutes(chapter.wordCount,pageIndex+1,pages.length):null;
@@ -300,6 +300,6 @@ export default function SecureReaderApp({bookId,bookTitle,onExit,episodeNumber,p
   {modal==='contents'&&<ContentsPanel onClose={()=>setModal('none')} chapters={allChapters} currentChapterId={segment?marker(segment.episodeNumber):''} bookmarks={bookmarks} completedEpisodeNumbers={completedEpisodes} onChapter={ch=>{const p=readMarker(ch.id);if(p)jumpEpisode(p.ep);}} onBookmark={at=>jumpTo(at)} onDeleteBookmark={id=>setBookmarks(old=>old.filter(b=>b.id!==id))} theme={theme}/>}
   {modal==='search'&&<SearchPanel onClose={()=>setModal('none')} chapters={chapter?[chapter]:[]} onResult={at=>{if(chapter){const col=anchorColumn(measuringNode.current,chapter,at.offset,geometry.bodyWidth);setPageIndex(col);saveAt(col);}}} theme={theme}/>}
   <ReadingSettingsModal isOpen={modal==='settings'} onClose={()=>setModal('none')} settings={effectiveSettings} onUpdateSettings={setSettingsSafe} appTheme={appTheme} onAppThemeChange={changeGlobalTheme}/>
-  <span aria-live="polite" className="sr-only">{segment?`Episode ${segment.episodeNumber}`:''}</span>
+  <span aria-live="polite" className="sr-only">{segment?displayedTitle:''}</span>
  </div>;
 }

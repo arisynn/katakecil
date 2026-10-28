@@ -1,4 +1,16 @@
-# KataKecil V7.5 RC1
+# KataKecil — Studio Penulis baru
+
+Studio sekarang memisahkan ruang **Kelola** dan **Tulis**. Upload EPUB/ZIP/TXT/MD
+memakai tiga langkah: pilih sumber, periksa isi, lalu simpan atau rilis.
+Halaman buku, prolog, bab, epilog, dan pembatas mempunyai jenis tersendiri.
+Draf revisi tetap privat sampai penulis menerapkannya ke versi terbit.
+
+Mulai dari [panduan Studio baru, pemasangan, dan hasil uji](docs/STUDIO_WORKSPACE.md).
+Backend produksi sudah dipasang; source antarmuka ada di cabang
+`feat/studio-rebuild`. Push GitHub dan deploy antarmuka masih memerlukan akses
+akun yang sesuai. Buku aktif belum dipindahkan ke format baru.
+
+## Catatan versi sebelumnya
 
 **UI 1.5:** [Library, Studio, dialog dan reader dirapikan](docs/UI_POLISH.md).
 Rak tetap hanya sampul, reader tetap hybrid, dan alur penerbitan tidak diubah.

@@ -2,7 +2,7 @@ import type {PublicCoverManifest} from '../features/covers/model';
 import { supabase } from './supabase';
 import type {BookEpub} from '../features/epub/api';
 export type Book = {
-  id: string; slug: string; title: string; synopsis: string; genre: string; reading_format?:'epub'; epub?:BookEpub;
+  id: string; slug: string; title: string; synopsis: string; genre: string; reading_format?:'epub'|'studio'; epub?:BookEpub;
   cover_url: string | null; cover_manifest?:PublicCoverManifest|null; cover_version?:number; studio_cover_path?:string|null; private_cover_path?: string | null; status: 'ongoing' | 'completed' | 'hiatus';
   is_published: boolean; is_featured: boolean; deleted_at?: string | null; created_at: string; updated_at: string;
 };
@@ -11,7 +11,7 @@ export type Episode = {
   title: string; content_md: string; content_length?: number; content_hash?: string; release_at: string | null; is_enabled: boolean;
   deleted_at?: string | null; is_finale?: boolean; editor_version?: number; created_at: string; updated_at: string;
 };
-export type EpisodeSummary = Pick<Episode, 'book_id'|'episode_number'|'arc_title'|'title'|'release_at'> & {is_finale?:boolean};
+export type EpisodeSummary = Pick<Episode, 'book_id'|'episode_number'|'arc_title'|'title'|'release_at'> & {is_finale?:boolean;kind?:import('../features/studio-next/model').SectionKind;display_number?:number|null;position?:number};
 
 export async function getPublicLibrary() {
   if (!supabase) return { books: [] as Book[], episodes: [] as EpisodeSummary[] };
@@ -32,6 +32,12 @@ export async function getPublicLibrary() {
   if(books.some(book=>book.reading_format==='epub')){
    const result=await supabase.from('qr_epub_releases').select('book_id,episode_number,title,release_at').eq('is_enabled',true).lte('release_at',new Date().toISOString()).order('episode_number');if(result.error)throw result.error;
    episodes.push(...(result.data||[]).map(row=>({...row,arc_title:'',is_finale:false})));
+  }
+  const studio=await supabase.from('qr_studio_books').select('book_id');
+  if(!studio.error){const ids=new Set((studio.data||[]).map(row=>row.book_id));for(const book of books)if(ids.has(book.id))book.reading_format='studio';
+   const normalized:any[]=[];for(let start=0;start<10000;start+=200){const releases=await supabase.from('qr_studio_releases').select('id,book_id,reader_number,title,arc_title,release_at,kind,display_number,position').eq('is_enabled',true).lte('release_at',new Date().toISOString()).order('book_id').order('position').order('id').range(start,start+199);if(releases.error)throw releases.error;normalized.push(...(releases.data||[]));if((releases.data?.length??0)<200)break;}
+   for(let i=episodes.length-1;i>=0;i--)if(ids.has(episodes[i].book_id))episodes.splice(i,1);
+   episodes.push(...normalized.map(row=>({...row,episode_number:row.reader_number,is_finale:false})));
   }
   const newest = (book: Book) => Math.max(new Date(book.updated_at).getTime(), ...episodes.filter(ep => ep.book_id === book.id).map(ep => new Date(ep.release_at ?? '').getTime() || 0));
   books.sort((x, y) => newest(y) - newest(x));

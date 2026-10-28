@@ -1,7 +1,7 @@
 import {bytes,equalSecret,hash,hmac,validVapid} from './crypto.ts';
 export type Subscription={endpoint:string;keys:{p256dh:string;auth:string}};
 export type Row={id:string;subscription:Subscription;cursor_at:string;cursor_id:string;lease_id:string;delivered_keys:Record<string,boolean>};
-export type Episode={id:string;source:'episode'|'epub';episode_number:number;title:string;release_at:string;book:{id:string;slug:string;title:string;is_published:boolean;deleted_at:string|null}};
+export type Episode={id:string;source:'episode'|'epub'|'studio';episode_number:number;title:string;release_at:string;book:{id:string;slug:string;title:string;is_published:boolean;deleted_at:string|null}};
 export type PushConfig={origin:string;url:string;publicKey:string;privateKey:string;subject:string;dispatchSecret:string;adminKey:string;anonKey:string};
 export interface PushRepository{
  healthy():Promise<boolean>;

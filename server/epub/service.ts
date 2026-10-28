@@ -1,3 +1,4 @@
+import {Buffer} from 'node:buffer';
 import {createHash} from 'node:crypto';
 import {DOMParser,DOMImplementation,XMLSerializer} from '@xmldom/xmldom';
 import {createClient} from '@supabase/supabase-js';

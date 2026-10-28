@@ -11,7 +11,7 @@ export default function BookDialog({book,episodes,progress,onClose,demo=false}:{
  const ref=useReaderDialogFocus<HTMLElement>(onClose);
  const [expanded,setExpanded]=useState(false),[query,setQuery]=useState(''),[limit,setLimit]=useState(50);
  const [next,setNext]=useState<UpcomingChapter|null>(null),[loading,setLoading]=useState(!demo);
- const rows=useMemo(()=>episodes.filter(ep=>ep.book_id===book.id).sort((a,b)=>a.episode_number-b.episode_number),[book.id,episodes]);
+ const rows=useMemo(()=>episodes.filter(ep=>ep.book_id===book.id).sort((a,b)=>(a.position??a.episode_number)-(b.position??b.episode_number)),[book.id,episodes]);
  const filtered=useMemo(()=>rows.filter(ep=>`${ep.episode_number} ${ep.title}`.toLocaleLowerCase('id').includes(query.toLocaleLowerCase('id').trim())),[rows,query]);
  useEffect(()=>{
   if(demo)return;let active=true;
@@ -27,7 +27,7 @@ export default function BookDialog({book,episodes,progress,onClose,demo=false}:{
   <div className="book-dialog-list-heading"><h3>Daftar episode</h3><span>{rows.length}</span></div>
   {rows.length>12&&<label className="book-dialog-search"><BrandIcon name="search" size={16}/><input type="search" aria-label="Cari episode buku" placeholder="Nomor atau judul episode" value={query} onChange={event=>{setQuery(event.target.value);setLimit(50);}}/></label>}
   <div className="book-dialog-episodes" aria-label="Episode terbit">
-   {filtered.slice(0,limit).map(ep=><button type="button" className="book-dialog-episode" key={ep.episode_number} aria-label={`Buka ${ep.episode_number===0?'prolog':`episode ${ep.episode_number}`}: ${ep.title}`} onClick={()=>{onClose();navigate(`/baca/${book.slug}?episode=${ep.episode_number}`);}}><span className="book-dialog-number">{ep.episode_number===0?'P':String(ep.episode_number).padStart(2,'0')}</span><span className="book-dialog-episode-title"><strong>{readerHeading(ep.title,ep.episode_number).title||`Bab ${ep.episode_number}`}</strong>{progress===ep.episode_number&&<small>Terakhir dibaca</small>}</span><BrandIcon name="chevron-right" size={16}/></button>)}
+   {filtered.slice(0,limit).map(ep=><button type="button" className="book-dialog-episode" key={ep.episode_number} aria-label={`Buka ${ep.episode_number===0?'prolog':`episode ${ep.episode_number}`}: ${ep.title}`} onClick={()=>{onClose();navigate(`/baca/${book.slug}?episode=${ep.episode_number}`);}}><span className="book-dialog-number">{ep.kind&&ep.kind!=='chapter'?'•':ep.episode_number===0?'P':String(ep.display_number??ep.episode_number).padStart(2,'0')}</span><span className="book-dialog-episode-title"><strong>{readerHeading(ep.title,ep.kind?ep.display_number:ep.episode_number,ep.kind).title||readerHeading(ep.title,ep.kind?ep.display_number:ep.episode_number,ep.kind).eyebrow}</strong>{progress===ep.episode_number&&<small>Terakhir dibaca</small>}</span><BrandIcon name="chevron-right" size={16}/></button>)}
    {!filtered.length&&<p className="book-dialog-empty">{query?'Episode tidak ditemukan.':demo?'Ini sampul contoh. Cerita asli memerlukan koneksi ke Library.':'Belum ada episode terbit.'}</p>}
    {filtered.length>limit&&<button type="button" className="book-dialog-more" onClick={()=>setLimit(value=>value+50)}>Tampilkan episode berikutnya</button>}
   </div>

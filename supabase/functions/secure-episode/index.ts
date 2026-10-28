@@ -4,7 +4,7 @@
  * This endpoint deliberately never accepts a client-supplied publication status.
  * Important: server-side secrets are NEVER included in Vite or exposed to browsers.
  */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
+import { createClient } from 'npm:@supabase/supabase-js@2.117.3';
 
 const HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -66,6 +66,21 @@ Deno.serve(async (req:Request)=>{
     if(bookError)return reply(503,{error:'Status publikasi tidak bisa diperiksa.'});
     if(!book)return reply(404,{error:'Novel tidak tersedia.'});
     const now=new Date().toISOString();
+    // Workspace books resolve their immutable release snapshots, including old numeric links.
+    const catalog=await db.from('qr_studio_books').select('book_id').eq('book_id',bookId).maybeSingle();
+    if(catalog.error&&!['42P01','PGRST205'].includes(catalog.error.code))return reply(503,{error:'Format bacaan tidak dapat diperiksa.'});
+    if(catalog.data){
+      let query=db.from('qr_studio_releases').select('id,reader_number,title,arc_title,kind,display_number,release_at,version_id').eq('book_id',bookId).eq('is_enabled',true).lte('release_at',now).order('position');
+      if(isIndex){const result=await query.limit(10000);if(result.error)return reply(503,{error:'Daftar isi tidak tersedia.'});return reply(200,{type:'index',episodes:(result.data||[]).map(row=>({...row,episode_number:row.reader_number}))});}
+      const result=await query.eq('reader_number',Number(input.episodeNumber)).maybeSingle();
+      if(result.error||!result.data)return reply(404,{error:'Bagian belum terbit.'});
+      const version=await db.from('qr_studio_versions').select('document').eq('id',result.data.version_id).eq('section_id',result.data.id).single();
+      const document=version.data?.document;
+      if(version.error||document?.source||!document?.content_md)return reply(409,{error:'Muat ulang aplikasi untuk format bacaan terbaru.'});
+      const current=await db.from('qr_studio_releases').select('version_id,book:qr_books!inner(is_published,deleted_at)').eq('id',result.data.id).eq('is_enabled',true).lte('release_at',new Date().toISOString()).eq('book.is_published',true).is('book.deleted_at',null).maybeSingle();
+      if(!current.data||current.data.version_id!==result.data.version_id)return reply(404,{error:'Bagian telah berubah.'});
+      return reply(200,{episodeNumber:result.data.reader_number,title:result.data.title,arc:result.data.arc_title,content:document.content_md,kind:result.data.kind,displayNumber:result.data.display_number,sourceVersion:result.data.version_id});
+    }
     if(isIndex){
       const {data,error}=await db.from('qr_episodes')
         .select('episode_number,title,arc_title,release_at')

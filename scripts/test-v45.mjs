@@ -26,6 +26,7 @@ const client={
     select(_columns){this.columns=_columns;return this;},
     eq(){return this;},is(){return this;},lte(){return this;},order(){return this;},limit(){return this;},
     async maybeSingle(){
+      if(table==='qr_studio_books')return {data:null,error:null};
       if(table==='qr_books')return {data:mode==='private'?null:{id:'novel'},error:null};
       if(mode==='unreleased')return {data:null,error:null};
       return {data:{episode_number:0,title:'Prolog',arc_title:'Bab Pembuka',release_at:

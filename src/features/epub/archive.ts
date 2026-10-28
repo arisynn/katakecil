@@ -1,9 +1,10 @@
 import JSZip from 'jszip';
 import {boundedRead,inspectZip} from '../import/zip';
 import {inspectImage} from '../covers/inspect';
+import {inferKind,type SectionKind} from '../studio-next/model';
 
 export const EPUB_MAX_BYTES=18_000_000;
-export type EpubToc={title:string;href:string};
+export type EpubToc={title:string;href:string;kind?:SectionKind};
 export type EpubMetadata={title:string;creator:string;language:string;toc:EpubToc[];sections:number};
 export type EpubDom={parse:(source:string)=>Document;create:()=>Document;serialize:(body:HTMLElement)=>string;imageUrl:(blob:Blob)=>Promise<string>;revoke:(url:string)=>void};
 const browserDom=():EpubDom=>({parse:source=>new DOMParser().parseFromString(source,'application/xml'),create:()=>document.implementation.createHTMLDocument(''),serialize:body=>body.innerHTML,imageUrl:async blob=>URL.createObjectURL(blob),revoke:url=>URL.revokeObjectURL(url)});
@@ -48,10 +49,11 @@ export async function openEpub(file:Blob,dom:EpubDom=browserDom()):Promise<EpubA
  if(!toc.length)for(const [index,item] of spine.entries())toc.push({title:`Bagian ${index+1}`,href:item!.path});
  // Canonical boundaries follow actual document order, never TOC order. Multiple
  // chapters inside one XHTML remain individually publishable without saved extracts.
- const canonical:EpubToc[]=[];
+ const explicitToc=toc.length>0;const canonical:EpubToc[]=[];
  for(const [index,item] of spine.entries()){
   const path=item!.path,doc=xml(await text(path),dom),body=elements(doc,'body')[0];if(!body)throw Error('Isi EPUB tidak terbaca.');
   const links=toc.filter(link=>epubPath('root.xml',link.href).path===path),all=Array.from(body.getElementsByTagName('*'));
+  if(explicitToc&&canonical.length&&!links.length&&!all.some(el=>/^h[1-3]$/.test(el.localName))&&inferKind('',path)==='chapter')continue;
   const ids=all.map(el=>el.getAttribute('id')).filter(Boolean);if(new Set(ids).size!==ids.length)throw Error('EPUB memiliki jangkar bab duplikat.');
   const anchors=new Map<string,EpubToc>();for(const link of links){const target=epubPath('root.xml',link.href);if(target.fragment){if(!ids.includes(target.fragment))throw Error('Jangkar daftar isi EPUB tidak ditemukan.');anchors.set(target.fragment,link);}}
   const ordered=all.filter(el=>anchors.has(el.getAttribute('id')||''));
@@ -62,6 +64,14 @@ export async function openEpub(file:Blob,dom:EpubDom=browserDom()):Promise<EpubA
   for(const el of ordered)canonical.push(anchors.get(el.getAttribute('id')!)!);
  }
  if(!canonical.length||canonical.length>600)throw Error('Maksimal 600 bagian internal EPUB.');
+ for(const item of canonical){
+  const target=epubPath('root.xml',item.href),doc=xml(await text(target.path),dom);
+  const all=Array.from(doc.getElementsByTagName('*'));
+  const node=target.fragment?all.find(el=>el.getAttribute('id')===target.fragment):elements(doc,'body')[0];
+  let current=node,semantic='';
+  while(current){semantic+=' '+(current.getAttribute('epub:type')||current.getAttributeNS('http://www.idpf.org/2007/ops','type')||'');current=current.parentNode?.nodeType===1?current.parentNode as Element:undefined;}
+  item.kind=/\bprologue\b/.test(semantic)?'prologue':/\bepilogue\b/.test(semantic)?'epilogue':/\bchapter\b/.test(semantic)?'chapter':/\b(?:titlepage|cover|copyright-page|toc|dedication|preface|foreword|acknowledgments|colophon)\b/.test(semantic)?'page':inferKind(item.title,target.path);
+ }
  const metadata:EpubMetadata={title:(elements(opf,'title')[0]?.textContent||'Buku EPUB').trim().slice(0,180),creator:(elements(opf,'creator')[0]?.textContent||'').trim().slice(0,180),language:(elements(opf,'language')[0]?.textContent||'id').trim().slice(0,30),toc:canonical,sections:spine.length};
  return new EpubArchive(metadata,spine.map(item=>item!.path),text,read,items,dom);
 }
@@ -70,6 +80,7 @@ export async function openEpub(file:Blob,dom:EpubDom=browserDom()):Promise<EpubA
  * into memory; scripts, publisher CSS and remote resources never enter the UI. */
 export class EpubArchive{
  constructor(readonly metadata:EpubMetadata,readonly spine:string[],private text:(path:string)=>Promise<string>,private read:(path:string,limit?:number)=>Promise<Uint8Array>,private items:Map<string,{path:string;type:string;properties:string}>,private dom:EpubDom){ }
+ async cover(){const item=[...this.items.values()].find(item=>item.properties.split(/\s+/).includes('cover-image'))||[...this.items.values()].find(item=>/^image\/(png|jpeg|webp)$/.test(item.type)&&/(?:^|\/)(?:cover|sampul)[_.-]/i.test(item.path));if(!item)return null;const bytes=await this.read(item.path,8_000_000);const info=inspectImage(bytes);return new Blob([Uint8Array.from(bytes)],{type:info.mime});}
  locate(href:string){const target=epubPath('root.xml',href);return {index:this.spine.indexOf(target.path),fragment:target.fragment};}
  async render(index:number,boundary?:{start:string;end:string}){
   const path=this.spine[index];if(!path)throw Error('Bagian buku tidak tersedia.');
@@ -105,9 +116,17 @@ export class EpubArchive{
   };
   try{for(const child of Array.from(body.childNodes))await copy(child,output.body);if(!started||!ended)throw Error('Batas episode EPUB tidak ditemukan.');return {html:this.dom.serialize(output.body),dispose:()=>urls.forEach(url=>this.dom.revoke(url))};}catch(error){urls.forEach(url=>this.dom.revoke(url));throw error;}
  }
+ async renderRange(startHref:string,endHref:string|null){
+  const start=this.locate(startHref),end=endHref?this.locate(endHref):{index:this.spine.length,fragment:''};
+  if(start.index<0||end.index<start.index)throw Error('Rentang EPUB tidak valid.');
+  const parts:{html:string;dispose:()=>void}[]=[];
+  try{for(let i=start.index;i<this.spine.length&&i<=end.index;i++){
+   if(i===end.index&&!end.fragment)break;
+   parts.push(await this.render(i,{start:i===start.index?start.fragment:'',end:i===end.index?end.fragment:''}));
+  }return {html:parts.map(p=>p.html).join('\n'),dispose:()=>parts.forEach(p=>p.dispose())};}catch(error){parts.forEach(p=>p.dispose());throw error;}
+ }
  async renderSection(sectionIndex:number){
-  const item=this.metadata.toc[sectionIndex];if(!item)throw Error('Episode EPUB tidak ditemukan.');
-  const start=this.locate(item.href),next=this.metadata.toc[sectionIndex+1],end=next?this.locate(next.href):null;
-  return this.render(start.index,{start:start.fragment,end:end?.index===start.index?end.fragment:''});
+  const item=this.metadata.toc[sectionIndex];if(!item)throw Error('Bagian EPUB tidak ditemukan.');
+  return this.renderRange(item.href,this.metadata.toc[sectionIndex+1]?.href??null);
  }
 }

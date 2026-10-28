@@ -1,0 +1,20 @@
+KataKecil — Studio Penulis baru
+24 Oktober 2026
+Commit: 9d1be9cfe422ab782f2b5d4c0658e803a6077793
+Cabang: feat/studio-rebuild
+
+Source lengkap ada dalam folder ini. Baca README.md dan docs/STUDIO_WORKSPACE.md.
+Backend sudah dipasang. Antarmuka belum dideploy karena akses tulis GitHub
+dan otorisasi tim Vercel belum tersedia. Buku produksi belum diadopsi.
+
+Studio_Update.bundle menyimpan commit perubahan yang belum dipush.
+Untuk mengembalikannya pada clone repository arisynn/katakecil yang sudah ada:
+  git fetch /lokasi/Studio_Update.bundle HEAD
+  git switch -c feat/studio-rebuild FETCH_HEAD
+
+Gunakan nama cabang lain jika cabang itu sudah ada. Bundle memerlukan commit
+dasar d9a9bc2cd43f02d31f17e4aaff4639924c920598 yang ada pada repository asal.
+
+Pengaturan lingkungan, node_modules, hasil build, dan naskah produksi tidak
+dimasukkan dalam paket. Dua migrasi Studio sudah diterapkan ke proyek tujuan;
+jangan menjalankannya ulang. Rincian status dan hasil uji ada di panduan.
