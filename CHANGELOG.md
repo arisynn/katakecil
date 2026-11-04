@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Liquid drag (4 November 2026)
+
+- Gabungkan pembaruan CSS meniscus: lensa di atas ikon, pinggiran blur/prisma dan kubah bening.
+- Drag jari/mouse mengikuti pointer; pelepasan langsung memilih tab terdekat satu kali, dengan velocity stretch terbatas dan sheet tetap terpasang.
+- Kunci arah horizontal, perlindungan scroll vertikal, pointercancel/sentuhan kedua/Escape, reduced motion dan fokus keyboard.
+- Adaptasi SVG displacement khusus tepi lensa serta gradasi latar yang lembut; fallback CSS tetap tersedia.
+- 72 tes regresi, 12 tes terarah, 18 pemeriksaan posisi lensa, 6 drag mouse/touch browser dan 120 kombinasi slider lulus. [Detail](docs/liquid-glass-drag.md).
+
 ## Web — 4 November 2026
 
 - Terapkan stylesheet iPhone glass yang diberikan pemilik proyek: tint lebih tipis, blur 44–60px, sorotan/bevel dan lensa lebih kuat.

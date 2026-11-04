@@ -1,4 +1,4 @@
-import {installGlassTabs} from './glass-tabs.js?v=1';
+import {installGlassTabs} from './glass-tabs.js?v=2';
 import {createAppUpdater} from './app-updates.js?v=1';
 import {installAppPopups} from './app-popups.js?v=10';
 import {parseEpub,PARSER_REVISION} from './epub.js?v=4';

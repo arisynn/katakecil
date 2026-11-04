@@ -8,66 +8,72 @@ body {
   --g-accent: var(--accent);
 
   /* Ultra-thin base tint agar latar belakang benar-benar melebur menembus kaca */
-  --g-fill: rgba(var(--glass), .22);
-  --g-panel: rgba(var(--glass), .34);
-  --g-ctl: rgba(var(--glass), .20);
-  --g-ctl-hover: rgba(var(--glass), .32);
+  --g-fill: rgba(var(--glass), .20);
+  --g-panel: rgba(var(--glass), .32);
+  --g-ctl: rgba(var(--glass), .18);
+  --g-ctl-hover: rgba(var(--glass), .30);
 
   /* 3D Optical Specular Borders & Bevels (ketebalan pinggiran kaca melengkung) */
-  --g-edge: rgba(255, 255, 255, .72);
-  --g-hi: rgba(255, 255, 255, .98);
-  --g-rim-side: rgba(255, 255, 255, .42);
-  --g-rim-bot: rgba(255, 255, 255, .34);
-  --g-inner-glow: rgba(255, 255, 255, .38);
+  --g-edge: rgba(255, 255, 255, .76);
+  --g-hi: rgba(255, 255, 255, 1);
+  --g-rim-side: rgba(255, 255, 255, .48);
+  --g-rim-bot: rgba(255, 255, 255, .38);
+  --g-inner-glow: rgba(255, 255, 255, .42);
 
   /* Caustics & Multi-angle Light Reflection (pantulan cahaya permukaan kaca) */
-  --g-hotspot: rgba(255, 255, 255, .52);
-  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .10);
-  --g-sheen-1: rgba(255, 255, 255, .44);
-  --g-sheen-2: rgba(255, 255, 255, .10);
-  --g-sheen-3: rgba(255, 255, 255, .20);
+  --g-hotspot: rgba(255, 255, 255, .58);
+  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .12);
+  --g-sheen-1: rgba(255, 255, 255, .48);
+  --g-sheen-2: rgba(255, 255, 255, .12);
+  --g-sheen-3: rgba(255, 255, 255, .24);
 
   /* Deep Ambient Shadows & Backdrop Vibrancy Pipeline */
-  --g-shadow: rgba(12, 32, 24, .24);
-  --g-shadow-ambient: rgba(0, 0, 0, .10);
-  --g-blur: 50px;
-  --g-sat: 240%;
-  --g-bright: 1.07;
-  --g-contrast: 1.05;
+  --g-shadow: rgba(12, 32, 24, .26);
+  --g-shadow-ambient: rgba(0, 0, 0, .12);
+  --g-blur: 54px;
+  --g-sat: 260%;
+  --g-bright: 1.08;
+  --g-contrast: 1.06;
 
-  /* Liquid Tab Lens */
-  --g-lens-dome: rgba(255, 255, 255, .92);
-  --g-lens-top: rgba(255, 255, 255, .78);
-  --g-lens-bot: rgba(255, 255, 255, .22);
+  /* Liquid Tab Lens — True Optical Meniscus (Bening di tengah, Blur di pinggir) */
+  --g-lens-dome: rgba(255, 255, 255, .88);
+  --g-lens-top: rgba(255, 255, 255, .38);
+  --g-lens-bot: rgba(255, 255, 255, .08);
+  --g-lens-rim-glow: rgba(255, 255, 255, .72);
+  --g-lens-edge-blur: 7.5px;
+  --g-lens-edge-sat: 280%;
 }
 
 body[data-theme=dark] {
-  --g-fill: rgba(var(--glass), .24);
-  --g-panel: rgba(var(--glass), .36);
+  --g-fill: rgba(var(--glass), .22);
+  --g-panel: rgba(var(--glass), .34);
   --g-ctl: rgba(255, 255, 255, .07);
-  --g-ctl-hover: rgba(255, 255, 255, .13);
+  --g-ctl-hover: rgba(255, 255, 255, .14);
 
-  --g-edge: rgba(255, 255, 255, .24);
-  --g-hi: rgba(255, 255, 255, .62);
-  --g-rim-side: rgba(255, 255, 255, .14);
-  --g-rim-bot: rgba(255, 255, 255, .12);
-  --g-inner-glow: rgba(255, 255, 255, .08);
+  --g-edge: rgba(255, 255, 255, .28);
+  --g-hi: rgba(255, 255, 255, .70);
+  --g-rim-side: rgba(255, 255, 255, .18);
+  --g-rim-bot: rgba(255, 255, 255, .15);
+  --g-inner-glow: rgba(255, 255, 255, .10);
 
-  --g-hotspot: rgba(255, 255, 255, .22);
-  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .12);
-  --g-sheen-1: rgba(255, 255, 255, .18);
-  --g-sheen-2: rgba(255, 255, 255, .04);
-  --g-sheen-3: rgba(255, 255, 255, .09);
+  --g-hotspot: rgba(255, 255, 255, .25);
+  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .15);
+  --g-sheen-1: rgba(255, 255, 255, .20);
+  --g-sheen-2: rgba(255, 255, 255, .05);
+  --g-sheen-3: rgba(255, 255, 255, .11);
 
-  --g-shadow: rgba(0, 0, 0, .68);
-  --g-shadow-ambient: rgba(0, 0, 0, .38);
-  --g-sat: 250%;
-  --g-bright: 1.12;
+  --g-shadow: rgba(0, 0, 0, .72);
+  --g-shadow-ambient: rgba(0, 0, 0, .42);
+  --g-sat: 270%;
+  --g-bright: 1.14;
   --g-contrast: 1.08;
 
-  --g-lens-dome: rgba(255, 255, 255, .48);
-  --g-lens-top: rgba(255, 255, 255, .30);
-  --g-lens-bot: rgba(255, 255, 255, .06);
+  --g-lens-dome: rgba(255, 255, 255, .44);
+  --g-lens-top: rgba(255, 255, 255, .18);
+  --g-lens-bot: rgba(255, 255, 255, .03);
+  --g-lens-rim-glow: rgba(255, 255, 255, .36);
+  --g-lens-edge-blur: 8px;
+  --g-lens-edge-sat: 300%;
 }
 
 /* ==========================================================================
@@ -247,104 +253,182 @@ body :is(.read-button, .dialog .primary, .tts-player .primary):active {
 }
 
 /* ==========================================================================
-   Liquid Tabs & 3D Water-Droplet Optical Lens
-   A bar and lens are siblings. Interactive labels exist only once, above both.
+   Liquid Tabs & 3D Optical Meniscus Droplet Lens
+   Gelembung kaca berada DI ATAS tombol/ikon (z-index: 3) namun memiliki bagian
+   tengah sejernih kristal dan pinggiran melengkung yang memburamkan (blur)
+   ikon/teks saat gelembung bergeser melewatinya.
    ========================================================================== */
 body .liquid-tabs {
   position: relative;
   isolation: isolate;
   background: transparent;
   border: 0;
-  border-radius: 17px;
+  border-radius: 18px;
   padding: 4px;
   gap: 4px;
   overflow: visible;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
   --lens-x: 4px;
   --lens-y: 4px;
   --lens-w: 0px;
   --lens-h: 35px;
 }
 
+/* Track cekung tempat gelembung kaca meluncur */
 .liquid-tabs::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, .08), transparent 65%),
-    rgba(var(--glass), .14);
+    radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, .09), transparent 70%),
+    linear-gradient(180deg, rgba(0, 0, 0, .07), rgba(255, 255, 255, .05)),
+    rgba(var(--glass), .16);
   border: 1px solid var(--g-edge);
   box-shadow:
-    inset 0 1.5px 4px rgba(0, 0, 0, .14),
+    inset 0 2px 5px rgba(0, 0, 0, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .25),
     inset 0 -1px 0 var(--g-rim-bot);
   pointer-events: none;
-  z-index: -2;
+  z-index: 0;
 }
 
-.glass-tab-lens {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--lens-w);
-  height: var(--lens-h);
-  transform: translate(var(--lens-x), var(--lens-y));
-  border-radius: 13px;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(85% 60% at 50% 6%, var(--g-lens-dome) 0%, transparent 70%),
-    linear-gradient(180deg, var(--g-lens-top) 0%, var(--g-lens-bot) 100%),
-    rgba(var(--accent-rgb), .16);
-  border: 1px solid var(--g-edge);
-  box-shadow:
-    inset 0 2px 1px var(--g-hi),
-    inset 0 -6px 12px rgba(var(--accent-rgb), .16),
-    0 8px 20px -6px var(--g-shadow),
-    0 2px 6px -1px var(--g-shadow-ambient);
-  transition:
-    transform .28s cubic-bezier(.22, 1, .36, 1),
-    width .28s cubic-bezier(.22, 1, .36, 1),
-    height .28s cubic-bezier(.22, 1, .36, 1);
-}
-
-.glass-tab-lens::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1.3px;
-  pointer-events: none;
-  background: conic-gradient(
-    from 200deg,
-    #fffffff0,
-    rgba(var(--accent-rgb), .52),
-    #f5addc80,
-    #b0edf58c,
-    #ffffffe6 55%,
-    #ffffff59,
-    #fffffff0
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-}
-
+/* Tombol & Ikon berada di z-index: 1 (di bawah gelembung kaca z-index: 3) */
 body .liquid-tabs > button {
   position: relative;
   min-width: 0;
   z-index: 1;
-  border-radius: 12px;
+  border-radius: 13px;
+  transition:
+    color .22s ease,
+    transform .22s cubic-bezier(.22, 1, .36, 1),
+    filter .22s ease;
 }
 
 body .liquid-tabs > button.active {
   background: transparent;
   box-shadow: none;
   color: var(--g-active-ink, var(--accent));
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), .28);
 }
 
 body .liquid-tabs > button.active::after {
   display: none;
+}
+
+/* Badan utama Gelembung Kaca (Duduk DI ATAS ikon agar pinggirannya bisa membiaskan ikon) */
+.glass-tab-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--lens-w);
+  height: var(--lens-h);
+  transform: translate3d(var(--lens-x), var(--lens-y), 0);
+  scale: 1;
+  border-radius: 14px;
+  pointer-events: none;
+  z-index: 3;
+  /* Bagian tengah tetap bening agar ikon aktif tajam, dengan kilau kubah air di atas */
+  background:
+    radial-gradient(75% 42% at 50% 4%, var(--g-lens-dome) 0%, transparent 72%),
+    radial-gradient(90% 55% at 50% 100%, rgba(var(--accent-rgb), .18) 0%, transparent 70%),
+    linear-gradient(180deg, var(--g-lens-top) 0%, transparent 42%, var(--g-lens-bot) 100%);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 2px 1.5px 0 var(--g-hi),
+    inset 0 -2px 3px 0 var(--g-lens-rim-glow),
+    inset 2px 0 3px 0 rgba(255, 255, 255, .28),
+    inset -2px 0 3px 0 rgba(255, 255, 255, .28),
+    inset 0 -6px 14px rgba(var(--accent-rgb), .14),
+    0 10px 24px -6px var(--g-shadow),
+    0 3px 8px -2px var(--g-shadow-ambient);
+  /* Tanpa backdrop-filter di parent agar ::after bisa langsung mem-blur tombol/ikon di bawahnya */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition:
+    transform .36s cubic-bezier(.2, 1.12, .28, 1),
+    width .36s cubic-bezier(.2, 1.12, .28, 1),
+    height .36s cubic-bezier(.2, 1.12, .28, 1),
+    scale .26s cubic-bezier(.2, 1.25, .3, 1),
+    box-shadow .26s ease;
+  will-change: transform, width, height, scale;
+}
+
+/* Efek cairan menggelembung saat tab disentuh atau digeser */
+body .liquid-tabs:active .glass-tab-lens {
+  scale: 1.045 1.08;
+  --g-lens-edge-blur: 10.5px;
+  box-shadow:
+    inset 0 2.5px 2px 0 var(--g-hi),
+    inset 0 -2.5px 4px 0 var(--g-lens-rim-glow),
+    inset 0 0 18px rgba(255, 255, 255, .32),
+    inset 0 -8px 16px rgba(var(--accent-rgb), .22),
+    0 14px 30px -6px var(--g-shadow),
+    0 5px 12px -2px var(--g-shadow-ambient);
+}
+
+/* Lapisan 1 (::after): Cincin Bias Pinggiran Kaca (Edge Blur Ring).
+   Bagian tengah transparan (0% - 38%) sehingga teks/ikon di tengah tetap tajam,
+   sedangkan pinggirannya (40% - 100%) mem-blur & membiaskan ikon saat dilewati! */
+.glass-tab-lens::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  backdrop-filter:
+    blur(var(--g-lens-edge-blur))
+    saturate(var(--g-lens-edge-sat))
+    brightness(1.16)
+    contrast(1.14);
+  -webkit-backdrop-filter:
+    blur(var(--g-lens-edge-blur))
+    saturate(var(--g-lens-edge-sat))
+    brightness(1.16)
+    contrast(1.14);
+  -webkit-mask-image: radial-gradient(
+    72% 64% at 50% 50%,
+    transparent 36%,
+    rgba(0, 0, 0, .35) 56%,
+    rgba(0, 0, 0, .82) 76%,
+    #000 94%
+  );
+  mask-image: radial-gradient(
+    72% 64% at 50% 50%,
+    transparent 36%,
+    rgba(0, 0, 0, .35) 56%,
+    rgba(0, 0, 0, .82) 76%,
+    #000 94%
+  );
+}
+
+/* Lapisan 2 (::before): Dispersi Prisma Pelangi (Chromatic Aberration) di Bibir Gelembung */
+.glass-tab-lens::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.6px;
+  pointer-events: none;
+  z-index: 2;
+  background: conic-gradient(
+    from 205deg,
+    #ffffffff,
+    rgba(var(--accent-rgb), .68),
+    #ff9ee2b3,
+    #8cf6ffbf,
+    #fffffffa 52%,
+    #ffdca899,
+    #8cf6ff99,
+    #ffffffff
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
 .liquid-tabs[data-lens-ready=false] .glass-tab-lens {
@@ -492,4 +576,36 @@ body .appearance-peeking {
   .glass-tab-lens {
     transition: none;
   }
+}
+
+/* Direct manipulation follows the pointer immediately; only release snaps. */
+.liquid-tabs[data-lens-dragging=true] .glass-tab-lens {
+  transition: scale .26s cubic-bezier(.2,1.25,.3,1), box-shadow .26s ease;
+}
+/* Keep the existing keyboard focus visible above the decorative overlay. */
+body .liquid-tabs > button:focus-visible { z-index: 4; }
+@media (prefers-reduced-motion: reduce) {
+  body .liquid-tabs:active .glass-tab-lens { scale: 1; }
+  .liquid-tabs[data-lens-dragging=true] .glass-tab-lens { transition: none; }
+}
+@supports not ((mask-image: radial-gradient(transparent, #000)) or (-webkit-mask-image: radial-gradient(transparent, #000))) {
+  .glass-tab-lens::after { display: none; }
+}
+
+/* Pointer velocity adaptation from the supplied helper, handled by glass-tabs.js. */
+body .liquid-tabs[data-lens-dragging=true] .glass-tab-lens {
+  scale: var(--lens-stretch-x, 1.04) var(--lens-stretch-y, 1.08);
+}
+/* Optional SVG displacement affects the masked edge only, with the CSS blur fallback above. */
+@supports (backdrop-filter: url("#kk-lens-refract") blur(1px)) {
+  .glass-tab-lens::after {
+    backdrop-filter: var(--g-lens-refraction-filter, blur(0px)) blur(var(--g-lens-edge-blur)) saturate(var(--g-lens-edge-sat)) brightness(1.16) contrast(1.14);
+  }
+}
+/* Low-contrast washes give the transparent UI a calm backdrop. The reading paper stays solid. */
+body :is(.library-shell, .settings-shell) {
+  background: radial-gradient(ellipse at 8% 18%, rgba(var(--accent-rgb), .14), transparent 52%), radial-gradient(ellipse at 92% 85%, rgba(var(--accent-rgb), .09), transparent 55%), var(--bg);
+}
+@media (prefers-reduced-motion: reduce) {
+  body .liquid-tabs[data-lens-dragging=true] .glass-tab-lens { scale: 1; transition: none; }
 }

@@ -1,5 +1,7 @@
 # iPhone glass — pembaruan web
 
+Catatan tahap pertama pada commit `0081d5a`. Pembaruan lensa, drag dan helper berikutnya dijelaskan di [liquid glass drag](liquid-glass-drag.md).
+
 Permintaan pemilik: menerapkan isi `katakecil_iphone_glass_css.md` ke web KataKecil. Lampiran berisi CSS langsung, sehingga isinya dipakai sebagai `dist/glass.css` dengan normalisasi newline akhir saja. Gaya yang lebih kuat dari referensi dipertahankan; tidak ada perubahan JavaScript, struktur Reader, naskah, database atau perilaku updater.
 
 Fill utama menjadi 22–36%, blur panel 60px, Settings 44px dan permukaan umum/slider 50px. Kilau berlapis, highlight tepi, bayangan, kapsul tombol dan lensa mengikuti file yang diberikan. Tema global, varian gelap, Custom, fallback blur/mask serta reduced motion tetap menggunakan selector yang kompatibel dengan aplikasi. Warna/bidang teks buku tidak diganti oleh stylesheet ini.

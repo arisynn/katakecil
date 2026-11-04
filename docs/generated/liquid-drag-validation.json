@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "0081d5a4e4e2e714211c8791858cb114bdc692d5",
+  "webTests": {
+    "passed": 72,
+    "failed": 0
+  },
+  "focusedTests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "build": "passed via npm test",
+  "typecheck": "passed",
+  "syntaxPublicationModuleGraphChecks": "passed",
+  "browser": {
+    "passed": true,
+    "lensGeometryChecks": 18,
+    "realAppPublicDomainBook": true,
+    "stableSheet": true,
+    "reducedMotion": true,
+    "nativeUpdaterHiddenOnWeb": true,
+    "jsErrors": 0
+  },
+  "pointerDragBrowser": {
+    "passed": true,
+    "drags": [
+      {
+        "touch": false,
+        "target": "contents",
+        "once": true
+      },
+      {
+        "touch": false,
+        "target": "bookmarks",
+        "once": true
+      },
+      {
+        "touch": false,
+        "target": "highlights",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "contents",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "bookmarks",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "highlights",
+        "once": true
+      }
+    ],
+    "verticalScrollPreserved": true,
+    "cancelPreserved": true,
+    "escapePreserved": true,
+    "stableSheetAndLens": true,
+    "exactlyOneAction": true,
+    "velocityStretch": true,
+    "svgEdgeFilterConnected": true,
+    "reducedMotion": true,
+    "jsExceptions": 0
+  },
+  "sliderChecks": {
+    "checks": 120,
+    "baseline": false,
+    "passed": true
+  },
+  "sources": [
+    "Owner-provided katakecil_iphone_glass_css _1_.md (partial CSS merged with existing sections)",
+    "Owner-provided katakecil_liquid_glass_helper_js_svg_filter.js (velocity formula and SVG definition adapted into the existing single controller)"
+  ],
+  "deviceQA": "Headless Chromium mouse and emulated touch input only; no physical-phone FPS/performance claim",
+  "databaseChanges": false,
+  "apkRebuilt": false
+}
