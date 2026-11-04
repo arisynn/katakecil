@@ -29,7 +29,8 @@ let catalogFails=false;
 globalThis.fetch=async(url)=>{
  const address=new URL(String(url),'https://reader.example/');
  if(address.hostname==='hrbcwymdqigtfmpmsdsi.supabase.co'&&address.pathname.endsWith('lumina-library')){if(catalogFails)throw Error('offline');return Response.json({books:fixtureBooks});}
- if(address.hostname==='library.test')return Response.json({url:'https://hrbcwymdqigtfmpmsdsi.supabase.co/storage/v1/object/sign/test/alice.epub'});
+ if(address.hostname==='library.test')return Response.json({url:'https://hrbcwymdqigtfmpmsdsi.supabase.co/storage/v1/object/sign/test/'+(address.searchParams.get('book')==='garis'?'garis':'alice')+'.epub'});
+ if(address.pathname.endsWith('/garis.epub'))return new Response(await tinyEpub([{name:'chapter1.xhtml',html:'<h1>Bab 1 — Bahasa yang Tetap</h1><p>Ini cerita berbahasa Indonesia. Buku tetap dalam bahasa aslinya.</p>'}]));
  if(address.hostname==='hrbcwymdqigtfmpmsdsi.supabase.co'&&address.pathname.startsWith('/storage/'))return new Response(await readFile(new URL('./fixtures/epubs/alice.epub',import.meta.url)));
  try{return new Response(await readFile(new URL('../dist'+address.pathname,import.meta.url)));}catch{return new Response('missing',{status:404});}
 };
@@ -69,7 +70,7 @@ test('malformed and encrypted files fail without executing markup',async()=>{
 });
 
 test('local persistence and BroadcastChannel apply preferences, annotations, and progress',async()=>{
- const store=await import('../dist/store.js');
+ const store=await import('../dist/store.js?v=6');
  await store.openDatabase();
  store.updatePreferences({glassBlur:34});
  assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).glassBlur,34);
@@ -87,7 +88,7 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
 });
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
- const store=await import('../dist/store.js');
+ const store=await import('../dist/store.js?v=6');
  const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
  await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
  store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
@@ -142,7 +143,7 @@ test('catalog normalization accepts production data and rejects duplicate IDs an
 async function tinyEpub(files){
  const zip=new JSZip();zip.file('mimetype','application/epub+zip');zip.file('META-INF/container.xml','<container><rootfiles><rootfile full-path="OPS/book.opf"/></rootfiles></container>');
  const items=files.map((f,i)=>`<item id="s${i}" href="${f.name}" media-type="application/xhtml+xml"/>`).join('');
- zip.file('OPS/book.opf',`<package xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata><dc:title>Test book</dc:title><dc:creator>Writer</dc:creator></metadata><manifest>${items}</manifest><spine>${files.map((f,i)=>`<itemref idref="s${i}"/>`).join('')}</spine></package>`);
+ zip.file('OPS/book.opf',`<package xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata><dc:title>Test book</dc:title><dc:creator>Writer</dc:creator><dc:language>id</dc:language></metadata><manifest>${items}</manifest><spine>${files.map((f,i)=>`<itemref idref="s${i}"/>`).join('')}</spine></package>`);
  for(const f of files)zip.file('OPS/'+f.name,'<html><body>'+f.html+'</body></html>');return zip.generateAsync({type:'uint8array'});
 }
 test('chapter names are extracted once from nested spans and numbered paragraph headings',async()=>{
@@ -160,4 +161,16 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
  assert.equal(book.chapters[1].text,'Paragraf berikutnya.');
  assert.equal(book.chapters[2].text,'Teks cerita di bawah judul.');
  assert.ok(!JSON.stringify(book.chapters).includes('Section '));assert.match(book.chapters[3].text,/Bagian ini masih bagian cerita/);
+});
+
+
+test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
+ const store=await import('../dist/store.js?v=6');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
+ click('[data-action="settings"]');assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
+ assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.match($('.settings-shell').textContent,/Books stay in their original language/);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
+ click('[data-action="library"]');await wait();assert.match($('.bottom-tabs').textContent,/Settings/);click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
+ click('[data-action="library"]');click('[data-action="open"][data-id="garis-yang-kita-teruskan-karisyono-final-45-bab"]');await until(()=>$('.page-text')&&$('.reader-loading')?.classList.contains('hidden'),'Indonesian book opened in English UI');await wait();
+ const root=$('.page-text'),chapter=$('.page-heading h1').textContent,source=root.textContent,position=JSON.stringify(store.progress['garis-yang-kita-teruskan-karisyono-final-45-bab']);
+ assert.match(source,/Ini cerita berbahasa Indonesia/);assert.equal(root.lang,'id');assert.equal($('.chapter-label').textContent,'BAB 1');assert.equal(chapter,'Bahasa yang Tetap');assert.equal($('[data-action="contents"]').textContent.trim(),'Contents');assert.equal($('[data-action="appearance"]').textContent.trim(),'Appearance');assert.equal($('[data-action="fullscreen"]').textContent.trim(),'Full screen');
+ const remote=new MockBroadcastChannel('lumina-local-sync');remote.postMessage({kind:'preferences',payload:{...store.preferences,uiLanguage:'id'}});await wait();assert.equal(w.document.documentElement.lang,'id');assert.equal($('.page-text'),root,'language changes keep the page mounted');assert.equal(root.textContent,source);assert.equal($('.page-heading h1').textContent,chapter);assert.equal($('.chapter-label').textContent,'BAB 1');assert.equal(JSON.stringify(store.progress['garis-yang-kita-teruskan-karisyono-final-45-bab']),position);assert.equal($('[data-action="contents"]').textContent.trim(),'Daftar isi');remote.close();
 });

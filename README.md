@@ -69,3 +69,11 @@ The reader now renders highlight selection with DOM Range geometry and applicati
 EPUB parser revision 4 stores the original BAB/EPISODE/CHAPTER number separately from the subtitle and restores that marker above the title. The count comes from source text/navigation rather than spine indexes. The carousel removes repeated title/author captions, increases whole-cover size, and retains viewport bounds.
 
 The logo at `dist/assets/katakecil-logo.png` was generated with the image generation tool and is used as the app mark and favicon. Its original remains in `/workspace/generated_images`. Menu icons use rounded geometry and slightly bolder strokes. Glass uses lower opacity, stronger backdrop blur/saturation, inner highlights, and a subtle accent background to make refraction/blur visible. The app remains buildless HTML/CSS/JavaScript; Next.js is not used or required for these effects.
+
+## App language
+
+Settings now includes **Bahasa aplikasi / App language** with **Bahasa Indonesia** and **English**. The choice is saved as `uiLanguage` in the existing device preferences and synchronizes across tabs. Indonesian remains the default for existing devices.
+
+Localization is limited to interface labels, messages, prompts, navigation, and accessibility attributes. EPUB prose, source chapter titles/numbers, book metadata, selected quotations, personal notes, and editable text opt out explicitly. The document language follows the app preference while each book's text retains its own `lang`. Changing app language updates UI nodes in place and does not repaginate books or update reading progress.
+
+Tests verify reversible interface translation, book and note text preservation, English UI surrounding an Indonesian EPUB, persistence, and cross-tab language changes without replacing the reader page or changing its anchor.

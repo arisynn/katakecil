@@ -1,4 +1,4 @@
-export const DEFAULTS = { glassBlur:20, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.8, margin:52, spreadMode:'single', pageAnimation:'slide', accentColor:'#54756c' };
+export const DEFAULTS = { glassBlur:20, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.8, margin:52, spreadMode:'single', pageAnimation:'slide', accentColor:'#54756c', uiLanguage:'id' };
 const safeRead = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 export let storageHealthy = true;
 export function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { storageHealthy = false; return false; } }
@@ -7,6 +7,7 @@ export const deviceId = settings.deviceId || crypto.randomUUID();
 export let preferences = { ...DEFAULTS, ...settings, deviceId };
 if(preferences.schemaVersion!==2){preferences={...preferences,schemaVersion:2,spreadMode:'single',themeMode:preferences.themeMode==='auto-sensor'?'system':preferences.themeMode};}
 if(!/^#[0-9a-f]{6}$/i.test(preferences.accentColor))preferences.accentColor=DEFAULTS.accentColor;
+if(!['id','en'].includes(preferences.uiLanguage))preferences.uiLanguage='id';
 writeLocal('lumina_device_settings', preferences);
 let database;
 export async function openDatabase() {
