@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — 4 November 2026
+
+- Terapkan stylesheet iPhone glass yang diberikan pemilik proyek: tint lebih tipis, blur 44–60px, sorotan/bevel dan lensa lebih kuat.
+- Cache stylesheet dinaikkan ke `glass.css?v=2`. Perilaku Reader dan updater tetap memakai implementasi yang sama.
+- 9 tes terarah, 18 pemeriksaan posisi lensa di aplikasi asli dan 120 kombinasi preview slider lulus. Lihat [catatan web](docs/iphone-glass-web.md).
+
 ## v1.0.1-preview.2 — 4 November 2026
 
 - Efek kaca konsisten di seluruh permukaan UI, mengikuti tema dan aksen global.

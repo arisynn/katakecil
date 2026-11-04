@@ -1,34 +1,495 @@
-/* Adapted from the user-provided kaca.css. One surface per panel; global app palettes. */
-body{--g-ink:var(--text);--g-accent:var(--accent);--g-fill:rgba(var(--glass),.58);--g-panel:rgba(var(--glass),.86);--g-edge:rgba(var(--glass),.68);--g-hi:#ffffffb8;--g-shadow:#193c2e24;--g-blur:18px;--g-lens-top:#ffffff61;--g-lens-bot:#ffffff14}
-body[data-theme=dark]{--g-fill:rgba(var(--glass),.68);--g-panel:rgba(var(--glass),.93);--g-edge:#ffffff24;--g-hi:#ffffff38;--g-shadow:#0007;--g-lens-top:#ffffff1c;--g-lens-bot:#ffffff06}
-/* Shared panels replace the older conflicting glass declarations. */
-body .glass,body .settings-surface,body .dialog,body .app-picker{background:linear-gradient(145deg,#ffffff0c,transparent 65%),var(--g-fill);border:1px solid var(--g-edge);backdrop-filter:blur(var(--g-blur)) saturate(1.6);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.6);box-shadow:inset 0 1px 0 var(--g-hi),0 12px 30px -12px var(--g-shadow);color:var(--g-ink);isolation:isolate}
-body .glass::before{content:none}
-body .dialog,body .app-picker{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel);--g-blur:22px}
-body .settings-surface{--g-blur:16px}
-body[data-palette=custom]{--g-panel:var(--paper)}
-body :is(.overlay-backdrop,.app-picker-backdrop){backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(16,28,23,.18)}
-/* Small controls share their parent's tint instead of blurring it a second time. */
-body :is(.app-select-trigger,.app-color-trigger,.secondary,.header-back,.comfort-reset,.tool-grid button,.text-input,.page-jump input){background:rgba(var(--glass),.34);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff24;backdrop-filter:none;-webkit-backdrop-filter:none}
-body :is(.library-header .icon-button,.reader-toolbar .icon-button,.dialog-heading .icon-button,.app-picker-heading .icon-button){background:rgba(var(--glass),.35);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38}
-body .read-button,body .dialog .primary,body .tts-player .primary{background:linear-gradient(155deg,#ffffff16,transparent 70%),var(--accent);box-shadow:inset 0 1px 0 #ffffff40,0 8px 22px -12px var(--g-shadow);border:1px solid #ffffff24}
-/* A bar and lens are siblings. Interactive labels exist only once, above both. */
-body .liquid-tabs{position:relative;isolation:isolate;background:transparent;border:0;border-radius:17px;padding:4px;gap:4px;overflow:visible;--lens-x:4px;--lens-y:4px;--lens-w:0px;--lens-h:35px}
-.liquid-tabs::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(var(--glass),.15);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38;pointer-events:none;z-index:-2}
-.glass-tab-lens{position:absolute;left:0;top:0;width:var(--lens-w);height:var(--lens-h);transform:translate(var(--lens-x),var(--lens-y));border-radius:13px;pointer-events:none;z-index:-1;background:linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),.09);border:1px solid var(--g-edge);box-shadow:inset 0 1px 1px var(--g-hi),inset 0 -5px 10px rgba(var(--accent-rgb),.07),0 4px 14px -8px var(--g-shadow);transition:transform .24s cubic-bezier(.25,.85,.25,1),width .24s cubic-bezier(.25,.85,.25,1),height .24s cubic-bezier(.25,.85,.25,1)}
-.glass-tab-lens::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from 200deg,#ffffffa6,rgba(var(--accent-rgb),.25),#f5addc40,#b0edf54d,#ffffff9e 55%,#ffffff38,#ffffffa6);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
-body .liquid-tabs>button{position:relative;min-width:0;z-index:1;border-radius:12px}
-body .liquid-tabs>button.active{background:transparent;box-shadow:none;color:var(--g-active-ink,var(--accent))}
-body .liquid-tabs>button.active::after{display:none}
-.liquid-tabs[data-lens-ready=false] .glass-tab-lens{transition:none}
-body .dialog .reader-tabs.liquid-tabs{padding:4px;gap:3px;margin-bottom:12px}
-body .segmented.liquid-tabs{padding:3px}
-/* Preserve slider capture/coordinates and the single expanded preview surface. */
-body .appearance-peeking>.dialog{background:transparent!important;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-body .reader-peek-control::before{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 var(--g-hi),0 12px 30px -12px var(--g-shadow);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6)}
-body .appearance-peeking{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-.update-summary{font-size:11px;color:var(--muted);margin-left:auto;padding-inline:8px;text-align:right}
-.update-version{font-size:12px;color:var(--muted);margin:10px 0}.update-state{line-height:1.7;margin:12px 0}.update-notes{white-space:pre-wrap;font:inherit;font-size:12px;line-height:1.7;max-height:24dvh;overflow:auto;padding:12px;background:rgba(var(--glass),.16);border-radius:12px}.update-download{width:100%;accent-color:var(--accent)}.update-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.update-actions>button{flex:1}.update-privacy{font-size:11px;line-height:1.6;color:var(--muted);margin-top:16px}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body{--g-fill:var(--surface);--g-panel:var(--surface)}body .glass,body .settings-surface,body .dialog,body .app-picker{background:var(--surface)}body .reader-peek-control::before{background:var(--surface)}}
-@supports not (mask-composite:exclude){.glass-tab-lens::before{display:none}}
-@media(prefers-reduced-motion:reduce){.glass-tab-lens{transition:none}}
+/* ==========================================================================
+   KataKecil-glass.css — Brutal iOS 18 / visionOS "Liquid Crystal" Edition
+   One surface per panel; global app palettes; multi-layer optical refraction.
+   ========================================================================== */
+
+body {
+  --g-ink: var(--text);
+  --g-accent: var(--accent);
+
+  /* Ultra-thin base tint agar latar belakang benar-benar melebur menembus kaca */
+  --g-fill: rgba(var(--glass), .22);
+  --g-panel: rgba(var(--glass), .34);
+  --g-ctl: rgba(var(--glass), .20);
+  --g-ctl-hover: rgba(var(--glass), .32);
+
+  /* 3D Optical Specular Borders & Bevels (ketebalan pinggiran kaca melengkung) */
+  --g-edge: rgba(255, 255, 255, .72);
+  --g-hi: rgba(255, 255, 255, .98);
+  --g-rim-side: rgba(255, 255, 255, .42);
+  --g-rim-bot: rgba(255, 255, 255, .34);
+  --g-inner-glow: rgba(255, 255, 255, .38);
+
+  /* Caustics & Multi-angle Light Reflection (pantulan cahaya permukaan kaca) */
+  --g-hotspot: rgba(255, 255, 255, .52);
+  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .10);
+  --g-sheen-1: rgba(255, 255, 255, .44);
+  --g-sheen-2: rgba(255, 255, 255, .10);
+  --g-sheen-3: rgba(255, 255, 255, .20);
+
+  /* Deep Ambient Shadows & Backdrop Vibrancy Pipeline */
+  --g-shadow: rgba(12, 32, 24, .24);
+  --g-shadow-ambient: rgba(0, 0, 0, .10);
+  --g-blur: 50px;
+  --g-sat: 240%;
+  --g-bright: 1.07;
+  --g-contrast: 1.05;
+
+  /* Liquid Tab Lens */
+  --g-lens-dome: rgba(255, 255, 255, .92);
+  --g-lens-top: rgba(255, 255, 255, .78);
+  --g-lens-bot: rgba(255, 255, 255, .22);
+}
+
+body[data-theme=dark] {
+  --g-fill: rgba(var(--glass), .24);
+  --g-panel: rgba(var(--glass), .36);
+  --g-ctl: rgba(255, 255, 255, .07);
+  --g-ctl-hover: rgba(255, 255, 255, .13);
+
+  --g-edge: rgba(255, 255, 255, .24);
+  --g-hi: rgba(255, 255, 255, .62);
+  --g-rim-side: rgba(255, 255, 255, .14);
+  --g-rim-bot: rgba(255, 255, 255, .12);
+  --g-inner-glow: rgba(255, 255, 255, .08);
+
+  --g-hotspot: rgba(255, 255, 255, .22);
+  --g-caustic: rgba(var(--accent-rgb, 255, 255, 255), .12);
+  --g-sheen-1: rgba(255, 255, 255, .18);
+  --g-sheen-2: rgba(255, 255, 255, .04);
+  --g-sheen-3: rgba(255, 255, 255, .09);
+
+  --g-shadow: rgba(0, 0, 0, .68);
+  --g-shadow-ambient: rgba(0, 0, 0, .38);
+  --g-sat: 250%;
+  --g-bright: 1.12;
+  --g-contrast: 1.08;
+
+  --g-lens-dome: rgba(255, 255, 255, .48);
+  --g-lens-top: rgba(255, 255, 255, .30);
+  --g-lens-bot: rgba(255, 255, 255, .06);
+}
+
+/* ==========================================================================
+   Shared Panels: Radial Hotspot + Caustic Bounce + Diagonal Sheen + 3D Rim
+   ========================================================================== */
+body .glass,
+body .settings-surface,
+body .dialog,
+body .app-picker {
+  background:
+    radial-gradient(120% 85% at 10% 0%, var(--g-hotspot) 0%, transparent 55%),
+    radial-gradient(100% 80% at 95% 100%, var(--g-caustic) 0%, transparent 60%),
+    linear-gradient(
+      135deg,
+      var(--g-sheen-1) 0%,
+      var(--g-sheen-2) 36%,
+      transparent 52%,
+      var(--g-sheen-3) 100%
+    ),
+    var(--g-fill);
+  border: 1px solid var(--g-edge);
+  backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
+  -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
+  box-shadow:
+    inset 0 1.5px 0.5px 0 var(--g-hi),
+    inset 1px 0 0 0 var(--g-rim-side),
+    inset -1px 0 0 0 var(--g-rim-side),
+    inset 0 -1.5px 1px 0 var(--g-rim-bot),
+    inset 0 0 32px 0 var(--g-inner-glow),
+    0 26px 56px -12px var(--g-shadow),
+    0 6px 18px -3px var(--g-shadow-ambient);
+  color: var(--g-ink);
+  isolation: isolate;
+}
+
+body .glass::before {
+  content: none;
+}
+
+body .dialog,
+body .app-picker {
+  background:
+    radial-gradient(130% 90% at 12% 0%, var(--g-hotspot) 0%, transparent 58%),
+    radial-gradient(110% 85% at 92% 100%, var(--g-caustic) 0%, transparent 64%),
+    linear-gradient(
+      135deg,
+      var(--g-sheen-1) 0%,
+      var(--g-sheen-2) 40%,
+      transparent 55%,
+      var(--g-sheen-3) 100%
+    ),
+    var(--g-panel);
+  --g-blur: 60px;
+}
+
+body .settings-surface {
+  --g-blur: 44px;
+}
+
+body[data-palette=custom] {
+  --g-panel: color-mix(in srgb, var(--paper) 42%, transparent);
+  --g-fill: color-mix(in srgb, var(--paper) 28%, transparent);
+}
+
+body :is(.overlay-backdrop, .app-picker-backdrop) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(8, 16, 13, .26);
+}
+
+/* ==========================================================================
+   Small Controls & Capsules: Tactile iOS Control Center Pill Look
+   ========================================================================== */
+body :is(
+  .app-select-trigger,
+  .app-color-trigger,
+  .secondary,
+  .header-back,
+  .comfort-reset,
+  .tool-grid button,
+  .text-input,
+  .page-jump input
+) {
+  background:
+    radial-gradient(100% 90% at 20% 0%, var(--g-sheen-1) 0%, transparent 65%),
+    linear-gradient(160deg, var(--g-sheen-2) 0%, transparent 60%),
+    var(--g-ctl);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 1.2px 0.5px 0 var(--g-hi),
+    inset 0 -1px 0.5px 0 var(--g-rim-bot),
+    0 5px 14px -4px var(--g-shadow-ambient);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .16s cubic-bezier(.22, 1, .36, 1);
+}
+
+body :is(
+  .app-select-trigger,
+  .app-color-trigger,
+  .secondary,
+  .header-back,
+  .comfort-reset,
+  .tool-grid button
+):hover {
+  background:
+    radial-gradient(110% 95% at 20% 0%, var(--g-hotspot) 0%, transparent 68%),
+    var(--g-ctl-hover);
+}
+
+body :is(
+  .app-select-trigger,
+  .app-color-trigger,
+  .secondary,
+  .header-back,
+  .comfort-reset,
+  .tool-grid button
+):active {
+  transform: scale(.975);
+}
+
+body :is(
+  .library-header .icon-button,
+  .reader-toolbar .icon-button,
+  .dialog-heading .icon-button,
+  .app-picker-heading .icon-button
+) {
+  background:
+    radial-gradient(95% 95% at 25% 5%, var(--g-hotspot) 0%, transparent 62%),
+    linear-gradient(155deg, var(--g-sheen-1) 0%, transparent 65%),
+    var(--g-ctl);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 1.5px 0.5px 0 var(--g-hi),
+    inset 0 -1px 0.5px 0 var(--g-rim-bot),
+    0 7px 16px -5px var(--g-shadow);
+  transition:
+    transform .16s cubic-bezier(.22, 1, .36, 1),
+    background-color .18s ease,
+    box-shadow .18s ease;
+}
+
+body :is(
+  .library-header .icon-button,
+  .reader-toolbar .icon-button,
+  .dialog-heading .icon-button,
+  .app-picker-heading .icon-button
+):active {
+  transform: scale(.93);
+}
+
+/* Primary Action Buttons: Glossy Jewel-Tinted iOS Capsule */
+body .read-button,
+body .dialog .primary,
+body .tts-player .primary {
+  background:
+    radial-gradient(110% 80% at 30% 0%, rgba(255, 255, 255, .48) 0%, transparent 55%),
+    linear-gradient(165deg, rgba(255, 255, 255, .32) 0%, rgba(255, 255, 255, .06) 48%, rgba(0, 0, 0, .08) 100%),
+    var(--accent);
+  box-shadow:
+    inset 0 1.5px 0.5px 0 rgba(255, 255, 255, .78),
+    inset 0 -1.5px 2px 0 rgba(0, 0, 0, .24),
+    0 12px 26px -8px var(--g-shadow);
+  border: 1px solid rgba(255, 255, 255, .44);
+  transition:
+    transform .16s cubic-bezier(.22, 1, .36, 1),
+    filter .18s ease,
+    box-shadow .18s ease;
+}
+
+body :is(.read-button, .dialog .primary, .tts-player .primary):active {
+  transform: scale(.975);
+}
+
+/* ==========================================================================
+   Liquid Tabs & 3D Water-Droplet Optical Lens
+   A bar and lens are siblings. Interactive labels exist only once, above both.
+   ========================================================================== */
+body .liquid-tabs {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  border: 0;
+  border-radius: 17px;
+  padding: 4px;
+  gap: 4px;
+  overflow: visible;
+  --lens-x: 4px;
+  --lens-y: 4px;
+  --lens-w: 0px;
+  --lens-h: 35px;
+}
+
+.liquid-tabs::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .08), transparent 65%),
+    rgba(var(--glass), .14);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 1.5px 4px rgba(0, 0, 0, .14),
+    inset 0 -1px 0 var(--g-rim-bot);
+  pointer-events: none;
+  z-index: -2;
+}
+
+.glass-tab-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--lens-w);
+  height: var(--lens-h);
+  transform: translate(var(--lens-x), var(--lens-y));
+  border-radius: 13px;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(85% 60% at 50% 6%, var(--g-lens-dome) 0%, transparent 70%),
+    linear-gradient(180deg, var(--g-lens-top) 0%, var(--g-lens-bot) 100%),
+    rgba(var(--accent-rgb), .16);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 2px 1px var(--g-hi),
+    inset 0 -6px 12px rgba(var(--accent-rgb), .16),
+    0 8px 20px -6px var(--g-shadow),
+    0 2px 6px -1px var(--g-shadow-ambient);
+  transition:
+    transform .28s cubic-bezier(.22, 1, .36, 1),
+    width .28s cubic-bezier(.22, 1, .36, 1),
+    height .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.glass-tab-lens::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.3px;
+  pointer-events: none;
+  background: conic-gradient(
+    from 200deg,
+    #fffffff0,
+    rgba(var(--accent-rgb), .52),
+    #f5addc80,
+    #b0edf58c,
+    #ffffffe6 55%,
+    #ffffff59,
+    #fffffff0
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+body .liquid-tabs > button {
+  position: relative;
+  min-width: 0;
+  z-index: 1;
+  border-radius: 12px;
+}
+
+body .liquid-tabs > button.active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--g-active-ink, var(--accent));
+}
+
+body .liquid-tabs > button.active::after {
+  display: none;
+}
+
+.liquid-tabs[data-lens-ready=false] .glass-tab-lens {
+  transition: none;
+}
+
+body .dialog .reader-tabs.liquid-tabs {
+  padding: 4px;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+
+body .segmented.liquid-tabs {
+  padding: 3px;
+}
+
+/* ==========================================================================
+   Appearance Peeking & Slider Surface Preservation
+   ========================================================================== */
+body .appearance-peeking > .dialog {
+  background: transparent !important;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body .reader-peek-control::before {
+  background:
+    radial-gradient(120% 85% at 15% 0%, var(--g-hotspot) 0%, transparent 58%),
+    linear-gradient(
+      135deg,
+      var(--g-sheen-1) 0%,
+      var(--g-sheen-2) 42%,
+      transparent 55%,
+      var(--g-sheen-3) 100%
+    ),
+    var(--g-panel);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 1.5px 0.5px 0 var(--g-hi),
+    inset 1px 0 0 0 var(--g-rim-side),
+    inset -1px 0 0 0 var(--g-rim-side),
+    inset 0 -1.5px 1px 0 var(--g-rim-bot),
+    inset 0 0 28px 0 var(--g-inner-glow),
+    0 24px 50px -12px var(--g-shadow);
+  backdrop-filter: blur(50px) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
+  -webkit-backdrop-filter: blur(50px) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
+}
+
+body .appearance-peeking {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ==========================================================================
+   Updater UI Elements
+   ========================================================================== */
+.update-summary {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+  padding-inline: 8px;
+  text-align: right;
+}
+
+.update-version {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 0;
+}
+
+.update-state {
+  line-height: 1.7;
+  margin: 12px 0;
+}
+
+.update-notes {
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+  max-height: 24dvh;
+  overflow: auto;
+  padding: 12px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .05), transparent),
+    rgba(var(--glass), .16);
+  border: 1px solid var(--g-edge);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, .08),
+    inset 0 -1px 0 var(--g-rim-bot);
+  border-radius: 12px;
+}
+
+.update-download {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.update-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.update-actions > button {
+  flex: 1;
+}
+
+.update-privacy {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-top: 16px;
+}
+
+/* ==========================================================================
+   Fallbacks & Accessibility
+   ========================================================================== */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body {
+    --g-fill: var(--surface);
+    --g-panel: var(--surface);
+  }
+  body .glass,
+  body .settings-surface,
+  body .dialog,
+  body .app-picker {
+    background: var(--surface);
+  }
+  body .reader-peek-control::before {
+    background: var(--surface);
+  }
+}
+
+@supports not (mask-composite: exclude) {
+  .glass-tab-lens::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-tab-lens {
+    transition: none;
+  }
+}
