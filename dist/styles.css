@@ -83,3 +83,12 @@ body[data-theme] .reader-toolbar .icon-button.active svg{fill:rgba(var(--accent-
 /* Color pickers follow the same fixed heading/content-only scrolling pattern. */
 .app-picker>.app-color-editor{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:3px;margin:-3px}
 @media(min-width:641px){.settings-content>.settings-group{margin-inline:auto}}
+
+/* Shared half-screen cap; the visible viewport keeps sheets above the keyboard. */
+body .dialog,body .dialog.compact-settings-dialog,body .app-picker{max-height:min(50dvh,calc(var(--app-visible-height,100dvh) - 24px))}
+.overlay-backdrop,.app-picker-backdrop{top:var(--app-visible-top,0px);bottom:auto;height:var(--app-visible-height,100dvh)}
+@media(orientation:landscape) and (max-height:480px){
+ body .dialog.has-panel-body{padding:10px 16px}
+ .dialog.has-panel-body>.dialog-heading{margin-bottom:8px}
+ .dialog .reader-tabs .tab{min-height:40px;padding-block:4px;gap:3px}
+}

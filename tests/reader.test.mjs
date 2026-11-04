@@ -122,6 +122,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  const context=new w.MouseEvent('contextmenu',{bubbles:true,cancelable:true});$('.page-text').dispatchEvent(context);assert.ok(context.defaultPrevented);
  click('[data-action="highlight"][data-color="emerald"]');assert.equal($('mark').textContent,quote);
  selectWords(100,35);await until(()=>$('.selection-popover'),'second selection');click('[data-action="new-note"]');input('#note-text','Bagian yang ingin kusimpan.');
+ const noteEditor=$('#note-text'),readerText=$('.page-text');noteEditor.focus();await wait(40);assert.equal(w.document.activeElement,noteEditor,'opening a sheet cannot steal focus from its editor');w.dispatchEvent(new w.Event('resize'));await wait(250);assert.equal(w.document.activeElement,noteEditor);assert.equal($('.page-text'),readerText,'keyboard resize must not repaginate the reader while editing');assert.equal(noteEditor.value,'Bagian yang ingin kusimpan.');
  const noteCopy=new w.Event('copy',{bubbles:true,cancelable:true});$('#note-text').dispatchEvent(noteCopy);assert.equal(noteCopy.defaultPrevented,false,'copy remains available in the note editor');
  $('#note-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.ok(store.annotations.some(a=>a.noteText==='Bagian yang ingin kusimpan.'));
  click('[data-action="bookmark"]');assert.ok(store.annotations.some(a=>a.bookId===fixtureBooks[0].id&&a.type==='bookmark'));

@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Panel setengah layar dan fokus notes (4 November 2026)
+
+- Batasi semua dialog dan picker maksimal setengah layar; judul/tab tetap, isi bergulir.
+- Jaga panel di area viewport yang terlihat saat keyboard terbuka.
+- Jangan ambil kembali fokus dari kolom yang sudah aktif ketika panel dibuka; tunda reflow reader saat mengetik dalam dialog.
+- Simpan anchor draft notes terpisah dari seleksi sementara agar tetap bisa disimpan setelah perubahan viewport.
+
 ## Web — Alignment dan penanda bab (4 November 2026)
 
 - Sejajarkan pilihan font dengan tombol Comfort defaults; margin label tidak lagi mengenai wrapper kontrol.

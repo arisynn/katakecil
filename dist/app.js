@@ -24,8 +24,9 @@ const accents=[['#54756c','Sage'],['#4269a5','Biru'],['#82669c','Ungu'],['#a15e7
 let books=[],catalogState='loading',catalogError='',catalogOffline=false,view='library';
 let activeLibraryId='',carouselObserver=null,carouselTimer;
 let currentBook=null,pages=[],pageIndex=0,readerMode='reading',readingRequest=0,layoutRequest=0;
-let selectedRange=null,editingAnnotation=null,noteColor='amber',drawerTab='contents',previousFocus=null;
+let selectedRange=null,noteDraftRange=null,editingAnnotation=null,noteColor='amber',drawerTab='contents',previousFocus=null;
 let customSelection;
+let deferredEditorReflow=false;
 let toastTimer,resizeTimer,ignoreClickUntil=0,pointerStart=null,touchState=null,reflowing=false;
 const percentage=id=>Math.round(Store.progress[id]?.percentage||0);
 const notesFor=id=>Store.annotations.filter(a=>a.bookId===id);
@@ -174,8 +175,10 @@ async function toggleFullscreen(){
  }catch{toast('Browser tidak mengizinkan layar penuh.');}
 }
 for(const event of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(event,()=>{syncFullscreenButton();clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(currentBook)reflow().catch(e=>toast(e.message));},100);});
+function editingDialog(){const field=document.activeElement;return !!field?.closest?.('.dialog')&&field.matches('textarea,[contenteditable="true"],input:not([type=hidden]):not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=color])');}
 async function reflow(anchor=null){
- if(!currentBook)return;const request=++layoutRequest;reflowing=true;anchor=anchor||features.position();features.setPosition(anchor);features.apply();
+ if(!currentBook)return;
+ if(editingDialog()){deferredEditorReflow=true;return;}const request=++layoutRequest;reflowing=true;anchor=anchor||features.position();features.setPosition(anchor);features.apply();
  const pageEl=$('#reading-page');if(!pageEl||!currentBook)return;
  $('.reader-loading')?.classList.remove('hidden');
  if(document.fonts?.ready)await document.fonts.ready;
@@ -193,6 +196,7 @@ async function reflow(anchor=null){
  try{
   const result=await paginateToFit(chapterSource,fits,()=>new Promise(resolve=>requestAnimationFrame(resolve)),()=>request!==layoutRequest||currentBook?.chapters!==chapterSource);
   if(!result||request!==layoutRequest)return;
+  if(editingDialog()){deferredEditorReflow=true;return;}
   pages=result;const offset=anchor.start??anchor.charOffset??0;let index=pages.findIndex(pg=>pg.chapterIndex===anchor.chapterIndex&&offset>=pg.start&&offset<pg.end);pageIndex=index>=0?index:Math.max(0,Math.min(pageIndex,pages.length-1));
   updatePage();persistPosition();syncFullscreenButton();
  }finally{measure.remove();if(request===layoutRequest){reflowing=false;$('.reader-loading')?.classList.add('hidden');}}
@@ -227,9 +231,10 @@ function showOverlay(html){
  if(!overlay.firstChild)previousFocus=document.activeElement;
  overlay.innerHTML=`<div class="overlay-backdrop" data-backdrop="true"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">${html}</section></div>`;
  layoutDialog($('.dialog',overlay));
- document.body.classList.add('sheet-open');requestAnimationFrame(()=>$('.dialog',overlay)?.focus());
+ const dialog=$('.dialog',overlay);
+ document.body.classList.add('sheet-open');requestAnimationFrame(()=>{if(dialog?.isConnected&&!dialog.contains(document.activeElement))dialog.focus({preventScroll:true});});
 }
-function closeOverlay(){popups.close(false);features.closePanel();overlay.innerHTML='';document.body.classList.remove('sheet-open');previousFocus?.focus?.();previousFocus=null;editingAnnotation=null;pendingBackup=null;}
+function closeOverlay(){popups.close(false);features.closePanel();overlay.innerHTML='';document.body.classList.remove('sheet-open');previousFocus?.focus?.();previousFocus=null;editingAnnotation=null;noteDraftRange=null;pendingBackup=null;if(deferredEditorReflow){deferredEditorReflow=false;if(currentBook)void reflow().catch(e=>toast(e.message));}}
 function dialogHeading(title){const symbol=/catatan|notes/i.test(title)?'edit':/bookmark/i.test(title)?'bookmark':/tampilan|appearance|theme|tema/i.test(title)?'appearance':/baca nyaring|read aloud/i.test(title)?'speaker':/pencarian|search/i.test(title)?'search':/alat kata|word tools/i.test(title)?'globe':/alat baca|reading tools/i.test(title)?'sliders':/impor|import/i.test(title)?'upload':/perangkat|device|tentang|about/i.test(title)?'device':'bookOpen';return `<div class="dialog-heading"><h2 id="dialog-title">${icon(symbol)}${title}</h2>${actionButton('close','close','Tutup')}</div>`;}
 function removeSelection(){customSelection?.clear();selectedRange=null;$('.selection-popover')?.remove();window.getSelection()?.removeAllRanges();}
 function showSelectionToolbar(rect){
@@ -245,10 +250,10 @@ customSelection=createTextSelection({document,getRoot:event=>view==='reader'?fea
 // Native selection is not used by reader highlighting (including touch/long-press).
 function selectionChanged(){}
 
-function saveHighlight(color,noteText=''){if(!selectedRange)return;const anchor=features.anchorMetadata(selectedRange.chapterIndex,selectedRange.startOffset,selectedRange.endOffset);const existing=notesFor(currentBook.id).find(a=>a.type==='highlight'&&a.chapterIndex===selectedRange.chapterIndex&&a.startOffset===selectedRange.startOffset&&a.endOffset===selectedRange.endOffset);Store.saveAnnotation({...existing,...selectedRange,anchor,id:existing?.id||crypto.randomUUID(),type:'highlight',color,noteText:noteText||existing?.noteText||'',createdAt:existing?.createdAt||new Date().toISOString()});removeSelection();closeOverlay();updatePage();toast(noteText?'Catatan tersimpan.':'Highlight tersimpan.');}
+function saveHighlight(color,noteText='',range=selectedRange){if(!range)return;const anchor=features.anchorMetadata(range.chapterIndex,range.startOffset,range.endOffset);const existing=notesFor(currentBook.id).find(a=>a.type==='highlight'&&a.chapterIndex===range.chapterIndex&&a.startOffset===range.startOffset&&a.endOffset===range.endOffset);Store.saveAnnotation({...existing,...range,anchor,id:existing?.id||crypto.randomUUID(),type:'highlight',color,noteText:noteText||existing?.noteText||'',createdAt:existing?.createdAt||new Date().toISOString()});removeSelection();closeOverlay();updatePage();toast(noteText?'Catatan tersimpan.':'Highlight tersimpan.');}
 function noteDialog(annotation=null){
  if(annotation?.type==='bookmark'){features.bookmarkDialog(annotation);return;}
- const range=annotation||selectedRange;if(!range)return;noteColor=annotation?.color||'amber';
+ const range=annotation||selectedRange;if(!range)return;noteDraftRange=annotation?null:{...range};noteColor=annotation?.color||'amber';
  const bookmark=annotation?.type==='bookmark';
  showOverlay(`${dialogHeading(bookmark?'Bookmark':'Catatan')}<p class="dialog-caption">${bookmark?'Kembali ke bagian yang kamu simpan.':'Simpan pikiranmu tentang bagian ini.'}</p>${bookmark?'':`<blockquote class="note-quote" data-book-content translate="no">${escapeHTML(annotation?.needsReview&&currentBook?.source==='supabase'?translatePhrase('Original quotation is kept in your annotation export.'):range.selectedText)}</blockquote><div class="note-colors">${Object.keys(colors).map(c=>`<button class="color-button color-${c} ${c===noteColor?'selected':''}" data-action="note-color" data-color="${c}" aria-label="Warna ${c}"></button>`).join('')}</div><form id="note-form"><label class="field-label" for="note-text">Catatanmu</label><textarea id="note-text" class="text-input" maxlength="10000" placeholder="Tulis di sini…">${escapeHTML(annotation?.noteText||'')}</textarea><div class="dialog-actions">${annotation?`${annotation.noteText?`<button class="secondary" type="button" data-action="delete-note" data-id="${annotation.id}">${icon('notes')} Hapus catatan</button>`:''}<button class="icon-button" type="button" data-action="delete-annotation" data-id="${annotation.id}" aria-label="Hapus highlight">${icon('trash')}</button>`:''}<button class="primary" type="submit">${icon('check')}Simpan</button></div></form>`}${bookmark?`<div class="dialog-actions"><button class="secondary" data-action="delete-annotation" data-id="${annotation.id}">Hapus bookmark</button><button class="primary" data-action="jump-annotation" data-id="${annotation.id}">Buka halaman</button></div>`:''}`);
  editingAnnotation=annotation;
@@ -361,7 +366,7 @@ document.addEventListener('invalid',event=>{
  const message=v.valueMissing?(id?'Kolom ini wajib diisi.':'This field is required.'):(v.rangeUnderflow||v.rangeOverflow||v.badInput)&&field.min!==''&&field.max!==''?(id?`Masukkan nilai antara ${field.min} dan ${field.max}.`:`Enter a value between ${field.min} and ${field.max}.`):(id?'Periksa nilai kolom ini.':'Check this field’s value.');
  toast(message);field.focus({preventScroll:true});
 },true);
-document.addEventListener('submit',event=>{if(features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note);});
+document.addEventListener('submit',event=>{if(features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note,noteDraftRange);});
 document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));
 document.addEventListener('keyup',event=>{if(event.shiftKey||event.key==='Shift')selectionChanged();});
@@ -404,7 +409,7 @@ let lastTextPreferences=features.signature();
 Store.onSync((kind,payload)=>{
  if(kind==='preferences'){const signature=features.signature(),textChanged=signature!==lastTextPreferences;applyPreferences();if(currentBook&&textChanged){features.stopSpeech();reflow().catch(e=>toast(e.message));}if(view==='settings'&&!overlay.firstChild)renderSettings();}
  else if(kind==='progress'&&currentBook&&(!payload||payload.bookId===currentBook.id)){if(customSelection.active||overlay.firstChild)return;const saved=payload||Store.progress[currentBook.id];if(saved){const i=pages.findIndex(pg=>pg.chapterIndex===saved.chapterIndex&&(saved.charOffset||0)>=pg.start&&(saved.charOffset||0)<pg.end);if(i>=0){pageIndex=i;features.setPosition({chapterIndex:saved.chapterIndex,start:saved.charOffset||0});updatePage();}}}
- else if(kind.includes('annotation')&&currentBook){if(!readerSelection())updatePage();if($('#drawer-content'))$('#drawer-content').innerHTML=contentsBody();}
+ else if(kind.includes('annotation')&&currentBook){if(!readerSelection()&&!editingDialog())updatePage();if($('#drawer-content'))$('#drawer-content').innerHTML=contentsBody();}
  else if(view==='library'&&$('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();
 });
 try{const channel=new BroadcastChannel('lumina-library');channel.onmessage=async()=>{const stored=await Store.dbGetAll('books');for(const book of stored.filter(b=>b.source==='local'))if(!books.some(b=>b.id===book.id))books.push(book);if(view==='library')renderLibrary();};}catch{}
@@ -430,8 +435,9 @@ new window.MutationObserver(()=>navigation.sync()).observe(app.parentElement||do
 void listenNativeLifecycle({back:()=>{if(!canGoBack())return false;navigation.back();return true;},active:appActivity}).catch(e=>toast(e.message));
 document.addEventListener('visibilitychange',()=>appActivity(document.visibilityState==='visible'));
 window.addEventListener('pagehide',()=>{persistPosition();void Store.flush();});
-window.visualViewport?.addEventListener('resize',()=>{
- const height=window.visualViewport.height;document.documentElement.style.setProperty('--app-visible-height',height+'px');
-});
+function syncVisibleViewport(){const viewport=window.visualViewport;if(!viewport)return;const style=document.documentElement.style;style.setProperty('--app-visible-height',viewport.height+'px');style.setProperty('--app-visible-top',viewport.offsetTop+'px');}
+window.visualViewport?.addEventListener('resize',syncVisibleViewport);
+window.visualViewport?.addEventListener('scroll',syncVisibleViewport);
+syncVisibleViewport();
 async function init(){activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();renderLibrary();await loadCatalog();void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');}
 init().catch(()=>{catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});
