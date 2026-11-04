@@ -18,7 +18,7 @@ export function createReaderExperience(ctx){
  let search={query:'',chapterIndex:0,matches:[],total:0,index:-1},lookupSelection=null,lookupRequest=0,lookupAbort=null;
  let pendingSpeechPosition=null,lastSpeechSave=0;
  let draftInk='#28302b',draftPaper='#faf9f5',speechRange=null,speechWord=null;
- const wake=new ReadingWakeLock();
+ const wake=ctx.wakeLock||new ReadingWakeLock();
  const speech=new ReadAloud({change:()=>updateSpeechUI(),sentence:(pos,end)=>speechAt(pos,end,false),word:(pos,end)=>speechAt(pos,end,true),error:message=>ctx.toast(message)},ctx.speechDriver);
  const chapterName=index=>ctx.book()?.chapters[index]?.navigationTitle||ctx.book()?.chapters[index]?.title||tr('Book information','Informasi buku');
  const field=(label,key,type,attributes,value)=>`<label class="reader-setting appearance-field"><span>${label}</span><input data-reader-pref="${key}" type="${type}" ${attributes} value="${esc(value)}"><output data-output="${key}">${esc(value)}</output></label>`;
@@ -34,7 +34,7 @@ export function createReaderExperience(ctx){
   for(const [name,value] of Object.entries({'reader-font':font,'reader-size':d.fontSize+'px','reader-line':d.lineHeight,'reader-weight':d.fontWeight,'paragraph-space':d.paragraphSpacing+'px','letter-space':d.letterSpacing+'px','paragraph-indent':d.paragraphIndent+'em','reader-align':d.textAlign,'reader-inset-x':d.marginHorizontal+'px','reader-inset-y':Math.min(d.marginVertical,Math.max(8,(innerHeight-220)/2))+'px','reader-width':d.readerWidth+'px','reader-paper':palette.background,'reader-ink':palette.text,'reader-brightness':(100-d.brightness)/100,'content-position':d.contentPosition==='center'?'center':'flex-start'}))s.setProperty('--'+name,String(value));
   const shell=$('.reader-shell');if(shell){shell.dataset.readingMode=mode();shell.dataset.spread=String(spread());shell.dataset.animation=ctx.prefs().pageAnimation||'slide';}
  }
- function enter(){panel='';scrollPosition=null;pendingSpeechPosition=null;lastSpeechSave=0;filters={episode:'all',color:'all'};activeTab='contents';search={query:'',chapterIndex:0,matches:[],total:0,index:-1};apply();void wake.set(!!ctx.prefs().wakeLock).catch(()=>{});}
+ function enter(){panel='';scrollPosition=null;pendingSpeechPosition=null;lastSpeechSave=0;filters={episode:'all',color:'all'};activeTab='contents';search={query:'',chapterIndex:0,matches:[],total:0,index:-1};apply();void wake.set(!!ctx.prefs().wakeLock).catch(()=>{});if(ctx.setOrientation)void ctx.setOrientation(ctx.prefs().orientation||'auto').catch(()=>{});}
  function leave(){finishPeek();speech.stop();void wake.set(false);clearTimeout(scrollTimer);lookupAbort?.abort();lookupRequest++;lookupSelection=null;scrollPosition=null;panel='';clearSpeechPaint();}
  function closePanel(){finishPeek();panel='';lookupAbort?.abort();lookupRequest++;}
  function anchorMetadata(chapterIndex,start,end){return makeAnchor(ctx.book().chapters[chapterIndex],start,end);}
@@ -219,7 +219,7 @@ export function createReaderExperience(ctx){
  async function changePreference(key,value){
   const anchor=peek?.anchor||position(),previous=ctx.prefs()[key];delete previewValues[key];ctx.savePreferences({[key]:value});ctx.apply();
   if(key==='wakeLock'){try{await wake.set(!!value);}catch(error){ctx.toast(error.message);}return;}
-  if(key==='orientation'){try{if(value==='auto')screen.orientation?.unlock?.();else if(screen.orientation?.lock)await screen.orientation.lock(value);else ctx.toast(tr('Orientation lock is unavailable. Rotate your device manually.','Kunci orientasi tidak tersedia. Putar perangkat secara manual.'));}catch{ctx.toast(tr('The browser did not allow orientation lock.','Browser tidak mengizinkan kunci orientasi.'));}return;}
+  if(key==='orientation'){try{if(ctx.setOrientation)await ctx.setOrientation(value);else if(value==='auto')screen.orientation?.unlock?.();else if(screen.orientation?.lock)await screen.orientation.lock(value);else ctx.toast(tr('Orientation lock is unavailable. Rotate your device manually.','Kunci orientasi tidak tersedia. Putar perangkat secara manual.'));}catch{ctx.toast(tr('The browser did not allow orientation lock.','Browser tidak mengizinkan kunci orientasi.'));}return;}
   if(key==='ttsRate'){speech.setRate(Number(value));return;}
   if(['brightness','tapNavigation','pageAnimation'].includes(key))return;
   speech.stop();scrollPosition=anchor;try{await ctx.reflow(anchor);}catch(error){ctx.savePreferences({[key]:previous});ctx.apply();await ctx.reflow(anchor);throw error;}
@@ -278,7 +278,7 @@ export function createReaderExperience(ctx){
  window.addEventListener('pagehide',()=>{speech.stop();void wake.set(false);});
  document.addEventListener('keydown',event=>{if(event.target.closest?.('.appearance-tabs')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const tabs=$$('.appearance-tabs button'),index=tabs.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next]?.click();return;}if(!event.target.closest?.('.reader-tabs')||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();event.stopPropagation();const tabs=$$('.reader-tabs .tab'),index=tabs.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next]?.click();});
  return{apply,enter,leave,closePanel,position,mode,spread,renderedPages,renderText,measureText,afterRender,jump,anchorMetadata,resolveAnnotations,savedPosition,progressMetadata,contents,contentsBody,appearance,themeDialog,bookmarkDialog,action,input,change,submit,
-  stopSpeech:()=>speech.stop(),pauseSpeech:()=>speech.pause(),paintSpeech,clearSpeechPaint,refreshPanel:()=>{if(panel==='appearance')appearance();else if(panel==='global-theme')themeDialog();else if(panel==='contents')contents();},
+  stopSpeech:()=>speech.stop(),pauseSpeech:()=>speech.pause(),resumeScreen:()=>wake.set(!!ctx.prefs().wakeLock),paintSpeech,clearSpeechPaint,refreshPanel:()=>{if(panel==='appearance')appearance();else if(panel==='global-theme')themeDialog();else if(panel==='contents')contents();},
   signature:()=>JSON.stringify(Object.fromEntries([...Object.keys(readerDefaults),'fontFamily','fontSize','lineHeight','spreadMode'].filter(k=>!['readerTheme','customTextColor','customBackgroundColor','brightness','wakeLock','ttsVoice','ttsLanguage','ttsRate','tapNavigation','pageAnimation'].includes(k)).map(k=>[k,ctx.prefs()[k]]))),
   setPosition:anchor=>{scrollPosition={chapterIndex:anchor.chapterIndex,start:anchor.start??anchor.charOffset??0};},
   rootFor:event=>event?.target?.closest?.('.page-text')||document.activeElement?.closest?.('.page-text')||$('.page-text'),

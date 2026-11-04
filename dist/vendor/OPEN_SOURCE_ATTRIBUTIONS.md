@@ -31,6 +31,15 @@ The DOM range conversion dependencies are retained by the CommonJS package bundl
 - The existing KataKecil logo is an image-generation output from earlier work, not an asset copied from these repositories.
 - EPUB test fixtures are the existing public-domain Project Gutenberg editions. The owner's manuscript EPUBs are not committed or included in the static distribution.
 
+## Android application and shared device adapter
+
+- **Capacitor core 8.6.0**, **Capacitor Android 8.6.0**, **Capacitor App 8.1.2** — MIT, Drifty Co., https://github.com/ionic-team/capacitor and https://github.com/ionic-team/capacitor-plugins. Used for the local WebView shell, native bridge, system bars, lifecycle and Back. Notices: [core](./licenses/capacitor-core.txt), [Android](./licenses/capacitor-android.txt), [App](./licenses/capacitor-app.txt).
+- **tslib**, pinned transitively in the lockfile — Microsoft, 0BSD. [Notice and license](./licenses/tslib.txt).
+- Capacitor's native dependencies include **AndroidX** (The Android Open Source Project, Apache-2.0, https://android.googlesource.com/platform/frameworks/support/) and **Apache Cordova Android** (The Apache Software Foundation, Apache-2.0, https://github.com/apache/cordova-android). The existing bundled [Apache-2.0 text](./licenses/diff-match-patch.txt) is retained; upstream notices remain in the dependency distributions.
+- `KataKecilDevicePlugin.java` is app-specific integration using Android TextToSpeech, the Storage Access Framework document picker, orientation and screen flags. Android TTS engines/voices are device components and are not bundled. Network voices can send requested speech to their provider; offline voices are labeled separately.
+
+Capacitor CLI 8.6.0 is development tooling and is not shipped inside the APK or web bundle. The original logo is reused unchanged for the launcher and splash screen.
+
 ## Development dependencies
 
 New tooling: **esbuild 0.28.2** (MIT, https://github.com/evanw/esbuild), **TypeScript 7.0.2** (Apache-2.0, https://github.com/microsoft/TypeScript), **@types/node 26.6.6** (MIT, https://github.com/DefinitelyTyped/DefinitelyTyped). Existing **jsdom 26.1.0** (MIT) and **fake-indexeddb 6.2.4** (Apache-2.0) remain test-only. Exact transitive versions/integrity are in the lockfile. Build/test tooling is not shipped as browser code.

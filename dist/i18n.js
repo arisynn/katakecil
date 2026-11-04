@@ -3,6 +3,12 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Simpan backup':'Save backup','Pulihkan backup':'Restore backup','Backup disimpan.':'Backup saved.',
+ 'Backup memuat progres dan catatan. Buku pribadi perlu diimpor ulang.':'Backups include progress and notes. Import personal EPUBs again.',
+ 'Data digabungkan. Catatan dan progres yang lebih baru di perangkat ini dipertahankan.':'Data is merged. Newer notes and progress on this device are kept.',
+ 'Pulihkan pengaturan tampilan':'Restore appearance settings','Batal':'Cancel',
+ 'Progres dan catatan tersimpan di perangkat ini. Buku dari server memerlukan koneksi.':'Progress and notes are saved on this device. Server books require an internet connection.',
+ 'Menghapus data aplikasi atau browser menghapus data lokal. Simpan backup untuk memindahkannya ke perangkat lain.':'Clearing app or browser data removes local data. Save a backup to move it to another device.',
  'Kertas':'Paper','Hijau':'Green','Kustom':'Custom',
  'Aksi Library':'Library actions',
  'Progres dan catatan tersimpan di browser ini. Buku dari server memerlukan koneksi.':'Progress and notes are saved in this browser. Server books require an internet connection.',
@@ -16,6 +22,12 @@ const english={
  'Layar penuh belum didukung browser ini.':'This browser does not support full screen.','Browser tidak mengizinkan layar penuh.':'The browser did not allow full screen.','Penyimpanan perangkat tidak tersedia. Progres mungkin tidak tersimpan.':'Device storage is unavailable. Your progress may not be saved.','Penyimpanan perangkat tidak tersedia.':'Device storage is unavailable.','Bookmark dihapus.':'Bookmark removed.','Halaman ditandai.':'Page bookmarked.','Catatan tersimpan.':'Note saved.','Highlight tersimpan.':'Highlight saved.','Catatan diekspor.':'Notes exported.','Buku ini sudah ada di rak.':'This book is already on your shelf.','Buku ditambahkan ke rak.':'Book added to your shelf.','Berkas tidak dapat dibuka.':'Unable to open this file.','Pilih berkas .epub.':'Choose an .epub file.','Ukuran maksimal 30 MB.':'The maximum file size is 30 MB.','Penyimpanan perangkat penuh atau tidak tersedia.':'Device storage is full or unavailable.','Alamat buku tidak valid.':'The book URL is invalid.','Buku diperbarui. Segarkan koleksi dan buka lagi.':'The book has changed. Refresh your library and open it again.','Koneksi ke koleksi buku gagal. Coba lagi.':'Unable to connect to your library. Try again.','Berkas lebih besar dari 30 MB.':'This file is larger than 30 MB.','Format koleksi tidak valid.':'The library format is invalid.','Data buku tidak lengkap.':'Some book details are missing.','Periksa koneksi internet, lalu coba lagi.':'Check your internet connection and try again.','Buku tidak tersedia.':'This book is unavailable.','Buku belum bisa dibuka.':'Unable to open this book.','Posisi catatan ini perlu ditinjau setelah pembaruan buku.':'This note’s location needs review after the book was updated.','Rak belum bisa dibuka. Coba segarkan halaman.':'Unable to load your library. Try refreshing the page.','Ukuran teks terlalu besar untuk area baca. Kecilkan teks atau putar layar.':'The text is too large for this screen. Reduce the text size or rotate your device.','Halaman tidak dapat ditata untuk ukuran layar ini.':'Unable to lay out a page for this screen size.'
 };
 const parserErrors={
+ 'Invalid KataKecil backup.':'Backup KataKecil tidak valid.',
+ 'Backup is larger than 8 MB.':'Ukuran backup lebih dari 8 MB.',
+ 'Storage is unavailable. Keep your backup and try again.':'Penyimpanan tidak tersedia. Simpan berkas backup dan coba lagi.',
+ 'Reading data was imported, but settings could not be saved.':'Data bacaan dipulihkan, tetapi pengaturan gagal disimpan.',
+ 'A note ID belongs to another book. Nothing was imported.':'ID catatan berbenturan dengan buku lain. Tidak ada data yang diimpor.',
+ 'Orientation lock is unavailable. Rotate your device manually.':'Kunci orientasi tidak tersedia. Putar perangkat secara manual.',
  'Storage is unavailable. Export your notes before closing this tab.':'Penyimpanan tidak tersedia. Ekspor catatan sebelum menutup tab ini.',
  'Original quotation is kept in your annotation export.':'Kutipan asli tersimpan dalam ekspor anotasi Anda.',
  'Select between 1 and 4,000 characters.':'Pilih antara 1 hingga 4.000 karakter.',

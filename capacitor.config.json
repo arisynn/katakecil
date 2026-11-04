@@ -1,0 +1,13 @@
+{
+  "appId": "id.karisyono.katakecil",
+  "appName": "KataKecil",
+  "webDir": "dist",
+  "server": { "androidScheme": "https" },
+  "plugins": { "SystemBars": { "insetsHandling": "css", "initialViewportFitValueHint": "cover" } },
+  "android": {
+    "backgroundColor": "#faf9f5",
+    "allowMixedContent": false,
+    "minWebViewVersion": 113,
+    "webContentsDebuggingEnabled": false
+  }
+}

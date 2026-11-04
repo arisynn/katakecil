@@ -5,7 +5,7 @@ import {JSDOM} from 'jsdom';
 import {runInNewContext} from 'node:vm';
 import {createRequire} from 'node:module';
 import {indexedDB,IDBKeyRange} from 'fake-indexeddb';
-const dom=new JSDOM('<html><head><meta name="theme-color"></head><body><div id="app"></div><div id="overlay-root"></div><div id="toast"></div><input type="file" id="epub-input"></body></html>',{url:'https://reader.example/',runScripts:'outside-only',pretendToBeVisual:true});
+const dom=new JSDOM('<html><head><meta name="theme-color"></head><body><div id="app"></div><div id="overlay-root"></div><div id="toast"></div><input type="file" id="epub-input"><input type="file" id="backup-input" hidden></body></html>',{url:'https://reader.example/',runScripts:'outside-only',pretendToBeVisual:true});
 const w=dom.window;
 const zipModule={exports:{}};
 runInNewContext(await readFile(new URL('../dist/vendor/jszip.min.js',import.meta.url),'utf8'),{module:zipModule,exports:zipModule.exports,require:createRequire(import.meta.url),setTimeout,clearTimeout,setImmediate,Buffer,Uint8Array,ArrayBuffer,Promise});
@@ -76,7 +76,7 @@ test('malformed and encrypted files fail without executing markup',async()=>{
 });
 
 test('local persistence and BroadcastChannel apply preferences, annotations, and progress',async()=>{
- const store=await import('../dist/store.js?v=11');
+ const store=await import('../dist/store.js?v=12');
  await store.openDatabase();
  store.updatePreferences({glassBlur:34});
  assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).glassBlur,34);
@@ -94,7 +94,7 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
 });
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
- const store=await import('../dist/store.js?v=11');
+ const store=await import('../dist/store.js?v=12');
  const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
  await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
  store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
@@ -171,7 +171,7 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
 
 
 test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
- const store=await import('../dist/store.js?v=11');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
+ const store=await import('../dist/store.js?v=12');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
  click('[data-action="settings"]');assert.ok($('.settings-header [data-action="library"]'),'Settings has a back action');assert.equal($('.bottom-tabs'),null);assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
  assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.match($('.settings-shell').textContent,/Books stay in their original language/);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
  click('[data-action="library"]');await wait();assert.equal($('.bottom-tabs'),null);assert.equal($('.library-header-actions [data-action="settings"]').getAttribute('aria-label'),'Settings');click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
@@ -182,7 +182,7 @@ test('language setting persists and synchronizes while reader text and reading p
 });
 
 test('advanced reader integrates display, scroll, spread, page jumps, search, annotations and selected-text tools',async()=>{
- const store=await import('../dist/store.js?v=11');const bookId=fixtureBooks[0].id;
+ const store=await import('../dist/store.js?v=12');const bookId=fixtureBooks[0].id;
  click('[data-action="library"]');click('[data-action="settings"]');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));
  click('[data-action="library"]');click('[data-action="open"][data-id="'+bookId+'"]');await until(()=>$('.reader-loading')?.classList.contains('hidden'),'advanced reader opened');
  const otherProgress=JSON.stringify(store.progress[fixtureBooks[1].id]);
@@ -215,8 +215,21 @@ test('advanced reader integrates display, scroll, spread, page jumps, search, an
  globalThis.innerWidth=730;globalThis.innerHeight=360;w.innerWidth=730;w.innerHeight=360;w.dispatchEvent(new w.Event('resize'));await wait(220);await until(()=>$('.reader-loading')?.classList.contains('hidden'),'simulated landscape reflow');assert.equal($('.reader-shell').dataset.spread,'false');assert.equal(store.progress[bookId].charOffset,resumeOffset);click('[data-action="library"]');
 });
 
+test('shared web UI previews and restores a backup, and browser Back closes its sheet before Settings',async()=>{
+ const store=await import('../dist/store.js?v=12'),identity=store.deviceId;
+ click('[data-action="settings"]');await wait(40);
+ const note={id:'backup-ui-note',bookId:fixtureBooks[0].id,type:'bookmark',color:'sapphire',chapterIndex:0,charOffset:0,label:'From another device',createdAt:'2026-11-01T00:00:00.000Z',updatedAt:'2026-11-01T00:00:00.000Z'};
+ const raw=JSON.stringify({format:'katakecil-backup',schemaVersion:2,preferences:{fontSize:20},progress:[],annotations:[note]});
+ const choose=()=>{Object.defineProperty($('#backup-input'),'files',{configurable:true,value:[{name:'backup.json',size:raw.length,text:async()=>raw}]});$('#backup-input').dispatchEvent(new w.Event('change',{bubbles:true}));};
+ choose();await until(()=>$('[data-action="backup-restore"]'),'backup preview');assert.equal(store.annotations.some(a=>a.id===note.id),false,'preview does not modify data');
+ w.history.back();await until(()=>!$('.dialog'),'Back dismisses backup preview');assert.ok($('.settings-shell'));
+ choose();await until(()=>$('[data-action="backup-restore"]'),'backup preview again');click('[data-action="backup-restore"]');await until(()=>!$('.dialog'),'restore completed');
+ assert.ok(store.annotations.find(a=>a.id===note.id));assert.equal(store.preferences.fontSize,20);assert.equal(store.deviceId,identity);
+ w.history.back();await until(()=>$('.library-shell'),'Back returns to Library');
+});
+
 test('notes recover after LocalStorage mirror failure and deleted notes never resurrect on hydration',async()=>{
- const store=await import('../dist/store.js?v=11'),oldSet=w.Storage.prototype.setItem;
+ const store=await import('../dist/store.js?v=12'),oldSet=w.Storage.prototype.setItem;
  w.Storage.prototype.setItem=function(key,value){if(key==='lumina_annotations')throw Error('QuotaExceededError');return oldSet.call(this,key,value);};
  const note={id:'quota-note',bookId:'test-book-only',type:'highlight',selectedText:'a small quote',chapterIndex:0,startOffset:0,endOffset:13,noteText:'Recover this note',color:'amber',createdAt:new Date().toISOString()};
  assert.equal(store.saveAnnotation(note),false);await wait(40);const recovered=await import('../dist/store.js?quota-recovery');await recovered.hydrate();assert.ok(recovered.annotations.some(a=>a.id===note.id),'a new module instance recovers the note from IndexedDB');await store.hydrate();

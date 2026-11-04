@@ -6,9 +6,14 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "check": "node scripts/check-reader.mjs",
     "build": "node scripts/build-reader.mjs",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "android:sync": "npm run build && cap sync android",
+    "android:debug": "node scripts/build-android.mjs --debug",
+    "android:release": "node scripts/build-android.mjs",
+    "android:key": "node scripts/create-signing-key.mjs"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.6.0",
     "@types/node": "26.6.6",
     "esbuild": "0.28.2",
     "fake-indexeddb": "6.2.4",
@@ -16,6 +21,9 @@
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
     "dom-anchor-text-quote": "4.0.2",
     "easy-speech": "2.4.0"
   }

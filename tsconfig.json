@@ -17,6 +17,7 @@
   },
   "include": [
     "src/reader/**/*.ts",
+    "src/platform/**/*.ts",
     "supabase/functions/lumina-library/*.ts"
   ]
 }

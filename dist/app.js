@@ -4,11 +4,13 @@ import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=10';
-import * as Store from './store.js?v=11';
-import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=10';
+import * as Store from './store.js?v=12';
+import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=11';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,fetchPublishedBook,findPage,makeAnchor,prepareChapters,globalPalette} from './advanced-reader.js?v=11';
-import {createReaderExperience} from './reader-experience.js?v=13';
+import {createReaderExperience} from './reader-experience.js?v=14';
+import {isNativeApp,nativeSpeechDriver,createNativeWakeLock,saveJSON,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=1';
+import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
 const popups=installAppPopups(document);
 const colors={amber:'#e7ca7e',emerald:'#a4c9ae',sapphire:'#acc7e6',rose:'#e4b3c3'};
@@ -23,6 +25,7 @@ const percentage=id=>Math.round(Store.progress[id]?.percentage||0);
 const notesFor=id=>Store.annotations.filter(a=>a.bookId===id);
 const p=()=>Store.preferences;
 const features=createReaderExperience({
+ speechDriver:nativeSpeechDriver,wakeLock:createNativeWakeLock(),setOrientation:setReaderOrientation,
  book:()=>currentBook,pages:()=>pages,index:()=>pageIndex,prefs:p,annotations:()=>Store.annotations,progress:id=>Store.progress[id],
  savePreferences:Store.updatePreferences,saveAnnotation:Store.saveAnnotation,saveSpeech:tts=>{if(currentBook)Store.saveProgress({...Store.progress[currentBook.id],bookId:currentBook.id,tts});},
  goPage:goToPage,reflow,paint:updatePage,persist:persistPosition,apply:applyPreferences,show:showOverlay,close:closeOverlay,heading:dialogHeading,mode:setReaderMode,toast,selection:()=>selectedRange,clearSelection:removeSelection,download,
@@ -42,7 +45,7 @@ function applyPreferences(){
  s.setProperty('--reader-font',['DM Sans','Plus Jakarta Sans'].includes(p().fontFamily)?'system-ui,sans-serif':"'Lora',Georgia,serif");
  s.setProperty('--reader-size',`${Math.max(14,Math.min(32,p().fontSize))}px`);s.setProperty('--reader-line',String(Math.max(1.4,Math.min(2,p().lineHeight))));
  $('meta[name="theme-color"]').content=palette.background;
- features.apply();
+ features.apply();void updateSystemTheme(palette.dark).catch(()=>{});
 }
 function shell(content,page='library'){
  return `<main class="personal-shell ${page==='library'?'library-shell':'settings-shell'}">${content}</main>`;
@@ -76,7 +79,7 @@ function scrollToSelected(smooth=true){const el=$('#book-carousel'),card=$$('.sh
 function selectBook(id,scroll=true){if(!books.some(b=>b.id===id))return;activeLibraryId=id;Store.writeLocal('lumina_selected_book',id);$$('.shelf-book').forEach(c=>c.classList.toggle('is-current',c.dataset.bookId===id));$$('.shelf-dot').forEach(c=>{c.classList.toggle('active',c.dataset.id===id);c.setAttribute('aria-pressed',String(c.dataset.id===id));});if($('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();if(scroll)scrollToSelected();}
 function renderSettings(){
  disconnectCarousel();view='settings';currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Pengaturan · KataKecil';
- app.innerHTML=shell(`<header class="settings-header"><div class="settings-brand">${brandMark()}<span>KataKecil</span></div><div class="settings-title-row"><h1>Pengaturan</h1><button class="header-back" data-action="library" aria-label="Kembali ke Library">${icon('left')}<span>Library</span></button></div></header><section class="settings-group"><h2>${icon('globe')} Bahasa</h2><div class="settings-surface"><div class="setting-row"><label class="setting-label" for="app-language">${icon('globe')}Bahasa aplikasi</label><select id="app-language" class="language-select" aria-label="Bahasa aplikasi"><option value="id" ${p().uiLanguage!=='en'?'selected':''}>Bahasa Indonesia</option><option value="en" ${p().uiLanguage==='en'?'selected':''}>English</option></select></div></div><p class="settings-caption">Hanya mengubah bahasa aplikasi, bukan isi buku.</p></section><section class="settings-group"><h2>${icon('appearance')} Tampilan</h2><div class="settings-surface"><button class="settings-link global-theme-link" data-action="global-theme"><span class="setting-label">${icon('appearance')}Tema</span><span id="global-theme-summary">${({light:'Terang',dark:'Gelap',system:'Sistem',sepia:'Sepia',paper:'Kertas',green:'Hijau',custom:'Kustom'})[p().themeMode]||'Terang'}</span>${icon('chevron')}</button><div class="setting-row accent-row"><span class="setting-label">${icon('palette')}Warna aksen</span><div class="accent-options">${accents.map(([color,name])=>`<button class="accent-swatch ${p().accentColor===color?'selected':''}" style="--swatch:${color}" data-action="accent" data-value="${color}" aria-label="Aksen ${name}" aria-pressed="${p().accentColor===color}">${icon('check')}</button>`).join('')}<label class="custom-accent" title="Pilih warna sendiri">${icon('plus')}<input type="color" id="accent-custom" aria-label="Warna aksen pilihan" value="${p().accentColor}"></label></div></div></div></section><section class="settings-group"><h2>${icon('bookOpen')} Membaca</h2><div class="settings-surface"><div class="setting-row"><span class="setting-label">${icon('type')}Huruf</span><div class="segmented">${[['Lora','Serif'],['Plus Jakarta Sans','Sans']].map(([v,l])=>`<button data-action="font" data-value="${v}" class="${p().fontFamily===v?'active':''}">${icon(v==='light'?'sun':v==='dark'?'moon':v==='system'?'device':'type')}<span>${l}</span></button>`).join('')}</div></div><div class="setting-row font-range"><label for="settings-font-size"><span class="setting-label">${icon('textSize')}Ukuran teks</span><output id="font-size-output">${p().fontSize}</output></label><input type="range" id="settings-font-size" min="14" max="32" step="1" value="${p().fontSize}" aria-label="Ukuran teks"></div></div><p class="settings-caption">Seleksi kalimat untuk highlight. Aksi salin teks buku dinonaktifkan.</p></section><section class="settings-group"><details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="import">Impor EPUB dari perangkat ${icon('upload')}</button><button class="settings-link" data-action="export-notes">Ekspor catatan ${icon('download')}</button><button class="settings-link" data-action="status">Penyimpanan perangkat ${icon('shield')}</button></div></details></section><p class="settings-footnote">Progres dan catatan tersimpan di perangkat ini.</p>`,'settings');
+ app.innerHTML=shell(`<header class="settings-header"><div class="settings-brand">${brandMark()}<span>KataKecil</span></div><div class="settings-title-row"><h1>Pengaturan</h1><button class="header-back" data-action="library" aria-label="Kembali ke Library">${icon('left')}<span>Library</span></button></div></header><section class="settings-group"><h2>${icon('globe')} Bahasa</h2><div class="settings-surface"><div class="setting-row"><label class="setting-label" for="app-language">${icon('globe')}Bahasa aplikasi</label><select id="app-language" class="language-select" aria-label="Bahasa aplikasi"><option value="id" ${p().uiLanguage!=='en'?'selected':''}>Bahasa Indonesia</option><option value="en" ${p().uiLanguage==='en'?'selected':''}>English</option></select></div></div><p class="settings-caption">Hanya mengubah bahasa aplikasi, bukan isi buku.</p></section><section class="settings-group"><h2>${icon('appearance')} Tampilan</h2><div class="settings-surface"><button class="settings-link global-theme-link" data-action="global-theme"><span class="setting-label">${icon('appearance')}Tema</span><span id="global-theme-summary">${({light:'Terang',dark:'Gelap',system:'Sistem',sepia:'Sepia',paper:'Kertas',green:'Hijau',custom:'Kustom'})[p().themeMode]||'Terang'}</span>${icon('chevron')}</button><div class="setting-row accent-row"><span class="setting-label">${icon('palette')}Warna aksen</span><div class="accent-options">${accents.map(([color,name])=>`<button class="accent-swatch ${p().accentColor===color?'selected':''}" style="--swatch:${color}" data-action="accent" data-value="${color}" aria-label="Aksen ${name}" aria-pressed="${p().accentColor===color}">${icon('check')}</button>`).join('')}<label class="custom-accent" title="Pilih warna sendiri">${icon('plus')}<input type="color" id="accent-custom" aria-label="Warna aksen pilihan" value="${p().accentColor}"></label></div></div></div></section><section class="settings-group"><h2>${icon('bookOpen')} Membaca</h2><div class="settings-surface"><div class="setting-row"><span class="setting-label">${icon('type')}Huruf</span><div class="segmented">${[['Lora','Serif'],['Plus Jakarta Sans','Sans']].map(([v,l])=>`<button data-action="font" data-value="${v}" class="${p().fontFamily===v?'active':''}">${icon(v==='light'?'sun':v==='dark'?'moon':v==='system'?'device':'type')}<span>${l}</span></button>`).join('')}</div></div><div class="setting-row font-range"><label for="settings-font-size"><span class="setting-label">${icon('textSize')}Ukuran teks</span><output id="font-size-output">${p().fontSize}</output></label><input type="range" id="settings-font-size" min="14" max="32" step="1" value="${p().fontSize}" aria-label="Ukuran teks"></div></div><p class="settings-caption">Seleksi kalimat untuk highlight. Aksi salin teks buku dinonaktifkan.</p></section><section class="settings-group"><details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="import">Impor EPUB dari perangkat ${icon('upload')}</button><button class="settings-link" data-action="export-notes">Ekspor catatan ${icon('download')}</button><button class="settings-link" data-action="backup-export">Simpan backup ${icon('download')}</button><button class="settings-link" data-action="backup-import">Pulihkan backup ${icon('upload')}</button><button class="settings-link" data-action="status">Penyimpanan perangkat ${icon('shield')}</button></div></details></section><p class="settings-footnote">Progres dan catatan tersimpan di perangkat ini.</p>`,'settings');
 }
 async function fetchLimited(url,type='buffer'){
  const target=new URL(url,location.href);if(!['https:','http:'].includes(target.protocol))throw Error('Alamat buku tidak valid.');
@@ -143,9 +146,10 @@ function migrateSavedAnchors(bookId,oldChapters,newChapters){
  const saved=Store.progress[bookId];if(saved){const moved=relocateAnchor(oldChapters,newChapters,saved.chapterIndex,saved.charOffset||0);Store.saveProgress({...saved,...moved,anchorBeforeV3:saved.anchorBeforeV3||{chapterIndex:saved.chapterIndex,charOffset:saved.charOffset},parserRevision:PARSER_REVISION});}
  for(const annotation of [...Store.annotations].filter(a=>a.bookId===bookId)){const moved=relocateAnchor(oldChapters,newChapters,annotation.chapterIndex,annotation.charOffset??annotation.startOffset??0,annotation.selectedText||'');const original=annotation.anchorBeforeV3||{chapterIndex:annotation.chapterIndex,charOffset:annotation.charOffset,startOffset:annotation.startOffset,endOffset:annotation.endOffset};Store.saveAnnotation(moved?{...annotation,...moved,...(annotation.type==='highlight'?{startOffset:moved.charOffset,endOffset:moved.charOffset+annotation.selectedText.length}:{}),needsReview:false,anchorBeforeV3:original,parserRevision:PARSER_REVISION}:{...annotation,needsReview:true,anchorBeforeV3:original,parserRevision:PARSER_REVISION});}
 }
-function fullscreenElement(){return document.fullscreenElement||document.webkitFullscreenElement;}
+function fullscreenElement(){return nativeFullscreen()||document.fullscreenElement||document.webkitFullscreenElement;}
 function syncFullscreenButton(){const button=$('[data-action="fullscreen"]');if(!button)return;const active=!!fullscreenElement();button.innerHTML=icon(active?'collapse':'expand')+`<span>${active?'Keluar layar penuh':'Layar penuh'}</span>`;button.setAttribute('aria-label',active?'Keluar layar penuh':'Masuk layar penuh');button.setAttribute('aria-pressed',String(active));}
 async function toggleFullscreen(){
+ if(isNativeApp){await toggleNativeFullscreen();syncFullscreenButton();setReaderMode('reading');return;}
  try{if(fullscreenElement()){const exit=document.exitFullscreen||document.webkitExitFullscreen;if(!exit)throw Error();await exit.call(document);}
  else{const root=document.documentElement,request=root.requestFullscreen||root.webkitRequestFullscreen;if(!request){toast('Layar penuh belum didukung browser ini.');return;}await request.call(root);setReaderMode('reading');}
  syncFullscreenButton();
@@ -206,7 +210,7 @@ function showOverlay(html){
  overlay.innerHTML=`<div class="overlay-backdrop" data-backdrop="true"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">${html}</section></div>`;
  document.body.classList.add('sheet-open');requestAnimationFrame(()=>$('.dialog',overlay)?.focus());
 }
-function closeOverlay(){popups.close(false);features.closePanel();overlay.innerHTML='';document.body.classList.remove('sheet-open');previousFocus?.focus?.();previousFocus=null;editingAnnotation=null;}
+function closeOverlay(){popups.close(false);features.closePanel();overlay.innerHTML='';document.body.classList.remove('sheet-open');previousFocus?.focus?.();previousFocus=null;editingAnnotation=null;pendingBackup=null;}
 function dialogHeading(title){const symbol=/catatan|notes/i.test(title)?'edit':/bookmark/i.test(title)?'bookmark':/tampilan|appearance|theme|tema/i.test(title)?'appearance':/baca nyaring|read aloud/i.test(title)?'speaker':/pencarian|search/i.test(title)?'search':/alat kata|word tools/i.test(title)?'globe':/alat baca|reading tools/i.test(title)?'sliders':/impor|import/i.test(title)?'upload':/perangkat|device/i.test(title)?'device':'bookOpen';return `<div class="dialog-heading"><h2 id="dialog-title">${icon(symbol)}${title}</h2>${actionButton('close','close','Tutup')}</div>`;}
 function removeSelection(){customSelection?.clear();selectedRange=null;$('.selection-popover')?.remove();window.getSelection()?.removeAllRanges();}
 function showSelectionToolbar(rect){
@@ -245,17 +249,36 @@ async function importFile(file){
  closeOverlay();renderLibrary();toast('Buku ditambahkan ke rak.');
  }catch(e){fail(e.message||'Berkas tidak dapat dibuka.');}finally{if($('#upload-zone'))$('#upload-zone').disabled=false;$('#epub-input').value='';}
 }
-function download(filename,text){const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function exportNotes(){download('katakecil-catatan.json',JSON.stringify({exportedAt:new Date().toISOString(),deviceId:Store.deviceId,annotations:Store.annotations.map(a=>({...a,bookTitle:books.find(b=>b.id===a.bookId)?.title||a.bookId}))},null,2));toast('Catatan diekspor.');}
-function statusDialog(){showOverlay(`${dialogHeading('Perangkat ini')}<p class="dialog-caption">Progres dan catatan tersimpan di browser ini. Buku dari server memerlukan koneksi.</p><div class="status-details"><span>${Store.storageHealthy?'Penyimpanan aktif':'Penyimpanan tidak tersedia'}</span><code>${escapeHTML(Store.deviceId)}</code></div><p class="settings-caption">Menghapus data browser juga menghapus data lokal. Ekspor catatan untuk menyimpan salinannya.</p><div class="dialog-actions"><button class="secondary" data-action="export-notes">Ekspor catatan</button></div><p class="settings-caption"><a href="./vendor/OPEN_SOURCE_ATTRIBUTIONS.md" target="_blank" rel="noopener noreferrer">Lisensi open-source</a></p>`);}
+async function download(filename,text){return saveJSON(filename,text);}
+async function exportNotes(){if(await download('katakecil-catatan.json',JSON.stringify({exportedAt:new Date().toISOString(),deviceId:Store.deviceId,annotations:Store.annotations.map(a=>({...a,bookTitle:books.find(b=>b.id===a.bookId)?.title||a.bookId}))},null,2)))toast('Catatan diekspor.');}
+let pendingBackup=null;
+async function previewBackup(file){
+ try{
+  if(file.size>BACKUP_MAX_BYTES)throw Error('Backup is larger than 8 MB.');
+  pendingBackup=parseBackup(await file.text());
+  const backup=pendingBackup;
+  showOverlay(`${dialogHeading('Pulihkan backup')}<p class="dialog-caption">Backup memuat progres dan catatan. Buku pribadi perlu diimpor ulang.</p><p class="backup-count" role="status"><span>${backup.annotations.length}</span> <span>Catatan</span> · <span>${backup.progress.length}</span> <span>Posisi baca</span></p><p class="settings-caption">Data digabungkan. Catatan dan progres yang lebih baru di perangkat ini dipertahankan.</p>${backup.schemaVersion===2?'<label class="backup-settings-choice"><input type="checkbox" id="restore-preferences" checked> Pulihkan pengaturan tampilan</label>':''}<div class="form-error" id="backup-error" role="alert"></div><div class="dialog-actions"><button class="secondary" data-action="close">Batal</button><button class="primary" data-action="backup-restore">Pulihkan backup</button></div>`);
+ }catch(error){pendingBackup=null;toast(error.message||'Invalid KataKecil backup.');}
+ finally{$('#backup-input').value='';}
+}
+async function restoreSelectedBackup(){
+ if(!pendingBackup)return;
+ const button=$('[data-action="backup-restore"]');if(button)button.disabled=true;
+ try{
+  const result=await Store.restoreBackup(pendingBackup,{restorePreferences:!!$('#restore-preferences')?.checked});
+  pendingBackup=null;applyPreferences();closeOverlay();if(view==='settings')renderSettings();else if(currentBook){features.resolveAnnotations();await reflow();}else renderLibrary();
+  toast(p().uiLanguage==='id'?`Dipulihkan: ${result.annotations} catatan, ${result.progress} progres. Dilewati: ${result.skipped}.`:`Restored: ${result.annotations} notes, ${result.progress} positions. Skipped: ${result.skipped}.`);
+ }catch(error){const area=$('#backup-error');if(area)area.textContent=error.message;else toast(error.message);if(button)button.disabled=false;}
+}
+function statusDialog(){showOverlay(`${dialogHeading('Perangkat ini')}<p class="dialog-caption">Progres dan catatan tersimpan di perangkat ini. Buku dari server memerlukan koneksi.</p><div class="status-details"><span>${Store.storageHealthy?'Penyimpanan aktif':'Penyimpanan tidak tersedia'}</span><code>${escapeHTML(Store.deviceId)}</code></div><p class="settings-caption">Menghapus data aplikasi atau browser menghapus data lokal. Simpan backup untuk memindahkannya ke perangkat lain.</p><div class="dialog-actions"><button class="secondary" data-action="backup-export">Simpan backup</button><button class="secondary" data-action="backup-import">Pulihkan backup</button></div><p class="settings-caption"><button class="license-link" data-action="licenses">Lisensi open-source</button></p>`);}
 function setAccent(color){if(!/^#[a-f\d]{6}$/i.test(color))return;Store.updatePreferences({accentColor:color});applyPreferences();$$('.accent-swatch').forEach(el=>{el.classList.toggle('selected',el.dataset.value===color);el.setAttribute('aria-pressed',String(el.dataset.value===color));});if($('#accent-custom'))$('#accent-custom').value=color;popups.scan();}
-function navigateLibrary(){features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay();removeSelection();renderLibrary();}
+function navigateLibrary(){persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay();removeSelection();renderLibrary();}
 async function handleAction(button,event){
  if(features.action(button))return;
  const action=button.dataset.action,id=button.dataset.id,value=button.dataset.value;
  switch(action){
   case 'library':navigateLibrary();break;
-  case 'settings':features.leave();readingRequest++;layoutRequest++;closeOverlay();removeSelection();renderSettings();break;
+  case 'settings':persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;closeOverlay();removeSelection();renderSettings();break;
   case 'refresh':await loadCatalog();break;
   case 'select-book':selectBook(id);break;
   case 'carousel-prev':case 'carousel-next':{const index=books.findIndex(b=>b.id===activeLibraryId);const next=Math.max(0,Math.min(books.length-1,index+(action==='carousel-next'?1:-1)));if(books[next])selectBook(books[next].id);break;}
@@ -282,8 +305,12 @@ async function handleAction(button,event){
   case 'font':Store.updatePreferences({fontFamily:value});applyPreferences();$$('[data-action="font"]').forEach(el=>el.classList.toggle('active',el.dataset.value===value));if(currentBook)await reflow();break;
   case 'import':importDialog();break;
   case 'choose-file':$('#epub-input').click();break;
-  case 'export-notes':exportNotes();break;
+  case 'export-notes':await exportNotes();break;
+  case 'backup-export':persistPosition();if(await download('katakecil-backup.json',JSON.stringify(createBackup({preferences:p(),progress:Store.progress,annotations:Store.annotations}),null,2)))toast('Backup disimpan.');break;
+  case 'backup-import':$('#backup-input').click();break;
+  case 'backup-restore':await restoreSelectedBackup();break;
   case 'status':statusDialog();break;
+  case 'licenses':{const response=await fetch('./vendor/OPEN_SOURCE_ATTRIBUTIONS.md');if(!response.ok)throw Error('Licenses are unavailable.');const text=await response.text();showOverlay(`${dialogHeading('Lisensi open-source')}<pre class="license-text">${escapeHTML(text)}</pre>`);break;}
  }
 }
 document.addEventListener('click',event=>{
@@ -302,7 +329,7 @@ document.addEventListener('input',event=>{
  if(el.id==='settings-font-size'){Store.updatePreferences({fontSize:Number(el.value)});if($('#font-size-output'))$('#font-size-output').textContent=el.value;if(!currentBook)applyPreferences();}
  if(el.id==='page-scrubber'){$('#page-counter').textContent=`${Number(el.value)+1} / ${pages.length}`;el.setAttribute('aria-valuetext',`Halaman ${Number(el.value)+1} dari ${pages.length}`);}
 });
-document.addEventListener('change',event=>{const el=event.target;if(features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);});
+document.addEventListener('change',event=>{const el=event.target;if(features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
 document.addEventListener('submit',event=>{if(features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note);});
 document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));
@@ -352,6 +379,28 @@ Store.onSync((kind,payload)=>{
 try{const channel=new BroadcastChannel('lumina-library');channel.onmessage=async()=>{const stored=await Store.dbGetAll('books');for(const book of stored.filter(b=>b.source==='local'))if(!books.some(b=>b.id===book.id))books.push(book);if(view==='library')renderLibrary();};}catch{}
 function syncAppTitle(){const title=view==='settings'?translatePhrase('Pengaturan'):view==='reader'&&currentBook?currentBook.title:'Library';const next=title+' · KataKecil';if(document.title!==next)document.title=next;}
 startUiTranslations(syncAppTitle);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void validatePublication();});
+let appActive=document.visibilityState!=='hidden';
+function appActivity(active){
+ if(appActive===active)return;appActive=active;
+ if(!active){persistPosition();features.pauseSpeech();void Store.flush();}
+ else {void validatePublication();if(currentBook){void features.resumeScreen().catch(()=>{});void reflow().catch(e=>toast(e.message));}}
+}
+function canGoBack(){return !!($('.app-picker-backdrop')||overlay.firstChild||selectedRange||view!=='library');}
+function appBack(){
+ if($('.app-picker-backdrop')){popups.close();return;}
+ const focused=document.activeElement;
+ if(focused?.matches('input:not([hidden]),textarea,[contenteditable="true"]')){focused.blur();return;}
+ if(overlay.firstChild){closeOverlay();return;}
+ if(selectedRange){removeSelection();return;}
+ if(view!=='library')navigateLibrary();
+}
+const navigation=installBackNavigation({window,canGoBack,back:appBack,native:isNativeApp});
+new window.MutationObserver(()=>navigation.sync()).observe(app.parentElement||document.body,{childList:true,subtree:true});
+void listenNativeLifecycle({back:()=>{if(!canGoBack())return false;navigation.back();return true;},active:appActivity}).catch(e=>toast(e.message));
+document.addEventListener('visibilitychange',()=>appActivity(document.visibilityState==='visible'));
+window.addEventListener('pagehide',()=>{persistPosition();void Store.flush();});
+window.visualViewport?.addEventListener('resize',()=>{
+ const height=window.visualViewport.height;document.documentElement.style.setProperty('--app-visible-height',height+'px');
+});
 async function init(){activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();renderLibrary();await loadCatalog();if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');}
 init().catch(()=>{catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});

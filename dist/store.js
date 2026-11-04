@@ -88,3 +88,48 @@ export async function hydrate() {
   for(const record of storedAnnotations){const local=merged.get(record.id);if(record.deleted){if(!local||timestamp(record)>=timestamp(local)){merged.delete(record.id);removedAnnotations.add(record.id);}}else if(!local||timestamp(record)>timestamp(local))merged.set(record.id,record);}
   annotations=[...merged.values()];writeLocal('lumina_annotations',annotations);
 }
+
+// A single IndexedDB transaction commits imported reading metadata. Existing newer records
+// and deletion tombstones win; the current device identity is never imported.
+export async function restoreBackup(backup,{restorePreferences=false}={}) {
+ await hydrate();
+ const stored=await dbGetAll('annotations'),byId=new Map(annotations.map(a=>[a.id,a]));
+ const deleted=new Map(stored.filter(a=>a.deleted).map(a=>[a.id,a]));
+ const nextProgress={...progress},writes=[],progressWrites=[];let skipped=0;
+ for(const incoming of backup.annotations){
+  const old=byId.get(incoming.id),tombstone=deleted.get(incoming.id);
+  if(old&&old.bookId!==incoming.bookId)throw Error('A note ID belongs to another book. Nothing was imported.');
+  if(tombstone&&annotationTime(tombstone)>=annotationTime(incoming)||old&&annotationTime(old)>=annotationTime(incoming)){skipped++;continue;}
+  const copy={...incoming};byId.set(copy.id,copy);writes.push(copy);
+ }
+ for(const incoming of backup.progress){
+  const old=nextProgress[incoming.bookId];if(old&&annotationTime(old)>=annotationTime(incoming)){skipped++;continue;}
+  const copy={...incoming,id:incoming.bookId};nextProgress[incoming.bookId]=copy;progressWrites.push(copy);
+ }
+ const nextAnnotations=[...byId.values()],db=await openDatabase();let durable=false;
+ if(db)durable=await new Promise(resolve=>{try{
+  const tx=db.transaction(['progress','annotations'],'readwrite');
+  for(const row of writes)tx.objectStore('annotations').put(row);
+  for(const row of progressWrites)tx.objectStore('progress').put(row);
+  tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false);tx.onabort=()=>resolve(false);
+ }catch{resolve(false);}});
+ const localProgress=writeLocal('lumina_reading_progress',nextProgress),localAnnotations=writeLocal('lumina_annotations',nextAnnotations);
+ if(!durable&&(!localProgress||!localAnnotations)){storageFailure();throw Error('Storage is unavailable. Keep your backup and try again.');}
+ progress=nextProgress;annotations=nextAnnotations;
+ for(const row of writes){removedAnnotations.delete(row.id);emit('annotation',row);}
+ for(const row of progressWrites)emit('progress',row);
+ if(restorePreferences){
+  const next={...preferences,...backup.preferences,deviceId};
+  if(!writeLocal('lumina_device_settings',next))throw Error('Reading data was imported, but settings could not be saved.');
+  preferences=next;emit('preferences',preferences);
+ }
+ return {annotations:writes.length,progress:progressWrites.length,skipped};
+}
+
+export async function flush() {
+ const results=await Promise.all([
+  ...Object.values(progress).map(row=>dbPut('progress',{...row,id:row.bookId})),
+  ...annotations.map(row=>dbPut('annotations',row)),
+ ]);
+ return results.every(Boolean);
+}
