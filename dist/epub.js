@@ -59,7 +59,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     let started = !boundaries.size;
     const flush = () => {
       const text = content.join('\n\n').trim();
-      if (text.length >= 120 && !/contents|illustrations|project gutenberg|copyright|titlepage/i.test(title)) chapters.push({title,text,href:path});
+      if (text.length > 0 && !/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(title)) chapters.push({title,text,href:path});
       content=[];
     };
     for (const block of blocks) {
@@ -75,7 +75,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     if (started) flush();
     if (!blocks.length) {
       const text=doc.body.textContent.replace(/\s+/g,' ').trim();
-      if(text.length>=120)chapters.push({title,text,href:path});
+      if(text.length>0)chapters.push({title,text,href:path});
     }
   }
   if (!chapters.length) throw new Error('No readable text was found. Image-only and fixed-layout EPUBs are not supported.');

@@ -1,12 +1,13 @@
 """Refresh the self-hosted demo books, fonts, and licenses (network required)."""
 import urllib.request,concurrent.futures,pathlib,re,urllib.parse
 root=pathlib.Path(__file__).resolve().parents[1]/'dist'
+book_root=root.parent/'tests'/'fixtures'/'epubs'
+book_root.mkdir(parents=True,exist_ok=True)
 books=[('alice',11),('pride',1342),('frankenstein',84),('sherlock',1661),('treasure',120),('time',35)]
-(root/'books').mkdir(exist_ok=True)
 (root/'fonts').mkdir(exist_ok=True)
 def fetch(item):
  name,id=item
- urllib.request.urlretrieve(f'https://www.gutenberg.org/ebooks/{id}.epub.noimages',root/'books'/f'{name}.epub')
+ urllib.request.urlretrieve(f'https://www.gutenberg.org/ebooks/{id}.epub.noimages',book_root/f'{name}.epub')
  return name
 with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
  for name in pool.map(fetch,books):print('Downloaded',name)

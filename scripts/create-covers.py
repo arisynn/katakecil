@@ -1,5 +1,6 @@
 from pathlib import Path
-root=Path(__file__).resolve().parents[1]/'dist'/'covers'
+root=Path(__file__).resolve().parents[1]/'tests'/'fixtures'/'covers'
+root.mkdir(parents=True,exist_ok=True)
 base='''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 440"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".085"/></feComponentTransfer></filter><filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity=".12"/></filter></defs>'''
 def save(name,bg,art,labels):
  svg=base+f'<rect width="300" height="440" fill="{bg}"/>'+art+labels+'<rect width="300" height="440" filter="url(#noise)" opacity=".55"/><path d="M8 0v440" stroke="#000" stroke-opacity=".09"/><path d="M12 0v440" stroke="#fff" stroke-opacity=".15"/></svg>'
