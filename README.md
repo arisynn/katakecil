@@ -9,7 +9,7 @@ A quiet personal EPUB library. One horizontal carousel, two bottom tabs, and a f
 - Settings offer light/dark/system theme, preset or custom accent colors, serif/sans, and text size. EPUB import is inside the closed **Lanjutan** section.
 - Books open in reading mode. A tap or inward two-finger pinch opens controls and scales the existing page down. Tap the page to return to full size. Menu toggling preserves the page DOM, pagination, selected font size, and reading anchor.
 - Swipe or arrow keys turn pages. The reader menu contains contents, bookmarks, appearance, and a progress scrubber.
-- Select text to highlight in four colors or add a note. Native copy/cut, reader context menus, and text dragging are suppressed; selection is enabled. Editing or copying your own notes remains available. Browser/OS selection menus can vary; this is a reading interaction preference, not DRM.
+- Select text to highlight in four colors or add a note. Native copy/cut, reader context menus, and text dragging are suppressed; application-owned selection is enabled. Editing or copying your own notes remains available. Browser/OS selection menus can vary; this is a reading interaction preference, not DRM.
 - Page text is measured against available viewport height after fonts are loaded. Fullscreen means the available browser viewport with safe-area insets; iOS browser chrome is controlled by the browser.
 
 ## Supabase source
@@ -61,3 +61,11 @@ Parser revision 3 recognizes EPUB 3 navigation, chapter/episode markers inside h
 Pagination fills the available measured space without jumping back to an earlier paragraph. Final chapter pages can naturally be short. The full-screen menu action now invokes the browser Fullscreen API; an unsupported browser gets a clear message without silently using the action to close the menu. Tap/pinch remains a separate reading-controls interaction.
 
 The shelf uses a fixed-height viewport layout, smaller artwork, and contain-fit covers. The new KataKecil mark, favicon, settings icons, and reduced-motion-aware transitions replace the previous branding. Public URL and persisted device data keys remain stable.
+
+## Custom selection and glass update
+
+The reader now renders highlight selection with DOM Range geometry and application-owned handles. It never adds a range to the browser Selection, which avoids the native selection path used by Chrome contextual search. Reader text has native selection disabled; long-press, mouse drag, handle dragging, or keyboard H start/adjust the application highlight. Swipe and multi-touch cancel pending selection. Note editors retain their normal text behavior. The Chrome/Android browser-owned search panel still requires real-device confirmation in this environment; no browser-control tool is available here.
+
+EPUB parser revision 4 stores the original BAB/EPISODE/CHAPTER number separately from the subtitle and restores that marker above the title. The count comes from source text/navigation rather than spine indexes. The carousel removes repeated title/author captions, increases whole-cover size, and retains viewport bounds.
+
+The logo at `dist/assets/katakecil-logo.png` was generated with the image generation tool and is used as the app mark and favicon. Its original remains in `/workspace/generated_images`. Menu icons use rounded geometry and slightly bolder strokes. Glass uses lower opacity, stronger backdrop blur/saturation, inner highlights, and a subtle accent background to make refraction/blur visible. The app remains buildless HTML/CSS/JavaScript; Next.js is not used or required for these effects.

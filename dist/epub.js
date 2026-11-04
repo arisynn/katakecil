@@ -1,4 +1,9 @@
-export const PARSER_REVISION = 3;
+export const PARSER_REVISION = 4;
+
+export function chapterLabelOf(value=''){
+ const match=String(value).match(/^(bab|episode|chapter|bagian)\s*(\d+(?:\.\d+)?|[ivxlcdm]+(?=\s|[.:—–-]|$))/i);
+ if(!match)return '';return ({bab:'BAB',episode:'EPISODE',chapter:'BAB',bagian:'BAGIAN'}[match[1].toLowerCase()])+' '+match[2].toUpperCase();
+}
 
 /* EPUB content is parsed as inert XML and rendered as text only. */
 export async function parseEpub(buffer, fallback = 'Untitled book') {
@@ -84,7 +89,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     let started = !boundaries.size;
     const flush = () => {
       const text = content.join('\n\n').trim();
-      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,navigationTitle:sourceTitle||title||'Informasi buku'});
+      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path)),navigationTitle:sourceTitle||title||'Informasi buku'});
       content=[];
     };
     for (const block of blocks) {
@@ -103,7 +108,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     if (started) flush();
     if (!blocks.length) {
       const text=doc.body.textContent.replace(/\s+/g,' ').trim();
-      if(text.length>0)chapters.push({title,text,href:path,navigationTitle:sourceTitle||title||'Informasi buku'});
+      if(text.length>0)chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path)),navigationTitle:sourceTitle||title||'Informasi buku'});
     }
   }
   if (!chapters.length) throw new Error('No readable text was found. Image-only and fixed-layout EPUBs are not supported.');

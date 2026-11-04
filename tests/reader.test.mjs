@@ -40,7 +40,10 @@ async function until(check,description){for(let i=0;i<200;i++){if(check())return
 const $=selector=>w.document.querySelector(selector);
 function click(selector){const el=$(selector);assert.ok(el,'Missing element: '+selector);el.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));}
 function input(selector,value){const el=$(selector);assert.ok(el,'Missing input: '+selector);el.value=value;el.dispatchEvent(new w.Event('input',{bubbles:true}));}
-function selectWords(start=20,length=55){const el=$('.page-text');const walker=w.document.createTreeWalker(el,w.NodeFilter.SHOW_TEXT);let node,remaining=start;while(node=walker.nextNode()){if(remaining+length<=node.textContent.length)break;remaining=Math.max(0,remaining-node.textContent.length);}assert.ok(node,'Readable text node');const range=w.document.createRange();range.setStart(node,remaining);range.setEnd(node,remaining+length);const selection=w.getSelection();selection.removeAllRanges();selection.addRange(range);w.document.dispatchEvent(new w.MouseEvent('mouseup',{bubbles:true}));return selection.toString();}
+function selectWords(start=20,length=55){const root=$('.page-text'),quote=root.textContent.slice(start,start+length);w.document.caretRangeFromPoint=x=>{
+ const walker=w.document.createTreeWalker(root,w.NodeFilter.SHOW_TEXT);let node,left=Math.max(0,Math.min(root.textContent.length,x)),last;while(node=walker.nextNode()){last=node;if(left<=node.textContent.length)break;left-=node.textContent.length;}node=node||last;const range=w.document.createRange();range.setStart(node,Math.min(left,node.textContent.length));range.collapse(true);return range;};
+ const pointer=(name,x)=>{const event=new w.MouseEvent(name,{bubbles:true,cancelable:true,clientX:x,clientY:250,button:0});Object.defineProperties(event,{pointerId:{value:1},pointerType:{value:'mouse'}});root.dispatchEvent(event);};pointer('pointerdown',start);pointer('pointermove',start+length);pointer('pointerup',start+length);return quote;}
+
 
 test('all bundled EPUBs contain real chapters and pagination preserves every character',async()=>{
  const expected={alice:12,pride:40,frankenstein:20,sherlock:12,treasure:30,time:12};
@@ -94,20 +97,21 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  assert.equal(w.document.querySelectorAll('.shelf-book').length,3);
  assert.equal(w.document.querySelectorAll('.bottom-tab').length,2);
  assert.equal($('[data-action="import"]'),null,'no upload action in Library');
- assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.ok($('.brand-mark'));assert.match($('.library-header').textContent,/KataKecil/);assert.ok($('.library-shell'));
+ assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.ok($('.brand-mark'));assert.match($('.library-header').textContent,/KataKecil/);assert.ok($('.library-shell'));assert.equal($('.book-title'),null,'cover captions are hidden');assert.equal($('.book-author'),null);
  click('[data-action="carousel-next"]');assert.match($('.shelf-book.is-current').dataset.bookId,/garis/);
  click('[data-action="select-book"][data-id="masa-panen-google-play-ready-1"]');
  click('.read-button');await until(()=>$('.page-text')&&$('.reader-loading')?.classList.contains('hidden'),'reader paginated');
- assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('.bottom-tabs'),null);assert.equal(store.progress[fixtureBooks[0].id].chapterIndex,0,'old cache position migrates past removed title page');assert.equal(store.annotations.find(a=>a.id==='legacy-bookmark').chapterIndex,1);assert.equal((await store.dbGetAll('books')).find(b=>b.id===fixtureBooks[0].id).parsedRevision,3);
- assert.match($('.page-text').textContent,/Alice was beginning/);assert.equal($('.page-heading>p'),null,'no generated chapter numbering');assert.ok(!$('.reading-page').textContent.includes('Section '));
+ assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('.bottom-tabs'),null);assert.equal(store.progress[fixtureBooks[0].id].chapterIndex,0,'old cache position migrates past removed title page');assert.equal(store.annotations.find(a=>a.id==='legacy-bookmark').chapterIndex,1);assert.equal((await store.dbGetAll('books')).find(b=>b.id===fixtureBooks[0].id).parsedRevision,4);
+ assert.match($('.page-text').textContent,/Alice was beginning/);assert.match($('.chapter-label').textContent,/BAB I/,'chapter marker comes from the source EPUB');assert.ok(!$('.reading-page').textContent.includes('Section '));
  const page=$('#reading-page'),text=$('.page-text').textContent;
  let requests=0,exits=0;Object.defineProperty(w.document,'fullscreenElement',{value:null,writable:true,configurable:true});w.document.documentElement.requestFullscreen=async()=>{requests++;w.document.fullscreenElement=w.document.documentElement;};w.document.exitFullscreen=async()=>{exits++;w.document.fullscreenElement=null;};
  click('[data-action="show-controls"]');assert.equal($('.reader-shell').dataset.mode,'controls');assert.equal($('#reading-page'),page);assert.equal($('.page-text').textContent,text);
  click('.page-text');assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('#reading-page'),page);
  click('[data-action="show-controls"]');click('[data-action="fullscreen"]');await wait();assert.equal(requests,1,'fullscreen action calls the browser API');assert.equal($('.reader-shell').dataset.mode,'reading');click('[data-action="show-controls"]');click('[data-action="fullscreen"]');await wait();assert.equal(exits,1);assert.equal($('.reader-shell').dataset.mode,'controls');const requestFullscreen=w.document.documentElement.requestFullscreen;delete w.document.documentElement.requestFullscreen;click('[data-action="fullscreen"]');await wait();assert.equal($('.reader-shell').dataset.mode,'controls','unsupported fullscreen does not silently close the menu');w.document.documentElement.requestFullscreen=requestFullscreen;click('[data-action="next"]');const second=$('.page-text').textContent;assert.notEqual(second,text);click('[data-action="prev"]');
  const range=$('#page-scrubber');input('#page-scrubber','2');assert.equal($('#page-scrubber'),range);range.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal(store.progress[fixtureBooks[0].id].pageIndex,2);input('#page-scrubber','0');$('#page-scrubber').dispatchEvent(new w.Event('change',{bubbles:true}));
+ $('.page-text').dispatchEvent(new w.KeyboardEvent('keydown',{key:'h',bubbles:true,cancelable:true}));assert.ok($('.selection-handle-start'));assert.equal(w.document.activeElement,$('.selection-handle-start'));$('.selection-handle-start').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert.equal($('.custom-selection-layer'),null);
  const quote=selectWords();await until(()=>$('.selection-popover'),'highlight toolbar');
- const copy=new w.Event('copy',{bubbles:true,cancelable:true});$('.page-text').dispatchEvent(copy);assert.ok(copy.defaultPrevented,'copy is blocked for reader selection');assert.equal(w.getSelection().toString(),quote,'selection survives copy prevention');
+ const copy=new w.Event('copy',{bubbles:true,cancelable:true});$('.page-text').dispatchEvent(copy);assert.ok(copy.defaultPrevented,'copy is blocked for reader selection');assert.equal(w.getSelection().rangeCount,0,'highlighting does not create native selection or Google search triggers');assert.equal(w.document.querySelectorAll('.selection-handle').length,2);
  const context=new w.MouseEvent('contextmenu',{bubbles:true,cancelable:true});$('.page-text').dispatchEvent(context);assert.ok(context.defaultPrevented);
  click('[data-action="highlight"][data-color="emerald"]');assert.equal($('mark').textContent,quote);
  selectWords(100,35);await until(()=>$('.selection-popover'),'second selection');click('[data-action="new-note"]');input('#note-text','Bagian yang ingin kusimpan.');
@@ -151,7 +155,7 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
   {name:'fourth.xhtml',html:'<p>Bagian ini masih bagian cerita, bukan judul.</p><p>Kalimat tanpa judul buatan.</p>'}
  ]);
  const book=await parseEpub(bytes);assert.equal(book.chapters.length,4);
- assert.deepEqual(book.chapters.map(c=>c.title),['Kelereng Putih','Sesudah Tepuk Tangan','Kursi yang Tersisa','']);
+ assert.deepEqual(book.chapters.map(c=>c.title),['Kelereng Putih','Sesudah Tepuk Tangan','Kursi yang Tersisa','']);assert.deepEqual(book.chapters.map(c=>c.chapterLabel),['EPISODE 3','BAB 4','BAB 5','']);
  assert.equal(book.chapters[0].text,'Paragraf pertama yang sebenarnya.');
  assert.equal(book.chapters[1].text,'Paragraf berikutnya.');
  assert.equal(book.chapters[2].text,'Teks cerita di bawah judul.');

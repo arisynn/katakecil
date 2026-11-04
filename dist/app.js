@@ -1,9 +1,10 @@
-import {parseEpub,PARSER_REVISION} from './epub.js?v=3';
-import {relocateAnchor} from './anchors.js?v=3';
-import {paginateToFit} from './pagination.js?v=3';
+import {parseEpub,PARSER_REVISION} from './epub.js?v=4';
+import {relocateAnchor} from './anchors.js?v=4';
+import {paginateToFit} from './pagination.js?v=4';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js';
-import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=3';
+import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=4';
 import * as Store from './store.js';
+import {createTextSelection,wordBounds} from './text-selection.js?v=4';
 const app=$('#app'),overlay=$('#overlay-root');
 const colors={amber:'#e7ca7e',emerald:'#a4c9ae',sapphire:'#acc7e6',rose:'#e4b3c3'};
 const accents=[['#54756c','Sage'],['#4269a5','Biru'],['#82669c','Ungu'],['#a15e73','Rose'],['#a07732','Amber'],['#58616e','Graphite']];
@@ -11,6 +12,7 @@ let books=[],catalogState='loading',catalogError='',catalogOffline=false,view='l
 let activeLibraryId='',carouselObserver=null,carouselTimer;
 let currentBook=null,pages=[],pageIndex=0,readerMode='reading',readingRequest=0,layoutRequest=0;
 let selectedRange=null,editingAnnotation=null,noteColor='amber',drawerTab='contents',previousFocus=null;
+let customSelection;
 let toastTimer,resizeTimer,ignoreClickUntil=0,pointerStart=null,touchState=null,reflowing=false;
 const percentage=id=>Math.round(Store.progress[id]?.percentage||0);
 const notesFor=id=>Store.annotations.filter(a=>a.bookId===id);
@@ -37,7 +39,7 @@ function genericCover(title,author=''){
  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 }
 function bookCard(book,index){
- return `<article class="shelf-book ${book.id===activeLibraryId?'is-current':''}" data-book-id="${escapeHTML(book.id)}" aria-label="${index+1} dari ${books.length}: ${escapeHTML(book.title)}"><button class="cover-button" data-action="open" data-id="${escapeHTML(book.id)}" aria-label="Baca ${escapeHTML(book.title)}"><img class="book-cover" src="${escapeHTML(book.cover||genericCover(book.title,book.author))}" alt="Sampul ${escapeHTML(book.title)}" ${index===0?'fetchpriority="high"':'loading="lazy"'} draggable="false"></button><h2 class="book-title">${escapeHTML(book.title)}</h2><p class="book-author">${escapeHTML(book.author)}</p></article>`;
+ return `<article class="shelf-book ${book.id===activeLibraryId?'is-current':''}" data-book-id="${escapeHTML(book.id)}" aria-label="${index+1} dari ${books.length}: ${escapeHTML(book.title)}"><button class="cover-button" data-action="open" data-id="${escapeHTML(book.id)}" aria-label="Baca ${escapeHTML(book.title)}"><img class="book-cover" src="${escapeHTML(book.cover||genericCover(book.title,book.author))}" alt="Sampul ${escapeHTML(book.title)}" ${index===0?'fetchpriority="high"':'loading="lazy"'} draggable="false"></button></article>`;
 }
 function libraryBody(){
  if(catalogState==='loading')return `<div class="library-loading" role="status"><div class="skeleton-cover"></div><p>Menyiapkan rak buku…</p></div>`;
@@ -99,11 +101,11 @@ async function ensureBook(id){
 }
 function pageMarkup(page,index,measurement=false){
  const chapter=currentBook.chapters[page.chapterIndex];
- return `<div class="page-inner"><div class="page-heading" ${page.start!==0||!chapter.title?'hidden':''}><h1>${escapeHTML(chapter.title)}</h1></div><div class="page-text" lang="${escapeHTML(currentBook.language||'id')}" ${measurement?'':`data-page="${index}"`}>${measurement?'':markedText(page)}</div><div class="page-number" aria-label="Nomor halaman">${measurement?'':index+1}</div></div>`;
+ return `<div class="page-inner"><div class="page-heading" ${page.start!==0||(!chapter.title&&!chapter.chapterLabel)?'hidden':''}>${chapter.chapterLabel?`<p class="chapter-label">${escapeHTML(chapter.chapterLabel)}</p>`:''}<h1 ${!chapter.title?'hidden':''}>${escapeHTML(chapter.title)}</h1></div><div class="page-text" tabindex="0" aria-label="Isi halaman. Tekan H untuk mulai highlight." lang="${escapeHTML(currentBook.language||'id')}" ${measurement?'':`data-page="${index}"`}>${measurement?'':markedText(page)}</div><div class="page-number" aria-label="Nomor halaman">${measurement?'':index+1}</div></div>`;
 }
 function mountReader(){
  disconnectCarousel();document.body.classList.remove('is-library');document.body.classList.add('is-reading');view='reader';readerMode='reading';document.title=`${currentBook.title} · KataKecil`;
- app.innerHTML=`<main class="reader-shell" data-mode="reading"><header class="reader-toolbar" inert aria-hidden="true"><button class="icon-button" data-action="library" aria-label="Kembali ke Library">${icon('back')}</button><span class="reader-title">${escapeHTML(currentBook.title)}</span><button class="icon-button" data-action="bookmark" aria-label="Bookmark halaman">${icon('bookmark')}</button></header><div class="reader-stage"><article class="reading-page" id="reading-page" aria-label="Halaman buku">${pageMarkup({chapterIndex:0,start:0,end:0},0,true)}</article></div><button class="reader-menu-trigger" data-action="show-controls" aria-label="Buka menu baca">${icon('more')}</button><footer class="reader-controls" inert aria-hidden="true"><div class="reader-tool-actions"><button data-action="contents">${icon('list')}<span>Daftar isi</span></button><button data-action="appearance">${icon('type')}<span>Tampilan</span></button><button data-action="fullscreen" aria-label="Masuk layar penuh" aria-pressed="false">${icon('expand')}<span>Layar penuh</span></button></div><div class="scrubber-row"><button class="icon-button" data-action="prev" aria-label="Halaman sebelumnya">${icon('left')}</button><label><span class="sr-only">Posisi baca</span><input type="range" id="page-scrubber" min="0" max="1" value="0" aria-label="Posisi baca"></label><button class="icon-button" data-action="next" aria-label="Halaman berikutnya">${icon('chevron')}</button></div><div class="reader-progress"><span id="page-counter"></span><span id="reading-percent"></span></div></footer><div class="reader-loading" role="status"><div class="spinner"></div><span>Menata halaman…</span></div></main>`;
+ app.innerHTML=`<main class="reader-shell" data-mode="reading"><header class="reader-toolbar glass" inert aria-hidden="true"><button class="icon-button" data-action="library" aria-label="Kembali ke Library">${icon('back')}</button><span class="reader-title">${escapeHTML(currentBook.title)}</span><button class="icon-button" data-action="bookmark" aria-label="Bookmark halaman">${icon('bookmark')}</button></header><div class="reader-stage"><article class="reading-page" id="reading-page" aria-label="Halaman buku">${pageMarkup({chapterIndex:0,start:0,end:0},0,true)}</article></div><button class="reader-menu-trigger" data-action="show-controls" aria-label="Buka menu baca">${icon('more')}</button><footer class="reader-controls glass" inert aria-hidden="true"><div class="reader-tool-actions"><button data-action="contents">${icon('list')}<span>Daftar isi</span></button><button data-action="appearance">${icon('type')}<span>Tampilan</span></button><button data-action="fullscreen" aria-label="Masuk layar penuh" aria-pressed="false">${icon('expand')}<span>Layar penuh</span></button></div><div class="scrubber-row"><button class="icon-button" data-action="prev" aria-label="Halaman sebelumnya">${icon('left')}</button><label><span class="sr-only">Posisi baca</span><input type="range" id="page-scrubber" min="0" max="1" value="0" aria-label="Posisi baca"></label><button class="icon-button" data-action="next" aria-label="Halaman berikutnya">${icon('chevron')}</button></div><div class="reader-progress"><span id="page-counter"></span><span id="reading-percent"></span></div></footer><div class="reader-loading" role="status"><div class="spinner"></div><span>Menata halaman…</span></div></main>`;
 }
 function migrateSavedAnchors(bookId,oldChapters,newChapters){
  const saved=Store.progress[bookId];if(saved){const moved=relocateAnchor(oldChapters,newChapters,saved.chapterIndex,saved.charOffset||0);Store.saveProgress({...saved,...moved,anchorBeforeV3:saved.anchorBeforeV3||{chapterIndex:saved.chapterIndex,charOffset:saved.charOffset},parserRevision:PARSER_REVISION});}
@@ -153,7 +155,7 @@ function markedText(page){
  return cuts.slice(0,-1).map((start,i)=>{const end=cuts[i+1],a=relevant.find(a=>a.startOffset<=start&&a.endOffset>=end),text=escapeHTML(currentBook.chapters[page.chapterIndex].text.slice(start,end));return a?`<mark class="mark-${a.color}" data-annotation="${a.id}" title="${escapeHTML(a.noteText||'Buka highlight')}">${text}</mark>`:text;}).join('');
 }
 function updatePage(animate=false){
- if(!pages[pageIndex]||!currentBook)return;
+ if(!pages[pageIndex]||!currentBook)return;removeSelection();
  const page=$('#reading-page');page.innerHTML=pageMarkup(pages[pageIndex],pageIndex);page.setAttribute('aria-label',`Halaman ${pageIndex+1} dari ${pages.length}`);
  if(animate){page.classList.remove('page-changing');void page.offsetWidth;page.classList.add('page-changing');}
  const range=$('#page-scrubber');range.max=pages.length-1;range.value=pageIndex;range.setAttribute('aria-valuetext',`Halaman ${pageIndex+1} dari ${pages.length}`);
@@ -173,20 +175,20 @@ function showOverlay(html){
 }
 function closeOverlay(){overlay.innerHTML='';document.body.classList.remove('sheet-open');previousFocus?.focus?.();previousFocus=null;editingAnnotation=null;}
 function dialogHeading(title){const symbol=/catatan/i.test(title)?'edit':/bookmark/i.test(title)?'bookmark':/tampilan/i.test(title)?'appearance':/impor/i.test(title)?'upload':/perangkat/i.test(title)?'device':'bookOpen';return `<div class="dialog-heading"><h2 id="dialog-title">${icon(symbol)}${title}</h2>${actionButton('close','close','Tutup')}</div>`;}
-function removeSelection(){selectedRange=null;$('.selection-popover')?.remove();window.getSelection()?.removeAllRanges();}
-function selectionChanged(){
- if(view!=='reader'||overlay.firstChild||reflowing)return;
- const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount){$('.selection-popover')?.remove();return;}
- const range=selection.getRangeAt(0),node=range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer:range.commonAncestorContainer.parentElement;
- const root=node.closest('.page-text');if(!root||!root.contains(range.startContainer)||!root.contains(range.endContainer))return;
- const text=selection.toString();if(!text.trim()||text.length>10000)return;
- const before=range.cloneRange();before.selectNodeContents(root);before.setEnd(range.startContainer,range.startOffset);const page=pages[pageIndex];
- selectedRange={bookId:currentBook.id,chapterIndex:page.chapterIndex,pageIndex,startOffset:page.start+before.toString().length,endOffset:page.start+before.toString().length+text.length,selectedText:text,charOffset:page.start+before.toString().length};
- const rect=range.getBoundingClientRect();$('.selection-popover')?.remove();const el=document.createElement('div');el.className='selection-popover glass';el.setAttribute('role','toolbar');el.setAttribute('aria-label','Highlight pilihan teks');
+function removeSelection(){customSelection?.clear();selectedRange=null;$('.selection-popover')?.remove();window.getSelection()?.removeAllRanges();}
+function showSelectionToolbar(rect){
+ $('.selection-popover')?.remove();const el=document.createElement('div');el.className='selection-popover glass';el.setAttribute('role','toolbar');el.setAttribute('aria-label','Highlight pilihan teks');
  el.innerHTML=Object.keys(colors).map(color=>`<button class="color-button color-${color}" data-action="highlight" data-color="${color}" aria-label="Highlight ${color}"></button>`).join('')+`<button class="note-button" data-action="new-note">${icon('edit')}<span>Catatan</span></button>`;
  el.style.left=`${Math.max(8,Math.min(innerWidth-270,rect.left+rect.width/2-128))}px`;el.style.top=`${Math.max(8,Math.min(innerHeight-70,rect.top>75?rect.top-64:rect.bottom+10))}px`;
  el.addEventListener('pointerdown',event=>event.preventDefault());document.body.appendChild(el);
 }
+customSelection=createTextSelection({document,getRoot:()=>view==='reader'?$('.page-text'):null,canStart:()=>view==='reader'&&!overlay.firstChild&&!reflowing,
+ onChange:selection=>{const page=pages[pageIndex];if(!page||!currentBook)return;ignoreClickUntil=performance.now()+650;touchState=null;selectedRange={bookId:currentBook.id,chapterIndex:page.chapterIndex,pageIndex,startOffset:page.start+selection.start,endOffset:page.start+selection.end,selectedText:selection.text,charOffset:page.start+selection.start};showSelectionToolbar(selection.rect);},
+ onClear:()=>{if(selectedRange)ignoreClickUntil=performance.now()+350;selectedRange=null;$('.selection-popover')?.remove();}
+});
+// Native selection is not used by reader highlighting (including touch/long-press).
+function selectionChanged(){}
+
 function saveHighlight(color,noteText=''){if(!selectedRange)return;Store.saveAnnotation({...selectedRange,id:crypto.randomUUID(),type:'highlight',color,noteText,createdAt:new Date().toISOString()});removeSelection();closeOverlay();updatePage();toast(noteText?'Catatan tersimpan.':'Highlight tersimpan.');}
 function noteDialog(annotation=null){
  const range=annotation||selectedRange;if(!range)return;noteColor=annotation?.color||'amber';
@@ -254,7 +256,7 @@ async function handleAction(button,event){
  }
 }
 document.addEventListener('click',event=>{
- const button=event.target.closest('[data-action]');if(button){if(performance.now()<ignoreClickUntil&&button.closest('.reader-shell'))return;handleAction(button,event).catch(error=>toast(error.message||'Coba lagi.'));return;}
+ const button=event.target.closest('[data-action]');if(button){if(performance.now()<ignoreClickUntil&&button.closest('.reader-shell')&&!button.closest('.reader-toolbar,.reader-controls'))return;handleAction(button,event).catch(error=>toast(error.message||'Coba lagi.'));return;}
  if(event.target.dataset.backdrop==='true'){closeOverlay();return;}
  if(!currentBook||overlay.firstChild||reflowing||performance.now()<ignoreClickUntil||!window.getSelection()?.isCollapsed)return;
  const mark=event.target.closest('[data-annotation]');if(mark){const a=Store.annotations.find(a=>a.id===mark.dataset.annotation);if(a)noteDialog(a);return;}
@@ -270,10 +272,10 @@ document.addEventListener('input',event=>{
 });
 document.addEventListener('change',event=>{const el=event.target;if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);});
 document.addEventListener('submit',event=>{if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note);});
-document.addEventListener('selectionchange',()=>{if(selectedRange&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
+document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));
 document.addEventListener('keyup',event=>{if(event.shiftKey||event.key==='Shift')selectionChanged();});
-function readerSelection(){const selection=window.getSelection();if(!selection||selection.isCollapsed)return false;const node=selection.anchorNode;return !!(node?.nodeType===1?node:node?.parentElement)?.closest('.page-text');}
+function readerSelection(){if(customSelection.active)return true;const selection=window.getSelection();if(!selection||selection.isCollapsed)return false;const node=selection.anchorNode;return !!(node?.nodeType===1?node:node?.parentElement)?.closest('.page-text');}
 for(const name of ['copy','cut'])document.addEventListener(name,event=>{if(readerSelection()&&!event.target.closest?.('input,textarea'))event.preventDefault();});
 document.addEventListener('contextmenu',event=>{if(event.target.closest('.page-text')){event.preventDefault();selectionChanged();}});
 document.addEventListener('dragstart',event=>{if(event.target.closest('.page-text'))event.preventDefault();});
@@ -282,13 +284,13 @@ document.addEventListener('keydown',event=>{
  if((event.ctrlKey||event.metaKey)&&['c','x','insert'].includes(event.key.toLowerCase())&&readerSelection()&&!input){event.preventDefault();return;}
  if(event.key==='Escape'){if(overlay.firstChild)closeOverlay();else if(selectedRange)removeSelection();else if(currentBook)setReaderMode(readerMode==='reading'?'controls':'reading');return;}
  if(event.key==='Tab'&&overlay.firstChild){const panel=$('.dialog'),focusable=$$('button:not(:disabled),input,textarea,select,a[href]',panel).filter(el=>!el.closest('[hidden]'));const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&(document.activeElement===first||document.activeElement===panel)){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}return;}
- if(input||overlay.firstChild||!window.getSelection()?.isCollapsed)return;
- if(currentBook){if(event.key==='ArrowRight'){event.preventDefault();goToPage(pageIndex+1);}if(event.key==='ArrowLeft'){event.preventDefault();goToPage(pageIndex-1);}if(event.key==='Enter'||event.key===' '){event.preventDefault();setReaderMode(readerMode==='reading'?'controls':'reading');}if(event.key.toLowerCase()==='b')toggleBookmark();}
+ if(input||overlay.firstChild||customSelection.active||!window.getSelection()?.isCollapsed)return;
+ if(currentBook){if(event.key.toLowerCase()==='h'){event.preventDefault();const bounds=wordBounds($('.page-text').textContent,0);customSelection.select(bounds.start,bounds.end);$('.selection-handle-start')?.focus();return;}if(event.key==='ArrowRight'){event.preventDefault();goToPage(pageIndex+1);}if(event.key==='ArrowLeft'){event.preventDefault();goToPage(pageIndex-1);}if(event.key==='Enter'||event.key===' '){event.preventDefault();setReaderMode(readerMode==='reading'?'controls':'reading');}if(event.key.toLowerCase()==='b')toggleBookmark();}
  else if(view==='library'&&['ArrowRight','ArrowLeft'].includes(event.key)){event.preventDefault();const index=books.findIndex(b=>b.id===activeLibraryId),next=books[Math.max(0,Math.min(books.length-1,index+(event.key==='ArrowRight'?1:-1)))];if(next)selectBook(next.id);}
 });
 const touchDistance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
 document.addEventListener('touchstart',event=>{
- if(!currentBook||overlay.firstChild||!event.target.closest('.reading-page'))return;
+ if(!currentBook||overlay.firstChild||customSelection.active||!event.target.closest('.reading-page'))return;
  if(event.touches.length>=2){touchState={kind:'pinch',distance:touchDistance(event.touches),fired:false};ignoreClickUntil=performance.now()+600;}
  else touchState={kind:'single',x:event.touches[0].clientX,y:event.touches[0].clientY,at:performance.now()};
 },{passive:true});
@@ -298,7 +300,7 @@ document.addEventListener('touchmove',event=>{
 },{passive:false});
 document.addEventListener('touchend',event=>{
  setTimeout(selectionChanged,160);if(!touchState||event.touches.length)return;
- const state=touchState;touchState=null;if(state.kind==='pinch'){ignoreClickUntil=performance.now()+500;return;}
+ const state=touchState;touchState=null;if(customSelection.active||customSelection.interacting)return;if(state.kind==='pinch'){ignoreClickUntil=performance.now()+500;return;}
  const end=event.changedTouches[0];if(!end)return;
  const dx=end.clientX-state.x,dy=end.clientY-state.y,duration=performance.now()-state.at;
  if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6&&window.getSelection()?.isCollapsed){ignoreClickUntil=performance.now()+500;goToPage(pageIndex+(dx<0?1:-1));}
