@@ -59,3 +59,10 @@ test('book tabs and theme preset changes update the existing bottom sheet',()=>{
  for(const tab of ['highlights','notes','bookmarks']){s.features.action({dataset:{action:'reader-tab',value:tab}});assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);assert.equal(dialog.querySelector('.reader-tabs'),nav);assert.equal(dialog.querySelector('#drawer-content'),body);}
  s.features.themeDialog();dialog=s.w.document.querySelector('.dialog');backdrop=s.w.document.querySelector('.overlay-backdrop');s.w.document.querySelector('[data-action=app-theme-preset][data-value=paper]').click();assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);s.features.leave();s.w.close();
 });
+
+test('arc accordions open the current arc and retain expansion across book tabs',()=>{
+ const s=scene(),arc1={id:'arc-one',label:'ARC 1',title:'Pertemuan'},arc2={id:'arc-two',label:'ARC 2',title:'Percakapan'};
+ const chapters=[{href:'one',title:'Satu',text:'Hello',arc:arc1},{href:'two',title:'Dua',text:'Second',arc:arc1},{href:'three',title:'Tiga',text:'Third',arc:arc2}];s.ctx.book().chapters=chapters;s.features.contents();const doc=s.w.document,dialog=doc.querySelector('.dialog');let arcs=[...doc.querySelectorAll('.toc-arc')];assert.equal(arcs.length,2);assert.equal(arcs[0].open,true);assert.equal(arcs[1].open,false);assert.deepEqual([...doc.querySelectorAll('.toc-item')].map(el=>el.dataset.index),['0','1','2']);
+ arcs[0].open=false;arcs[0].dispatchEvent(new s.w.Event('toggle'));arcs[1].open=true;arcs[1].dispatchEvent(new s.w.Event('toggle'));s.features.contents('notes');s.features.contents('contents');arcs=[...doc.querySelectorAll('.toc-arc')];assert.equal(doc.querySelector('.dialog'),dialog);assert.equal(arcs[0].open,false);assert.equal(arcs[1].open,true);
+ chapters.forEach(c=>delete c.arc);s.features.contents();assert.equal(doc.querySelectorAll('.toc-arc').length,0);assert.equal(doc.querySelectorAll('.toc-item').length,3);s.features.leave();s.w.close();
+});

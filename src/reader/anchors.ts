@@ -1,5 +1,5 @@
 import { fromTextPosition, toTextPosition } from 'dom-anchor-text-quote';
-export interface Chapter { text: string; href?: string; title?: string; chapterLabel?: string; navigationTitle?: string; contentHash?: string }
+export interface Chapter { text: string; href?: string; title?: string; chapterLabel?: string; navigationTitle?: string; arc?: {id: string; label: string; title: string}; contentHash?: string }
 export interface TextAnchor { episodeId: string; exact: string; prefix: string; suffix: string; start: number; end: number; sourceHash?: string }
 // The package's position functions only read textContent. No native Selection is created.
 export function makeAnchor(chapter: Chapter, start: number, end: number): TextAnchor {

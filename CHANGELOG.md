@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Ruang konten dan accordion arc (4 November 2026)
+
+- Terapkan batas setengah layar pada konten yang bergulir; header/tab mendapat ruang tersendiri, dengan batas total tetap mengikuti viewport dan keyboard.
+- Pertahankan metadata arc dari heading EPUB dan kelompokkan Contents menggunakan accordion native. Arc aktif terbuka otomatis; buku tanpa arc tetap memakai daftar biasa.
+- Urutan bab, teks, anchor, dan identitas episode tetap dipertahankan. Tidak ada perubahan database atau publikasi.
+
 ## Web — Panel setengah layar dan fokus notes (4 November 2026)
 
 - Batasi semua dialog dan picker maksimal setengah layar; judul/tab tetap, isi bergulir.

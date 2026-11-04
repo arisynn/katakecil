@@ -249,3 +249,14 @@ test('a failure of both storage mechanisms produces a visible recovery warning',
  store.saveAnnotation({id:'both-storage-failed',bookId:'test-only',type:'highlight',selectedText:'small quote'});await wait(40);w.Storage.prototype.setItem=oldSet;
  assert.equal(warnings,1);assert.match($('#toast').textContent,/Storage is unavailable|Penyimpanan tidak tersedia/);
 });
+
+test('arc markers group chapters without adding title-only arc pages or changing text',async()=>{
+ const book=await parseEpub(await tinyEpub([
+  {name:'arc-one.xhtml',html:'<h1 id="arc-01-title">Kursi yang Tersisa</h1>'},
+  {name:'one.xhtml',html:'<h2 id="chapter-01-title">Pertemuan</h2><p>Teks pertama.</p>'},
+  {name:'two.xhtml',html:'<h2 id="chapter-02-title">Percakapan</h2><p>Teks kedua.</p>'},
+  {name:'arc-two.xhtml',html:'<h1 id="arc-02-title">Bahasa untuk Dua Orang</h1>'},
+  {name:'three.xhtml',html:'<h2 id="chapter-03-title">Berikutnya</h2><p>Teks ketiga.</p>'}
+ ]));
+ assert.equal(book.chapters.length,3);assert.deepEqual(book.chapters.map(c=>c.text),['Teks pertama.','Teks kedua.','Teks ketiga.']);assert.deepEqual(book.chapters.map(c=>c.chapterLabel),['BAB 1','BAB 2','BAB 3']);assert.deepEqual(book.chapters.map(c=>c.arc.label),['ARC 1','ARC 1','ARC 2']);assert.equal(book.chapters[0].arc.id,book.chapters[1].arc.id);assert.notEqual(book.chapters[1].arc.id,book.chapters[2].arc.id);assert.equal(book.chapters[2].arc.title,'Bahasa untuk Dua Orang');assert.deepEqual(book.chapters.map(c=>c.href),['OPS/one.xhtml','OPS/two.xhtml','OPS/three.xhtml']);
+});
