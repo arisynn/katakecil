@@ -24,14 +24,23 @@ export function installAppPopups(doc=document){
    sheet.append(list);requestAnimationFrame(()=>{const selected=list.querySelector('[aria-selected=true]:not(:disabled)')||list.querySelector('button:not(:disabled)');selected?.focus({preventScroll:true});selected?.scrollIntoView?.({block:'nearest'});});
   }else{
    const content=doc.createElement('div');content.className='app-color-editor';
-   const swatches=doc.createElement('div');swatches.className='app-color-swatches';
    const preview=doc.createElement('span');preview.className='app-color-preview';preview.style.background=control.value;
-   const field=doc.createElement('label');field.className='app-color-hex';field.textContent=language()?'Kode warna':'Hex color';const hex=doc.createElement('input');hex.type='text';hex.maxLength=7;hex.value=control.value;hex.spellcheck=false;hex.autocomplete='off';hex.setAttribute('aria-label',language()?'Kode warna':'Hex color');field.append(hex);
+   const field=doc.createElement('label');field.className='app-color-hex';field.textContent=language()?'Kode warna':'Hex color';const hex=doc.createElement('input');hex.type='text';hex.maxLength=7;hex.value=control.value;hex.spellcheck=false;hex.autocomplete='off';hex.autocapitalize='off';hex.setAttribute('aria-label',language()?'Kode warna':'Hex color');field.append(hex);
    const apply=doc.createElement('button');apply.type='button';apply.className='primary';apply.textContent=language()?'Terapkan':'Apply';
-   const validate=()=>{const valid=/^#[a-f\d]{6}$/i.test(hex.value);apply.disabled=!valid;hex.setAttribute('aria-invalid',String(!valid));if(valid)preview.style.background=hex.value;};hex.addEventListener('input',validate);
-   for(const color of ['#28302b','#faf9f5','#191d1b','#dddcd4','#eee2c8','#4c3b2a','#f1f0e9','#353b36','#dce8d9','#293d30','#54756c','#4269a5','#82669c','#a15e73','#a07732','#58616e']){const swatch=doc.createElement('button');swatch.type='button';swatch.style.background=color;swatch.setAttribute('aria-label',color);swatch.addEventListener('click',()=>{hex.value=color;validate();});swatches.append(swatch);}
+   const channels=doc.createElement('div');channels.className='app-rgb-controls';
+   const ranges=[],outputs=[];let rgb=[0,0,0];
+   const validate=()=>{
+    const valid=/^#[a-f\d]{6}$/i.test(hex.value);apply.disabled=!valid;hex.setAttribute('aria-invalid',String(!valid));if(!valid)return;
+    rgb=[1,3,5].map(offset=>parseInt(hex.value.slice(offset,offset+2),16));preview.style.background=hex.value;
+    ranges.forEach((range,index)=>{range.value=String(rgb[index]);outputs[index].value=String(rgb[index]);const low=[...rgb],high=[...rgb];low[index]=0;high[index]=255;range.style.setProperty('--rgb-track',`linear-gradient(to right,rgb(${low.join(',')}),rgb(${high.join(',')}))`);});
+   };
+   for(const [index,name]of ['R','G','B'].entries()){
+    const row=doc.createElement('label');row.className='app-rgb-row';const label=doc.createElement('span');label.textContent=name;const range=doc.createElement('input');range.type='range';range.className='app-rgb-slider';range.min='0';range.max='255';range.step='1';range.setAttribute('aria-label',language()?['Merah','Hijau','Biru'][index]:['Red','Green','Blue'][index]);const output=doc.createElement('output');ranges.push(range);outputs.push(output);
+    range.addEventListener('input',()=>{rgb[index]=Number(range.value);hex.value='#'+rgb.map(value=>value.toString(16).padStart(2,'0')).join('');validate();});row.append(label,range,output);channels.append(row);
+   }
+   hex.addEventListener('input',validate);hex.addEventListener('keydown',event=>{if(event.key==='Enter'&&!apply.disabled){event.preventDefault();apply.click();}});validate();
    apply.addEventListener('click',()=>{if(!/^#[a-f\d]{6}$/i.test(hex.value))return;control.value=hex.value.toLowerCase();refresh(control);close();control.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));control.dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));});
-   content.append(swatches,preview,field,apply);sheet.append(content);requestAnimationFrame(()=>hex.focus({preventScroll:true}));
+   content.append(preview,field,channels,apply);sheet.append(content);requestAnimationFrame(()=>{if(current?.layer===layer&&!sheet.contains(doc.activeElement))dismiss.focus({preventScroll:true});});
   }
   layer.addEventListener('click',event=>{if(event.target===layer)close();});
  }

@@ -3,7 +3,7 @@ import {layoutDialog} from './panel-layout.js?v=1';
 import {APP_INFO} from './app-info.js?v=1';
 import {installGlassTabs} from './glass-tabs.js?v=2';
 import {createAppUpdater} from './app-updates.js?v=2';
-import {installAppPopups} from './app-popups.js?v=10';
+import {installAppPopups} from './app-popups.js?v=11';
 import {parseEpub,PARSER_REVISION} from './epub.js?v=6';
 import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
@@ -177,7 +177,7 @@ async function toggleFullscreen(){
  }catch{toast('Browser tidak mengizinkan layar penuh.');}
 }
 for(const event of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(event,()=>{syncFullscreenButton();clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(currentBook)reflow().catch(e=>toast(e.message));},100);});
-function editingDialog(){const field=document.activeElement;return !!field?.closest?.('.dialog')&&field.matches('textarea,[contenteditable="true"],input:not([type=hidden]):not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=color])');}
+function editingDialog(){const field=document.activeElement;return !!field?.closest?.('.dialog,.app-picker')&&field.matches('textarea,[contenteditable="true"],input:not([type=hidden]):not([type=range]):not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=color])');}
 async function reflow(anchor=null){
  if(!currentBook)return;
  if(editingDialog()){deferredEditorReflow=true;return;}const request=++layoutRequest;reflowing=true;anchor=anchor||features.position();features.setPosition(anchor);features.apply();

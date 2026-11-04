@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Pemilih warna RGB (4 November 2026)
+
+- Ganti grid preset warna dengan tiga slider RGB, preview warna dan input hex yang saling tersinkron. Nilai baru disimpan setelah Apply.
+- Buka panel tanpa memfokuskan input teks; keyboard hanya muncul saat input diketuk. Fokus yang sudah dipilih pengguna tidak ditimpa callback panel.
+- Perlindungan fokus saat resize keyboard sekarang juga mencakup editor dalam color picker.
+
 ## Web — Seleksi UI dan zoom lokal (4 November 2026)
 
 - Nonaktifkan copy/cut, seleksi native pada UI, context menu dan drag teks. Kolom notes/input tetap dapat diedit dan menerima paste; highlighter aplikasi tetap memakai DOM Range.
