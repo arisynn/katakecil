@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Loading buku dan Settings ringkas (4 November 2026)
+
+- Tampilkan layar loading segera ketika membuka buku, lalu lanjutkan ke tahap penataan halaman. Hapus toast Opening book; error tetap memiliki feedback dan kembali ke Library bila buku belum termuat.
+- Hapus tiga deskripsi di halaman Settings dan pindahkan About app beserta updater Android ke accordion Advanced.
+- Pertahankan posisi header Library, data bacaan dan mekanisme otorisasi buku.
+
 ## Web — Comfort defaults untuk Text dan Layout (4 November 2026)
 
 - Batasi reset ke pengaturan pada tab Text dan Layout; tema, aksen, bahasa aplikasi, TTS dan seluruh data bacaan dipertahankan. Konfirmasi tetap memakai dialog aplikasi.
