@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Kembali ke tampilan Preview 2 (4 November 2026)
+
+- Kembalikan stylesheet kaca ke tampilan v1.0.1-preview.2: blur ringan, panel lebih tenang, tombol dan header seperti semula.
+- Pertahankan kemampuan drag tab, pelepasan slider langsung, feedback validasi aplikasi, reader dan updater GitHub.
+- Pembaruan web saja; APK Preview 2 tetap sama. Catatan audit liquid glass di bawah merupakan riwayat eksperimen yang telah dibatalkan tampilannya.
+
 ## Web — Konsistensi liquid glass (4 November 2026)
 
 - Audit seluruh UI sebelum implementasi; satukan panel, header, picker, toast, loading dan empty state dalam fondasi kaca tiga lapis.

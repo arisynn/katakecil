@@ -1,3 +1,5 @@
+> Riwayat eksperimen: tampilan audit ini dikembalikan ke gaya v1.0.1-preview.2 pada pembaruan berikutnya atas permintaan pemilik. Hasil tes di bawah berlaku pada commit eksperimen, bukan tampilan web terkini.
+
 # Audit UI menyeluruh dan konsistensi Liquid Glass
 
 Audit awal dilakukan pada commit `f60c705`, sebelum perubahan visual berikutnya. Instruksi pemilik meminta inventaris ditampilkan terlebih dahulu, kemudian implementasi. Daftar awal sudah ditampilkan dalam percakapan sebelum perubahan kode. Audit memindai 33 file aplikasi; 8 file menghasilkan markup/kontrol. Tidak ada JSX/TSX atau migrasi framework.
