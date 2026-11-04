@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Reset seluruh pengaturan (4 November 2026)
+
+- Comfort defaults meminta konfirmasi melalui dialog aplikasi sebelum mengembalikan seluruh preferensi ke default terpusat.
+- Reset mencakup bahasa, tema, aksen, font, layout, navigasi, layar dan TTS. Progres, koleksi buku, bookmark, highlight, notes dan identitas perangkat dipertahankan.
+- Pembatalan tidak mengubah preferensi; kegagalan penyimpanan ditampilkan dalam dialog. Pengiriman berulang dibatasi saat proses berlangsung.
+
 ## Web — Ruang konten dan accordion arc (4 November 2026)
 
 - Terapkan batas setengah layar pada konten yang bergulir; header/tab mendapat ruang tersendiri, dengan batas total tetap mengikuti viewport dan keyboard.

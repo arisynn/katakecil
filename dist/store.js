@@ -63,6 +63,12 @@ window.addEventListener('storage', event => {
 function storageFailure(){window.dispatchEvent(new window.CustomEvent('katakecil-storage-failure'));}
 function emit(kind,payload) { try { broadcast?.postMessage({kind,payload}); } catch {} }
 export function updatePreferences(change) { preferences={...preferences,...change};writeLocal('lumina_device_settings',preferences);emit('preferences',preferences); }
+export function resetPreferences(){
+ const next={...DEFAULTS,...migrateReaderPreferences(DEFAULTS),schemaVersion:2,uiLanguageChosen:true,uiLanguageDefaultVersion:1,deviceId};
+ if(!writeLocal('lumina_device_settings',next)){storageFailure();throw Error('Settings could not be saved. Please try again.');}
+ preferences=next;emit('preferences',preferences);return preferences;
+}
+
 export function saveProgress(value) {
   const record={...progress[value.bookId],...value,id:value.bookId,updatedAt:new Date().toISOString()};
   const fresh=safeRead('lumina_reading_progress',progress);

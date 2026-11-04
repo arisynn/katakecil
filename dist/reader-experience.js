@@ -14,7 +14,7 @@ export function createReaderExperience(ctx){
  const tr=(en,id=en)=>ctx.prefs().uiLanguage==='id'?id:en;
  let previewValues={};
  const pref=()=>readerSettings({...ctx.prefs(),...previewValues});
- let appearanceTab='text',peek=null;
+ let appearanceTab='text',peek=null,resetting=false;
  const arcOpen=new Map();
  let panel='',scrollPosition=null,scrollTimer,scrollRestore=false,filters={episode:'all',color:'all'},activeTab='contents';
  let search={query:'',chapterIndex:0,matches:[],total:0,index:-1},lookupSelection=null,lookupRequest=0,lookupAbort=null;
@@ -147,6 +147,21 @@ export function createReaderExperience(ctx){
   showPanel(ctx.heading(tr('Reading appearance','Tampilan baca'))+`<nav class="appearance-tabs" role="tablist" aria-label="${tr('Appearance sections','Bagian tampilan')}">${tabs.map(([key,title,symbol])=>`<button id="appearance-tab-${key}" data-action="appearance-tab" data-value="${key}" class="${key===tab?'active':''}" role="tab" aria-selected="${key===tab}" tabindex="${key===tab?'0':'-1'}" aria-controls="appearance-body">${icon(symbol)}<span>${title}</span></button>`).join('')}</nav><div id="appearance-body" class="reader-settings appearance-panel" role="tabpanel" aria-labelledby="appearance-tab-${tab}">${body}</div>${tab!=='theme'?`<p class="appearance-hint">${icon('sliders')}${tr('Hold a slider to preview the page.','Tahan slider untuk melihat pratinjau halaman.')}</p>`:''}`,'appearance');
   $('.dialog')?.classList.add('compact-settings-dialog');if(tab==='theme')previewTheme();
  }
+ function confirmDefaults(){
+  finishPeek();panel='comfort-confirm';
+  showPanel(ctx.heading(tr('Reset all settings?','Reset semua pengaturan?'))+`<p class="dialog-caption">${tr('Restore every app and reader setting, including language, theme, accent, layout and read-aloud preferences.','Kembalikan semua pengaturan aplikasi dan reader, termasuk bahasa, tema, aksen, tata letak, dan baca nyaring.')}</p><p class="settings-caption">${tr('Books, reading progress, bookmarks, highlights and notes will be kept.','Buku, progres baca, bookmark, highlight, dan catatan tetap tersimpan.')}</p><p class="form-error" role="alert" id="reset-settings-error"></p><div class="dialog-actions"><button class="secondary" data-action="comfort-reset-cancel">${tr('Cancel','Batal')}</button><button class="primary" data-action="comfort-reset-confirm">${icon('refresh')}${tr('Reset all settings','Reset semua pengaturan')}</button></div>`,'comfort-confirm');
+ }
+ async function restoreDefaults(){
+  if(panel!=='comfort-confirm'||resetting)return;resetting=true;
+  const button=$('[data-action="comfort-reset-confirm"]'),anchor=position();if(button)button.disabled=true;
+  try{
+   ctx.resetPreferences();speech.stop();previewValues={};scrollPosition=anchor;ctx.apply();
+   const effects=[wake.set(!!ctx.prefs().wakeLock)];if(ctx.setOrientation)effects.push(ctx.setOrientation(ctx.prefs().orientation||'auto'));
+   await Promise.allSettled(effects);await ctx.reflow(anchor);
+   if(panel==='comfort-confirm'){appearance('text');ctx.toast(tr('All settings restored.','Semua pengaturan dipulihkan.'));}
+  }catch(error){const field=$('#reset-settings-error');if(field)field.textContent=error.message||tr('Unable to reset settings. Try again.','Pengaturan belum dapat direset. Coba lagi.');}
+  finally{resetting=false;if(button?.isConnected)button.disabled=false;}
+ }
  function beginPeek(input){
   if(panel!=='appearance'||input.type!=='range')return;if(peek)return;
   const field=input.closest('.appearance-field');if(!field)return;
@@ -266,7 +281,9 @@ export function createReaderExperience(ctx){
   case 'next-episode':nextChapter(1);return true;
   case 'appearance-tab':endPeek();appearance(value);$('#appearance-tab-'+value)?.focus({preventScroll:true});return true;
   case 'global-theme':themeDialog();return true;
-  case 'comfort-reset':{finishPeek();const a=position();ctx.savePreferences({fontFamily:'Lora',fontSize:19,fontWeight:400,lineHeight:1.6,paragraphSpacing:6,letterSpacing:0,paragraphIndent:1.5,textAlign:'justify',pageAnimation:'fade',marginHorizontal:24,marginVertical:22,readerWidth:720});ctx.apply();void ctx.reflow(a).then(()=>appearance('text')).catch(e=>ctx.toast(e.message));return true;}
+  case 'comfort-reset':confirmDefaults();return true;
+  case 'comfort-reset-cancel':if(panel==='comfort-confirm'&&!resetting)appearance(appearanceTab);return true;
+  case 'comfort-reset-confirm':void restoreDefaults();return true;
   case 'app-theme-preset':ctx.savePreferences({themeMode:value,readerTheme:'follow',globalThemeVersion:1});ctx.apply();if(panel==='appearance')appearance('theme');else themeDialog();updateThemeSummary();return true;
   case 'apply-reader-theme':if(contrast(draftInk,draftPaper)<4.5)return true;ctx.savePreferences({themeMode:'custom',readerTheme:'follow',globalThemeVersion:1,customTextColor:draftInk,customBackgroundColor:draftPaper});ctx.apply();if(panel==='appearance')appearance('theme');else themeDialog();updateThemeSummary();return true;
   case 'selection-tools':lookup();return true;
