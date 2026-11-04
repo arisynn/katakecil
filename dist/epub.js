@@ -1,4 +1,4 @@
-export const PARSER_REVISION = 4;
+export const PARSER_REVISION = 5;
 
 export function chapterLabelOf(value=''){
  const match=String(value).match(/^(bab|episode|chapter|bagian)\s*(\d+(?:\.\d+)?|[ivxlcdm]+(?=\s|[.:—–-]|$))/i);
@@ -65,6 +65,11 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     return value.replace(chapterMarker,'').trim();
   };
   const isMarker=value=>value.length<=180&&chapterMarker.test(value);
+  // Some EPUBs keep chapter numbers in semantic heading IDs rather than visible text.
+  const headingLabel=node=>{
+    const match=node.id?.match(/^(bab|chapter|episode|bagian)[_-](\d+)(?:[_-](?:title|heading))?$/i);
+    return match?chapterLabelOf(match[1]+' '+Number(match[2])):'';
+  };
   const isGenerated=value=>/^(?:section|bagian|bab|chapter)\s*\d*$/i.test(value);
   const chapters = [];
   for (const ref of opf.getElementsByTagName('itemref')) {
@@ -83,23 +88,25 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     const level = headings.some(el=>el.tagName==='H2') ? 'H2' : headings.some(el=>el.tagName==='H1') ? 'H1' : 'H3';
     const boundaries = new Set(explicit.length?explicit:headings.filter(el=>el.tagName===level));
     let sourceTitle=chapterNames.get(path)||'';
+    let sourceLabel='';
     let title=realTitle(sourceTitle);
     if(isGenerated(title))title='';
     let content = [];
     let started = !boundaries.size;
     const flush = () => {
       const text = content.join('\n\n').trim();
-      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path)),navigationTitle:sourceTitle||title||'Informasi buku'});
+      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path))||sourceLabel,navigationTitle:sourceTitle||title||'Informasi buku'});
       content=[];
     };
     for (const block of blocks) {
       const value = plain(block);
       if (!value) continue;
-      if(started&&!title&&!content.length&&(/^H[1-4]$/.test(block.tagName)||block.matches('.chapter-name,.chapter-title,.subtitle'))&&!isMarker(value)){title=realTitle(value,block);sourceTitle=sourceTitle?sourceTitle+' — '+value:value;continue;}
+      if(started&&!title&&!content.length&&(/^H[1-4]$/.test(block.tagName)||block.matches('.chapter-name,.chapter-title,.subtitle'))&&!isMarker(value)){title=realTitle(value,block);sourceLabel=headingLabel(block)||sourceLabel;sourceTitle=sourceTitle?sourceTitle+' — '+value:value;continue;}
       if (boundaries.has(block)) {
         if (started) flush();
         // Some illustrated editions put image captions inside chapter headings.
         sourceTitle=(value.match(/chapter\s*[IVXLCDM\d]+(?:[.\s:–—-].*)?$/i)?.[0]||value).trim();
+        sourceLabel=headingLabel(block);
         title=realTitle(sourceTitle,block);
         if(isGenerated(title))title='';
         started = true;
@@ -108,7 +115,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     if (started) flush();
     if (!blocks.length) {
       const text=doc.body.textContent.replace(/\s+/g,' ').trim();
-      if(text.length>0)chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path)),navigationTitle:sourceTitle||title||'Informasi buku'});
+      if(text.length>0)chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path))||sourceLabel,navigationTitle:sourceTitle||title||'Informasi buku'});
     }
   }
   if (!chapters.length) throw new Error('No readable text was found. Image-only and fixed-layout EPUBs are not supported.');

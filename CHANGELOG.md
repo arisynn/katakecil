@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Alignment dan penanda bab (4 November 2026)
+
+- Sejajarkan pilihan font dengan tombol Comfort defaults; margin label tidak lagi mengenai wrapper kontrol.
+- Baca nomor bab dari ID heading semantik seperti chapter-11-title apabila teks judul tidak mencantumkannya. Nomor dalam teks tetap diprioritaskan; ID sembarang tidak digunakan.
+- Naikkan revisi parser agar EPUB lokal dengan buffer dapat diparsing ulang; isi dan identitas episode tetap sama.
+
 ## Web — Settings dan panel tetap (4 November 2026)
 
 - Susun Settings menjadi Appearance & language, Reading, Data & storage, dan About app; upload EPUB tetap di Advanced.

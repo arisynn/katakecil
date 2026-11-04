@@ -159,10 +159,12 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
   {name:'first.xhtml',html:'<h1><span class="chapter-no">Episode 3</span><span class="chapter-name">Kelereng Putih</span></h1><p>Paragraf pertama yang sebenarnya.</p>'},
   {name:'second.xhtml',html:'<p><strong>Bab 4 — Sesudah Tepuk Tangan</strong></p><p>Paragraf berikutnya.</p>'},
   {name:'third.xhtml',html:'<p>Bab 5</p><h1>Kursi yang Tersisa</h1><p>Teks cerita di bawah judul.</p>'},
-  {name:'fourth.xhtml',html:'<p>Bagian ini masih bagian cerita, bukan judul.</p><p>Kalimat tanpa judul buatan.</p>'}
+  {name:'fourth.xhtml',html:'<p>Bagian ini masih bagian cerita, bukan judul.</p><p>Kalimat tanpa judul buatan.</p>'},
+  {name:'fifth.xhtml',html:'<h2 id="chapter-11-title">Hari yang Tidak Istimewa</h2><p>Nomor bab ada pada identitas judul.</p>'},
+  {name:'sixth.xhtml',html:'<h2 id="random-12-title">Judul Biasa</h2><p>Nomor sembarang bukan nomor bab.</p>'}
  ]);
- const book=await parseEpub(bytes);assert.equal(book.chapters.length,4);
- assert.deepEqual(book.chapters.map(c=>c.title),['Kelereng Putih','Sesudah Tepuk Tangan','Kursi yang Tersisa','']);assert.deepEqual(book.chapters.map(c=>c.chapterLabel),['EPISODE 3','BAB 4','BAB 5','']);
+ const book=await parseEpub(bytes);assert.equal(book.chapters.length,6);
+ assert.deepEqual(book.chapters.map(c=>c.title),['Kelereng Putih','Sesudah Tepuk Tangan','Kursi yang Tersisa','','Hari yang Tidak Istimewa','Judul Biasa']);assert.deepEqual(book.chapters.map(c=>c.chapterLabel),['EPISODE 3','BAB 4','BAB 5','','BAB 11','']);
  assert.equal(book.chapters[0].text,'Paragraf pertama yang sebenarnya.');
  assert.equal(book.chapters[1].text,'Paragraf berikutnya.');
  assert.equal(book.chapters[2].text,'Teks cerita di bawah judul.');
