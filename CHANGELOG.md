@@ -2,6 +2,11 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Header sederhana (4 November 2026)
+
+- Hapus logo dan nama KataKecil dari header Library dan Settings, serta angka jumlah buku di samping Library.
+- Pertahankan ruang baris branding sebelumnya agar posisi judul dan jarak atas tidak bergeser.
+
 ## Web — Kembali ke tampilan Preview 2 (4 November 2026)
 
 - Kembalikan stylesheet kaca ke tampilan v1.0.1-preview.2: blur ringan, panel lebih tenang, tombol dan header seperti semula.

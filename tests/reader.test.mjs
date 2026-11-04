@@ -104,7 +104,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  assert.equal(w.document.querySelectorAll('.shelf-book').length,3);
  assert.equal($('.bottom-tabs'),null);assert.equal($('[data-action="library"]'),null,'Library has no redundant self-navigation');assert.ok($('.library-header-actions [data-action="settings"]'));assert.ok($('.library-header-actions [data-action="refresh"]'));
  assert.equal($('[data-action="import"]'),null,'no upload action in Library');
- assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.ok($('.brand-mark'));assert.match($('.library-header').textContent,/KataKecil/);assert.ok($('.library-shell'));assert.equal($('.book-title'),null,'cover captions are hidden');assert.equal($('.book-author'),null);
+ assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.equal($('.brand-mark'),null);assert.equal($('.book-count'),null);assert.equal($('.library-header h1').textContent,'Library');assert.ok($('.header-brand-space'));assert.ok(!$('.library-header').textContent.includes('KataKecil'));assert.ok($('.library-shell'));assert.equal($('.book-title'),null,'cover captions are hidden');assert.equal($('.book-author'),null);
  click('[data-action="carousel-next"]');assert.match($('.shelf-book.is-current').dataset.bookId,/garis/);
  click('[data-action="select-book"][data-id="masa-panen-google-play-ready-1"]');
  click('.read-button');await until(()=>$('.page-text')&&$('.reader-loading')?.classList.contains('hidden'),'reader paginated');
