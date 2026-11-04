@@ -1,5 +1,5 @@
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=8';
-import {escapeHTML as esc,icon,$,$$} from './ui.js?v=8';
+import {escapeHTML as esc,icon,$,$$} from './ui.js?v=9';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
 

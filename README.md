@@ -18,6 +18,8 @@ npm test
 
 ## Reader
 
+Library is the only main page: Refresh and Settings sit together in its header. Settings has a back-to-Library action; the redundant bottom tab bar is removed.
+
 - Existing carousel, glass UI, generated logo, English default/Indonesian app language, custom selection, copy protection, pinch menu, swipe, native fullscreen and measured pagination remain.
 - Pages or continuous scrolling within an episode; previous/next episode, direct page jump, slider, edge taps and two-page mode at widths of at least 1,000px.
 - Typography/layout controls, five named reading palettes, custom colors with contrast preview, dimming overlay and optional browser screen controls.

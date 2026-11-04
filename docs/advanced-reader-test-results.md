@@ -63,3 +63,7 @@ Required staging/device checklist:
 ## Deployment status
 
 Automated development checks are reported above; manual browser/device and staging rollout gates remain open. No production deploy or migration was performed. The old live raw-source gateway remains a deployment-blocking finding until the separate hardening patch is approved and deployed.
+
+## Header navigation follow-up
+
+The subsequent navigation update removes bottom tabs, moves Settings beside Refresh, adds a Settings back action, and replaces the Refresh glyph. Seven targeted existing regression tests passed, including library/settings navigation, source parsing, reader controls and language persistence. Build, typecheck, syntax/security-boundary and module-cache graph checks passed. The 42-test full-suite result above records the preceding advanced-reader delivery at `49f9e6d`; the full suite and browser QA were not repeated for this small follow-up. Manual QA is left to the user as requested.

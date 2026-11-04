@@ -102,7 +102,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  await import('../dist/app.js');
  await until(()=>$('.shelf-book'),'Supabase collection loaded');
  assert.equal(w.document.querySelectorAll('.shelf-book').length,3);
- assert.equal(w.document.querySelectorAll('.bottom-tab').length,2);
+ assert.equal($('.bottom-tabs'),null);assert.equal($('[data-action="library"]'),null,'Library has no redundant self-navigation');assert.ok($('.library-header-actions [data-action="settings"]'));assert.ok($('.library-header-actions [data-action="refresh"]'));
  assert.equal($('[data-action="import"]'),null,'no upload action in Library');
  assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.ok($('.brand-mark'));assert.match($('.library-header').textContent,/KataKecil/);assert.ok($('.library-shell'));assert.equal($('.book-title'),null,'cover captions are hidden');assert.equal($('.book-author'),null);
  click('[data-action="carousel-next"]');assert.match($('.shelf-book.is-current').dataset.bookId,/garis/);
@@ -172,9 +172,9 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
 
 test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
  const store=await import('../dist/store.js?v=8');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
- click('[data-action="settings"]');assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
+ click('[data-action="settings"]');assert.ok($('.settings-header [data-action="library"]'),'Settings has a back action');assert.equal($('.bottom-tabs'),null);assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
  assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.match($('.settings-shell').textContent,/Books stay in their original language/);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
- click('[data-action="library"]');await wait();assert.match($('.bottom-tabs').textContent,/Settings/);click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
+ click('[data-action="library"]');await wait();assert.equal($('.bottom-tabs'),null);assert.equal($('.library-header-actions [data-action="settings"]').getAttribute('aria-label'),'Settings');click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
  click('[data-action="library"]');click('[data-action="open"][data-id="garis-yang-kita-teruskan-karisyono-final-45-bab"]');await until(()=>$('.page-text')&&$('.reader-loading')?.classList.contains('hidden'),'Indonesian book opened in English UI');await wait();
  const root=$('.page-text'),chapter=$('.page-heading h1').textContent,source=root.textContent,position=JSON.stringify(store.progress['garis-yang-kita-teruskan-karisyono-final-45-bab']);
  assert.match(source,/Ini cerita berbahasa Indonesia/);assert.equal(root.lang,'id');assert.equal($('.chapter-label').textContent,'BAB 1');assert.equal(chapter,'Bahasa yang Tetap');assert.equal($('[data-action="contents"]').textContent.trim(),'Contents');assert.equal($('[data-action="appearance"]').textContent.trim(),'Appearance');assert.equal($('[data-action="fullscreen"]').textContent.trim(),'Full screen');
