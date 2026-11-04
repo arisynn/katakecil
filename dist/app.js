@@ -8,7 +8,7 @@ import * as Store from './store.js?v=10';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=10';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,fetchPublishedBook,findPage,makeAnchor,prepareChapters,globalPalette} from './advanced-reader.js?v=10';
-import {createReaderExperience} from './reader-experience.js?v=10';
+import {createReaderExperience} from './reader-experience.js?v=11';
 const app=$('#app'),overlay=$('#overlay-root');
 const popups=installAppPopups(document);
 const colors={amber:'#e7ca7e',emerald:'#a4c9ae',sapphire:'#acc7e6',rose:'#e4b3c3'};

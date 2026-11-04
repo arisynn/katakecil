@@ -24,7 +24,7 @@ test('slider preview hides the sheet, retains its input, applies CSS live and co
  const s=scene();s.features.setPosition({chapterIndex:0,start:3});s.features.appearance('text');const input=s.w.document.querySelector('[data-reader-pref=fontSize]');
  input.dispatchEvent(new s.w.MouseEvent('pointerdown',{bubbles:true}));assert.equal(s.w.document.querySelector('.reader-peek-control input'),input);assert.equal(s.w.document.querySelector('.reader-shell').dataset.mode,'reading');assert.ok(s.w.document.querySelector('.overlay-backdrop').classList.contains('appearance-peeking'));assert.equal(input.closest('.dialog'),s.w.document.querySelector('.dialog'),'the input stays in its original dialog during touch drag');
  input.value='26';input.dispatchEvent(new s.w.Event('input',{bubbles:true}));assert.equal(s.prefs.fontSize,19,'preview has not committed storage');assert.equal(s.w.document.documentElement.style.getPropertyValue('--reader-size'),'26px');
- input.dispatchEvent(new s.w.Event('change',{bubbles:true}));input.dispatchEvent(new s.w.MouseEvent('pointerup',{bubbles:true}));await wait(440);
+ input.dispatchEvent(new s.w.Event('change',{bubbles:true}));input.dispatchEvent(new s.w.MouseEvent('pointerup',{bubbles:true}));
  assert.equal(s.prefs.fontSize,26);assert.deepEqual(s.reflows.at(-1),{chapterIndex:0,start:3});assert.equal(s.w.document.querySelector('.reader-peek-control'),null);assert.equal(s.w.document.querySelector('[data-reader-pref=fontSize]'),input);assert.equal(s.w.document.querySelector('.reader-shell').dataset.mode,'controls');assert.equal(s.w.document.querySelector('.overlay-backdrop').classList.contains('appearance-peeking'),false);s.features.leave();s.w.close();
 });
 test('closing a slider preview cancels unsaved style and global theme changes affect the app and reader together',()=>{
@@ -39,10 +39,23 @@ test('read-aloud closes its panel and paints each real word through the CSS High
  pending[0]();await wait(10);assert.equal(spoken[1],'rain.');assert.equal(s.index,1);assert.equal(registry.get('katakecil-tts-word').ranges[0].toString(),'rain');s.features.action({dataset:{action:'tts-pause'}});assert.equal(registry.get('katakecil-tts-word').ranges[0].toString(),'rain');s.features.action({dataset:{action:'tts-stop'}});assert.equal(registry.has('katakecil-tts-word'),false);assert.ok(s.speechSaves.some(p=>p.charOffset===6));s.features.leave();s.w.close();
 });
 
-test('a second slider drag stays visible when the previous pagination request finishes',async()=>{
+test('release ends preview immediately without waiting for pagination or a native change event',async()=>{
  const s=scene(),pending=[];s.ctx.reflow=()=>new Promise(resolve=>pending.push(resolve));s.features.appearance('text');const input=s.w.document.querySelector('[data-reader-pref=fontSize]');
  const event=name=>input.dispatchEvent(name.startsWith('pointer')?new s.w.MouseEvent(name,{bubbles:true}):new s.w.Event(name,{bubbles:true}));
- event('pointerdown');input.value='24';event('input');event('change');event('pointerup');await wait(50);
- event('pointerdown');input.value='25';event('input');pending[0]();await wait(400);assert.ok(s.w.document.body.classList.contains('reader-previewing'),'finishing the old layout must not interrupt the new drag');
- event('change');event('pointerup');pending[1]();await wait(440);assert.equal(s.prefs.fontSize,25);assert.equal(s.w.document.body.classList.contains('reader-previewing'),false);s.features.leave();s.w.close();
+ event('pointerdown');input.value='24';event('input');event('pointerup');
+ assert.equal(s.w.document.body.classList.contains('reader-previewing'),false,'pointerup restores the sheet synchronously');assert.equal(s.prefs.fontSize,24);assert.equal(pending.length,1);
+ event('change');assert.equal(pending.length,1,'the later native change must not launch a duplicate layout');
+ event('pointerdown');input.value='25';event('input');pending[0]();await Promise.resolve();await Promise.resolve();assert.ok(s.w.document.body.classList.contains('reader-previewing'),'old pagination cannot interrupt a new drag');
+ event('pointerup');assert.equal(s.prefs.fontSize,25);assert.equal(s.w.document.body.classList.contains('reader-previewing'),false);pending[1]();s.features.leave();s.w.close();
+});
+test('appearance tabs retain the same sheet, header, tabs and panel container',()=>{
+ const s=scene();let openings=0;const show=s.ctx.show;s.ctx.show=html=>{openings++;show(html);};s.features.appearance('text');
+ const doc=s.w.document,dialog=doc.querySelector('.dialog'),backdrop=doc.querySelector('.overlay-backdrop'),heading=doc.querySelector('#dialog-title'),tabs=doc.querySelector('.appearance-tabs'),body=doc.querySelector('#appearance-body');
+ for(const tab of ['layout','theme','text']){doc.querySelector('[data-action=appearance-tab][data-value='+tab+']').click();assert.equal(doc.querySelector('.dialog'),dialog);assert.equal(doc.querySelector('.overlay-backdrop'),backdrop);assert.equal(doc.querySelector('#dialog-title'),heading);assert.equal(doc.querySelector('.appearance-tabs'),tabs);assert.equal(doc.querySelector('#appearance-body'),body);assert.equal(tabs.querySelector('[aria-selected=true]').dataset.value,tab);assert.equal(doc.activeElement,tabs.querySelector('[data-value='+tab+']'));}
+ s.prefs.uiLanguage='id';s.features.appearance('layout');assert.equal(doc.querySelector('#dialog-title'),heading);assert.match(heading.textContent,/Tampilan baca/);assert.equal(tabs.querySelector('[data-value=text] span').textContent,'Teks');assert.equal(openings,1,'only entering the appearance menu opens a sheet');s.features.leave();s.w.close();
+});
+test('book tabs and theme preset changes update the existing bottom sheet',()=>{
+ const s=scene();s.features.contents('contents');let dialog=s.w.document.querySelector('.dialog'),backdrop=s.w.document.querySelector('.overlay-backdrop');
+ for(const tab of ['highlights','notes','bookmarks']){s.features.action({dataset:{action:'reader-tab',value:tab}});assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);}
+ s.features.themeDialog();dialog=s.w.document.querySelector('.dialog');backdrop=s.w.document.querySelector('.overlay-backdrop');s.w.document.querySelector('[data-action=app-theme-preset][data-value=paper]').click();assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);s.features.leave();s.w.close();
 });

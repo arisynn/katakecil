@@ -6,7 +6,9 @@ This follow-up updates the existing development branch. No production deployment
 
 The long vertical appearance form is now split into **Text**, **Layout** and **Theme** tabs. Sliders use a two-column layout; less-used controls sit in disclosure sections. The main controls remain reachable without scrolling through every Reader option.
 
-Holding a slider temporarily hides the sheet and reader controls, leaving only that slider over the full page. Styles preview immediately. The range stays in its original DOM position so native touch dragging retains its target and coordinates. On release, measured pagination uses the original text anchor, then the sheet returns. Cancelling restores the stored value. A generation guard prevents an older pagination request from closing a newer drag.
+Holding a slider temporarily hides the sheet and reader controls, leaving only that slider over the full page. Styles preview immediately. The range stays in its original DOM position so native touch dragging retains its target and coordinates. On pointer release or keyboard release, the value is committed and the sheet returns immediately in the same event handler, without a timer or waiting for pagination. Measured pagination preserves the original text anchor in the background. A subsequent native change event does not repeat the reflow. Cancelling restores the stored value; an older reflow cannot close a newer drag.
+
+Switching Text/Layout/Theme keeps the same bottom sheet, header, tab buttons and panel container mounted. Book tabs and global-theme preset changes also update their existing sheet instead of restarting its entrance animation.
 
 ## Comfortable defaults
 
@@ -38,10 +40,10 @@ Pause/resume, speed changes, stop, per-book saved position and next-published-ep
 
 ## Verification
 
-- **51 automated tests passed**, zero failures.
+- **53 automated tests passed**, zero failures.
 - Build, strict helper/Edge typecheck, frontend syntax/publication boundary and runtime-module graph checks passed.
 - npm audit: zero reported vulnerabilities.
-- New tests cover app-owned select/color dialogs, comfortable/global preference migration, live slider preview/commit/cancel, rapid consecutive drags, real word-start fallback, fluent boundary voices, word painting and page turns.
+- New tests cover app-owned select/color dialogs, comfortable/global preference migration, live slider preview/commit/cancel, immediate release during unresolved pagination, stable sheet/tab identity, rapid consecutive drags, real word-start fallback, fluent boundary voices, word painting and page turns.
 - Regression tests retain source-character preservation, app-language isolation, gestures, copy protection, annotations and source authorization.
 
-These tests use jsdom and injected speech drivers. Physical device/audio and browser visual QA are left to the user as requested; no hardware audio or screenshot PASS is claimed. Exact command output is in `docs/generated/compact-reader-validation.txt`.
+These tests use jsdom and injected speech drivers. Physical device/audio and browser visual QA are left to the user as requested; no hardware audio or screenshot PASS is claimed. Original compact-control evidence is in `docs/generated/compact-reader-validation.txt`; the latest release/tab regression output is in `docs/generated/sheet-interaction-validation.txt`.

@@ -1,6 +1,6 @@
 # KataKecil — Advanced Reader implementation report
 
-This records the foundation delivery at `49f9e6d`. The current control/theme/TTS follow-up and its 51-test result are documented in [Compact reader controls](compact-reader-controls.md).
+This records the foundation delivery at `49f9e6d`. The current control/theme/TTS follow-up and its 53-test result are documented in [Compact reader controls](compact-reader-controls.md).
 
 Date: 4 November 2026 (UTC). Scope: the existing KataKecil checkout at `/workspace/sites/luminaglass`, branch `feat/advanced-reader`. No production deployment, production migration, publication edit, new account, or cloud annotation table was performed.
 
