@@ -137,10 +137,10 @@ export function createReaderExperience(ctx){
   if(panel!=='appearance'||input.type!=='range')return;if(peek)return;
   const field=input.closest('.appearance-field');if(!field)return;
   // Keep the actual range in place so native touch dragging never loses its DOM/capture target.
-  peek={input,field,anchor:position()};field.classList.add('reader-peek-control','glass');document.body.classList.add('reader-previewing');$('.overlay-backdrop')?.classList.add('appearance-peeking');ctx.mode('reading');
+  peek={input,field,anchor:position()};field.classList.add('reader-peek-control');document.body.classList.add('reader-previewing');$('.overlay-backdrop')?.classList.add('appearance-peeking');ctx.mode('reading');
  }
  function finishPeek(){
-  if(!peek)return;const state=peek;peek=null;previewValues={};state.field.classList.remove('reader-peek-control','glass');const value=ctx.prefs()[state.input.dataset.readerPref];state.input.value=value;const output=state.field.querySelector('output');if(output)output.textContent=value;document.body.classList.remove('reader-previewing');$('.overlay-backdrop')?.classList.remove('appearance-peeking');apply();if(ctx.book())ctx.mode('controls');
+  if(!peek)return;const state=peek;peek=null;previewValues={};state.field.classList.remove('reader-peek-control');const value=ctx.prefs()[state.input.dataset.readerPref];state.input.value=value;const output=state.field.querySelector('output');if(output)output.textContent=value;document.body.classList.remove('reader-previewing');$('.overlay-backdrop')?.classList.remove('appearance-peeking');apply();if(ctx.book())ctx.mode('controls');
  }
  function endPeek(){
   const state=peek;if(!state)return;const key=state.input.dataset.readerPref,value=Number(state.input.value);
