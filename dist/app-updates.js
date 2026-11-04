@@ -1,3 +1,4 @@
+import {layoutDialog} from './panel-layout.js?v=1';
 import {escapeHTML as esc,icon} from './ui.js?v=10';
 
 // Android owns download URLs, checksums, package/signature checks and installer permissions.
@@ -16,7 +17,7 @@ export function createAppUpdater(ctx){
   if(!ctx.enabled)return;let dialog=panel();
   if(!dialog&&open){ctx.show(content());dialog=document.querySelector('.dialog');if(dialog)dialog.dataset.appUpdates='true';}
   else if(dialog)dialog.innerHTML=content();
-  dialog?.classList.add('compact-settings-dialog');refreshSummary();
+  layoutDialog(dialog);dialog?.classList.add('compact-settings-dialog');refreshSummary();
  }
  async function check({silent=false}={}){
   if(!ctx.enabled||downloadTask||stage==='installing'||stage==='ready')return;

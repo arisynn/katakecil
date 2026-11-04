@@ -15,3 +15,7 @@ for(const name of ['core','android','app'])await writeFile('dist/vendor/licenses
 await writeFile('dist/vendor/licenses/tslib.txt',await readFile('node_modules/tslib/CopyrightNotice.txt','utf8')+'\n'+await readFile('node_modules/tslib/LICENSE.txt','utf8'));
 await writeFile('dist/vendor/OPEN_SOURCE_ATTRIBUTIONS.md',(await readFile('OPEN_SOURCE_ATTRIBUTIONS.md','utf8')).replaceAll('(dist/vendor/','(./').replaceAll('(dist/fonts/','(../fonts/'));
 console.log('Reader modules bundled; third-party licenses copied.');
+
+// About app always follows the release configuration used by the APK build.
+const appInfo=JSON.parse(await readFile('app-version.json','utf8'));
+await writeFile('dist/app-info.js','// Generated from app-version.json by npm run build.\nexport const APP_INFO = '+JSON.stringify(appInfo)+';\n');

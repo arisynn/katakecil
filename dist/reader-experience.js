@@ -1,3 +1,4 @@
+import {layoutDialog} from './panel-layout.js?v=1';
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=11';
 import {escapeHTML as esc,icon,$,$$} from './ui.js?v=10';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
@@ -97,11 +98,11 @@ export function createReaderExperience(ctx){
     const fragment=document.createElement('template');fragment.innerHTML=html;const next=fragment.content.querySelector(bodySelector),body=$(bodySelector),previous=$(tabsSelector+' button.active')?.dataset.value;
     body.innerHTML=next.innerHTML;body.setAttribute('aria-labelledby',next.getAttribute('aria-labelledby'));const heading=dialog.querySelector('#dialog-title'),nextHeading=fragment.content.querySelector('#dialog-title');if(heading&&nextHeading&&heading.textContent!==nextHeading.textContent)heading.innerHTML=nextHeading.innerHTML;const nav=dialog.querySelector(tabsSelector);nav.setAttribute('aria-label',fragment.content.querySelector(tabsSelector).getAttribute('aria-label'));
     nav.querySelectorAll('button').forEach(button=>{const active=button.dataset.value===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;const label=button.querySelector('span'),nextLabel=fragment.content.querySelector('#'+button.id+' span');if(label.textContent!==nextLabel.textContent)label.textContent=nextLabel.textContent;});
-    const oldHint=$('.appearance-hint'),newHint=fragment.content.querySelector('.appearance-hint');if(!newHint)oldHint?.remove();else if(!oldHint)dialog.append(newHint);else if(oldHint.textContent!==newHint.textContent)oldHint.innerHTML=newHint.innerHTML;
-    if(previous!==selected)dialog.scrollTop=0;
+    const oldHint=$('.appearance-hint'),newHint=fragment.content.querySelector('.appearance-hint');if(!newHint)oldHint?.remove();else if(!oldHint)(dialog.querySelector('.dialog-body')||dialog).append(newHint);else if(oldHint.textContent!==newHint.textContent)oldHint.innerHTML=newHint.innerHTML;
+    if(previous!==selected)(dialog.querySelector('.dialog-body')||dialog).scrollTop=0;
    }else dialog.innerHTML=html;
   }else{ctx.show(html);dialog=$('.dialog');}
-  if(dialog)dialog.dataset.readerPanel=key;
+  if(dialog){layoutDialog(dialog);dialog.dataset.readerPanel=key;}
  }
  function contents(tab=activeTab){
   if(!ctx.book())return;activeTab=tab;panel='contents';ctx.mode('controls');

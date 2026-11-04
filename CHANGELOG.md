@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Settings dan panel tetap (4 November 2026)
+
+- Susun Settings menjadi Appearance & language, Reading, Data & storage, dan About app; upload EPUB tetap di Advanced.
+- About menampilkan versi dari konfigurasi rilis, platform, GitHub dan atribusi; updater Android tetap tersedia.
+- Header Settings serta judul/tab dialog tetap di tempat; hanya isi yang bergulir. Tab dan sheet tetap dipertahankan ketika berpindah.
+- Hilangkan lingkaran tambahan pada ikon toolbar reader, pertahankan target sentuh dan penanda bookmark aktif.
+- Pemeriksaan dibatasi ke build, typecheck, pemeriksaan modul, dan tes panel terarah. QA visual/perangkat dilanjutkan pemilik.
+
 ## Web — Header sederhana (4 November 2026)
 
 - Hapus logo dan nama KataKecil dari header Library dan Settings, serta angka jumlah buku di samping Library.

@@ -36,3 +36,7 @@ body .appearance-peeking{backdrop-filter:none!important;-webkit-backdrop-filter:
 /* Keep pointer dragging with the quieter Preview 2 appearance. */
 body .liquid-tabs { touch-action: pan-y; user-select: none; -webkit-user-select: none; }
 .liquid-tabs[data-lens-dragging=true] .glass-tab-lens { transition: none; }
+
+/* Reader toolbar keeps a single surface, with no circular button chrome. */
+body[data-theme] .reader-toolbar .icon-button{background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+body[data-theme] .reader-toolbar .icon-button:hover{background:rgba(var(--accent-rgb),.08)}

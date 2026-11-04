@@ -3,6 +3,11 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Tampilan dan bahasa':'Appearance & language','Data dan penyimpanan':'Data & storage','Tentang aplikasi':'About app',
+ 'Atur spasi, margin, dan navigasi saat membuka buku.':'Adjust spacing, margins, and navigation inside a book.',
+ 'Ruang tenang untuk koleksi buku pribadi dan cerita berikutnya.':'A quiet place for your personal library and your next chapter.',
+ 'Versi':'Version','Platform':'Platform',
+
  'Simpan backup':'Save backup','Pulihkan backup':'Restore backup','Backup disimpan.':'Backup saved.',
  'Backup memuat progres dan catatan. Buku pribadi perlu diimpor ulang.':'Backups include progress and notes. Import personal EPUBs again.',
  'Data digabungkan. Catatan dan progres yang lebih baru di perangkat ini dipertahankan.':'Data is merged. Newer notes and progress on this device are kept.',
