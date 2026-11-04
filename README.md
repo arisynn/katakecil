@@ -22,9 +22,9 @@ Library is the only main page: Refresh and Settings sit together in its header. 
 
 - Existing carousel, glass UI, generated logo, English default/Indonesian app language, custom selection, copy protection, pinch menu, swipe, native fullscreen and measured pagination remain.
 - Pages or continuous scrolling within an episode; previous/next episode, direct page jump, slider, edge taps and two-page mode at widths of at least 1,000px.
-- Typography/layout controls, five named reading palettes, custom colors with contrast preview, dimming overlay and optional browser screen controls.
+- Compact Text/Layout/Theme tabs, live slider previews, comfortable justified defaults, one global theme, custom colors with contrast preview, dimming overlay and optional browser screen controls.
 - Separate Contents, Highlights, Notes and Bookmarks panels, color/episode filters, bookmark labels, scoped exports, and stable episode/quote/context/offset/hash anchors.
-- Local episode search, selected-word English/Indonesian dictionary, selected-text translation and browser read-aloud with voice/language/rate/resume controls.
+- Local episode search, selected-word English/Indonesian dictionary, selected-text translation and word-tracked browser read-aloud with voice/language/rate/resume controls. App-owned dialogs replace native select/color popovers.
 - Copying/sharing book text remains disabled. Only explicit selected-text lookup actions send text to dictionary/translation services. Voice labels distinguish device and online speech engines.
 
 ## Published content and storage
@@ -40,6 +40,8 @@ The former `lumina-library` signed-source gateway has a **prepared, undeployed**
 The published sample uses its real ID `contoh-katakecil`; the earlier internal EPUB ID is not aliased to it. Old annotations retain their book IDs and remain available in the device-wide export. Unresolvable source locations are marked for review rather than attached to another episode.
 
 ## Reports and licenses
+
+- [Latest compact controls, global themes and TTS update](docs/compact-reader-controls.md)
 
 - [Complete audit, implementation, tests and deployment status](docs/advanced-reader-report.md)
 - [Test evidence and remaining QA](docs/advanced-reader-test-results.md)

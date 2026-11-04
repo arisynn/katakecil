@@ -76,7 +76,7 @@ test('malformed and encrypted files fail without executing markup',async()=>{
 });
 
 test('local persistence and BroadcastChannel apply preferences, annotations, and progress',async()=>{
- const store=await import('../dist/store.js?v=8');
+ const store=await import('../dist/store.js?v=10');
  await store.openDatabase();
  store.updatePreferences({glassBlur:34});
  assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).glassBlur,34);
@@ -94,7 +94,7 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
 });
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
- const store=await import('../dist/store.js?v=8');
+ const store=await import('../dist/store.js?v=10');
  const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
  await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
  store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
@@ -134,7 +134,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  await wait(550);click('[data-action="library"]');click('[data-action="settings"]');assert.equal($('.advanced-settings').open,false);assert.ok($('[data-action="import"]').closest('details'));assert.ok($('.setting-label svg'),'settings rows have icons');
  click('[data-action="accent"][data-value="#82669c"]');assert.equal(w.document.documentElement.style.getPropertyValue('--accent'),'#82669c');assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).accentColor,'#82669c');
  input('#accent-custom','#dfb142');assert.equal(store.preferences.accentColor,'#dfb142');
- click('[data-action="set-theme"][data-value="dark"]');assert.equal(w.document.body.dataset.theme,'dark');
+ click('[data-action="global-theme"]');click('[data-action="app-theme-preset"][data-value="dark"]');assert.equal(w.document.body.dataset.theme,'dark');click('[data-action="close"]');
  click('[data-action="import"]');assert.ok($('#upload-zone'));click('[data-action="close"]');
  click('[data-action="library"]');catalogFails=true;click('[data-action="refresh"]');await until(()=>$('.offline-label'),'offline catalog recovery');assert.equal(w.document.querySelectorAll('.shelf-book').length,3);catalogFails=false;
 });
@@ -171,7 +171,7 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
 
 
 test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
- const store=await import('../dist/store.js?v=8');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
+ const store=await import('../dist/store.js?v=10');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
  click('[data-action="settings"]');assert.ok($('.settings-header [data-action="library"]'),'Settings has a back action');assert.equal($('.bottom-tabs'),null);assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
  assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.match($('.settings-shell').textContent,/Books stay in their original language/);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
  click('[data-action="library"]');await wait();assert.equal($('.bottom-tabs'),null);assert.equal($('.library-header-actions [data-action="settings"]').getAttribute('aria-label'),'Settings');click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
@@ -182,19 +182,19 @@ test('language setting persists and synchronizes while reader text and reading p
 });
 
 test('advanced reader integrates display, scroll, spread, page jumps, search, annotations and selected-text tools',async()=>{
- const store=await import('../dist/store.js?v=8');const bookId=fixtureBooks[0].id;
+ const store=await import('../dist/store.js?v=10');const bookId=fixtureBooks[0].id;
  click('[data-action="library"]');click('[data-action="settings"]');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));
  click('[data-action="library"]');click('[data-action="open"][data-id="'+bookId+'"]');await until(()=>$('.reader-loading')?.classList.contains('hidden'),'advanced reader opened');
  const otherProgress=JSON.stringify(store.progress[fixtureBooks[1].id]);
- const changePref=async(key,value)=>{const el=$('[data-reader-pref="'+key+'"]');assert.ok(el,key);if(el.type==='checkbox')el.checked=value;else el.value=String(value);el.dispatchEvent(new w.Event('input',{bubbles:true}));el.dispatchEvent(new w.Event('change',{bubbles:true}));await until(()=>$('.reader-loading')?.classList.contains('hidden'),'preference '+key+' reflow');};
+ const changePref=async(key,value)=>{let el=$('[data-reader-pref="'+key+'"]');if(!el){const layout=['readingMode','spreadMode','pageAnimation','marginHorizontal','marginVertical','readerWidth','contentPosition','brightness','orientation','tapNavigation','wakeLock'].includes(key);click('[data-action="appearance-tab"][data-value="'+(layout?'layout':'text')+'"]');el=$('[data-reader-pref="'+key+'"]');}assert.ok(el,key);if(el.type==='checkbox')el.checked=value;else el.value=String(value);el.dispatchEvent(new w.Event('input',{bubbles:true}));el.dispatchEvent(new w.Event('change',{bubbles:true}));await until(()=>$('.reader-loading')?.classList.contains('hidden'),'preference '+key+' reflow');};
  click('[data-action="show-controls"]');click('[data-action="reader-tools"]');$('#page-jump').value='3';$('#page-jump-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(store.progress[bookId].pageIndex,2);const originalOffset=store.progress[bookId].charOffset;assert.ok(originalOffset>0);
  click('[data-action="appearance"]');await changePref('fontSize',22);assert.equal(store.progress[bookId].charOffset,originalOffset,'a nonzero source anchor survives reflow');
  for(const [key,value,css] of [['fontWeight',600,'--reader-weight'],['lineHeight',1.6,'--reader-line'],['paragraphSpacing',8,'--paragraph-space'],['letterSpacing',.4,'--letter-space'],['paragraphIndent',1,'--paragraph-indent'],['marginHorizontal',20,'--reader-inset-x'],['marginVertical',18,'--reader-inset-y'],['readerWidth',680,'--reader-width']]){await changePref(key,value);assert.ok(w.document.documentElement.style.getPropertyValue(css).startsWith(String(value)),key+' affects actual CSS');assert.equal(store.progress[bookId].charOffset,originalOffset);}
  await changePref('textAlign','justify');assert.equal(w.document.documentElement.style.getPropertyValue('--reader-align'),'justify');
- click('[data-action="preview-theme"][data-value="sepia"]');assert.notEqual(store.preferences.readerTheme,'sepia','theme is previewed before apply');assert.ok($('#theme-preview').style.background);click('[data-action="apply-reader-theme"]');assert.equal(store.preferences.readerTheme,'sepia');
- click('[data-action="preview-theme"][data-value="custom"]');$('#reader-ink').value='#ffffff';$('#reader-ink').dispatchEvent(new w.Event('input',{bubbles:true}));$('#reader-paper').value='#ffffff';$('#reader-paper').dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal($('[data-action="apply-reader-theme"]').disabled,true,'unreadable custom contrast cannot be applied');assert.ok($('.theme-choice[data-value="custom"]').classList.contains('active'));
+ click('[data-action="appearance-tab"][data-value="theme"]');click('[data-action="app-theme-preset"][data-value="sepia"]');assert.equal(store.preferences.themeMode,'sepia');assert.equal(store.preferences.readerTheme,'follow');assert.equal(w.document.body.style.getPropertyValue('--paper'),'#eee2c8');
+ click('[data-action="app-theme-preset"][data-value="custom"]');$('#reader-ink').value='#ffffff';$('#reader-ink').dispatchEvent(new w.Event('input',{bubbles:true}));$('#reader-paper').value='#ffffff';$('#reader-paper').dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal($('[data-action="apply-reader-theme"]').disabled,true,'unreadable custom contrast cannot be applied');assert.ok($('.global-theme-chip[data-value="custom"]').classList.contains('active'));
  await changePref('readingMode','scroll');assert.equal($('.reader-shell').dataset.readingMode,'scroll');assert.equal(store.progress[bookId].charOffset,originalOffset);
- click('[data-action="close"]');click('[data-action="reader-tools"]');$('#page-jump').value='4';$('#page-jump-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));const scrollOffset=store.progress[bookId].charOffset;assert.ok(scrollOffset>originalOffset,'direct navigation moves the scroll anchor');
+ click('[data-action="close"]');click('[data-action="reader-tools"]');$('#page-jump').value='4';$('#page-jump-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));const scrollOffset=store.progress[bookId].charOffset;assert.ok(scrollOffset>0);assert.notEqual(scrollOffset,originalOffset,'direct navigation moves the scroll anchor');
  click('[data-action="appearance"]');await changePref('fontSize',23);assert.equal(store.progress[bookId].charOffset,scrollOffset);await changePref('readingMode','pages');assert.equal(store.progress[bookId].charOffset,scrollOffset);await changePref('spreadMode','double');click('[data-action="close"]');assert.equal(w.document.querySelectorAll('.spread-leaf').length,2);
  // The second leaf uses its own source offsets without ever creating a native Selection.
  const secondRoot=$('.spread-leaf:nth-child(2) .page-text'),secondStart=Number(secondRoot.dataset.start),secondChapter=Number(secondRoot.dataset.chapterIndex);
@@ -216,7 +216,7 @@ test('advanced reader integrates display, scroll, spread, page jumps, search, an
 });
 
 test('notes recover after LocalStorage mirror failure and deleted notes never resurrect on hydration',async()=>{
- const store=await import('../dist/store.js?v=8'),oldSet=w.Storage.prototype.setItem;
+ const store=await import('../dist/store.js?v=10'),oldSet=w.Storage.prototype.setItem;
  w.Storage.prototype.setItem=function(key,value){if(key==='lumina_annotations')throw Error('QuotaExceededError');return oldSet.call(this,key,value);};
  const note={id:'quota-note',bookId:'test-book-only',type:'highlight',selectedText:'a small quote',chapterIndex:0,startOffset:0,endOffset:13,noteText:'Recover this note',color:'amber',createdAt:new Date().toISOString()};
  assert.equal(store.saveAnnotation(note),false);await wait(40);const recovered=await import('../dist/store.js?quota-recovery');await recovered.hydrate();assert.ok(recovered.annotations.some(a=>a.id===note.id),'a new module instance recovers the note from IndexedDB');await store.hydrate();

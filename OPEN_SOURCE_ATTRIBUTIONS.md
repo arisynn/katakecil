@@ -7,7 +7,7 @@ Updated 4 November 2026. Packages are pinned in `package-lock.json`. Reader UI, 
 | Package | Version | Repository | License | Reused module/API |
 | --- | --- | --- | --- | --- |
 | dom-anchor-text-quote | 4.0.2 | https://github.com/tilgovi/dom-anchor-text-quote | MIT | `fromTextPosition`, `toTextPosition`: quote, prefix/suffix and offset-hint matching. Called from `src/reader/anchors.ts` with a textContent adapter; native browser Selection is never created. |
-| easy-speech | 2.4.0 | https://github.com/jankapunkt/easy-speech | MIT | Voice initialization/discovery and cross-browser `speak`, `pause`, `resume`, `cancel`. Used through `ReadAloud` in `src/reader/speech.ts`. KataKecil adds its existing episode/page anchors, bounded utterance queue, pause recovery and DOM geometry painting. |
+| easy-speech | 2.4.0 | https://github.com/jankapunkt/easy-speech | MIT | Voice initialization/discovery and cross-browser `speak` (including actual `start` / `boundary` events), `pause`, `resume`, `cancel`. Used through `ReadAloud` in `src/reader/speech.ts`. KataKecil adds its existing episode/page anchors, bounded utterance queue, pause recovery and DOM geometry painting. |
 
 Full notices: [Text Quote Anchor](dist/vendor/licenses/dom-anchor-text-quote.txt), [EasySpeech](dist/vendor/licenses/easy-speech.txt). Original copyright and permission notices are retained. Bundling changes the packaging, not the upstream source implementations.
 
@@ -43,7 +43,7 @@ These services are not source-code dependencies. A request is made only after th
 - **Wikikamus/Wiktionary**, https://id.wiktionary.org/. Definition excerpts cite the original word page and **CC BY-SA 4.0**. Article history provides contributor attribution. Resource-bearing HTML is stripped; excerpts are rendered as text.
 - **MyMemory / Translated**, https://mymemory.translated.net/doc/spec.php. Translation results are credited in the panel. Service terms, logging and free quotas apply. No dictionary/translation results are bundled or stored in localStorage.
 
-Browser Web Speech, Intl.Segmenter, Fullscreen, Screen Orientation and Wake Lock are platform APIs. Online speech voices may use the browser/OS provider's service; the voice picker identifies local versus online voices.
+Browser Web Speech, Intl.Segmenter, CSS Custom Highlight, Fullscreen, Screen Orientation and Wake Lock are platform APIs. The app uses a real story word to detect voice boundary support, then actual word/start events; unsupported boundary voices use individual word utterances, never estimated highlight timers. Online speech voices may use the browser/OS provider's service; the voice picker identifies local versus online voices.
 
 ## Evaluated, not integrated
 

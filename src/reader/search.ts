@@ -34,3 +34,15 @@ export function sentences(text: string, language = 'en'): Sentence[] {
   }
   return result;
 }
+
+export interface SpokenWord extends Sentence { wordStart: number; wordEnd: number }
+export function spokenWords(text: string, language = 'en'): SpokenWord[] {
+  let segmenter: Intl.Segmenter;
+  try { segmenter = new Intl.Segmenter(language, {granularity: 'word'}); } catch { segmenter = new Intl.Segmenter('en', {granularity: 'word'}); }
+  const words = Array.from(segmenter.segment(text)).filter(s => s.isWordLike);
+  return words.map((word,index) => {
+    const start = index === 0 ? 0 : word.index;
+    const end = words[index+1]?.index ?? text.length;
+    return {start,end,text:text.slice(start,end),wordStart:word.index,wordEnd:word.index+word.segment.length};
+  });
+}

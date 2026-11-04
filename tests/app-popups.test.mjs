@@ -1,0 +1,16 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {installAppPopups} from '../dist/app-popups.js';
+const wait=()=>new Promise(resolve=>setTimeout(resolve,25));
+function scene(){const dom=new JSDOM('<html lang="en"><body><label>Reading mode<select id="mode"><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label><label for="color">Accent</label><input id="color" type="color" value="#54756c"></body></html>',{url:'https://katakecil.test/',pretendToBeVisual:true});globalThis.requestAnimationFrame=dom.window.requestAnimationFrame.bind(dom.window);return dom;}
+test('custom choice dialogs update the native data interface once, restore focus and never open a browser picker',async()=>{
+ const dom=scene(),w=dom.window,doc=w.document;let nativeOpened=0,changes=0;doc.querySelector('#mode').showPicker=()=>nativeOpened++;doc.querySelector('#mode').addEventListener('change',()=>changes++);
+ const ui=installAppPopups(doc);const select=doc.querySelector('#mode');assert.equal(select.hidden,true);const trigger=select.parentElement.querySelector('button');trigger.click();await wait();assert.ok(doc.querySelector('.app-picker [role=listbox]'));assert.equal(trigger.getAttribute('aria-expanded'),'true');assert.match(doc.querySelector('.app-picker-heading h2').textContent,/Reading mode/);
+ doc.querySelectorAll('.app-picker [role=option]')[1].click();await wait();assert.equal(select.value,'scroll');assert.equal(changes,1);assert.equal(nativeOpened,0);assert.equal(doc.querySelector('.app-picker'),null);assert.equal(doc.activeElement,trigger);assert.equal(trigger.querySelector('span').textContent,'Scroll');
+ trigger.click();await wait();doc.activeElement.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert.equal(doc.querySelector('.app-picker'),null);ui.destroy();w.close();
+});
+test('custom color dialogs validate hex input, cite the selected color and keep disabled choices unavailable',async()=>{
+ const dom=scene(),w=dom.window,doc=w.document,ui=installAppPopups(doc);let changes=0;const input=doc.querySelector('#color');input.addEventListener('change',()=>changes++);input.showPicker=()=>assert.fail('native color picker must stay closed');const trigger=input.parentElement.querySelector('button');trigger.click();await wait();const hex=doc.querySelector('.app-color-hex input');hex.value='bad';hex.dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal(doc.querySelector('.app-color-editor .primary').disabled,true);hex.value='#4269a5';hex.dispatchEvent(new w.Event('input',{bubbles:true}));doc.querySelector('.app-color-editor .primary').click();await wait();assert.equal(input.value,'#4269a5');assert.equal(changes,1);assert.match(trigger.getAttribute('aria-label'),/#4269a5/);assert.equal(doc.querySelector('.app-picker'),null);
+ const select=doc.querySelector('#mode');select.disabled=true;await wait();assert.equal(select.parentElement.querySelector('button').disabled,true);ui.destroy();w.close();
+});

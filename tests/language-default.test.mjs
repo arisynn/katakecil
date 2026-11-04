@@ -12,7 +12,7 @@ async function preferences(saved){
  return{store,w};
 }
 test('English defaults apply to new devices and migrate an old automatic Indonesian preference',async()=>{
- const fresh=await preferences();assert.equal(fresh.store.preferences.uiLanguage,'en');
+ const fresh=await preferences();assert.equal(fresh.store.preferences.uiLanguage,'en');assert.equal(fresh.store.preferences.textAlign,'justify');assert.equal(fresh.store.preferences.lineHeight,1.6);assert.equal(fresh.store.preferences.paragraphSpacing,6);assert.equal(fresh.store.preferences.pageAnimation,'fade');
  const old=await preferences({deviceId:'existing-device',schemaVersion:2,uiLanguage:'id',fontSize:23,accentColor:'#4269a5'});
  assert.equal(old.store.preferences.uiLanguage,'en');assert.equal(old.store.deviceId,'existing-device');assert.equal(old.store.preferences.fontSize,23);assert.equal(old.store.preferences.accentColor,'#4269a5');assert.equal(old.w.localStorage.getItem('lumina_annotations'),'[{"id":"keep-note"}]');assert.equal(JSON.parse(old.w.localStorage.getItem('lumina_device_settings')).uiLanguageDefaultVersion,1);
 });

@@ -3,6 +3,7 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Kertas':'Paper','Hijau':'Green','Kustom':'Custom',
  'Aksi Library':'Library actions',
  'Progres dan catatan tersimpan di browser ini. Buku dari server memerlukan koneksi.':'Progress and notes are saved in this browser. Server books require an internet connection.',
  'Alat':'Tools','Lisensi open-source':'Open-source licenses','Hapus catatan':'Remove note','Hapus highlight':'Delete highlight',

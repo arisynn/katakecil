@@ -1,5 +1,7 @@
 # KataKecil — Reader test evidence
 
+Latest follow-up: **51 tests passed**, build/typecheck/check passed. See [compact reader controls](compact-reader-controls.md) and `generated/compact-reader-validation.txt`. Historical foundation results below remain tied to their source snapshot.
+
 Date: 4 November 2026. This report distinguishes executed checks from outstanding browser/device QA.
 
 ## Executed baseline
