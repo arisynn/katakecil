@@ -1,6 +1,6 @@
 // Only interface text is localized. EPUB text and personal writing opt out explicitly.
 export const LANGUAGES=['id','en'];
-let language='id',observer,onUpdate=()=>{};
+let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
  'Informasi buku':'Book information','Library':'Library','Pengaturan':'Settings','Bahasa':'Language','Bahasa aplikasi':'App language','Hanya mengubah bahasa aplikasi, bukan isi buku.':'Changes the app language only. Books stay in their original language.',
@@ -53,7 +53,7 @@ export function localizeUI(root){
  attributes(root);for(const element of root.querySelectorAll('[aria-label],[title],[placeholder],[alt]'))attributes(element);
  const walker=root.ownerDocument.createTreeWalker(root,4);let node;while(node=walker.nextNode())textNode(node);
 }
-export function setUiLanguage(locale){language=LANGUAGES.includes(locale)?locale:'id';if(typeof document!=='undefined'){document.documentElement.lang=language;localizeUI(document.body);onUpdate();}}
+export function setUiLanguage(locale){language=LANGUAGES.includes(locale)?locale:'en';if(typeof document!=='undefined'){document.documentElement.lang=language;localizeUI(document.body);onUpdate();}}
 export function startUiTranslations(callback=()=>{}){
  onUpdate=callback;observer?.disconnect();localizeUI(document.body);
  observer=new document.defaultView.MutationObserver(records=>{for(const record of records){if(record.type==='attributes')attributes(record.target);else for(const node of record.addedNodes)localizeUI(node);}onUpdate();});

@@ -72,7 +72,7 @@ The logo at `dist/assets/katakecil-logo.png` was generated with the image genera
 
 ## App language
 
-Settings now includes **Bahasa aplikasi / App language** with **Bahasa Indonesia** and **English**. The choice is saved as `uiLanguage` in the existing device preferences and synchronizes across tabs. Indonesian remains the default for existing devices.
+Settings now includes **Bahasa aplikasi / App language** with **Bahasa Indonesia** and **English**. The choice is saved as `uiLanguage` in the existing device preferences and synchronizes across tabs. English is the default. The previous automatic Indonesian default is migrated once; explicit language choices made afterward are preserved.
 
 Localization is limited to interface labels, messages, prompts, navigation, and accessibility attributes. EPUB prose, source chapter titles/numbers, book metadata, selected quotations, personal notes, and editable text opt out explicitly. The document language follows the app preference while each book's text retains its own `lang`. Changing app language updates UI nodes in place and does not repaginate books or update reading progress.
 

@@ -3,8 +3,8 @@ import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=4';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=6';
-import * as Store from './store.js?v=6';
-import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=6';
+import * as Store from './store.js?v=7';
+import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=7';
 import {createTextSelection,wordBounds} from './text-selection.js?v=4';
 const app=$('#app'),overlay=$('#overlay-root');
 const colors={amber:'#e7ca7e',emerald:'#a4c9ae',sapphire:'#acc7e6',rose:'#e4b3c3'};
@@ -22,7 +22,7 @@ const selectedBook=()=>books.find(b=>b.id===activeLibraryId)||books[0];
 function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3000);}
 function theme(){if(p().themeMode==='system'||p().themeMode==='auto-sensor')return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';return p().themeMode;}
 function applyPreferences(){
- setUiLanguage(p().uiLanguage||'id');lastTextPreferences=JSON.stringify([p().fontFamily,p().fontSize,p().lineHeight]);
+ setUiLanguage(p().uiLanguage||'en');lastTextPreferences=JSON.stringify([p().fontFamily,p().fontSize,p().lineHeight]);
  document.body.dataset.theme=theme();
  const s=document.documentElement.style,accent=/^#[a-f\d]{6}$/i.test(p().accentColor)?p().accentColor:'#54756c';
  s.setProperty('--accent',accent);const rgb=[1,3,5].map(i=>parseInt(accent.slice(i,i+2),16));s.setProperty('--accent-rgb',rgb.join(','));
@@ -272,7 +272,7 @@ document.addEventListener('input',event=>{
  if(el.id==='settings-font-size'){Store.updatePreferences({fontSize:Number(el.value)});if($('#font-size-output'))$('#font-size-output').textContent=el.value;if(!currentBook)applyPreferences();}
  if(el.id==='page-scrubber'){$('#page-counter').textContent=`${Number(el.value)+1} / ${pages.length}`;el.setAttribute('aria-valuetext',`Halaman ${Number(el.value)+1} dari ${pages.length}`);}
 });
-document.addEventListener('change',event=>{const el=event.target;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);});
+document.addEventListener('change',event=>{const el=event.target;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);});
 document.addEventListener('submit',event=>{if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note);});
 document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));

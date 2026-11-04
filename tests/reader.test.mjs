@@ -70,7 +70,7 @@ test('malformed and encrypted files fail without executing markup',async()=>{
 });
 
 test('local persistence and BroadcastChannel apply preferences, annotations, and progress',async()=>{
- const store=await import('../dist/store.js?v=6');
+ const store=await import('../dist/store.js?v=7');
  await store.openDatabase();
  store.updatePreferences({glassBlur:34});
  assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).glassBlur,34);
@@ -83,12 +83,12 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
  store.deleteAnnotation(annotation.id);await wait();assert.equal((await store.dbGetAll('annotations')).length,0);
  const remote=new MockBroadcastChannel('lumina-local-sync');remote.postMessage({kind:'preferences',payload:{...store.preferences,glassBlur:17}});await wait();assert.equal(store.preferences.glassBlur,17);
  remote.close();
- store.updatePreferences({...store.DEFAULTS});
+ store.updatePreferences({...store.DEFAULTS,uiLanguage:'id',uiLanguageChosen:true});
  store.saveProgress({bookId:'alice',chapterIndex:0,pageIndex:0,totalPages:12,charOffset:0,percentage:0});
 });
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
- const store=await import('../dist/store.js?v=6');
+ const store=await import('../dist/store.js?v=7');
  const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
  await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
  store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
@@ -165,7 +165,7 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
 
 
 test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
- const store=await import('../dist/store.js?v=6');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
+ const store=await import('../dist/store.js?v=7');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
  click('[data-action="settings"]');assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
  assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.match($('.settings-shell').textContent,/Books stay in their original language/);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
  click('[data-action="library"]');await wait();assert.match($('.bottom-tabs').textContent,/Settings/);click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
