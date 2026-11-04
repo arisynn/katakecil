@@ -105,3 +105,13 @@ body .dialog-body,body .app-picker-options,body .app-picker>.app-color-editor{ma
 .toc-arc[open]>summary>svg{transform:rotate(90deg)}
 .toc-arc-chapters{padding-left:10px}.toc-arc-chapters .toc-item{width:100%}
 .toc-arc-chapters .toc-item:last-child{border-bottom:0}
+
+/* Native selection/callouts are off across app chrome; editors retain caret editing. */
+html,body{touch-action:pan-x pan-y}
+body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body :is(input,textarea,[contenteditable="true"]){-webkit-user-select:text;user-select:text}
+/* Magnify only the reading canvas, independently of its menu-preview transform. */
+#reading-page{scale:var(--reading-zoom,1);translate:var(--reading-pan-x,0px) var(--reading-pan-y,0px)}
+#reading-page[data-zoomed]{touch-action:none}
+
+@media(pointer:coarse){body :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,[contenteditable="true"]){font-size:16px}}

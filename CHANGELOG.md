@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Seleksi UI dan zoom lokal (4 November 2026)
+
+- Nonaktifkan copy/cut, seleksi native pada UI, context menu dan drag teks. Kolom notes/input tetap dapat diedit dan menerima paste; highlighter aplikasi tetap memakai DOM Range.
+- Blokir zoom viewport dari gesture/shortcut; pinch-out memperbesar hanya kanvas bacaan, maksimal 3×, dengan pan satu jari. Pinch-in pada ukuran normal tetap membuka menu.
+- Zoom bersifat sementara, direset saat menu dibuka atau halaman diganti, serta tidak mengubah font, pagination atau progres. Toolbar, sheet, Settings dan Library tetap pada skala normal.
+
 ## Web — Loading buku dan Settings ringkas (4 November 2026)
 
 - Tampilkan layar loading segera ketika membuka buku, lalu lanjutkan ke tahap penataan halaman. Hapus toast Opening book; error tetap memiliki feedback dan kembali ke Library bila buku belum termuat.
