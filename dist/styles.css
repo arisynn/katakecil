@@ -37,3 +37,7 @@ body[data-theme=dark] .glass{border-color:#ffffff24;box-shadow:inset 0 1px 1px #
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .bottom-tab.active svg{stroke-width:2.35}.page-text:focus-visible{outline:0}
+
+/* Match the Library title hierarchy to the Settings page. */
+.library-heading h1{font-family:inherit;font-size:27px;font-weight:650;line-height:1.15;letter-spacing:-1.3px;margin-top:17px}.library-heading .book-count{font-size:11px;font-weight:400;margin-left:11px;letter-spacing:0}.library-header>.icon-button{align-self:flex-end;margin-bottom:-4px}.library-heading .settings-brand .generated-brand{width:35px;height:35px}
+@media(max-height:620px){.library-heading h1{font-size:23px;margin-top:10px}.library-heading .settings-brand .generated-brand{width:28px;height:28px}}

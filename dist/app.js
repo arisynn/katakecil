@@ -50,7 +50,7 @@ function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.
 function renderLibrary(){
  disconnectCarousel();view='library';currentBook=null;document.body.classList.remove('is-reading');document.body.classList.add('is-library');document.title='Library · KataKecil';
  if(!books.some(b=>b.id===activeLibraryId))activeLibraryId=books[0]?.id||'';
- app.innerHTML=shell(`<header class="library-header"><div class="brand-lockup">${brandMark()}<div><h1>KataKecil</h1><p>${books.length?books.length+' buku':'Library'}</p></div></div>${actionButton('refresh','refresh','Segarkan koleksi')}</header>${libraryBody()}`);
+ app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="settings-brand">${brandMark()}<span>KataKecil</span></div><h1>Library<span class="book-count">${books.length||''}</span></h1></div>${actionButton('refresh','refresh','Segarkan koleksi')}</header>${libraryBody()}`);
  connectCarousel();
 }
 function disconnectCarousel(){carouselObserver?.disconnect();clearTimeout(carouselTimer);}
