@@ -1,7 +1,7 @@
-import {icon} from './ui.js?v=10';
+import {icon} from './ui.js?v=11';
 
 // Native controls remain as the data/event interface, while the visible picker belongs to the app.
-export function installAppPopups(doc=document){
+export function installAppPopups(doc=document,{loadWheel=()=>import('./vendor/color-wheel.js?v=1')}={}){
  const records=new WeakMap();let current=null,sequence=0;
  const language=()=>doc.documentElement.lang==='id';
  const close=(restore=true)=>{if(!current)return;const {layer,trigger,blocked}=current;current=null;for(const [node,wasInert] of blocked)node.inert=wasInert;layer.remove();trigger.setAttribute('aria-expanded','false');trigger.removeAttribute('aria-controls');doc.body.classList.remove('app-picker-open');if(restore&&trigger.isConnected)trigger.focus({preventScroll:true});};
@@ -27,20 +27,13 @@ export function installAppPopups(doc=document){
    const preview=doc.createElement('span');preview.className='app-color-preview';preview.style.background=control.value;
    const field=doc.createElement('label');field.className='app-color-hex';field.textContent=language()?'Kode warna':'Hex color';const hex=doc.createElement('input');hex.type='text';hex.maxLength=7;hex.value=control.value;hex.spellcheck=false;hex.autocomplete='off';hex.autocapitalize='off';hex.setAttribute('aria-label',language()?'Kode warna':'Hex color');field.append(hex);
    const apply=doc.createElement('button');apply.type='button';apply.className='primary';apply.textContent=language()?'Terapkan':'Apply';
-   const channels=doc.createElement('div');channels.className='app-rgb-controls';
-   const ranges=[],outputs=[];let rgb=[0,0,0];
-   const validate=()=>{
-    const valid=/^#[a-f\d]{6}$/i.test(hex.value);apply.disabled=!valid;hex.setAttribute('aria-invalid',String(!valid));if(!valid)return;
-    rgb=[1,3,5].map(offset=>parseInt(hex.value.slice(offset,offset+2),16));preview.style.background=hex.value;
-    ranges.forEach((range,index)=>{range.value=String(rgb[index]);outputs[index].value=String(rgb[index]);const low=[...rgb],high=[...rgb];low[index]=0;high[index]=255;range.style.setProperty('--rgb-track',`linear-gradient(to right,rgb(${low.join(',')}),rgb(${high.join(',')}))`);});
-   };
-   for(const [index,name]of ['R','G','B'].entries()){
-    const row=doc.createElement('label');row.className='app-rgb-row';const label=doc.createElement('span');label.textContent=name;const range=doc.createElement('input');range.type='range';range.className='app-rgb-slider';range.min='0';range.max='255';range.step='1';range.setAttribute('aria-label',language()?['Merah','Hijau','Biru'][index]:['Red','Green','Blue'][index]);const output=doc.createElement('output');ranges.push(range);outputs.push(output);
-    range.addEventListener('input',()=>{rgb[index]=Number(range.value);hex.value='#'+rgb.map(value=>value.toString(16).padStart(2,'0')).join('');validate();});row.append(label,range,output);channels.append(row);
-   }
+   const wheelHost=doc.createElement('div');wheelHost.className='app-color-wheel';wheelHost.setAttribute('aria-label',language()?'Roda warna':'Color wheel');
+   let wheel=null,syncing=false;
+   const validate=()=>{const valid=/^#[a-f\d]{6}$/i.test(hex.value);apply.disabled=!valid;hex.setAttribute('aria-invalid',String(!valid));if(valid){preview.style.background=hex.value;if(wheel&&!syncing){syncing=true;wheel.hex=hex.value;syncing=false;}}};
+   loadWheel().then(({default:ColorWheel})=>{if(current?.layer!==layer)return;wheel=new ColorWheel({appendTo:wheelHost,hex:hex.value,wheelDiameter:176,wheelThickness:18,handleDiameter:16,wheelReflectsSaturation:false,onChange:color=>{if(syncing||current?.layer!==layer)return;hex.value=color.hex;syncing=true;validate();syncing=false;}});}).catch(()=>{wheelHost.hidden=true;});
    hex.addEventListener('input',validate);hex.addEventListener('keydown',event=>{if(event.key==='Enter'&&!apply.disabled){event.preventDefault();apply.click();}});validate();
    apply.addEventListener('click',()=>{if(!/^#[a-f\d]{6}$/i.test(hex.value))return;control.value=hex.value.toLowerCase();refresh(control);close();control.dispatchEvent(new doc.defaultView.Event('input',{bubbles:true}));control.dispatchEvent(new doc.defaultView.Event('change',{bubbles:true}));});
-   content.append(preview,field,channels,apply);sheet.append(content);requestAnimationFrame(()=>{if(current?.layer===layer&&!sheet.contains(doc.activeElement))dismiss.focus({preventScroll:true});});
+   content.append(wheelHost,preview,field,apply);sheet.append(content);requestAnimationFrame(()=>{if(current?.layer===layer&&!sheet.contains(doc.activeElement))dismiss.focus({preventScroll:true});});
   }
   layer.addEventListener('click',event=>{if(event.target===layer)close();});
  }

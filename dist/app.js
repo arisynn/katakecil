@@ -3,20 +3,22 @@ import {layoutDialog} from './panel-layout.js?v=1';
 import {APP_INFO} from './app-info.js?v=1';
 import {installGlassTabs} from './glass-tabs.js?v=2';
 import {createAppUpdater} from './app-updates.js?v=2';
-import {installAppPopups} from './app-popups.js?v=11';
+import {installAppPopups} from './app-popups.js?v=12';
 import {parseEpub,PARSER_REVISION} from './epub.js?v=6';
 import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
-import {$,$$,escapeHTML,icon,actionButton} from './ui.js?v=10';
+import {$,$$,escapeHTML,icon,actionButton} from './ui.js?v=11';
 import * as Store from './store.js?v=14';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,fetchPublishedBook,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=11';
-import {createReaderExperience} from './reader-experience.js?v=19';
+import {createReaderExperience} from './reader-experience.js?v=20';
 import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=2';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
+const ACTIVE_READER_KEY='katakecil_active_reader';
+const rememberReader=id=>Store.writeLocal(ACTIVE_READER_KEY,id?{bookId:id}:null);
 const readerZoom=createReaderZoom(()=>$('#reading-page'));
 const popups=installAppPopups(document);
 installGlassTabs(document);
@@ -87,7 +89,7 @@ function connectCarousel(){const el=$('#book-carousel');if(!el)return;el.addEven
 function scrollToSelected(smooth=true){const el=$('#book-carousel'),card=$$('.shelf-book').find(c=>c.dataset.bookId===activeLibraryId);if(!el||!card)return;const left=card.offsetLeft-(el.clientWidth-card.offsetWidth)/2;if(el.scrollTo)el.scrollTo({left,behavior:smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});else el.scrollLeft=left;}
 function selectBook(id,scroll=true){if(!books.some(b=>b.id===id))return;activeLibraryId=id;Store.writeLocal('lumina_selected_book',id);$$('.shelf-book').forEach(c=>c.classList.toggle('is-current',c.dataset.bookId===id));$$('.shelf-dot').forEach(c=>{c.classList.toggle('active',c.dataset.id===id);c.setAttribute('aria-pressed',String(c.dataset.id===id));});if($('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();if(scroll)scrollToSelected();}
 function renderSettings(){
- disconnectCarousel();view='settings';currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Pengaturan · KataKecil';
+ rememberReader(null);disconnectCarousel();view='settings';currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Pengaturan · KataKecil';
  app.innerHTML=shell(`<header class="settings-header"><div class="header-brand-space" aria-hidden="true"></div><div class="settings-title-row"><h1>Pengaturan</h1><button class="header-back" data-action="library" aria-label="Kembali ke Library">${icon('left')}<span>Library</span></button></div></header><div class="settings-content">
  <section class="settings-group"><h2>${icon('appearance')} Tampilan dan bahasa</h2><div class="settings-surface">
  <div class="setting-row"><label class="setting-label" for="app-language">${icon('globe')}Bahasa aplikasi</label><select id="app-language" class="language-select" aria-label="Bahasa aplikasi"><option value="id" ${p().uiLanguage!=='en'?'selected':''}>Bahasa Indonesia</option><option value="en" ${p().uiLanguage==='en'?'selected':''}>English</option></select></div>
@@ -160,7 +162,7 @@ function pageMarkup(page,index,measurement=false){
  return `<div class="page-inner"><div class="page-heading" data-book-content translate="no" ${page.start!==0||(!chapter.title&&!chapter.chapterLabel)?'hidden':''}>${chapter.chapterLabel?`<p class="chapter-label">${escapeHTML(chapter.chapterLabel)}</p>`:''}<h1 ${!chapter.title?'hidden':''}>${escapeHTML(chapter.title)}</h1></div><div class="page-text" data-book-content translate="no" tabindex="0" aria-label="Isi halaman. Tekan H untuk mulai highlight." lang="${escapeHTML(currentBook.language||'id')}" ${measurement?'':`data-page="${index}"`}>${measurement?'':markedText(page)}</div><div class="page-number" aria-label="Nomor halaman">${measurement?'':index+1}</div></div>`;
 }
 function mountReader(){
- disconnectCarousel();document.body.classList.remove('is-library');document.body.classList.add('is-reading');view='reader';readerMode='reading';document.title=`${currentBook.title} · KataKecil`;
+ rememberReader(currentBook.id);disconnectCarousel();document.body.classList.remove('is-library');document.body.classList.add('is-reading');view='reader';readerMode='reading';document.title=`${currentBook.title} · KataKecil`;
  app.innerHTML=`<main class="reader-shell" data-mode="reading"><header class="reader-toolbar glass" inert aria-hidden="true"><button class="icon-button" data-action="library" aria-label="Kembali ke Library">${icon('back')}</button><span class="reader-title" data-book-content translate="no">${escapeHTML(currentBook.title)}</span><button class="icon-button" data-action="bookmark" aria-label="Bookmark halaman">${icon('bookmark')}</button></header><div class="reader-stage"><article class="reading-page" id="reading-page" aria-label="Halaman buku">${pageMarkup({chapterIndex:0,start:0,end:0},0,true)}</article></div><button class="reader-menu-trigger" data-action="show-controls" aria-label="Buka menu baca">${icon('more')}</button><footer class="reader-controls glass" inert aria-hidden="true"><div class="reader-tool-actions"><button data-action="contents">${icon('list')}<span>Daftar isi</span></button><button data-action="appearance">${icon('type')}<span>Tampilan</span></button><button data-action="reader-tools">${icon('sliders')}<span>Alat</span></button><button data-action="fullscreen" aria-label="Masuk layar penuh" aria-pressed="false">${icon('expand')}<span>Layar penuh</span></button></div><div class="scrubber-row"><button class="icon-button" data-action="prev" aria-label="Halaman sebelumnya">${icon('left')}</button><label><span class="sr-only">Posisi baca</span><input type="range" id="page-scrubber" min="0" max="1" value="0" aria-label="Posisi baca"></label><button class="icon-button" data-action="next" aria-label="Halaman berikutnya">${icon('chevron')}</button></div><div class="reader-progress"><span id="page-counter"></span><span id="reading-percent"></span></div></footer><div class="reader-loading" role="status"><div class="spinner"></div><span>Menata halaman…</span></div></main>`;
 }
 function migrateSavedAnchors(bookId,oldChapters,newChapters){
@@ -211,7 +213,7 @@ async function openBook(id,anchor=null){
  features.leave();const request=++readingRequest;closeOverlay();removeSelection();layoutRequest++;currentBook=null;pages=[];pageIndex=0;reflowing=false;
  clearTimeout(toastTimer);$('#toast').classList.remove('visible');mountOpeningPage();
  try{const book=await ensureBook(id);if(request!==readingRequest)return;currentBook=book;const saved=Store.progress[id];features.enter();features.resolveAnnotations();mountReader();features.apply();await reflow(anchor||features.savedPosition(saved));if(request!==readingRequest)return;if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia. Progres mungkin tidak tersimpan.');}
- catch(error){if(request===readingRequest){reflowing=false;if(currentBook){setReaderMode('controls');$('.reader-loading')?.classList.add('hidden');}else renderLibrary();toast(error.message||'Buku belum bisa dibuka.');}}
+ catch(error){if(request===readingRequest){reflowing=false;if(currentBook){setReaderMode('controls');$('.reader-loading')?.classList.add('hidden');}else{rememberReader(null);renderLibrary();}toast(error.message||'Buku belum bisa dibuka.');}}
 }
 function bookmarked(page){if(!page||!currentBook)return null;return notesFor(currentBook.id).find(a=>!a.needsReview&&a.type==='bookmark'&&a.chapterIndex===page.chapterIndex&&(a.charOffset||0)>=page.start&&(a.charOffset||0)<page.end);}
 function prefMargin(){return (Number(p().marginHorizontal)||24)*2;}
@@ -306,7 +308,7 @@ function aboutDialog(){
  showOverlay(`${dialogHeading('Tentang aplikasi')}<p class="about-description">Ruang tenang untuk koleksi buku pribadi dan cerita berikutnya.</p><dl class="about-details"><div><dt>Versi</dt><dd data-book-content translate="no">${escapeHTML(APP_INFO.version)}</dd></div><div><dt>Platform</dt><dd>${isNativeApp?'Android':'Web'}</dd></div></dl><p class="settings-caption">Progres dan catatan tersimpan di perangkat ini. Buku dari server memerlukan koneksi.</p><div class="about-links"><a class="settings-link" href="https://github.com/arisynn/katakecil" target="_blank" rel="noopener noreferrer"><span class="setting-label">${icon('globe')}GitHub</span>${icon('arrow')}</a><button class="settings-link" data-action="licenses"><span class="setting-label">${icon('notes')}Lisensi open-source</span>${icon('chevron')}</button></div>`);
 }
 function setAccent(color){if(!/^#[a-f\d]{6}$/i.test(color))return;Store.updatePreferences({accentColor:color});applyPreferences();$$('.accent-swatch').forEach(el=>{el.classList.toggle('selected',el.dataset.value===color);el.setAttribute('aria-pressed',String(el.dataset.value===color));});if($('#accent-custom'))$('#accent-custom').value=color;popups.scan();}
-function navigateLibrary(){persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay();removeSelection();renderLibrary();}
+function navigateLibrary(){rememberReader(null);persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay();removeSelection();renderLibrary();}
 async function handleAction(button,event){
  if(features.action(button))return;
  const action=button.dataset.action,id=button.dataset.id,value=button.dataset.value;
@@ -467,5 +469,10 @@ function syncVisibleViewport(){const viewport=window.visualViewport;if(!viewport
 window.visualViewport?.addEventListener('resize',syncVisibleViewport);
 window.visualViewport?.addEventListener('scroll',syncVisibleViewport);
 syncVisibleViewport();
-async function init(){activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();renderLibrary();await loadCatalog();void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');}
-init().catch(()=>{catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});
+async function init(){
+ const resume=readLocal(ACTIVE_READER_KEY,null),restoring=resume&&typeof resume.bookId==='string';activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();
+ if(restoring)mountOpeningPage();else renderLibrary();await loadCatalog();
+ if(restoring&&view==='loading'){if(books.some(book=>book.id===resume.bookId))await openBook(resume.bookId);else{rememberReader(null);renderLibrary();}}
+ void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');
+}
+init().catch(()=>{rememberReader(null);catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});

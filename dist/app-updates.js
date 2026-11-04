@@ -1,5 +1,5 @@
 import {layoutDialog} from './panel-layout.js?v=1';
-import {escapeHTML as esc,icon} from './ui.js?v=10';
+import {escapeHTML as esc,icon} from './ui.js?v=11';
 
 // Android owns download URLs, checksums, package/signature checks and installer permissions.
 export function createAppUpdater(ctx){

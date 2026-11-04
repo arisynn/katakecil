@@ -6,6 +6,10 @@ await build({entryPoints:['src/reader/index.ts'],outdir:'dist',entryNames:'advan
 });
 await build({entryPoints:{platform:'src/platform/index.ts','device-backup':'src/platform/backup.ts'},outdir:'dist',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
 await mkdir('dist/vendor/licenses',{recursive:true});
+await build({entryPoints:['node_modules/reinvented-color-wheel/es/reinvented-color-wheel.js'],outfile:'dist/vendor/color-wheel.js',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
+await writeFile('dist/vendor/color-wheel.css',await readFile('node_modules/reinvented-color-wheel/css/reinvented-color-wheel.min.css'));
+for(const name of ['reinvented-color-wheel','pure-color'])await writeFile('dist/vendor/licenses/'+name+'.txt',await readFile('node_modules/'+name+'/LICENSE'));
+
 for(const name of ['dom-anchor-text-quote','dom-anchor-text-position','dom-seek','dom-node-iterator','index-of','diff-match-patch','easy-speech']){
  const file='node_modules/'+name+'/LICENSE';await access(file);
  await writeFile('dist/vendor/licenses/'+name+'.txt',await readFile(file));

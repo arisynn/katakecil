@@ -25,6 +25,7 @@
     "@capacitor/app": "8.1.2",
     "@capacitor/core": "8.6.0",
     "dom-anchor-text-quote": "4.0.2",
-    "easy-speech": "2.4.0"
+    "easy-speech": "2.4.0",
+    "reinvented-color-wheel": "0.4.0"
   }
 }

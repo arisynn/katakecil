@@ -64,3 +64,11 @@ Browser Web Speech, Intl.Segmenter, CSS Custom Highlight, Fullscreen, Screen Ori
 | https://github.com/readest/readest | AGPL-3.0 | README/license/activity reviewed only. Incorporation would require a deliberate AGPL compliance decision, including applicable source-disclosure obligations for a combined/networked work. No code, UI, assets or dependencies incorporated; KataKecil's license is not changed. |
 
 Research details and activity snapshots: `docs/advanced-reader-report.md` and `docs/generated/open-source-research.json`.
+
+
+## Color wheel
+
+- [Reinvented Color Wheel](https://github.com/luncheon/reinvented-color-wheel), npm `reinvented-color-wheel@0.4.0`, WTFPL v2. Standalone hue ring, saturation/value canvas, pointer handling and color conversion integration; no framework UI imported and upstream source unchanged. [License](dist/vendor/licenses/reinvented-color-wheel.txt).
+- [pure-color](https://github.com/WickyNilliams/pure-color), npm `pure-color@1.3.0`, MIT. Upstream wheel dependency for hex/RGB/HSL conversion. [License](dist/vendor/licenses/pure-color.txt).
+
+MIT `@radial-color-picker/color-wheel` was evaluated but only draws hue and does not supply a full picker. `@jaames/iro` (MPL-2.0) was evaluated but not integrated. The selected small vanilla picker provides both hue and saturation/value controls without RGB sliders. Its permissive WTFPL license and the dependency's MIT notice are shipped with the app.

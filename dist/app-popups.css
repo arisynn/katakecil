@@ -4,13 +4,7 @@
 
 body.app-picker-open{overflow:hidden;overscroll-behavior:none}.app-picker-backdrop{overscroll-behavior:contain}
 
-/* RGB channels replace the preset grid and share a single draft with the hex input. */
+/* A reserved wheel area avoids layout shifts while the local module loads. */
 .app-color-editor{grid-template-columns:40px minmax(0,1fr);gap:12px}
-.app-rgb-controls{grid-column:1/-1;display:grid;gap:6px}
-.app-rgb-row{display:grid;grid-template-columns:18px minmax(0,1fr) 30px;align-items:center;gap:10px;min-height:36px;font-size:12px;font-weight:600}
-.app-rgb-row output{text-align:right;font-size:11px;font-weight:400;font-variant-numeric:tabular-nums;color:var(--muted)}
-.app-rgb-slider{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:32px;margin:0;background:transparent;cursor:pointer;touch-action:pan-y}
-.app-rgb-slider::-webkit-slider-runnable-track{height:6px;border:1px solid #8884;border-radius:99px;background:var(--rgb-track)}
-.app-rgb-slider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border:2px solid #fff;border-radius:50%;background:var(--accent);box-shadow:0 1px 5px #0004}
-.app-rgb-slider::-moz-range-track{height:6px;border:1px solid #8884;border-radius:99px;background:var(--rgb-track)}
-.app-rgb-slider::-moz-range-thumb{width:16px;height:16px;border:2px solid #fff;border-radius:50%;background:var(--accent);box-shadow:0 1px 5px #0004}
+.app-color-wheel{grid-column:1/-1;justify-self:center;width:176px;height:176px;margin:4px auto 2px}
+.app-color-wheel[hidden]{display:none}

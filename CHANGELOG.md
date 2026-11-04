@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Tema ringkas, color wheel dan resume setelah refresh (4 November 2026)
+
+- Rapikan pilihan tema menjadi baris dua kolom dengan ikon, Custom selebar panel, dan dua baris warna Text/Background yang sejajar.
+- Ganti slider RGB dengan color wheel yang di-host sendiri; input hex dan Apply tetap tersedia tanpa autofocus keyboard.
+- Ingat buku aktif dan buka kembali pada posisi tersimpan setelah refresh melalui alur pembacaan terotorisasi yang sama. Keluar ke Library/Settings mengakhiri sesi aktif; konten buku tidak ditambahkan ke penyimpanan sesi.
+- Dependency baru: reinvented-color-wheel 0.4.0 (WTFPL) dan pure-color 1.3.0 (MIT); atribusi dan lisensi disertakan.
+
 ## Web — Pemilih warna RGB (4 November 2026)
 
 - Ganti grid preset warna dengan tiga slider RGB, preview warna dan input hex yang saling tersinkron. Nilai baru disimpan setelah Apply.
