@@ -1,0 +1,33 @@
+[
+  {
+    "service": "dictionary_en",
+    "http": 200,
+    "cors": "*",
+    "shape": "entries",
+    "api_status": null,
+    "error": null
+  },
+  {
+    "service": "dictionary_id",
+    "http": 200,
+    "cors": "*",
+    "shape": [
+      "parse"
+    ],
+    "api_status": null,
+    "error": ""
+  },
+  {
+    "service": "translation",
+    "http": 200,
+    "cors": "*",
+    "shape": [
+      "responseData",
+      "quotaFinished",
+      "mtLangSupported",
+      "responseDetails"
+    ],
+    "api_status": 200,
+    "error": ""
+  }
+]

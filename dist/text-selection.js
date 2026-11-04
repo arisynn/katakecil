@@ -51,7 +51,7 @@ export function createTextSelection({document:doc,getRoot,canStart=()=>true,onCh
  }
  function begin(event){
   if(!canStart()||event.button>0)return;
-  const root=getRoot();if(!root||!root.contains(event.target))return;
+  const root=getRoot(event);if(!root||!root.contains(event.target))return;
   if(pointer){clearTimer();pointer=null;return;}
   const offset=offsetAtPoint(root,event.clientX,event.clientY);if(offset===null)return;
   pointer={id:event.pointerId,x:event.clientX,y:event.clientY,offset,root,type:event.pointerType||'mouse',at:Date.now(),selected:false};
@@ -68,7 +68,7 @@ export function createTextSelection({document:doc,getRoot,canStart=()=>true,onCh
   if(dragging){event.preventDefault();dragging=null;return;}
   if(pointer?.id===event.pointerId){if(state&&!pointer.selected&&Date.now()-pointer.at<delay)clear();clearTimer();pointer=null;}
  }
- const native=event=>{const root=getRoot();if(root?.contains(event.target))event.preventDefault();};
+ const native=event=>{const root=getRoot(event);if(root?.contains(event.target))event.preventDefault();};
  doc.addEventListener('pointerdown',begin);doc.addEventListener('pointermove',move,{passive:false});doc.addEventListener('pointerup',end);doc.addEventListener('pointercancel',()=>{clearTimer();pointer=null;dragging=null;});
  doc.addEventListener('touchstart',event=>{if(event.touches.length>1){clearTimer();pointer=null;}},{passive:true});
  doc.addEventListener('selectstart',native);doc.addEventListener('contextmenu',native);

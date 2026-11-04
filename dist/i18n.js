@@ -3,6 +3,8 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Progres dan catatan tersimpan di browser ini. Buku dari server memerlukan koneksi.':'Progress and notes are saved in this browser. Server books require an internet connection.',
+ 'Alat':'Tools','Lisensi open-source':'Open-source licenses','Hapus catatan':'Remove note','Hapus highlight':'Delete highlight',
  'Informasi buku':'Book information','Library':'Library','Pengaturan':'Settings','Bahasa':'Language','Bahasa aplikasi':'App language','Hanya mengubah bahasa aplikasi, bukan isi buku.':'Changes the app language only. Books stay in their original language.',
  'Navigasi utama':'Main navigation','Koleksi buku':'Book collection','Geser untuk memilih buku':'Swipe to choose a book','Buku sebelumnya':'Previous book','Buku selanjutnya':'Next book','Pilih buku':'Choose a book','Segarkan koleksi':'Refresh library','Menyiapkan rak buku…':'Loading your library…','Rak belum bisa dibuka':'Unable to load your library','Rak masih kosong':'Your shelf is empty','Koleksi buku akan muncul di sini.':'Your books will appear here.','Coba lagi':'Try again','Menampilkan koleksi tersimpan ·':'Showing saved books ·','Selesai dibaca':'Finished','Belum dibaca':'Not started','Lanjutkan membaca':'Continue reading','Baca buku':'Read book',
  'Tampilan':'Appearance','Tema':'Theme','Terang':'Light','Gelap':'Dark','Sistem':'System','Warna aksen':'Accent color','Pilih warna sendiri':'Choose a custom color','Warna aksen pilihan':'Custom accent color','Membaca':'Reading','Huruf':'Font','Ukuran teks':'Text size','Seleksi kalimat untuk highlight. Aksi salin teks buku dinonaktifkan.':'Select a passage to highlight it. Copying book text is disabled.','Lanjutan':'Advanced','Impor EPUB dari perangkat':'Import an EPUB','Ekspor catatan':'Export notes','Penyimpanan perangkat':'Device storage','Progres dan catatan tersimpan di perangkat ini.':'Progress and notes are saved on this device.',
@@ -12,6 +14,24 @@ const english={
  'Layar penuh belum didukung browser ini.':'This browser does not support full screen.','Browser tidak mengizinkan layar penuh.':'The browser did not allow full screen.','Penyimpanan perangkat tidak tersedia. Progres mungkin tidak tersimpan.':'Device storage is unavailable. Your progress may not be saved.','Penyimpanan perangkat tidak tersedia.':'Device storage is unavailable.','Bookmark dihapus.':'Bookmark removed.','Halaman ditandai.':'Page bookmarked.','Catatan tersimpan.':'Note saved.','Highlight tersimpan.':'Highlight saved.','Catatan diekspor.':'Notes exported.','Buku ini sudah ada di rak.':'This book is already on your shelf.','Buku ditambahkan ke rak.':'Book added to your shelf.','Berkas tidak dapat dibuka.':'Unable to open this file.','Pilih berkas .epub.':'Choose an .epub file.','Ukuran maksimal 30 MB.':'The maximum file size is 30 MB.','Penyimpanan perangkat penuh atau tidak tersedia.':'Device storage is full or unavailable.','Alamat buku tidak valid.':'The book URL is invalid.','Buku diperbarui. Segarkan koleksi dan buka lagi.':'The book has changed. Refresh your library and open it again.','Koneksi ke koleksi buku gagal. Coba lagi.':'Unable to connect to your library. Try again.','Berkas lebih besar dari 30 MB.':'This file is larger than 30 MB.','Format koleksi tidak valid.':'The library format is invalid.','Data buku tidak lengkap.':'Some book details are missing.','Periksa koneksi internet, lalu coba lagi.':'Check your internet connection and try again.','Buku tidak tersedia.':'This book is unavailable.','Buku belum bisa dibuka.':'Unable to open this book.','Posisi catatan ini perlu ditinjau setelah pembaruan buku.':'This note’s location needs review after the book was updated.','Rak belum bisa dibuka. Coba segarkan halaman.':'Unable to load your library. Try refreshing the page.','Ukuran teks terlalu besar untuk area baca. Kecilkan teks atau putar layar.':'The text is too large for this screen. Reduce the text size or rotate your device.','Halaman tidak dapat ditata untuk ukuran layar ini.':'Unable to lay out a page for this screen size.'
 };
 const parserErrors={
+ 'Storage is unavailable. Export your notes before closing this tab.':'Penyimpanan tidak tersedia. Ekspor catatan sebelum menutup tab ini.',
+ 'Original quotation is kept in your annotation export.':'Kutipan asli tersimpan dalam ekspor anotasi Anda.',
+ 'Select between 1 and 4,000 characters.':'Pilih antara 1 hingga 4.000 karakter.',
+ 'Select a single word to look it up.':'Pilih satu kata untuk mencari artinya.',
+ 'Select a shorter passage (up to 450 UTF-8 bytes).':'Pilih teks lebih pendek (maksimal 450 byte UTF-8).',
+ 'No definition was found for this word.':'Definisi kata ini tidak ditemukan.',
+ 'Dictionary lookup supports English and Indonesian.':'Kamus mendukung bahasa Inggris dan Indonesia.',
+ 'Choose two different supported languages.':'Pilih dua bahasa berbeda yang didukung.',
+ 'The service is unavailable or its request limit was reached.':'Layanan tidak tersedia atau batas permintaan tercapai.',
+ 'Translation is unavailable or its free request limit was reached.':'Terjemahan tidak tersedia atau batas gratis tercapai.',
+ 'No speech voices are available on this device.':'Tidak ada suara pembaca di perangkat ini.',
+ 'No voice is installed for this language. Choose an available voice.':'Suara untuk bahasa ini belum terpasang. Pilih suara yang tersedia.',
+ 'Screen Wake Lock is not supported by this browser.':'Browser ini tidak mendukung layar tetap menyala.',
+ 'Published content is unavailable. Please retry online.':'Konten terbit tidak tersedia. Coba lagi saat daring.',
+ 'Book changed. Refresh the library and open it again.':'Buku berubah. Segarkan Library lalu buka kembali.',
+ 'This book is no longer published.':'Buku ini tidak lagi diterbitkan.',
+ 'Publication changed. Reopen the book to load its published episodes.':'Publikasi berubah. Buka ulang buku untuk memuat episode terbit.',
+
  'This EPUB is larger than 30 MB. Please choose a smaller file.':'Ukuran EPUB lebih dari 30 MB. Pilih berkas yang lebih kecil.',
  'This EPUB is too large to safely open in the browser.':'EPUB ini terlalu besar untuk dibuka di browser.',
  'Encrypted or DRM-protected EPUBs are not supported. Please use a DRM-free edition.':'EPUB terenkripsi atau dengan DRM belum didukung. Gunakan edisi tanpa DRM.',

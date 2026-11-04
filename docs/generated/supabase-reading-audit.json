@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-04",
+  "secureFunction": "katakecil-reader",
+  "deployedVersionInspected": 2,
+  "deploymentPerformed": false,
+  "databaseWrites": false,
+  "securityAdvisorLints": 0,
+  "bookPublicPolicy": "is_published",
+  "sectionPublicPolicy": "is_enabled AND release_at <= now() AND parent book is_published",
+  "legacyGatewayHardening": "local source only; not deployed"
+}

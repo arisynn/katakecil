@@ -1,0 +1,26 @@
+{
+  "bytes": 50642,
+  "dependencies": [
+    "node_modules/diff-match-patch/index.js",
+    "node_modules/dom-node-iterator/lib/adapter.js",
+    "node_modules/dom-node-iterator/lib/builtin.js",
+    "node_modules/dom-node-iterator/lib/implementation.js",
+    "node_modules/dom-node-iterator/lib/polyfill.js",
+    "node_modules/dom-node-iterator/lib/shim.js",
+    "node_modules/dom-node-iterator/lib/index.js",
+    "node_modules/dom-node-iterator/polyfill.js",
+    "node_modules/dom-node-iterator/implementation.js",
+    "node_modules/dom-node-iterator/shim.js",
+    "node_modules/dom-node-iterator/index.js",
+    "node_modules/ancestors/index.js",
+    "node_modules/index-of/index.js",
+    "node_modules/dom-seek/lib/index.js",
+    "node_modules/dom-seek/index.js",
+    "node_modules/dom-anchor-text-position/lib/range-to-string.js",
+    "node_modules/dom-anchor-text-position/lib/index.js",
+    "node_modules/dom-anchor-text-position/index.js",
+    "node_modules/dom-anchor-text-quote/lib/index.js",
+    "node_modules/dom-anchor-text-quote/index.js",
+    "node_modules/easy-speech/dist/EasySpeech.js"
+  ]
+}

@@ -1,0 +1,165 @@
+KataKecil advanced-reader final verification — 2026-11-04 UTC
+Branch: feat/advanced-reader
+Production deploy: NOT PERFORMED
+Database migrations: NONE
+
+
+CLEAN INSTALL
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+
+added 54 packages in 861ms
+
+BUILD
+
+> build
+> node scripts/build-reader.mjs
+
+Reader modules bundled; third-party licenses copied.
+
+TYPECHECK
+
+> typecheck
+> tsc -p tsconfig.json
+
+
+CHECK
+
+> check
+> node scripts/check-reader.mjs
+
+JavaScript/Edge syntax, entry assets and publication boundaries checked.
+Runtime module graph resolves with consistent cache versions.
+
+TEST SUITE
+
+> test
+> npm run build && node --test tests/*.test.mjs
+
+
+> build
+> node scripts/build-reader.mjs
+
+Reader modules bundled; third-party licenses copied.
+✔ open-source quote anchors use context, survive changed offsets, and stay in their episode (2.45069ms)
+✔ one-time old EPUB anchor migration requires a unique exact contextual quotation (0.205729ms)
+✔ literal search handles regex punctuation, Unicode offsets, sentences, and bounded result lists (1.352181ms)
+✔ reading settings clamp invalid layout values and gate spreads at adequate screen widths (0.788894ms)
+✔ word counts and bounded speech segments use source-language text without rewriting it (9.207897ms)
+✔ secure source ignores source URLs, excludes empty publications and rejects malformed identities (1.020773ms)
+✔ published fetch fails closed on stale revisions, unavailable content, wrong MIME and oversized responses (28.549224ms)
+✔ translation sends only explicit selected text and rejects oversized selections before a request (1.334675ms)
+✔ dictionary uses one selected word, renders service errors and supports dependency injection (1.59141ms)
+✔ TTS plays, pauses, resumes at the last boundary and ignores stale callbacks after stop (6.561905ms)
+✔ TTS automatically advances within the available published chapter list and completes (0.963908ms)
+✔ wake lock releases on exit, rejects unsupported browsers and closes asynchronous request races (0.528333ms)
+✔ paragraph layout wrappers retain source offsets and separators without extra text (321.182215ms)
+✔ Indonesian dictionary strips resource-bearing markup and returns cited definitions (6.562936ms)
+✔ chapter content hashes keep repeated quotations at exact offsets after layout changes (2.665533ms)
+✔ concurrent speech initialization shares one device voice request (0.31983ms)
+✔ TTS speed changes apply during playback without losing the last spoken position (0.346771ms)
+✔ saved text anchors follow their source chapter after title and imprint pages disappear (1.245561ms)
+✔ ambiguous repeated highlights are retained for review rather than attached to the wrong passage (0.129925ms)
+✔ UI language switches in place while EPUB headings, prose, and personal notes stay original (54.849281ms)
+✔ dynamic app labels retain book titles verbatim and whitespace stays stable (0.287001ms)
+✔ English defaults apply to new devices and migrate an old automatic Indonesian preference (58.454775ms)
+✔ an explicitly selected Indonesian language remains selected after reload (17.139259ms)
+✔ legacy gateway lists only allowlisted nonempty publications without server credentials (26.992468ms)
+✔ legacy EPUB links go through published authorization with an exact revision and fail closed (3.054898ms)
+✔ measured pagination preserves full text including short chapters and astral characters (1.661415ms)
+✔ pagination can be cancelled and reports impossible layouts without clipping text (1.234383ms)
+✔ a paragraph ending at 61% of a page does not leave the other 39% empty (0.349985ms)
+✔ measurer receives exact source offsets even when the same words repeat (0.267682ms)
+alice: 12 chapters, 116 pages; opening: Down the Rabbit-Hole
+pride: 61 chapters, 512 pages; opening: 
+frankenstein: 28 chapters, 345 pages; opening: Letter 1
+sherlock: 12 chapters, 428 pages; opening: I. A SCANDAL IN BOHEMIA
+treasure: 35 chapters, 301 pages; opening: TREASURE ISLAND
+time: 17 chapters, 152 pages; opening: I. Introduction
+✔ all bundled EPUBs contain real chapters and pagination preserves every character (2006.593554ms)
+✔ malformed and encrypted files fail without executing markup (2.819054ms)
+✔ local persistence and BroadcastChannel apply preferences, annotations, and progress (112.145962ms)
+✔ personal carousel, reader controls, highlights, copy blocking, and settings work together (4963.239864ms)
+✔ catalog normalization accepts production data and rejects duplicate IDs and unsafe URLs (0.869997ms)
+✔ chapter names are extracted once from nested spans and numbered paragraph headings (9.543924ms)
+✔ language setting persists and synchronizes while reader text and reading positions remain intact (173.467103ms)
+✔ advanced reader integrates display, scroll, spread, page jumps, search, annotations and selected-text tools (50591.258749ms)
+✔ notes recover after LocalStorage mirror failure and deleted notes never resurrect on hydration (86.891897ms)
+✔ a failure of both storage mechanisms produces a visible recovery warning (43.454932ms)
+✔ custom drag highlights text across marks without creating a native Selection (68.987306ms)
+✔ touch long-press selects a word; a swipe or second finger cancels pending selection (84.823923ms)
+✔ word boundaries and DOM text offsets preserve punctuation and UTF-16 anchor positions (7.245896ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63268.331945
+
+ROLLBACK SOURCE VALIDATION
+
+> test
+> node --test tests/*.test.mjs
+
+✔ saved text anchors follow their source chapter after title and imprint pages disappear (1.23859ms)
+✔ ambiguous repeated highlights are retained for review rather than attached to the wrong passage (0.17997ms)
+✔ UI language switches in place while EPUB headings, prose, and personal notes stay original (57.360438ms)
+✔ dynamic app labels retain book titles verbatim and whitespace stays stable (0.24607ms)
+✔ English defaults apply to new devices and migrate an old automatic Indonesian preference (49.587831ms)
+✔ an explicitly selected Indonesian language remains selected after reload (13.652679ms)
+✔ legacy gateway lists only allowlisted nonempty publications without server credentials (24.746814ms)
+✔ legacy EPUB links go through published authorization with an exact revision and fail closed (3.060978ms)
+✔ measured pagination preserves full text including short chapters and astral characters (1.592292ms)
+✔ pagination can be cancelled and reports impossible layouts without clipping text (1.049696ms)
+✔ a paragraph ending at 61% of a page does not leave the other 39% empty (0.249475ms)
+alice: 12 chapters, 116 pages; opening: Down the Rabbit-Hole
+pride: 61 chapters, 512 pages; opening: 
+frankenstein: 28 chapters, 345 pages; opening: Letter 1
+sherlock: 12 chapters, 428 pages; opening: I. A SCANDAL IN BOHEMIA
+treasure: 35 chapters, 301 pages; opening: TREASURE ISLAND
+time: 17 chapters, 152 pages; opening: I. Introduction
+✔ all bundled EPUBs contain real chapters and pagination preserves every character (1837.137687ms)
+✔ malformed and encrypted files fail without executing markup (2.971364ms)
+✔ local persistence and BroadcastChannel apply preferences, annotations, and progress (107.547621ms)
+✔ personal carousel, reader controls, highlights, copy blocking, and settings work together (1226.217078ms)
+✔ catalog normalization accepts production data and rejects duplicate IDs and unsafe URLs (0.997158ms)
+✔ chapter names are extracted once from nested spans and numbered paragraph headings (9.94788ms)
+✔ language setting persists and synchronizes while reader text and reading positions remain intact (183.563306ms)
+✔ custom drag highlights text across marks without creating a native Selection (57.355627ms)
+✔ touch long-press selects a word; a swipe or second finger cancels pending selection (82.918699ms)
+✔ word boundaries and DOM text offsets preserve punctuation and UTF-16 anchor positions (6.948297ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8030.238688
+
+> check
+> node --check dist/app.js && node --check dist/store.js && node --check dist/epub.js && node --check dist/pagination.js && node --check dist/ui.js && node --check supabase/functions/lumina-library/index.ts && node --check dist/anchors.js && node --check dist/text-selection.js && node --check dist/i18n.js
+
+
+NPM AUDIT
+{
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependencies": {
+    "prod": 9,
+    "dev": 90,
+    "optional": 46,
+    "peer": 0,
+    "peerOptional": 0,
+    "total": 98
+  }
+}
+
+Supabase security advisor: 0 lints. Read-only RLS review performed. No production writes.

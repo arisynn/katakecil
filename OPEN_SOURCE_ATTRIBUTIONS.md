@@ -1,0 +1,57 @@
+# KataKecil — Open-source attributions
+
+Updated 4 November 2026. Packages are pinned in `package-lock.json`. Reader UI, publication adapters and domain integration are KataKecil code; no application UI from the research candidates was copied. Runtime libraries are bundled locally into `dist/advanced-reader.js`; no CDN is needed for these libraries.
+
+## Direct runtime packages actually integrated
+
+| Package | Version | Repository | License | Reused module/API |
+| --- | --- | --- | --- | --- |
+| dom-anchor-text-quote | 4.0.2 | https://github.com/tilgovi/dom-anchor-text-quote | MIT | `fromTextPosition`, `toTextPosition`: quote, prefix/suffix and offset-hint matching. Called from `src/reader/anchors.ts` with a textContent adapter; native browser Selection is never created. |
+| easy-speech | 2.4.0 | https://github.com/jankapunkt/easy-speech | MIT | Voice initialization/discovery and cross-browser `speak`, `pause`, `resume`, `cancel`. Used through `ReadAloud` in `src/reader/speech.ts`. KataKecil adds its existing episode/page anchors, bounded utterance queue, pause recovery and DOM geometry painting. |
+
+Full notices: [Text Quote Anchor](dist/vendor/licenses/dom-anchor-text-quote.txt), [EasySpeech](dist/vendor/licenses/easy-speech.txt). Original copyright and permission notices are retained. Bundling changes the packaging, not the upstream source implementations.
+
+## Runtime transitive dependencies included in the bundle
+
+| Package | Version | Repository | License | Notice |
+| --- | --- | --- | --- | --- |
+| dom-anchor-text-position | 4.0.0 | https://github.com/tilgovi/dom-anchor-text-position | MIT | [License](dist/vendor/licenses/dom-anchor-text-position.txt) |
+| dom-seek | 4.0.3 | https://github.com/tilgovi/dom-seek | MIT | [License](dist/vendor/licenses/dom-seek.txt) |
+| dom-node-iterator | 3.5.3 | https://github.com/tilgovi/dom-node-iterator | MIT | [License](dist/vendor/licenses/dom-node-iterator.txt) |
+| ancestors | 0.0.3 | https://github.com/chrisdickinson/ancestors | MIT | [Notice](dist/vendor/licenses/ancestors-NOTICE.txt). Upstream specifies MIT in README/package metadata and supplies no separate license/copyright file. Its README, author attribution and MIT permission text are retained transparently. |
+| index-of | 0.2.0 | https://github.com/jonschlinkert/index-of | MIT | [License](dist/vendor/licenses/index-of.txt) |
+| diff-match-patch | 1.0.5 | https://github.com/JackuB/diff-match-patch | Apache-2.0 | [License](dist/vendor/licenses/diff-match-patch.txt), including upstream copyright notices. |
+
+The DOM range conversion dependencies are retained by the CommonJS package bundle. KataKecil calls only the text-position quote APIs. The integration verifies exact text before accepting a match; fuzzy suggestions never silently move an annotation to different prose.
+
+## Existing assets retained
+
+- **JSZip 3.10.1**, https://github.com/Stuk/jszip — used under the MIT option of its MIT/GPLv3 dual license. EPUB decompression remains unchanged. [License](dist/vendor/JSZip-LICENSE.txt).
+- Self-hosted fonts from https://github.com/google/fonts — SIL Open Font License 1.1. Existing font files and notices are retained: [DM Sans](dist/fonts/DM-Sans-OFL.txt), [Fraunces](dist/fonts/Fraunces-OFL.txt), [JetBrains Mono](dist/fonts/JetBrains-Mono-OFL.txt), [Lora](dist/fonts/Lora-OFL.txt), [Merriweather](dist/fonts/Merriweather-OFL.txt), [Plus Jakarta Sans](dist/fonts/Plus-Jakarta-Sans-OFL.txt).
+- The existing KataKecil logo is an image-generation output from earlier work, not an asset copied from these repositories.
+- EPUB test fixtures are the existing public-domain Project Gutenberg editions. The owner's manuscript EPUBs are not committed or included in the static distribution.
+
+## Development dependencies
+
+New tooling: **esbuild 0.28.2** (MIT, https://github.com/evanw/esbuild), **TypeScript 7.0.2** (Apache-2.0, https://github.com/microsoft/TypeScript), **@types/node 26.6.6** (MIT, https://github.com/DefinitelyTyped/DefinitelyTyped). Existing **jsdom 26.1.0** (MIT) and **fake-indexeddb 6.2.4** (Apache-2.0) remain test-only. Exact transitive versions/integrity are in the lockfile. Build/test tooling is not shipped as browser code.
+
+## External dictionary/translation content
+
+These services are not source-code dependencies. A request is made only after the reader explicitly presses a lookup/translation button. Only the selected word/passage is submitted; the full episode is never submitted to these services.
+
+- **Free Dictionary API**, https://dictionaryapi.dev/ and https://github.com/meetDeveloper/freeDictionaryAPI. Definitions are cited to their Wiktionary entry and the license returned by the API. Content licenses can differ from the API's code license.
+- **Wikikamus/Wiktionary**, https://id.wiktionary.org/. Definition excerpts cite the original word page and **CC BY-SA 4.0**. Article history provides contributor attribution. Resource-bearing HTML is stripped; excerpts are rendered as text.
+- **MyMemory / Translated**, https://mymemory.translated.net/doc/spec.php. Translation results are credited in the panel. Service terms, logging and free quotas apply. No dictionary/translation results are bundled or stored in localStorage.
+
+Browser Web Speech, Intl.Segmenter, Fullscreen, Screen Orientation and Wake Lock are platform APIs. Online speech voices may use the browser/OS provider's service; the voice picker identifies local versus online voices.
+
+## Evaluated, not integrated
+
+| Candidate | License | Decision |
+| --- | --- | --- |
+| https://github.com/recogito/text-annotator-js | BSD-3-Clause | README, package API/dependencies, quote-context code and `packages/text-annotator/src/selection-handler.ts` inspected. Its handler uses `document.getSelection()` / selectionchange. Integrating its selection manager would replace the app-owned selection that prevents Android contextual search. Selected a smaller quote anchor package and retained KataKecil's selection UI. No source copied. |
+| https://github.com/readium/speech | BSD-3-Clause | Version 0.18.0 README, exported types, WebSpeech engine API and dependencies inspected. It is an active, broader toolkit with Readium utterance/voice/provider/navigation models. EasySpeech's smaller API fits the current page/episode model without adopting another navigator. No source copied. |
+| https://github.com/readium/web | BSD-3-Clause | Documentation hub for Readium TS/Go toolkits and Web Publication Manifests. Adopting a second publication/navigator architecture would replace working EPUB parsing/pagination. No source copied. |
+| https://github.com/readest/readest | AGPL-3.0 | README/license/activity reviewed only. Incorporation would require a deliberate AGPL compliance decision, including applicable source-disclosure obligations for a combined/networked work. No code, UI, assets or dependencies incorporated; KataKecil's license is not changed. |
+
+Research details and activity snapshots: `docs/advanced-reader-report.md` and `docs/generated/open-source-research.json`.

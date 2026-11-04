@@ -19,3 +19,9 @@ test('a paragraph ending at 61% of a page does not leave the other 39% empty',as
  assert.ok(pages[0].text.length>=970,`First page uses ${pages[0].text.length} of 1000 characters`);
  assert.equal(pages.map(p=>p.text).join(''),text);
 });
+
+test('measurer receives exact source offsets even when the same words repeat',async()=>{
+ const chapter={text:'Repeat this sentence. '.repeat(25)},calls=[];
+ const pages=await paginateToFit([chapter],(text,index,first,start)=>{calls.push({text,start});assert.equal(text,chapter.text.slice(start,start+text.length));assert.equal(first,start===0);return text.length<=77;});
+ assert.ok(calls.some(c=>c.start>0));assert.equal(pages.map(p=>p.text).join(''),chapter.text);
+});
