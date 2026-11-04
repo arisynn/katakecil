@@ -12,12 +12,14 @@ async function preferences(saved){
  return{store,w};
 }
 test('English defaults apply to new devices and migrate an old automatic Indonesian preference',async()=>{
- const fresh=await preferences();assert.equal(fresh.store.preferences.uiLanguage,'en');assert.equal(fresh.store.preferences.textAlign,'justify');assert.equal(fresh.store.preferences.lineHeight,1.6);assert.equal(fresh.store.preferences.paragraphSpacing,6);assert.equal(fresh.store.preferences.pageAnimation,'fade');
- const old=await preferences({deviceId:'existing-device',schemaVersion:2,uiLanguage:'id',fontSize:23,accentColor:'#4269a5'});
- assert.equal(old.store.preferences.uiLanguage,'en');assert.equal(old.store.deviceId,'existing-device');assert.equal(old.store.preferences.fontSize,23);assert.equal(old.store.preferences.accentColor,'#4269a5');assert.equal(old.w.localStorage.getItem('lumina_annotations'),'[{"id":"keep-note"}]');assert.equal(JSON.parse(old.w.localStorage.getItem('lumina_device_settings')).uiLanguageDefaultVersion,1);
+ const fresh=await preferences();assert.equal(fresh.store.preferences.uiLanguage,'en');assert.equal(fresh.store.preferences.textAlign,'justify');assert.equal(fresh.store.preferences.paragraphIndent,1.5);assert.equal(fresh.store.preferences.lineHeight,1.6);assert.equal(fresh.store.preferences.paragraphSpacing,6);assert.equal(fresh.store.preferences.pageAnimation,'fade');
+ const old=await preferences({deviceId:'existing-device',schemaVersion:2,uiLanguage:'id',fontSize:23,paragraphIndent:0,accentColor:'#4269a5'});
+ assert.equal(old.store.preferences.uiLanguage,'en');assert.equal(old.store.preferences.paragraphIndent,1.5);assert.equal(old.store.preferences.paragraphIndentVersion,1);assert.equal(old.store.deviceId,'existing-device');assert.equal(old.store.preferences.fontSize,23);assert.equal(old.store.preferences.accentColor,'#4269a5');assert.equal(old.w.localStorage.getItem('lumina_annotations'),'[{"id":"keep-note"}]');assert.equal(JSON.parse(old.w.localStorage.getItem('lumina_device_settings')).uiLanguageDefaultVersion,1);
 });
 test('an explicitly selected Indonesian language remains selected after reload',async()=>{
  const result=await preferences({schemaVersion:2,uiLanguage:'id',uiLanguageChosen:true,uiLanguageDefaultVersion:1});
  assert.equal(result.store.preferences.uiLanguage,'id');
+ const disabled=await preferences({paragraphIndent:0,paragraphIndentVersion:1});assert.equal(disabled.store.preferences.paragraphIndent,0,'turning indentation off remains saved');
+ const custom=await preferences({paragraphIndent:2});assert.equal(custom.store.preferences.paragraphIndent,2,'custom indentation is preserved');
  const invalid=await preferences({schemaVersion:2,uiLanguage:'invalid',uiLanguageDefaultVersion:1});assert.equal(invalid.store.preferences.uiLanguage,'en');
 });

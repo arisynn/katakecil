@@ -1,6 +1,6 @@
 export const readerDefaults = {
   readingMode: 'pages', readerTheme: 'follow', fontWeight: 400, paragraphSpacing: 6,
-  letterSpacing: 0, textAlign: 'justify', paragraphIndent: 0, marginHorizontal: 24,
+  letterSpacing: 0, textAlign: 'justify', paragraphIndent: 1.5, marginHorizontal: 24,
   marginVertical: 22, readerWidth: 720, contentPosition: 'top', brightness: 100,
   tapNavigation: true, wakeLock: false, orientation: 'auto', customTextColor: '#28302b',
   customBackgroundColor: '#faf9f5', ttsRate: 1, ttsVoice: '', ttsLanguage: '',
@@ -27,7 +27,7 @@ export function readerSettings(input: Record<string, unknown>) {
     readerTheme: choice(d.readerTheme, ['follow', 'light', 'dark', 'sepia', 'paper', 'green', 'custom'], 'follow'),
     fontSize: number('fontSize', 14, 32, 19), lineHeight: number('lineHeight', 1.2, 2.4, 1.6),
     fontWeight: number('fontWeight', 400, 700, 400), paragraphSpacing: number('paragraphSpacing', 0, 32, 6),
-    letterSpacing: number('letterSpacing', -.5, 3, 0), paragraphIndent: number('paragraphIndent', 0, 3, 0),
+    letterSpacing: number('letterSpacing', -.5, 3, 0), paragraphIndent: number('paragraphIndent', 0, 3, 1.5),
     marginHorizontal: number('marginHorizontal', 12, 72, 24), marginVertical: number('marginVertical', 8, 80, 22),
     readerWidth: number('readerWidth', 320, 1100, 720), brightness: number('brightness', 50, 100, 100),
     contentPosition: choice(d.contentPosition, ['top', 'center'], 'top'),
@@ -47,7 +47,9 @@ export function findPage(pages: {chapterIndex: number; start: number; end: numbe
 }
 
 export function migrateReaderPreferences(settings: Record<string, unknown>) {
-  const update: Record<string, unknown> = {readerTheme: 'follow', globalThemeVersion: 1, comfortDefaultsVersion: 1};
+  const update: Record<string, unknown> = {readerTheme: 'follow', globalThemeVersion: 1, comfortDefaultsVersion: 1, paragraphIndentVersion: 1};
+  // Upgrade the former zero default once; preserve custom widths and later choices.
+  if (settings.paragraphIndentVersion !== 1 && (settings.paragraphIndent === undefined || settings.paragraphIndent === 0)) update.paragraphIndent = 1.5;
   if (settings.globalThemeVersion !== 1) {
     const old = String(settings.readerTheme || 'follow');
     update.themeMode = old !== 'follow' && ['light','dark','sepia','paper','green','custom'].includes(old) ? old : settings.themeMode || 'light';

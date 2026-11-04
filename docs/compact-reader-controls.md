@@ -14,7 +14,7 @@ Switching Text/Layout/Theme keeps the same bottom sheet, header, tab buttons and
 
 - Lora, 19px, weight 400.
 - Justified text, line height 1.6, paragraph gap 6px.
-- No extra letter spacing or first-line indent.
+- No extra letter spacing; first-line paragraph indent 1.5em. True paragraph starts are indented; continued paragraphs on a later page stay flush. The existing More text options slider adjusts or disables indentation. A one-time preference update enables it for the former zero default, preserves custom widths, and retains subsequent choices.
 - Side margin 24px, vertical margin 22px, maximum column width 720px.
 - Subtle fade page transition; reduced-motion support retained.
 
@@ -47,3 +47,5 @@ Pause/resume, speed changes, stop, per-book saved position and next-published-ep
 - Regression tests retain source-character preservation, app-language isolation, gestures, copy protection, annotations and source authorization.
 
 These tests use jsdom and injected speech drivers. Physical device/audio and browser visual QA are left to the user as requested; no hardware audio or screenshot PASS is claimed. Original compact-control evidence is in `docs/generated/compact-reader-validation.txt`; the latest release/tab regression output is in `docs/generated/sheet-interaction-validation.txt`.
+
+Paragraph-indentation follow-up: the full 53-test suite, build, typecheck and check passed again. New-device defaults, upgrade from the former zero default, preserved custom indentation/disabled choices and continued-paragraph classification are covered by existing regression tests. Exact output: `docs/generated/paragraph-indent-validation.txt`.
