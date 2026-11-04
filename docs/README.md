@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Audit seluruh UI dan konversi tiga lapis liquid glass terbaru | [Audit UI glass](ui-liquid-glass-audit.md) |
 | Mengunduh APK terkini dan membaca batas pengujian | [Android Preview 2](releases/v1.0.1-preview.2.md) |
 | Efek kaca, lensa tab dan updater GitHub | [Glass dan app updates](glass-and-updates.md) |
 | Fakta build dan QA terbaru | [Validasi Preview 2](generated/glass-update-validation.json) |

@@ -1,0 +1,2020 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "f60c705e455dfeb9b53b85e6ce3a0134adf4436f",
+  "sourceAudit": {
+    "applicationFilesScanned": [
+      "src/platform/backup.ts",
+      "src/platform/index.ts",
+      "src/platform/navigation.ts",
+      "src/reader/anchors.ts",
+      "src/reader/display.ts",
+      "src/reader/index.ts",
+      "src/reader/search.ts",
+      "src/reader/source.ts",
+      "src/reader/speech.ts",
+      "src/reader/tools.ts",
+      "src/reader/vendor.d.ts",
+      "dist/advanced-reader.css",
+      "dist/advanced-reader.js",
+      "dist/anchors.js",
+      "dist/app-popups.css",
+      "dist/app-popups.js",
+      "dist/app-updates.js",
+      "dist/app.js",
+      "dist/config.js",
+      "dist/device-backup.js",
+      "dist/epub.js",
+      "dist/fonts.css",
+      "dist/glass-tabs.js",
+      "dist/glass.css",
+      "dist/i18n.js",
+      "dist/index.html",
+      "dist/pagination.js",
+      "dist/platform.js",
+      "dist/reader-experience.js",
+      "dist/store.js",
+      "dist/styles.css",
+      "dist/text-selection.js",
+      "dist/ui.js"
+    ],
+    "renderersOrMarkup": [
+      "dist/app-popups.js",
+      "dist/app-updates.js",
+      "dist/app.js",
+      "dist/glass-tabs.js",
+      "dist/index.html",
+      "dist/reader-experience.js",
+      "dist/text-selection.js",
+      "dist/ui.js"
+    ]
+  },
+  "architecture": "Static HTML/JavaScript UI with TypeScript reader/platform helpers; no framework migration",
+  "fullRegressionTests": {
+    "passed": 72,
+    "failed": 0
+  },
+  "typecheck": "passed",
+  "syntaxPublicationModuleGraph": "passed",
+  "browserAudit": {
+    "passed": true,
+    "snapshots": [
+      {
+        "name": "Library",
+        "roots": [
+          {
+            "selector": ".library-header",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".shelf-navigation",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".library-header .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".library-header .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".read-button",
+            "alpha": 0.30196078431372547,
+            "color": "rgba(84, 117, 108, 0.3)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.78) 0px 1.5px 0.5px 0px inset, rgba(0, 0, 0, 0.24) 0px -1.5px 2px 0px inset, rgba(12, 32, 24, 0.26) 0px 12px 26px -8px",
+            "display": "inline-flex",
+            "visible": true
+          },
+          {
+            "selector": ".shelf-navigation .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".shelf-navigation .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Settings light",
+        "roots": [
+          {
+            "selector": ".settings-header",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": false
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".header-back",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Option picker",
+        "roots": [
+          {
+            "selector": ".app-picker",
+            "alpha": 0.3215686274509804,
+            "color": "rgba(250, 249, 245, 0.32)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".app-picker-option",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(250, 249, 245, 0.12)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-picker-option",
+            "alpha": 0.1803921568627451,
+            "color": "rgba(84, 117, 108, 0.18)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-picker .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Color picker",
+        "roots": [
+          {
+            "selector": ".app-picker",
+            "alpha": 0.3215686274509804,
+            "color": "rgba(250, 249, 245, 0.32)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".app-color-hex input",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".app-color-editor .primary",
+            "alpha": 0.30196078431372547,
+            "color": "rgba(84, 117, 108, 0.3)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.78) 0px 1.5px 0.5px 0px inset, rgba(0, 0, 0, 0.24) 0px -1.5px 2px 0px inset, rgba(12, 32, 24, 0.26) 0px 12px 26px -8px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Theme dialog",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "color": "rgba(250, 249, 245, 0.32)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.1803921568627451,
+            "color": "rgba(84, 117, 108, 0.18)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.2,
+            "color": "rgba(250, 249, 245, 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Custom theme",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgb(255, 255, 255) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.48) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.48) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.38) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.42) 0px 0px 32px 0px inset, rgba(12, 32, 24, 0.26) 0px 26px 56px -12px, rgba(0, 0, 0, 0.12) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.1803921568627451,
+            "color": "rgba(84, 117, 108, 0.18)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-color-trigger",
+            "alpha": 0.2,
+            "color": "oklab(0.981769 -0.000434458 0.00538999 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-color-trigger",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-color-trigger",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .secondary",
+            "alpha": 0.2,
+            "color": "color(srgb 0.980392 0.976471 0.960784 / 0.2)",
+            "blur": "none",
+            "shadow": "rgb(255, 255, 255) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.38) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.12) 0px 5px 14px -4px",
+            "display": "inline-flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Dark theme",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.1803921568627451,
+            "color": "rgba(84, 117, 108, 0.18)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".global-theme-chip",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Settings dark",
+        "roots": [
+          {
+            "selector": ".settings-header",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".settings-surface",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": false
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".header-back",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.714) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.16) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.408) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.714) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.16) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.408) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Device storage",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".status-details",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .secondary",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .secondary",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".license-link",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "inline-block",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Licenses",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "EPUB import",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".upload-zone",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Reader toolbar and controls",
+        "roots": [
+          {
+            "selector": ".reader-toolbar",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".reader-controls",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".reader-loading",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "none",
+            "visible": false
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".reader-toolbar .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".reader-toolbar .icon-button",
+            "alpha": 0.17647058823529413,
+            "color": "rgba(89, 121, 112, 0.176)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".scrubber-row .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".scrubber-row .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Appearance",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".comfort-reset",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Layout and switches",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": false
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Reading tools",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".tool-grid button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".tool-grid button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".tool-grid button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".tool-grid button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".page-jump input",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".page-jump .secondary",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Glass validation toast",
+        "roots": [
+          {
+            "selector": "#toast",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": "#page-jump",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Search results",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-result",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".text-input",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "block",
+            "visible": true
+          },
+          {
+            "selector": ".search-summary .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-summary .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-summary .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Floating search navigation",
+        "roots": [
+          {
+            "selector": ".search-navigation",
+            "alpha": 0.2196078431372549,
+            "color": "rgba(25, 29, 27, 0.22)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".search-navigation .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-navigation .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".search-navigation .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Book panels",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".toc-item",
+            "alpha": 0.1803921568627451,
+            "color": "rgba(84, 117, 108, 0.18)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".toc-item",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(25, 29, 27, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".dialog .icon-button",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      },
+      {
+        "name": "Empty notes panel",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "color": "rgba(25, 29, 27, 0.34)",
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.5px 1px 0px inset, rgba(255, 255, 255, 0.18) 1px 0px 0px 0px inset, rgba(255, 255, 255, 0.18) -1px 0px 0px 0px inset, rgba(255, 255, 255, 0.15) 0px -1.5px 1px 0px inset, rgba(255, 255, 255, 0.1) 0px 0px 32px 0px inset, rgba(0, 0, 0, 0.72) 0px 26px 56px -12px, rgba(0, 0, 0, 0.42) 0px 6px 18px -3px",
+            "display": "block",
+            "visible": true
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".annotation-filters .app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          },
+          {
+            "selector": ".annotation-filters .app-select-trigger",
+            "alpha": 0.12156862745098039,
+            "color": "rgba(255, 255, 255, 0.12)",
+            "blur": "none",
+            "shadow": "rgba(255, 255, 255, 0.7) 0px 1.2px 0.5px 0px inset, rgba(255, 255, 255, 0.15) 0px -1px 0.5px 0px inset, rgba(0, 0, 0, 0.42) 0px 5px 14px -4px",
+            "display": "flex",
+            "visible": true
+          }
+        ],
+        "nested": []
+      }
+    ],
+    "responsive": [
+      {
+        "width": 320,
+        "height": 568,
+        "passed": true
+      },
+      {
+        "width": 375,
+        "height": 812,
+        "passed": true
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "passed": true
+      },
+      {
+        "width": 430,
+        "height": 932,
+        "passed": true
+      },
+      {
+        "width": 768,
+        "height": 1024,
+        "passed": true
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "passed": true
+      },
+      {
+        "width": 640,
+        "height": 360,
+        "passed": true
+      },
+      {
+        "width": 568,
+        "height": 320,
+        "passed": true
+      }
+    ],
+    "htmlValidationUsesAppToast": true,
+    "uncaughtJavaScriptExceptions": 0
+  },
+  "extraBrowserUI": {
+    "passed": true,
+    "contexts": [
+      {
+        "name": "Saved bookmark",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".saved-passage",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Bookmark label form",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".text-input",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Highlight popover",
+        "roots": [
+          {
+            "selector": ".selection-popover",
+            "alpha": 0.2196078431372549,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".note-button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".selection-popover .icon-button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Highlight and note form",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".note-quote",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".text-input",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Saved note and highlight",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".saved-passage",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          },
+          {
+            "selector": ".passage-actions button",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Backup preview",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3411764705882353,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          },
+          {
+            "selector": ".secondary",
+            "alpha": 0.12156862745098039,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "TTS configuration (injected driver)",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".app-select-trigger",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".tts-player .primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          },
+          {
+            "selector": ".tts-player .secondary",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".tts-player .secondary",
+            "alpha": 0.2,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "TTS mini-player (injected driver)",
+        "roots": [
+          {
+            "selector": ".tts-mini",
+            "alpha": 0.2,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".tts-mini .icon-button",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".tts-mini .icon-button",
+            "alpha": 0.2,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Word tools shell",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".note-quote",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".lookup-result",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".lookup-languages .app-select-trigger",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".lookup-languages .app-select-trigger",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".dialog .secondary",
+            "alpha": 0.2,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Updater available (mock API)",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          },
+          {
+            "selector": ".update-notes",
+            "alpha": 0.2,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Updater download (mock API)",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".secondary",
+            "alpha": 0.2,
+            "blur": "none"
+          },
+          {
+            "selector": ".update-download",
+            "alpha": 0.1803921568627451,
+            "blur": "none"
+          }
+        ]
+      },
+      {
+        "name": "Updater install-ready (mock API)",
+        "roots": [
+          {
+            "selector": ".dialog",
+            "alpha": 0.3215686274509804,
+            "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)"
+          }
+        ],
+        "controls": [
+          {
+            "selector": ".primary",
+            "alpha": 0.30196078431372547,
+            "blur": "none"
+          }
+        ]
+      }
+    ],
+    "actualAnnotationAndBackupUI": true,
+    "ttsAndUpdaterDriverFixtures": true,
+    "nativeAudioOrInstallationTested": false
+  },
+  "exceptions": [
+    "Solid reading paper and cover artwork",
+    "Accurate theme previews and color samples",
+    "Semantic highlight/search/TTS marks and state indicators",
+    "Solid fallback when backdrop filters are unsupported",
+    "OS/browser-owned file/permission/installer UI"
+  ],
+  "paintRules": {
+    "layerOneTint": "20\u201334% (Custom 34%)",
+    "layerOneBlur": 50,
+    "saturation": "260%",
+    "brightness": 1.08,
+    "contrast": 1.06,
+    "childBackdropFilters": "none; masked optical lens edge is an intentional local exception"
+  },
+  "nativeDeviceQA": "Not performed; positive TTS and updater UI used actual renderers with injected drivers, not native audio or installer",
+  "newDependencies": [],
+  "databaseChanges": false,
+  "apkRebuilt": false,
+  "dragRegression": {
+    "passed": true,
+    "drags": [
+      {
+        "touch": false,
+        "target": "bookmarks",
+        "once": true
+      },
+      {
+        "touch": false,
+        "target": "highlights",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "contents",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "bookmarks",
+        "once": true
+      },
+      {
+        "touch": true,
+        "target": "highlights",
+        "once": true
+      }
+    ],
+    "verticalScrollPreserved": true,
+    "cancelPreserved": true,
+    "escapePreserved": true,
+    "stableSheetAndLens": true,
+    "exactlyOneAction": true,
+    "velocityStretch": true,
+    "svgEdgeFilterConnected": true,
+    "reducedMotion": true,
+    "jsExceptions": 0
+  },
+  "sliderRegression": {
+    "passed": true,
+    "combinations": 120,
+    "releaseRestoresImmediately": true,
+    "hiddenDialogBackdrop": "none"
+  },
+  "loadingEmptyErrorUI": {
+    "passed": true,
+    "loading": {
+      "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+      "shadows": 5
+    },
+    "empty": {
+      "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+      "text": "Your shelf is empty",
+      "buttonBlur": "none"
+    },
+    "error": {
+      "blur": "blur(50px) saturate(2.6) brightness(1.08) contrast(1.06)",
+      "text": "Unable to load your library"
+    },
+    "catalogueResponsesMockedInFreshBrowserContext": true
+  }
+}

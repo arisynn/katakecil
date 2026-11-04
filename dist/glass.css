@@ -6,11 +6,13 @@
 body {
   --g-ink: var(--text);
   --g-accent: var(--accent);
+  --g-muted: color-mix(in srgb, var(--text) 76%, var(--bg));
+  --g-danger: #a54153;
 
   /* Ultra-thin base tint agar latar belakang benar-benar melebur menembus kaca */
   --g-fill: rgba(var(--glass), .20);
   --g-panel: rgba(var(--glass), .32);
-  --g-ctl: rgba(var(--glass), .18);
+  --g-ctl: rgba(var(--glass), .20);
   --g-ctl-hover: rgba(var(--glass), .30);
 
   /* 3D Optical Specular Borders & Bevels (ketebalan pinggiran kaca melengkung) */
@@ -30,7 +32,7 @@ body {
   /* Deep Ambient Shadows & Backdrop Vibrancy Pipeline */
   --g-shadow: rgba(12, 32, 24, .26);
   --g-shadow-ambient: rgba(0, 0, 0, .12);
-  --g-blur: 54px;
+  --g-blur: 50px;
   --g-sat: 260%;
   --g-bright: 1.08;
   --g-contrast: 1.06;
@@ -45,9 +47,10 @@ body {
 }
 
 body[data-theme=dark] {
+  --g-danger: #f2adb4;
   --g-fill: rgba(var(--glass), .22);
   --g-panel: rgba(var(--glass), .34);
-  --g-ctl: rgba(255, 255, 255, .07);
+  --g-ctl: rgba(255, 255, 255, .12);
   --g-ctl-hover: rgba(255, 255, 255, .14);
 
   --g-edge: rgba(255, 255, 255, .28);
@@ -64,9 +67,9 @@ body[data-theme=dark] {
 
   --g-shadow: rgba(0, 0, 0, .72);
   --g-shadow-ambient: rgba(0, 0, 0, .42);
-  --g-sat: 270%;
-  --g-bright: 1.14;
-  --g-contrast: 1.08;
+  --g-sat: 260%;
+  --g-bright: 1.08;
+  --g-contrast: 1.06;
 
   --g-lens-dome: rgba(255, 255, 255, .44);
   --g-lens-top: rgba(255, 255, 255, .18);
@@ -77,180 +80,121 @@ body[data-theme=dark] {
 }
 
 /* ==========================================================================
-   Shared Panels: Radial Hotspot + Caustic Bounce + Diagonal Sheen + 3D Rim
+   Layer 1 — shared optical surfaces. Theme-qualified selectors also replace
+   legacy dark-mode paint without changing component layout or visibility.
    ========================================================================== */
-body .glass,
-body .settings-surface,
-body .dialog,
-body .app-picker {
+body[data-theme] :is(.glass, .settings-surface, .dialog, .app-picker, .library-header, .settings-header, .shelf-navigation, .reader-loading, .skeleton-cover),
+body[data-theme] .library-shell > .empty-state,
+body[data-theme] #toast {
   background:
     radial-gradient(120% 85% at 10% 0%, var(--g-hotspot) 0%, transparent 55%),
     radial-gradient(100% 80% at 95% 100%, var(--g-caustic) 0%, transparent 60%),
-    linear-gradient(
-      135deg,
-      var(--g-sheen-1) 0%,
-      var(--g-sheen-2) 36%,
-      transparent 52%,
-      var(--g-sheen-3) 100%
-    ),
-    var(--g-fill);
+    linear-gradient(135deg, var(--g-sheen-1) 0%, var(--g-sheen-2) 36%, transparent 52%, var(--g-sheen-3) 100%),
+    var(--g-surface-fill, var(--g-fill));
   border: 1px solid var(--g-edge);
   backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
   -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat)) brightness(var(--g-bright)) contrast(var(--g-contrast));
-  box-shadow:
-    inset 0 1.5px 0.5px 0 var(--g-hi),
-    inset 1px 0 0 0 var(--g-rim-side),
-    inset -1px 0 0 0 var(--g-rim-side),
-    inset 0 -1.5px 1px 0 var(--g-rim-bot),
-    inset 0 0 32px 0 var(--g-inner-glow),
-    0 26px 56px -12px var(--g-shadow),
-    0 6px 18px -3px var(--g-shadow-ambient);
+  box-shadow: inset 0 1.5px 1px 0 var(--g-hi), inset 1px 0 0 var(--g-rim-side), inset -1px 0 0 var(--g-rim-side), inset 0 -1.5px 1px var(--g-rim-bot), inset 0 0 32px var(--g-inner-glow), 0 26px 56px -12px var(--g-shadow), 0 6px 18px -3px var(--g-shadow-ambient);
   color: var(--g-ink);
   isolation: isolate;
 }
-
-body .glass::before {
-  content: none;
-}
-
-body .dialog,
-body .app-picker {
-  background:
-    radial-gradient(130% 90% at 12% 0%, var(--g-hotspot) 0%, transparent 58%),
-    radial-gradient(110% 85% at 92% 100%, var(--g-caustic) 0%, transparent 64%),
-    linear-gradient(
-      135deg,
-      var(--g-sheen-1) 0%,
-      var(--g-sheen-2) 40%,
-      transparent 55%,
-      var(--g-sheen-3) 100%
-    ),
-    var(--g-panel);
-  --g-blur: 60px;
-}
-
-body .settings-surface {
-  --g-blur: 44px;
-}
-
+body[data-theme] .glass::before { content: none; }
+body[data-theme] :is(.dialog, .app-picker, .reader-loading),
+body[data-theme] #toast { --g-surface-fill: var(--g-panel); }
 body[data-palette=custom] {
-  --g-panel: color-mix(in srgb, var(--paper) 42%, transparent);
-  --g-fill: color-mix(in srgb, var(--paper) 28%, transparent);
+  --g-panel: color-mix(in srgb, var(--paper) 34%, transparent);
+  --g-fill: color-mix(in srgb, var(--paper) 34%, transparent);
+  --g-ctl: color-mix(in srgb, var(--paper) 20%, transparent);
 }
-
 body :is(.overlay-backdrop, .app-picker-backdrop) {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: rgba(8, 16, 13, .26);
+  background: rgba(8,16,13,.26);
 }
-
+body[data-theme] :is(.library-header, .settings-header) { border-radius: 24px; padding-block: 10px; }
+body[data-theme] .library-header { width: calc(100% - 32px); margin-inline: auto; padding-inline: 16px; }
+body[data-theme] .settings-header { width: calc(100% - 40px); margin-inline: auto; padding-inline: 16px; }
+body[data-theme] .shelf-navigation { width: max-content; max-width: calc(100% - 28px); margin-inline: auto; padding-inline: 5px; border-radius: 999px; }
+body[data-theme] .library-shell > .empty-state { border-radius: 24px; margin-inline: 20px; }
+body[data-theme] .skeleton-cover {
+  background: linear-gradient(105deg, rgba(var(--glass),.20), rgba(var(--glass),.34), rgba(var(--glass),.20));
+  background-size: 200% 100%;
+}
 /* ==========================================================================
-   Small Controls & Capsules: Tactile iOS Control Center Pill Look
+   Layer 2 — convex controls and inset cards, with no nested backdrop blur.
+   Semantic color samples, covers, reading paper and annotations keep their ink.
    ========================================================================== */
-body :is(
-  .app-select-trigger,
-  .app-color-trigger,
-  .secondary,
-  .header-back,
-  .comfort-reset,
-  .tool-grid button,
-  .text-input,
-  .page-jump input
-) {
-  background:
-    radial-gradient(100% 90% at 20% 0%, var(--g-sheen-1) 0%, transparent 65%),
-    linear-gradient(160deg, var(--g-sheen-2) 0%, transparent 60%),
-    var(--g-ctl);
+body[data-theme] :is(.icon-button, .reader-menu-trigger, .reader-tool-actions > button, .advanced-settings > summary, .appearance-more > summary, .custom-theme-editor > summary, .tts-about > summary, .secondary, .header-back, .comfort-reset, .tool-grid button, .text-input, .page-jump input, .app-select-trigger, .app-color-trigger, .app-color-hex input, .global-theme-chip, .app-picker-option, .upload-zone, .settings-link, .toc-item, .search-result, .saved-passage, .status-details, .note-quote, .lookup-result, .update-notes, .text-link, .license-link, .note-button, .passage-actions > button, .offline-label button, select) {
+  background: radial-gradient(100% 90% at 20% 0%, var(--g-sheen-1) 0%, transparent 65%), linear-gradient(160deg, var(--g-sheen-2) 0%, transparent 60%), var(--g-control-fill, var(--g-ctl));
   border: 1px solid var(--g-edge);
-  box-shadow:
-    inset 0 1.2px 0.5px 0 var(--g-hi),
-    inset 0 -1px 0.5px 0 var(--g-rim-bot),
-    0 5px 14px -4px var(--g-shadow-ambient);
+  border-radius: var(--g-control-radius, 12px);
+  box-shadow: inset 0 1.2px .5px var(--g-hi), inset 0 -1px .5px var(--g-rim-bot), var(--g-control-shadow, 0 5px 14px -4px var(--g-shadow-ambient));
+  color: var(--g-ink);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  transition:
-    background-color .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    transform .16s cubic-bezier(.22, 1, .36, 1);
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .16s cubic-bezier(.22,1,.36,1);
 }
-
-body :is(
-  .app-select-trigger,
-  .app-color-trigger,
-  .secondary,
-  .header-back,
-  .comfort-reset,
-  .tool-grid button
-):hover {
-  background:
-    radial-gradient(110% 95% at 20% 0%, var(--g-hotspot) 0%, transparent 68%),
-    var(--g-ctl-hover);
+body[data-theme] :is(.icon-button, .reader-menu-trigger) { --g-control-radius: 50%; }
+body[data-theme] :is(.advanced-settings, .appearance-more, .custom-theme-editor, .tts-about) > summary { padding-inline: 10px; }
+body[data-theme] .passage-actions > button:first-child { min-height: 44px; padding-inline: 10px; }
+body[data-theme] :is(.settings-link, .toc-item, .search-result, .saved-passage, .app-picker-option) {
+  --g-control-fill: rgba(var(--glass),.12);
+  --g-control-shadow: 0 0 0 transparent;
 }
-
-body :is(
-  .app-select-trigger,
-  .app-color-trigger,
-  .secondary,
-  .header-back,
-  .comfort-reset,
-  .tool-grid button
-):active {
-  transform: scale(.975);
+body[data-theme] :is(.settings-link, .app-picker-option) { --g-control-radius: 10px; }
+body[data-theme] :is(.toc-item, .search-result) { padding: 13px 10px; }
+body[data-theme] .saved-passage { padding: 16px 12px; }
+body[data-theme] .note-quote { padding: 12px 14px; border-left: 3px solid rgba(var(--accent-rgb),.4); }
+body[data-theme] .lookup-result { padding: 12px; }
+body[data-theme] :is(.status-details code, .update-notes, .license-text) { overflow-wrap: anywhere; min-width: 0; }
+body[data-theme] :is(.text-link, .license-link, .offline-label button) { padding-inline: 9px; }
+body[data-theme] .note-button { padding-inline: 9px; }
+body[data-theme] :is(.icon-button, .reader-menu-trigger, .reader-tool-actions > button, .advanced-settings > summary, .appearance-more > summary, .custom-theme-editor > summary, .tts-about > summary, .secondary, .header-back, .comfort-reset, .tool-grid button, .app-select-trigger, .app-color-trigger, .global-theme-chip, .app-picker-option, .upload-zone, .settings-link, .toc-item, .search-result, .text-link, .license-link, .note-button, .passage-actions > button, .offline-label button):hover {
+  background: radial-gradient(110% 95% at 20% 0%, var(--g-hotspot), transparent 68%), var(--g-ctl-hover);
 }
-
-body :is(
-  .library-header .icon-button,
-  .reader-toolbar .icon-button,
-  .dialog-heading .icon-button,
-  .app-picker-heading .icon-button
-) {
-  background:
-    radial-gradient(95% 95% at 25% 5%, var(--g-hotspot) 0%, transparent 62%),
-    linear-gradient(155deg, var(--g-sheen-1) 0%, transparent 65%),
-    var(--g-ctl);
-  border: 1px solid var(--g-edge);
-  box-shadow:
-    inset 0 1.5px 0.5px 0 var(--g-hi),
-    inset 0 -1px 0.5px 0 var(--g-rim-bot),
-    0 7px 16px -5px var(--g-shadow);
-  transition:
-    transform .16s cubic-bezier(.22, 1, .36, 1),
-    background-color .18s ease,
-    box-shadow .18s ease;
+body[data-theme] :is(.icon-button, .reader-menu-trigger, .reader-tool-actions > button, .advanced-settings > summary, .appearance-more > summary, .custom-theme-editor > summary, .tts-about > summary, .secondary, .header-back, .comfort-reset, .tool-grid button, .app-select-trigger, .app-color-trigger, .global-theme-chip, .app-picker-option, .upload-zone, .settings-link, .toc-item, .search-result, .text-link, .license-link, .note-button, .passage-actions > button, .offline-label button):active { transform: scale(.972); }
+body[data-theme] .settings-link:active { padding-left: 20px; }
+body[data-theme] :is(.global-theme-chip.active, .app-picker-option[aria-selected=true], .toc-item.active, .icon-button.active) {
+  --g-control-fill: rgba(var(--accent-rgb),.18);
+  border-color: rgba(var(--accent-rgb),.48);
+  color: var(--g-ink);
 }
-
-body :is(
-  .library-header .icon-button,
-  .reader-toolbar .icon-button,
-  .dialog-heading .icon-button,
-  .app-picker-heading .icon-button
-):active {
-  transform: scale(.93);
+body[data-theme] .upload-zone.dragging { --g-control-fill: rgba(var(--accent-rgb),.20); border-color: rgba(var(--accent-rgb),.65); }
+body[data-theme] :is(.primary, .read-button) {
+  background: radial-gradient(110% 80% at 30% 0%, rgba(255,255,255,.48), transparent 55%), linear-gradient(165deg, rgba(255,255,255,.32), rgba(255,255,255,.06) 48%, rgba(0,0,0,.08)), rgba(var(--accent-rgb),.30);
+  border: 1px solid rgba(var(--accent-rgb),.5);
+  box-shadow: inset 0 1.5px .5px rgba(255,255,255,.78), inset 0 -1.5px 2px rgba(0,0,0,.24), 0 12px 26px -8px var(--g-shadow);
+  color: var(--g-ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  filter: none;
+  transition: transform .16s cubic-bezier(.22,1,.36,1), box-shadow .18s ease;
 }
-
-/* Primary Action Buttons: Glossy Jewel-Tinted iOS Capsule */
-body .read-button,
-body .dialog .primary,
-body .tts-player .primary {
-  background:
-    radial-gradient(110% 80% at 30% 0%, rgba(255, 255, 255, .48) 0%, transparent 55%),
-    linear-gradient(165deg, rgba(255, 255, 255, .32) 0%, rgba(255, 255, 255, .06) 48%, rgba(0, 0, 0, .08) 100%),
-    var(--accent);
-  box-shadow:
-    inset 0 1.5px 0.5px 0 rgba(255, 255, 255, .78),
-    inset 0 -1.5px 2px 0 rgba(0, 0, 0, .24),
-    0 12px 26px -8px var(--g-shadow);
-  border: 1px solid rgba(255, 255, 255, .44);
-  transition:
-    transform .16s cubic-bezier(.22, 1, .36, 1),
-    filter .18s ease,
-    box-shadow .18s ease;
+body[data-theme] :is(.primary, .read-button):active { transform: scale(.972); }
+body[data-theme] :is(.form-error, [aria-invalid=true]) { color: var(--g-danger); }
+body[data-theme] [aria-invalid=true] { border-color: var(--g-danger); }
+body[data-theme] :is(.dialog, .app-picker, .glass, .settings-surface, .library-header, .settings-header) :is(.settings-caption, .dialog-caption, .theme-global-caption, .appearance-hint, .reading-statistics, .tts-state, .tts-book-context, .tts-about p, .update-version, .update-privacy, .reader-title) { color: var(--g-muted); }
+body[data-theme] .selection-handle::before { background: radial-gradient(at 30% 15%, rgba(255,255,255,.7), transparent 70%), rgba(var(--accent-rgb),.72); border-color: var(--g-edge); box-shadow: inset 0 1px 1px var(--g-hi), 0 2px 6px var(--g-shadow-ambient); }
+/* Color previews and swatches are data; add a clear rim without tinting the sample. */
+body[data-theme] :is(.color-button, .accent-swatch, .app-color-swatches button) { position: relative; }
+body[data-theme] :is(.color-button, .accent-swatch, .app-color-swatches button)::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  border: 1px solid var(--g-edge); box-shadow: inset 0 1px .5px rgba(255,255,255,.6);
 }
-
-body :is(.read-button, .dialog .primary, .tts-player .primary):active {
-  transform: scale(.975);
-}
+/* Uniform range/progress paint; the original input node, width and preview coordinates remain. */
+body[data-theme] input[type=range] { appearance: none; -webkit-appearance: none; min-height: 24px; background: transparent; cursor: pointer; }
+body[data-theme] input[type=range]::-webkit-slider-runnable-track { height: 5px; border: 1px solid var(--g-edge); border-radius: 99px; background: rgba(var(--glass),.24); box-shadow: inset 0 1px 2px rgba(0,0,0,.18); }
+body[data-theme] input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; border: 1px solid var(--g-edge); background: radial-gradient(at 30% 15%, rgba(255,255,255,.8), transparent 65%), rgba(var(--accent-rgb),.68); box-shadow: inset 0 1px 1px var(--g-hi), 0 2px 6px var(--g-shadow-ambient); }
+body[data-theme] input[type=range]::-moz-range-track { height: 5px; border: 1px solid var(--g-edge); border-radius: 99px; background: rgba(var(--glass),.24); box-shadow: inset 0 1px 2px rgba(0,0,0,.18); }
+body[data-theme] input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--g-edge); background: radial-gradient(at 30% 15%, rgba(255,255,255,.8), transparent 65%), rgba(var(--accent-rgb),.68); box-shadow: inset 0 1px 1px var(--g-hi), 0 2px 6px var(--g-shadow-ambient); }
+body[data-theme] input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 34px; height: 21px; flex-shrink: 0; position: relative; border: 1px solid var(--g-edge); border-radius: 99px; background: linear-gradient(160deg, rgba(255,255,255,.15), transparent), rgba(var(--glass),.2); box-shadow: inset 0 1px 3px var(--g-shadow-ambient); cursor: pointer; }
+body[data-theme] input[type=checkbox]::before { content: ''; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: linear-gradient(155deg,#fff,rgba(255,255,255,.8)); box-shadow: 0 1px 3px var(--g-shadow-ambient); transition: transform .18s cubic-bezier(.22,1,.36,1); }
+body[data-theme] input[type=checkbox]:checked { background: linear-gradient(160deg, rgba(255,255,255,.2), transparent), rgba(var(--accent-rgb),.54); }
+body[data-theme] input[type=checkbox]:checked::before { transform: translateX(13px); }
+body[data-theme] .update-download { appearance: none; -webkit-appearance: none; height: 8px; border: 1px solid var(--g-edge); border-radius: 99px; overflow: hidden; background: rgba(var(--glass),.18); }
+body[data-theme] .update-download::-webkit-progress-bar { background: rgba(var(--glass),.18); }
+body[data-theme] .update-download::-webkit-progress-value { background: linear-gradient(160deg, rgba(255,255,255,.35), transparent), rgba(var(--accent-rgb),.48); border-radius: inherit; }
+body[data-theme] .update-download::-moz-progress-bar { background: linear-gradient(160deg, rgba(255,255,255,.35), transparent), rgba(var(--accent-rgb),.48); border-radius: inherit; }
 
 /* ==========================================================================
    Liquid Tabs & 3D Optical Meniscus Droplet Lens
@@ -551,19 +495,10 @@ body .appearance-peeking {
    Fallbacks & Accessibility
    ========================================================================== */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  body {
-    --g-fill: var(--surface);
-    --g-panel: var(--surface);
-  }
-  body .glass,
-  body .settings-surface,
-  body .dialog,
-  body .app-picker {
-    background: var(--surface);
-  }
-  body .reader-peek-control::before {
-    background: var(--surface);
-  }
+  body { --g-fill: var(--surface); --g-panel: var(--surface); }
+  body[data-theme] :is(.glass, .settings-surface, .dialog, .app-picker, .library-header, .settings-header, .shelf-navigation, .reader-loading, .skeleton-cover),
+  body[data-theme] .library-shell > .empty-state, body[data-theme] #toast, body[data-theme] .reader-peek-control::before { background: var(--surface); }
+  body[data-theme] .appearance-peeking > .dialog { background: transparent !important; }
 }
 
 @supports not (mask-composite: exclude) {
@@ -608,4 +543,8 @@ body :is(.library-shell, .settings-shell) {
 }
 @media (prefers-reduced-motion: reduce) {
   body .liquid-tabs[data-lens-dragging=true] .glass-tab-lens { scale: 1; transition: none; }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  body[data-theme] .library-shell .shelf-navigation { width: 100%; max-width: none; padding-inline: 3px; }
 }

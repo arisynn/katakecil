@@ -335,6 +335,13 @@ document.addEventListener('input',event=>{
  if(el.id==='page-scrubber'){$('#page-counter').textContent=`${Number(el.value)+1} / ${pages.length}`;el.setAttribute('aria-valuetext',`Halaman ${Number(el.value)+1} dari ${pages.length}`);}
 });
 document.addEventListener('change',event=>{const el=event.target;if(features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='page-scrubber')goToPage(el.value);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
+// Keep HTML constraints intact, but present validation feedback in the app's glass toast.
+document.addEventListener('invalid',event=>{
+ const field=event.target;if(!field.closest?.('.dialog,.app-picker'))return;
+ event.preventDefault();const id=p().uiLanguage==='id',v=field.validity;
+ const message=v.valueMissing?(id?'Kolom ini wajib diisi.':'This field is required.'):(v.rangeUnderflow||v.rangeOverflow||v.badInput)&&field.min!==''&&field.max!==''?(id?`Masukkan nilai antara ${field.min} dan ${field.max}.`:`Enter a value between ${field.min} and ${field.max}.`):(id?'Periksa nilai kolom ini.':'Check this field’s value.');
+ toast(message);field.focus({preventScroll:true});
+},true);
 document.addEventListener('submit',event=>{if(features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note);});
 document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));

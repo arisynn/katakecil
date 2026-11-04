@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Konsistensi liquid glass (4 November 2026)
+
+- Audit seluruh UI sebelum implementasi; satukan panel, header, picker, toast, loading dan empty state dalam fondasi kaca tiga lapis.
+- Kontrol, disclosure, toolbar reader, slider dan switch memakai rim/tint konsisten tanpa nested backdrop blur.
+- Pertahankan drag lensa, preview slider, tema global, dark mode, reduced motion dan fallback.
+- Validasi form menggunakan toast aplikasi; constraint input tetap berlaku.
+- 72 tes lulus; audit Chromium 32 konteks, 8 ukuran, 120 kombinasi slider serta drag mouse/touch. [Audit dan batas pengujian](docs/ui-liquid-glass-audit.md).
+
 ## Web — Liquid drag (4 November 2026)
 
 - Gabungkan pembaruan CSS meniscus: lensa di atas ikon, pinggiran blur/prisma dan kubah bening.
