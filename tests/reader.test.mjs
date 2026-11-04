@@ -85,21 +85,26 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
  const store=await import('../dist/store.js');
+ const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
+ await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
+ store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
+ store.saveAnnotation({id:'legacy-bookmark',bookId:fixtureBooks[0].id,type:'bookmark',chapterIndex:2,charOffset:0,createdAt:new Date().toISOString(),color:'sapphire'});
  await import('../dist/app.js');
  await until(()=>$('.shelf-book'),'Supabase collection loaded');
  assert.equal(w.document.querySelectorAll('.shelf-book').length,3);
  assert.equal(w.document.querySelectorAll('.bottom-tab').length,2);
  assert.equal($('[data-action="import"]'),null,'no upload action in Library');
- assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);
+ assert.equal($('.sidebar'),null);assert.equal($('.hero'),null);assert.ok($('.brand-mark'));assert.match($('.library-header').textContent,/KataKecil/);assert.ok($('.library-shell'));
  click('[data-action="carousel-next"]');assert.match($('.shelf-book.is-current').dataset.bookId,/garis/);
  click('[data-action="select-book"][data-id="masa-panen-google-play-ready-1"]');
  click('.read-button');await until(()=>$('.page-text')&&$('.reader-loading')?.classList.contains('hidden'),'reader paginated');
- assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('.bottom-tabs'),null);
- assert.match($('.page-text').textContent,/Alice was beginning/);
+ assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('.bottom-tabs'),null);assert.equal(store.progress[fixtureBooks[0].id].chapterIndex,0,'old cache position migrates past removed title page');assert.equal(store.annotations.find(a=>a.id==='legacy-bookmark').chapterIndex,1);assert.equal((await store.dbGetAll('books')).find(b=>b.id===fixtureBooks[0].id).parsedRevision,3);
+ assert.match($('.page-text').textContent,/Alice was beginning/);assert.equal($('.page-heading>p'),null,'no generated chapter numbering');assert.ok(!$('.reading-page').textContent.includes('Section '));
  const page=$('#reading-page'),text=$('.page-text').textContent;
+ let requests=0,exits=0;Object.defineProperty(w.document,'fullscreenElement',{value:null,writable:true,configurable:true});w.document.documentElement.requestFullscreen=async()=>{requests++;w.document.fullscreenElement=w.document.documentElement;};w.document.exitFullscreen=async()=>{exits++;w.document.fullscreenElement=null;};
  click('[data-action="show-controls"]');assert.equal($('.reader-shell').dataset.mode,'controls');assert.equal($('#reading-page'),page);assert.equal($('.page-text').textContent,text);
  click('.page-text');assert.equal($('.reader-shell').dataset.mode,'reading');assert.equal($('#reading-page'),page);
- click('[data-action="show-controls"]');click('[data-action="next"]');const second=$('.page-text').textContent;assert.notEqual(second,text);click('[data-action="prev"]');
+ click('[data-action="show-controls"]');click('[data-action="fullscreen"]');await wait();assert.equal(requests,1,'fullscreen action calls the browser API');assert.equal($('.reader-shell').dataset.mode,'reading');click('[data-action="show-controls"]');click('[data-action="fullscreen"]');await wait();assert.equal(exits,1);assert.equal($('.reader-shell').dataset.mode,'controls');const requestFullscreen=w.document.documentElement.requestFullscreen;delete w.document.documentElement.requestFullscreen;click('[data-action="fullscreen"]');await wait();assert.equal($('.reader-shell').dataset.mode,'controls','unsupported fullscreen does not silently close the menu');w.document.documentElement.requestFullscreen=requestFullscreen;click('[data-action="next"]');const second=$('.page-text').textContent;assert.notEqual(second,text);click('[data-action="prev"]');
  const range=$('#page-scrubber');input('#page-scrubber','2');assert.equal($('#page-scrubber'),range);range.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal(store.progress[fixtureBooks[0].id].pageIndex,2);input('#page-scrubber','0');$('#page-scrubber').dispatchEvent(new w.Event('change',{bubbles:true}));
  const quote=selectWords();await until(()=>$('.selection-popover'),'highlight toolbar');
  const copy=new w.Event('copy',{bubbles:true,cancelable:true});$('.page-text').dispatchEvent(copy);assert.ok(copy.defaultPrevented,'copy is blocked for reader selection');assert.equal(w.getSelection().toString(),quote,'selection survives copy prevention');
@@ -115,7 +120,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  const beforePinch=store.progress[fixtureBooks[0].id].charOffset;
  const touch=(name,touches,changed=touches)=>{const e=new w.Event(name,{bubbles:true,cancelable:true});Object.defineProperties(e,{touches:{value:touches},changedTouches:{value:changed}});$('.page-text').dispatchEvent(e);return e;};
  touch('touchstart',[{clientX:40,clientY:200},{clientX:240,clientY:200}]);const pinch=touch('touchmove',[{clientX:85,clientY:200},{clientX:195,clientY:200}]);assert.ok(pinch.defaultPrevented);assert.equal($('.reader-shell').dataset.mode,'controls');touch('touchend',[],[{clientX:85,clientY:200}]);assert.equal(store.progress[fixtureBooks[0].id].charOffset,beforePinch);
- await wait(550);click('[data-action="library"]');click('[data-action="settings"]');assert.equal($('.advanced-settings').open,false);assert.ok($('[data-action="import"]').closest('details'));
+ await wait(550);click('[data-action="library"]');click('[data-action="settings"]');assert.equal($('.advanced-settings').open,false);assert.ok($('[data-action="import"]').closest('details'));assert.ok($('.setting-label svg'),'settings rows have icons');
  click('[data-action="accent"][data-value="#82669c"]');assert.equal(w.document.documentElement.style.getPropertyValue('--accent'),'#82669c');assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).accentColor,'#82669c');
  input('#accent-custom','#dfb142');assert.equal(store.preferences.accentColor,'#dfb142');
  click('[data-action="set-theme"][data-value="dark"]');assert.equal(w.document.body.dataset.theme,'dark');
@@ -128,4 +133,27 @@ test('catalog normalization accepts production data and rejects duplicate IDs an
  assert.equal(normalizeCatalog({books:fixtureBooks}).length,3);
  assert.throws(()=>normalizeCatalog({books:[fixtureBooks[0],fixtureBooks[0]]}),/lengkap/i);
  assert.throws(()=>normalizeCatalog({books:[{id:'bad',title:'bad',url:'javascript:alert(1)'}]}),/valid/);
+});
+
+async function tinyEpub(files){
+ const zip=new JSZip();zip.file('mimetype','application/epub+zip');zip.file('META-INF/container.xml','<container><rootfiles><rootfile full-path="OPS/book.opf"/></rootfiles></container>');
+ const items=files.map((f,i)=>`<item id="s${i}" href="${f.name}" media-type="application/xhtml+xml"/>`).join('');
+ zip.file('OPS/book.opf',`<package xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata><dc:title>Test book</dc:title><dc:creator>Writer</dc:creator></metadata><manifest>${items}</manifest><spine>${files.map((f,i)=>`<itemref idref="s${i}"/>`).join('')}</spine></package>`);
+ for(const f of files)zip.file('OPS/'+f.name,'<html><body>'+f.html+'</body></html>');return zip.generateAsync({type:'uint8array'});
+}
+test('chapter names are extracted once from nested spans and numbered paragraph headings',async()=>{
+ const bytes=await tinyEpub([
+  {name:'title.xhtml',html:'<h1>Test book</h1><p>Author</p>'},
+  {name:'imprint.xhtml',html:'<p>Edition 2026</p>'},
+  {name:'first.xhtml',html:'<h1><span class="chapter-no">Episode 3</span><span class="chapter-name">Kelereng Putih</span></h1><p>Paragraf pertama yang sebenarnya.</p>'},
+  {name:'second.xhtml',html:'<p><strong>Bab 4 — Sesudah Tepuk Tangan</strong></p><p>Paragraf berikutnya.</p>'},
+  {name:'third.xhtml',html:'<p>Bab 5</p><h1>Kursi yang Tersisa</h1><p>Teks cerita di bawah judul.</p>'},
+  {name:'fourth.xhtml',html:'<p>Bagian ini masih bagian cerita, bukan judul.</p><p>Kalimat tanpa judul buatan.</p>'}
+ ]);
+ const book=await parseEpub(bytes);assert.equal(book.chapters.length,4);
+ assert.deepEqual(book.chapters.map(c=>c.title),['Kelereng Putih','Sesudah Tepuk Tangan','Kursi yang Tersisa','']);
+ assert.equal(book.chapters[0].text,'Paragraf pertama yang sebenarnya.');
+ assert.equal(book.chapters[1].text,'Paragraf berikutnya.');
+ assert.equal(book.chapters[2].text,'Teks cerita di bawah judul.');
+ assert.ok(!JSON.stringify(book.chapters).includes('Section '));assert.match(book.chapters[3].text,/Bagian ini masih bagian cerita/);
 });

@@ -1,10 +1,10 @@
 {
-  "name": "luminaglass-reader",
+  "name": "katakecil-reader",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check dist/app.js && node --check dist/store.js && node --check dist/epub.js && node --check dist/pagination.js && node --check dist/ui.js && node --check supabase/functions/lumina-library/index.ts"
+    "check": "node --check dist/app.js && node --check dist/store.js && node --check dist/epub.js && node --check dist/pagination.js && node --check dist/ui.js && node --check supabase/functions/lumina-library/index.ts && node --check dist/anchors.js"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.4",

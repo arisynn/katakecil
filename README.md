@@ -1,4 +1,4 @@
-# LuminaGlass
+# KataKecil
 
 A quiet personal EPUB library. One horizontal carousel, two bottom tabs, and a full-viewport reader. The Site remains public at https://luminaglass-reading-room.saptajulianto80.chatgpt.site.
 
@@ -53,3 +53,11 @@ DOM tests do not measure a real browser's layout or verify Safari gesture behavi
 The three live approved files were downloaded through the new service and parsed successfully during implementation. Those private source files are served by Supabase and are not copied into the repository or the static deployment.
 
 `tests/fixtures/epubs/` contains the earlier public-domain Project Gutenberg editions as parser regressions. JSZip 3.10.1 is vendored with its license. Self-hosted font licenses are in `dist/fonts/`.
+
+## Reader corrections (4 November 2026)
+
+Parser revision 3 recognizes EPUB 3 navigation, chapter/episode markers inside headings or short styled paragraphs, and nested chapter number/name spans. Only the source subtitle is displayed; no synthetic Bab/Section number is inserted. Title/front/imprint/copyright documents no longer create near-empty reading pages. Number-only chapters have no fabricated visible heading. The parser cache is refreshed, with saved positions and notes relocated by source document and exact text; unmatched notes remain exportable and are marked for review.
+
+Pagination fills the available measured space without jumping back to an earlier paragraph. Final chapter pages can naturally be short. The full-screen menu action now invokes the browser Fullscreen API; an unsupported browser gets a clear message without silently using the action to close the menu. Tap/pinch remains a separate reading-controls interaction.
+
+The shelf uses a fixed-height viewport layout, smaller artwork, and contain-fit covers. The new KataKecil mark, favicon, settings icons, and reduced-motion-aware transitions replace the previous branding. Public URL and persisted device data keys remain stable.
