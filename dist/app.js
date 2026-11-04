@@ -8,11 +8,11 @@ import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton} from './ui.js?v=10';
-import * as Store from './store.js?v=13';
+import * as Store from './store.js?v=14';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,fetchPublishedBook,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=11';
-import {createReaderExperience} from './reader-experience.js?v=18';
+import {createReaderExperience} from './reader-experience.js?v=19';
 import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=2';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
@@ -34,7 +34,7 @@ const p=()=>Store.preferences;
 const features=createReaderExperience({
  speechDriver:nativeSpeechDriver,wakeLock:createNativeWakeLock(),setOrientation:setReaderOrientation,
  book:()=>currentBook,pages:()=>pages,index:()=>pageIndex,prefs:p,annotations:()=>Store.annotations,progress:id=>Store.progress[id],
- savePreferences:Store.updatePreferences,resetPreferences:Store.resetPreferences,saveAnnotation:Store.saveAnnotation,saveSpeech:tts=>{if(currentBook)Store.saveProgress({...Store.progress[currentBook.id],bookId:currentBook.id,tts});},
+ savePreferences:Store.updatePreferences,resetReadingPreferences:Store.resetReadingPreferences,saveAnnotation:Store.saveAnnotation,saveSpeech:tts=>{if(currentBook)Store.saveProgress({...Store.progress[currentBook.id],bookId:currentBook.id,tts});},
  goPage:goToPage,reflow,paint:updatePage,persist:persistPosition,apply:applyPreferences,show:showOverlay,close:closeOverlay,heading:dialogHeading,mode:setReaderMode,toast,selection:()=>selectedRange,clearSelection:removeSelection,download,
  syncIndex:index=>{if(index>=0){pageIndex=index;syncPageControls();}},
 });

@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Comfort defaults untuk Text dan Layout (4 November 2026)
+
+- Batasi reset ke pengaturan pada tab Text dan Layout; tema, aksen, bahasa aplikasi, TTS dan seluruh data bacaan dipertahankan. Konfirmasi tetap memakai dialog aplikasi.
+- Hapus petunjuk Hold a slider dan rapatkan jarak bawah panel Appearance sambil mempertahankan safe area dan gutter preview slider.
+- Entri reset seluruh pengaturan di bawah merupakan riwayat perilaku yang telah diganti.
+
 ## Web — Reset seluruh pengaturan (4 November 2026)
 
 - Comfort defaults meminta konfirmasi melalui dialog aplikasi sebelum mengembalikan seluruh preferensi ke default terpusat.

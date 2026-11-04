@@ -4,7 +4,7 @@ import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 const dom=new JSDOM('',{url:'https://backup.example/'}),w=dom.window;
 Object.assign(globalThis,{window:w,localStorage:w.localStorage,indexedDB,BroadcastChannel:class{postMessage(){}close(){}}});
-const store=await import('../dist/store.js?v=13');
+const store=await import('../dist/store.js?v=14');
 const old='2026-11-01T00:00:00.000Z',recent='2026-11-04T00:00:00.000Z';
 const bookmark=(id,at=old)=>({id,bookId:'book-one',chapterIndex:0,charOffset:0,type:'bookmark',color:'sapphire',label:'Return here',createdAt:at,updatedAt:at});
 test('restore merges new notes, keeps newer local data and tombstones, and retains the device identity',async()=>{
@@ -26,11 +26,12 @@ test('cross-book annotation ID collisions reject the complete import before writ
  assert.equal(JSON.stringify(store.annotations),before);assert.equal((await store.dbGetAll('annotations')).some(a=>a.id==='would-be-new'),false);
 });
 
-test('reset restores all central defaults while keeping device identity and reading data',()=>{
+test('comfort reset restores text and layout while keeping app, theme, speech and reading data',()=>{
  store.updatePreferences({themeMode:'dark',fontSize:30,brightness:60,readingMode:'scroll',ttsRate:1.8,uiLanguage:'id',accentColor:'#123456',obsoletePreference:true});
  store.saveAnnotation({...bookmark('reset-kept-note'),type:'highlight',noteText:'Keep this note',selectedText:'A passage',startOffset:0,endOffset:9});store.saveProgress({bookId:'reset-kept-book',chapterIndex:2,charOffset:44,percentage:31});
- const identity=store.deviceId,notes=JSON.stringify(store.annotations),progress=JSON.stringify(store.progress);store.resetPreferences();
- for(const [key,value]of Object.entries(store.DEFAULTS))assert.deepEqual(store.preferences[key],value,key);
- assert.equal(store.preferences.obsoletePreference,undefined);assert.equal(store.preferences.deviceId,identity);assert.equal(JSON.stringify(store.annotations),notes);assert.equal(JSON.stringify(store.progress),progress);assert.deepEqual(JSON.parse(localStorage.getItem('lumina_device_settings')),store.preferences);
- const prefs=JSON.stringify(store.preferences),setItem=w.Storage.prototype.setItem;try{w.Storage.prototype.setItem=()=>{throw Error('Storage blocked');};assert.throws(()=>store.resetPreferences(),/could not be saved/);assert.equal(JSON.stringify(store.preferences),prefs);}finally{w.Storage.prototype.setItem=setItem;}
+ const identity=store.deviceId,notes=JSON.stringify(store.annotations),progress=JSON.stringify(store.progress);store.resetReadingPreferences();
+ for(const key of ['fontSize','brightness','readingMode','fontWeight','paragraphSpacing','marginHorizontal','orientation','wakeLock'])assert.deepEqual(store.preferences[key],store.DEFAULTS[key],key);
+ for(const [key,value]of Object.entries({themeMode:'dark',uiLanguage:'id',accentColor:'#123456',ttsRate:1.8}))assert.equal(store.preferences[key],value,key);
+ assert.equal(store.preferences.obsoletePreference,true);assert.equal(store.preferences.deviceId,identity);assert.equal(JSON.stringify(store.annotations),notes);assert.equal(JSON.stringify(store.progress),progress);assert.deepEqual(JSON.parse(localStorage.getItem('lumina_device_settings')),store.preferences);
+ const prefs=JSON.stringify(store.preferences),setItem=w.Storage.prototype.setItem;try{w.Storage.prototype.setItem=()=>{throw Error('Storage blocked');};assert.throws(()=>store.resetReadingPreferences(),/could not be saved/);assert.equal(JSON.stringify(store.preferences),prefs);}finally{w.Storage.prototype.setItem=setItem;}
 });
