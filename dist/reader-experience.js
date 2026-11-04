@@ -1,5 +1,5 @@
-import {layoutDialog} from './panel-layout.js?v=1';
-import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=11';
+import {layoutDialog} from './panel-layout.js?v=2';
+import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=12';
 import {escapeHTML as esc,icon,$,$$} from './ui.js?v=11';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
@@ -16,12 +16,13 @@ export function createReaderExperience(ctx){
  const pref=()=>readerSettings({...ctx.prefs(),...previewValues});
  let appearanceTab='text',peek=null,resetting=false;
  const arcOpen=new Map();
+ let themeReturn='global-theme';
  let panel='',scrollPosition=null,scrollTimer,scrollRestore=false,filters={episode:'all',color:'all'},activeTab='contents';
  let search={query:'',chapterIndex:0,matches:[],total:0,index:-1},lookupSelection=null,lookupRequest=0,lookupAbort=null;
  let pendingSpeechPosition=null,lastSpeechSave=0;
- let draftInk='#28302b',draftPaper='#faf9f5',speechRange=null,speechWord=null;
+ let draftInk='#28302b',draftPaper='#faf9f5',speechRange=null;
  const wake=ctx.wakeLock||new ReadingWakeLock();
- const speech=new ReadAloud({change:()=>updateSpeechUI(),sentence:(pos,end)=>speechAt(pos,end,false),word:(pos,end)=>speechAt(pos,end,true),error:message=>ctx.toast(message)},ctx.speechDriver);
+ const speech=new ReadAloud({change:()=>updateSpeechUI(),paragraph:(pos,end)=>speechAt(pos,end),position:pos=>followSpeech(pos),error:message=>ctx.toast(message)},ctx.speechDriver);
  const chapterName=index=>ctx.book()?.chapters[index]?.navigationTitle||ctx.book()?.chapters[index]?.title||tr('Book information','Informasi buku');
  const field=(label,key,type,attributes,value)=>`<label class="reader-setting appearance-field"><span>${label}</span><input data-reader-pref="${key}" type="${type}" ${attributes} value="${esc(value)}"><output data-output="${key}">${esc(value)}</output></label>`;
  const select=(label,key,options,value)=>`<label class="reader-setting"><span>${label}</span><select data-reader-pref="${key}" aria-label="${label}">${options.map(([id,title])=>`<option value="${id}" ${id===String(value)?'selected':''}>${title}</option>`).join('')}</select></label>`;
@@ -131,8 +132,16 @@ export function createReaderExperience(ctx){
  function themeControls(){
   const d=pref(),selected=ctx.prefs().themeMode||'light';draftInk=d.customTextColor;draftPaper=d.customBackgroundColor;
   const glyph={light:'sun',dark:'moon',system:'device',sepia:'sepia',paper:'paper',green:'leaf',custom:'palette'};
-  return `<div class="global-theme-grid">${['light','dark','system','sepia','paper','green','custom'].map(key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(90deg,#faf9f5 50%,#191d1b 50%)':d.customBackgroundColor,text:d.customTextColor};return `<button class="global-theme-chip ${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span>${themeName(key)}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;}).join('')}</div><details class="custom-theme-editor" ${selected==='custom'?'open':''}><summary><span>${icon('palette')}${tr('Custom colors','Warna kustom')}</span>${icon('chevron')}</summary><div class="custom-theme-colors"><label class="custom-color-setting" for="reader-ink"><span>${icon('type')}${tr('Text','Teks')}</span><input type="color" id="reader-ink" aria-label="${tr('Text color','Warna teks')}" value="${d.customTextColor}"></label><label class="custom-color-setting" for="reader-paper"><span>${icon('paper')}${tr('Background','Latar')}</span><input type="color" id="reader-paper" aria-label="${tr('Background color','Warna latar')}" value="${d.customBackgroundColor}"></label></div><div id="theme-preview" class="theme-preview"><span class="theme-preview-sample"><strong>Aa</strong><span>${tr('Preview','Pratinjau')}</span></span><span id="theme-contrast" role="status" aria-label="${tr('Contrast','Kontras')}"></span></div><button class="primary" data-action="apply-reader-theme">${icon('check')}${tr('Apply colors','Terapkan warna')}</button></details>`;
+  return `<div class="global-theme-grid">${['light','dark','system','sepia','paper','green','custom'].map(key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(90deg,#faf9f5 50%,#191d1b 50%)':d.customBackgroundColor,text:d.customTextColor};return `<button class="global-theme-chip ${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span>${themeName(key)}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;}).join('')}</div>`;
  }
+ function customThemeDialog(){
+  if(panel!=='custom-theme')themeReturn=panel==='appearance'?'appearance':'global-theme';
+  const d=pref();draftInk=d.customTextColor;draftPaper=d.customBackgroundColor;panel='custom-theme';
+  showPanel(ctx.heading(tr('Custom theme','Tema kustom'))+`<div class="custom-theme-editor custom-theme-popup"><div class="custom-theme-colors"><label class="custom-color-setting" for="reader-ink"><span>${icon('type')}${tr('Text','Teks')}</span><input type="color" id="reader-ink" aria-label="${tr('Text color','Warna teks')}" value="${d.customTextColor}"></label><label class="custom-color-setting" for="reader-paper"><span>${icon('paper')}${tr('Background','Latar')}</span><input type="color" id="reader-paper" aria-label="${tr('Background color','Warna latar')}" value="${d.customBackgroundColor}"></label></div><div id="theme-preview" class="theme-preview"><span class="theme-preview-sample"><strong>Aa</strong><span>${tr('Preview','Pratinjau')}</span></span><span id="theme-contrast" role="status" aria-label="${tr('Contrast','Kontras')}"></span></div><div class="dialog-actions"><button class="secondary" data-action="custom-theme-back">${icon('left')}${tr('Back','Kembali')}</button><button class="primary" data-action="apply-reader-theme">${icon('check')}${tr('Apply colors','Terapkan warna')}</button></div></div>`,'custom-theme');
+  $('.dialog')?.classList.add('compact-settings-dialog');previewTheme();
+ }
+ function returnFromCustomTheme(){if(themeReturn==='appearance')appearance('theme');else themeDialog();}
+
  function updateThemeSummary(){const label=$('#global-theme-summary');if(label)label.textContent=themeName(ctx.prefs().themeMode||'light');}
  function previewTheme(){const preview=$('#theme-preview');if(!preview)return;preview.style.background=draftPaper;preview.style.color=draftInk;const ratio=contrast(draftInk,draftPaper),valid=ratio>=4.5;$('#theme-contrast').textContent=ratio.toFixed(1)+':1'+(valid?'':' · '+tr('Use stronger contrast','Gunakan kontras lebih tinggi'));$('[data-action="apply-reader-theme"]').disabled=!valid;}
  function themeDialog(){panel='global-theme';showPanel(ctx.heading(tr('Theme','Tema'))+themeControls(),'global-theme');$('.dialog')?.classList.add('compact-settings-dialog');previewTheme();}
@@ -203,7 +212,7 @@ export function createReaderExperience(ctx){
  async function speechDialog(){
   panel='speech';ctx.mode('controls');showPanel(ctx.heading(tr('Read aloud','Baca nyaring'))+`<p role="status">${tr('Loading available voices…','Memuat suara yang tersedia…')}</p>`,'speech');
   try{await speech.initialize();if(panel!=='speech'||!ctx.book())return;
-   showPanel(ctx.heading(tr('Read aloud','Baca nyaring'))+`<p class="tts-book-context" data-book-content translate="no">${esc(chapterName(position().chapterIndex))}</p><div class="tts-config"><label for="tts-language">${tr('Language','Bahasa')}</label><select id="tts-language">${[...new Set(speech.voices.map(v=>v.lang))].map(lang=>`<option value="${esc(lang)}" ${lang===(ctx.prefs().ttsLanguage||speech.voices.find(v=>v.lang.startsWith(ctx.book().language))?.lang)?'selected':''}>${esc(lang)}</option>`).join('')}</select><label for="tts-voice">${tr('Voice','Suara')}</label><select id="tts-voice"></select></div>${field(tr('Speed','Kecepatan'),'ttsRate','range','min="0.5" max="2" step="0.1"',ctx.prefs().ttsRate||1)}<p class="tts-state" role="status"></p><div class="tts-player"><button class="primary" data-action="tts-play">${icon('play')}<span>${tr('Play / resume','Putar / lanjut')}</span></button><button class="secondary" data-action="tts-pause" aria-label="${tr('Pause','Jeda')}">${icon('pause')}</button><button class="secondary" data-action="tts-stop" aria-label="${tr('Stop','Hentikan')}">${icon('close')}</button></div><button class="text-link" data-action="tts-from-here">${tr('Start from this position','Mulai dari posisi ini')}</button><details class="tts-about"><summary>${tr('About voices','Tentang suara')}</summary><p>${tr('Local voices stay on your device. Online voices use your browser provider. Voices without word events use word-by-word playback to keep the highlight accurate.','Suara lokal tetap di perangkat. Suara daring memakai layanan browser. Suara tanpa event kata dibaca per kata agar highlight tetap akurat.')}</p></details>`,'speech');$('.dialog')?.classList.add('compact-settings-dialog');updateVoices();updateSpeechUI();
+   showPanel(ctx.heading(tr('Read aloud','Baca nyaring'))+`<p class="tts-book-context" data-book-content translate="no">${esc(chapterName(position().chapterIndex))}</p><div class="tts-config"><label for="tts-language">${tr('Language','Bahasa')}</label><select id="tts-language">${[...new Set(speech.voices.map(v=>v.lang))].map(lang=>`<option value="${esc(lang)}" ${lang===(ctx.prefs().ttsLanguage||speech.voices.find(v=>v.lang.startsWith(ctx.book().language))?.lang)?'selected':''}>${esc(lang)}</option>`).join('')}</select><label for="tts-voice">${tr('Voice','Suara')}</label><select id="tts-voice"></select></div>${field(tr('Speed','Kecepatan'),'ttsRate','range','min="0.5" max="2" step="0.1"',ctx.prefs().ttsRate||1)}<p class="tts-state" role="status"></p><div class="tts-player"><button class="primary" data-action="tts-play">${icon('play')}<span>${tr('Play / resume','Putar / lanjut')}</span></button><button class="secondary" data-action="tts-pause" aria-label="${tr('Pause','Jeda')}">${icon('pause')}</button><button class="secondary" data-action="tts-stop" aria-label="${tr('Stop','Hentikan')}">${icon('close')}</button></div><button class="text-link" data-action="tts-from-here">${tr('Start from this position','Mulai dari posisi ini')}</button><details class="tts-about"><summary>${tr('About voices','Tentang suara')}</summary><p>${tr('Reads and highlights one paragraph at a time. Local voices stay on your device; online voices use your browser provider.','Membaca dan menyorot satu paragraf setiap kali. Suara lokal tetap di perangkat; suara daring memakai layanan browser.')}</p></details>`,'speech');$('.dialog')?.classList.add('compact-settings-dialog');updateVoices();updateSpeechUI();
   }catch(error){if(panel==='speech')showPanel(ctx.heading(tr('Read aloud','Baca nyaring'))+`<p class="form-error" role="alert">${esc(error.message||tr('Speech is unavailable in this browser.','Suara tidak tersedia di browser ini.'))}</p>`,'speech');}
  }
  function updateVoices(){const language=$('#tts-language')?.value,select=$('#tts-voice');if(!select)return;const voices=speech.voices.filter(v=>v.lang===language).sort((a,b)=>Number(b.localService)-Number(a.localService)),preferred=voices.find(v=>v.voiceURI===ctx.prefs().ttsVoice)||voices[0];select.innerHTML=voices.map(v=>`<option value="${esc(v.voiceURI)}" ${v===preferred?'selected':''}>${esc(v.name)} · ${v.localService?tr('on device','di perangkat'):tr('online','daring')}</option>`).join('');}
@@ -217,25 +226,29 @@ export function createReaderExperience(ctx){
   ctx.close();ctx.mode('reading');await speech.play(book.chapters,start,options);
  }
  function persistSpeech(pos,force=false){pendingSpeechPosition={...pos};if(!force&&performance.now()-lastSpeechSave<1000)return;lastSpeechSave=performance.now();const book=ctx.book(),chapter=book?.chapters[pos.chapterIndex];if(!chapter?.text.length)return;const offset=Math.min(chapter.text.length-1,pos.charOffset);ctx.saveSpeech({chapterIndex:pos.chapterIndex,charOffset:offset,anchor:makeAnchor(chapter,offset,Math.min(chapter.text.length,offset+80))});}
- function speechAt(pos,end,word){
-  if(!ctx.book())return;if(word&&speechWord?.chapterIndex===pos.chapterIndex&&speechWord.start===pos.charOffset&&speechWord.end===end)return;persistSpeech(pos);const index=findPage(ctx.pages(),pos.chapterIndex,pos.charOffset),shown=renderedPages(ctx.index());
-  let outside=!shown.some(p=>p.chapterIndex===pos.chapterIndex&&pos.charOffset>=p.start&&pos.charOffset<p.end);if(mode()==='scroll'&&!outside){const root=$('.page-text'),range=textRange(root,pos.charOffset,Math.min(root.textContent.length,pos.charOffset+1)),box=root.closest('.page-inner').getBoundingClientRect(),rect=range?.getBoundingClientRect();outside=!rect||rect.top<box.top||rect.bottom>box.bottom;}
-  if(outside){if(index>=0)jump({chapterIndex:pos.chapterIndex,start:pos.charOffset},'speech');}
-  if(word)speechWord={chapterIndex:pos.chapterIndex,start:pos.charOffset,end};else{speechRange={chapterIndex:pos.chapterIndex,start:pos.charOffset,end};speechWord=null;}paintSpeech();
+ function speechAt(pos,end){
+  if(!ctx.book())return;
+  if(speechRange?.chapterIndex===pos.chapterIndex&&speechRange.start===pos.charOffset&&speechRange.end===end)return;
+  speechRange={chapterIndex:pos.chapterIndex,start:pos.charOffset,end};paintSpeech();
  }
- function clearSpeechPaint(){$$('.tts-paint-layer').forEach(el=>el.remove());window.CSS?.highlights?.delete('katakecil-tts-word');speechRange=null;speechWord=null;}
+ function followSpeech(pos){
+  if(!ctx.book())return;persistSpeech(pos);const index=findPage(ctx.pages(),pos.chapterIndex,pos.charOffset),shown=renderedPages(ctx.index());
+  let outside=!shown.some(p=>p.chapterIndex===pos.chapterIndex&&pos.charOffset>=p.start&&pos.charOffset<p.end);if(mode()==='scroll'&&!outside){const root=$('.page-text'),range=textRange(root,pos.charOffset,Math.min(root.textContent.length,pos.charOffset+1)),box=root.closest('.page-inner').getBoundingClientRect(),rect=range?.getBoundingClientRect();outside=!rect||rect.top<box.top||rect.bottom>box.bottom;}
+  if(outside&&index>=0)jump({chapterIndex:pos.chapterIndex,start:pos.charOffset},'speech');
+ }
+ function clearSpeechPaint(){$$('.tts-paint-layer').forEach(el=>el.remove());window.CSS?.highlights?.delete('katakecil-tts-paragraph');speechRange=null;}
  function paintSpeech(){
-  $$('.tts-paint-layer').forEach(el=>el.remove());window.CSS?.highlights?.delete('katakecil-tts-word');
-  if(!['playing','paused'].includes(speech.state)||!speechWord)return;
-  const range=speechWord,nativeRanges=[];
+  $$('.tts-paint-layer').forEach(el=>el.remove());window.CSS?.highlights?.delete('katakecil-tts-paragraph');
+  if(!['playing','paused'].includes(speech.state)||!speechRange)return;
+  const range=speechRange,nativeRanges=[];
   for(const root of $$('.page-text')){if(Number(root.dataset.chapterIndex)!==range.chapterIndex)continue;
    const offset=Number(root.dataset.start||0),start=Math.max(0,range.start-offset),end=Math.min(root.textContent.length,range.end-offset);if(end<=start)continue;
    const domRange=textRange(root,start,end);if(!domRange)continue;nativeRanges.push(domRange);
    if(window.Highlight&&window.CSS?.highlights)continue;
-   const layer=document.createElement('div');layer.className='tts-paint-layer tts-word';layer.setAttribute('aria-hidden','true');const box=(mode()==='scroll'?root.closest('.page-inner'):root).getBoundingClientRect();
+   const layer=document.createElement('div');layer.className='tts-paint-layer tts-paragraph';layer.setAttribute('aria-hidden','true');const box=(mode()==='scroll'?root.closest('.page-inner'):root).getBoundingClientRect();
    for(const r of Array.from(domRange.getClientRects?.()||[])){const top=Math.max(r.top,box.top),bottom=Math.min(r.bottom,box.bottom);if(bottom<=top)continue;const rect=document.createElement('i');Object.assign(rect.style,{left:r.left+'px',top:top+'px',width:r.width+'px',height:bottom-top+'px'});layer.appendChild(rect);}$('.reader-shell')?.appendChild(layer);
   }
-  if(nativeRanges.length&&window.Highlight&&window.CSS?.highlights)window.CSS.highlights.set('katakecil-tts-word',new window.Highlight(...nativeRanges));
+  if(nativeRanges.length&&window.Highlight&&window.CSS?.highlights)window.CSS.highlights.set('katakecil-tts-paragraph',new window.Highlight(...nativeRanges));
  }
  function updateSpeechUI(){
   if(speech.state!=='playing'&&pendingSpeechPosition){persistSpeech(pendingSpeechPosition,true);pendingSpeechPosition=null;}
@@ -284,8 +297,9 @@ export function createReaderExperience(ctx){
   case 'comfort-reset':confirmDefaults();return true;
   case 'comfort-reset-cancel':if(panel==='comfort-confirm'&&!resetting)appearance(appearanceTab);return true;
   case 'comfort-reset-confirm':void restoreDefaults();return true;
-  case 'app-theme-preset':ctx.savePreferences({themeMode:value,readerTheme:'follow',globalThemeVersion:1});ctx.apply();if(panel==='appearance')appearance('theme');else themeDialog();updateThemeSummary();return true;
-  case 'apply-reader-theme':if(contrast(draftInk,draftPaper)<4.5)return true;ctx.savePreferences({themeMode:'custom',readerTheme:'follow',globalThemeVersion:1,customTextColor:draftInk,customBackgroundColor:draftPaper});ctx.apply();if(panel==='appearance')appearance('theme');else themeDialog();updateThemeSummary();return true;
+  case 'custom-theme-back':returnFromCustomTheme();return true;
+  case 'app-theme-preset':if(value==='custom'){customThemeDialog();return true;}ctx.savePreferences({themeMode:value,readerTheme:'follow',globalThemeVersion:1});ctx.apply();if(panel==='appearance')appearance('theme');else themeDialog();updateThemeSummary();return true;
+  case 'apply-reader-theme':if(contrast(draftInk,draftPaper)<4.5)return true;ctx.savePreferences({themeMode:'custom',readerTheme:'follow',globalThemeVersion:1,customTextColor:draftInk,customBackgroundColor:draftPaper});ctx.apply();returnFromCustomTheme();updateThemeSummary();return true;
   case 'selection-tools':lookup();return true;
   case 'lookup-definition':void lookupFetch('dictionary');return true;
   case 'lookup-translate':void lookupFetch('translation');return true;
@@ -310,7 +324,7 @@ export function createReaderExperience(ctx){
  document.addEventListener('toggle',event=>{if(event.target.matches?.('.toc-arc'))arcOpen.set(event.target.dataset.arcId,event.target.open);},true);
  document.addEventListener('keydown',event=>{if(event.target.closest?.('.appearance-tabs')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const tabs=$$('.appearance-tabs button'),index=tabs.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next]?.click();return;}if(!event.target.closest?.('.reader-tabs')||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();event.stopPropagation();const tabs=$$('.reader-tabs .tab'),index=tabs.indexOf(event.target),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next]?.click();});
  return{apply,enter,leave,closePanel,position,mode,spread,renderedPages,renderText,measureText,afterRender,jump,anchorMetadata,resolveAnnotations,savedPosition,progressMetadata,contents,contentsBody,appearance,themeDialog,bookmarkDialog,action,input,change,submit,
-  stopSpeech:()=>speech.stop(),pauseSpeech:()=>speech.pause(),resumeScreen:()=>wake.set(!!ctx.prefs().wakeLock),paintSpeech,clearSpeechPaint,refreshPanel:()=>{if(panel==='appearance')appearance();else if(panel==='global-theme')themeDialog();else if(panel==='contents')contents();},
+  stopSpeech:()=>speech.stop(),pauseSpeech:()=>speech.pause(),resumeScreen:()=>wake.set(!!ctx.prefs().wakeLock),paintSpeech,clearSpeechPaint,refreshPanel:()=>{if(panel==='appearance')appearance();else if(panel==='global-theme')themeDialog();else if(panel==='custom-theme')customThemeDialog();else if(panel==='contents')contents();},
   signature:()=>JSON.stringify(Object.fromEntries([...Object.keys(readerDefaults),'fontFamily','fontSize','lineHeight','spreadMode'].filter(k=>!['readerTheme','customTextColor','customBackgroundColor','brightness','wakeLock','ttsVoice','ttsLanguage','ttsRate','tapNavigation','pageAnimation'].includes(k)).map(k=>[k,ctx.prefs()[k]]))),
   setPosition:anchor=>{scrollPosition={chapterIndex:anchor.chapterIndex,start:anchor.start??anchor.charOffset??0};},
   rootFor:event=>event?.target?.closest?.('.page-text')||document.activeElement?.closest?.('.page-text')||$('.page-text'),

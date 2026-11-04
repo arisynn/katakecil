@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — TTS paragraf dan custom theme popup (4 November 2026)
+
+- Baca TTS per paragraf dan highlight paragraf utuh; event kata hanya untuk posisi/navigasi. Hapus fallback utterance per kata. Paragraf sangat panjang tetap dibatasi sesuai batas 4.000 karakter Android.
+- Buka editor Custom theme sebagai popup saat Custom dipilih; perubahan diterapkan setelah Apply colors, tanpa accordion tema.
+- Perbesar color wheel secara responsif, tetap menyediakan hex tanpa autofocus keyboard.
+- Saat accordion dibuka pengguna, gulir container kontennya agar isi terlihat; header panel tetap di tempat dan reduced motion dihormati.
+
 ## Web — Tema ringkas, color wheel dan resume setelah refresh (4 November 2026)
 
 - Rapikan pilihan tema menjadi baris dua kolom dengan ikon, Custom selebar panel, dan dua baris warna Text/Background yang sejajar.

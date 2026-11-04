@@ -52,7 +52,7 @@ These services are not source-code dependencies. A request is made only after th
 - **Wikikamus/Wiktionary**, https://id.wiktionary.org/. Definition excerpts cite the original word page and **CC BY-SA 4.0**. Article history provides contributor attribution. Resource-bearing HTML is stripped; excerpts are rendered as text.
 - **MyMemory / Translated**, https://mymemory.translated.net/doc/spec.php. Translation results are credited in the panel. Service terms, logging and free quotas apply. No dictionary/translation results are bundled or stored in localStorage.
 
-Browser Web Speech, Intl.Segmenter, CSS Custom Highlight, Fullscreen, Screen Orientation and Wake Lock are platform APIs. The app uses a real story word to detect voice boundary support, then actual word/start events; unsupported boundary voices use individual word utterances, never estimated highlight timers. Online speech voices may use the browser/OS provider's service; the voice picker identifies local versus online voices.
+Browser Web Speech, Intl.Segmenter, CSS Custom Highlight, Fullscreen, Screen Orientation and Wake Lock are platform APIs. The app queues paragraphs without a word-by-word fallback and highlights the complete current paragraph. Native word events, when available, update resume positions and page navigation only. Paragraphs longer than the Android 4,000-character limit are split into bounded passages while retaining one paragraph highlight. Online speech voices may use the browser/OS provider's service; the voice picker identifies local versus online voices.
 
 ## Evaluated, not integrated
 

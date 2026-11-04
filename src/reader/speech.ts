@@ -1,5 +1,4 @@
 import EasySpeech from 'easy-speech';
-import { sentences, spokenWords, type Sentence } from './search';
 export interface SpeechPosition { chapterIndex: number; charOffset: number }
 export interface SpeechBoundary { charIndex?: number; charLength?: number; name?: string }
 export interface SpeechDriver {
@@ -8,10 +7,10 @@ export interface SpeechDriver {
   speak(options: {text: string; voice?: SpeechSynthesisVoice; rate: number; start: () => void; boundary: (event: SpeechBoundary) => void}): Promise<unknown>;
   pause(): void; resume(): void; cancel(): void;
 }
-type Chunk = Sentence & {wordStart: number; wordEnd: number; probe: boolean};
+type Chunk = {text: string; start: number; end: number; paragraphStart: number; paragraphEnd: number};
 export class ReadAloud {
   state: 'idle' | 'loading' | 'playing' | 'paused' | 'error' = 'idle';
-  tracking: 'checking' | 'native' | 'word' = 'checking';
+  tracking = 'paragraph' as const;
   position: SpeechPosition = {chapterIndex:0,charOffset:0};
   voices: SpeechSynthesisVoice[] = [];
   private ready = false;
@@ -23,11 +22,10 @@ export class ReadAloud {
   private language = 'en';
   private rate = 1;
   private voice?: SpeechSynthesisVoice;
-  private boundaries = new Map<string,boolean>();
   constructor(private hooks: {
     change: () => void;
-    sentence: (position: SpeechPosition,end: number) => void;
-    word: (position: SpeechPosition,end: number) => void;
+    paragraph: (position: SpeechPosition,end: number) => void;
+    position?: (position: SpeechPosition) => void;
     error: (message: string) => void;
   }, private driver: SpeechDriver = EasySpeech as unknown as SpeechDriver) {}
   async initialize() {
@@ -56,13 +54,21 @@ export class ReadAloud {
   }
   private makeQueue() {
     const text=this.chapters[this.position.chapterIndex]?.text||'',offset=Math.max(0,Math.min(text.length,this.position.charOffset));
-    const supported=this.boundaries.get(this.voice?.voiceURI||'');
-    this.tracking=supported===true?'native':supported===false?'word':'checking';
-    const chunks = supported===true ? sentences(text.slice(offset),this.language).map(sentence=>{
-      const word=spokenWords(sentence.text,this.language)[0];
-      return {...sentence,wordStart:sentence.start+(word?.wordStart||0),wordEnd:sentence.start+(word?.wordEnd||sentence.text.length),probe:false};
-    }) : spokenWords(text.slice(offset),this.language).map(word=>({...word,probe:supported===undefined}));
-    this.queue=chunks.map(chunk=>({...chunk,start:chunk.start+offset,end:chunk.end+offset,wordStart:chunk.wordStart+offset,wordEnd:chunk.wordEnd+offset}));this.cursor=0;
+    this.queue=[];this.cursor=0;
+    const add=(from:number,to:number)=>{
+      while(from<to&&/\s/.test(text[from]))from++;
+      while(to>from&&/\s/.test(text[to-1]))to--;
+      if(to<=offset||to<=from)return;
+      let start=Math.max(from,offset);
+      while(start<to){
+        // Android accepts at most 4,000 UTF-16 units. Only unusually long paragraphs split;
+        // all chunks retain the same complete paragraph highlight.
+        let end=Math.min(to,start+4000);
+        if(end<to){const space=text.lastIndexOf(' ',end-1);if(space>start+2000)end=space+1;const code=text.charCodeAt(end-1);if(code>=0xD800&&code<=0xDBFF)end--;}
+        this.queue.push({text:text.slice(start,end),start,end,paragraphStart:from,paragraphEnd:to});start=end;
+      }
+    };
+    let start=0;for(const match of text.matchAll(/\r?\n[ \t]*\r?\n+/g)){add(start,match.index!);start=match.index!+match[0].length;}add(start,text.length);
   }
   private async pump(token:number) {
     if (token!==this.generation||this.state!=='playing') return;
@@ -71,25 +77,20 @@ export class ReadAloud {
       this.position={chapterIndex:this.position.chapterIndex+1,charOffset:0};this.makeQueue();
       if (!this.queue.length) {void this.pump(token);return;}
     }
-    const chunk=this.queue[this.cursor],voiceId=this.voice?.voiceURI||'';
-    this.position.charOffset=chunk.start;this.hooks.sentence({...this.position},chunk.end);
+    const chunk=this.queue[this.cursor];
+    this.position.charOffset=chunk.start;
+    this.hooks.paragraph({chapterIndex:this.position.chapterIndex,charOffset:chunk.paragraphStart},chunk.paragraphEnd);
+    this.hooks.position?.({...this.position});
     try {
       await this.driver.speak({text:chunk.text,voice:this.voice,rate:this.rate,start:()=>{
         if (token!==this.generation||this.state!=='playing') return;
-        this.position.charOffset=chunk.wordStart;this.hooks.word({...this.position},chunk.wordEnd);
+        this.hooks.position?.({...this.position});
       },boundary:event=>{
         if (token!==this.generation||this.state!=='playing'||event.name!=='word'||event.charIndex===undefined||event.charIndex<0||event.charIndex>=chunk.text.length) return;
-        if (chunk.probe) {this.boundaries.set(voiceId,true);this.tracking='native';this.hooks.change();}
-        const index=event.charIndex;const word=spokenWords(chunk.text,this.language).find(w=>index>=w.wordStart&&index<w.wordEnd);
-        if (!word) return;
-        this.position.charOffset=chunk.start+word.wordStart;this.hooks.word({...this.position},chunk.start+word.wordEnd);
+        this.position.charOffset=chunk.start+event.charIndex;this.hooks.position?.({...this.position});
       }});
       if (token!==this.generation) return;
-      this.position.charOffset=chunk.end;
-      if (chunk.probe) {
-        if (!this.boundaries.has(voiceId)) this.boundaries.set(voiceId,false);
-        this.makeQueue();this.hooks.change();
-      } else this.cursor++;
+      this.position.charOffset=chunk.end;this.cursor++;
       if (this.state==='playing') void this.pump(token);
     } catch(error) {
       if (token!==this.generation) return;

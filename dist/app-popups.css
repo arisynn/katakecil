@@ -6,5 +6,5 @@ body.app-picker-open{overflow:hidden;overscroll-behavior:none}.app-picker-backdr
 
 /* A reserved wheel area avoids layout shifts while the local module loads. */
 .app-color-editor{grid-template-columns:40px minmax(0,1fr);gap:12px}
-.app-color-wheel{grid-column:1/-1;justify-self:center;width:176px;height:176px;margin:4px auto 2px}
+.app-color-wheel{grid-column:1/-1;justify-self:center;width:var(--wheel-size,256px);height:var(--wheel-size,256px);margin:4px auto 2px}
 .app-color-wheel[hidden]{display:none}

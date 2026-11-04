@@ -83,18 +83,18 @@ test('dictionary uses one selected word, renders service errors and supports dep
 function speechHarness(){
  const calls=[],pending=[];const voice={voiceURI:'local-en',name:'Local',lang:'en-US',localService:true};
  const driver={init:async()=>true,voices:()=>[voice],speak:options=>new Promise((resolve,reject)=>{calls.push(options);options.start?.();pending.push({resolve,reject});}),pause:()=>calls.push('pause'),resume:()=>calls.push('resume'),cancel:()=>calls.push('cancel')};
- const events=[];const speech=new ReadAloud({change:()=>events.push(speech.state),sentence:(p,e)=>events.push({sentence:p,end:e}),word:(p,e)=>events.push({word:p,end:e}),error:e=>events.push({error:e})},driver);
+ const events=[];const speech=new ReadAloud({change:()=>events.push(speech.state),paragraph:(p,e)=>events.push({paragraph:p,end:e}),position:p=>events.push({position:p}),error:e=>events.push({error:e})},driver);
  return{speech,calls,pending,events};
 }
-test('TTS plays, pauses, resumes at the last boundary and ignores stale callbacks after stop',async()=>{
- const {speech,calls,pending,events}=speechHarness();await speech.play([{text:'First sentence. Next sentence.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});
- const first=calls.find(c=>typeof c==='object');assert.equal(speech.state,'playing');first.boundary({name:'word',charIndex:0,charLength:5});pending[0].resolve();await tick();calls.filter(c=>typeof c==='object').at(-1).boundary({name:'word',charIndex:0,charLength:8});assert.equal(speech.position.charOffset,6);assert.ok(events.some(e=>e.word?.charOffset===6));
- speech.pause();assert.equal(speech.state,'paused');speech.resume();assert.equal(speech.state,'playing');assert.ok(calls.filter(c=>typeof c==='object').at(-1).text.startsWith('sentence.'));
+test('TTS speaks whole paragraphs, resumes at native checkpoints and ignores stale callbacks',async()=>{
+ const {speech,calls,pending,events}=speechHarness();await speech.play([{text:'First sentence. Next sentence.\n\nSecond paragraph.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});
+ const first=calls.find(c=>typeof c==='object');assert.equal(first.text,'First sentence. Next sentence.');assert.equal(speech.state,'playing');first.boundary({name:'word',charIndex:6,charLength:8});assert.equal(speech.position.charOffset,6);assert.ok(events.some(e=>e.position?.charOffset===6));assert.equal(events.filter(e=>e.paragraph).length,1);
+ speech.pause();assert.equal(speech.state,'paused');speech.resume();assert.equal(speech.state,'playing');assert.ok(calls.filter(c=>typeof c==='object').at(-1).text.startsWith('sentence. Next'));
  speech.stop();first.boundary({name:'word',charIndex:0});pending[0].resolve();await tick();assert.equal(speech.state,'idle');assert.equal(speech.position.charOffset,6);
 });
 
 test('TTS automatically advances within the available published chapter list and completes',async()=>{
- const {speech,pending,events}=speechHarness();await speech.play([{text:'First.'},{text:'Second.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});pending[0].resolve();await tick();assert.equal(speech.position.chapterIndex,1);assert.ok(events.some(e=>e.sentence?.chapterIndex===1));pending[1].resolve();await tick();assert.equal(speech.state,'idle');
+ const {speech,pending,events}=speechHarness();await speech.play([{text:'First.'},{text:'Second.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});pending[0].resolve();await tick();assert.equal(speech.position.chapterIndex,1);assert.ok(events.some(e=>e.paragraph?.chapterIndex===1));pending[1].resolve();await tick();assert.equal(speech.state,'idle');
  const missing=speechHarness();await assert.rejects(()=>missing.speech.play([{text:'Teks.'}],{chapterIndex:0,charOffset:0},{language:'id',rate:1}),/No voice/);
 });
 
@@ -127,7 +127,7 @@ test('chapter content hashes keep repeated quotations at exact offsets after lay
 test('concurrent speech initialization shares one device voice request',async()=>{
  let requests=0,finish;const voice={voiceURI:'local-en',name:'Local',lang:'en-US',localService:true};
  const driver={init:()=>{requests++;return new Promise(r=>finish=r);},voices:()=>[voice],speak:async()=>{},pause(){},resume(){},cancel(){}};
- const speech=new ReadAloud({change(){},sentence(){},word(){},error(){}},driver);
+ const speech=new ReadAloud({change(){},paragraph(){},error(){}},driver);
  const one=speech.initialize(),two=speech.initialize();assert.equal(requests,1);finish(true);await Promise.all([one,two]);assert.equal(speech.state,'idle');
 });
 
@@ -137,15 +137,19 @@ test('TTS speed changes apply during playback without losing the last spoken pos
  const latest=calls.filter(c=>typeof c==='object').at(-1);assert.equal(latest.rate,1.5);assert.ok(latest.text.startsWith('First'));assert.equal(speech.position.charOffset,0);assert.equal(speech.state,'playing');speech.stop();
 });
 
-test('voices without native word boundaries highlight every actually started word and keep punctuation',async()=>{
- const {speech,calls,pending,events}=speechHarness();await speech.play([{text:'"Hello," rain fell.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});
- assert.equal(calls.filter(c=>typeof c==='object')[0].text,'"Hello," ');assert.ok(events.some(e=>e.word?.charOffset===1&&e.end===6));assert.equal(speech.tracking,'checking');
- pending[0].resolve();await tick();assert.equal(speech.tracking,'word');assert.equal(calls.filter(c=>typeof c==='object')[1].text,'rain ');assert.ok(events.some(e=>e.word?.charOffset===9&&e.end===13));
- pending[1].resolve();await tick();assert.equal(calls.filter(c=>typeof c==='object')[2].text,'fell.');assert.ok(events.some(e=>e.word?.charOffset===14&&e.end===18));pending[2].resolve();await tick();assert.equal(speech.state,'idle');
+test('voices without boundaries read complete paragraphs without a word fallback',async()=>{
+ const {speech,calls,pending,events}=speechHarness();await speech.play([{text:'"Hello," rain fell. Next sentence.\n\nAnother paragraph.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});
+ assert.equal(calls.filter(c=>typeof c==='object')[0].text,'"Hello," rain fell. Next sentence.');assert.equal(speech.tracking,'paragraph');assert.equal(events.filter(e=>e.paragraph).length,1);pending[0].resolve();await tick();assert.equal(calls.filter(c=>typeof c==='object')[1].text,'Another paragraph.');assert.equal(events.filter(e=>e.paragraph).length,2);speech.stop();
 });
-test('native boundary support switches to fluent utterances after one real word without repeating it',async()=>{
- const {speech,calls,pending,events}=speechHarness();await speech.play([{text:'Hello rain falls softly.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});const first=calls.filter(c=>typeof c==='object')[0];first.boundary({name:'word',charIndex:0,charLength:5});pending[0].resolve();await tick();const fluent=calls.filter(c=>typeof c==='object')[1];assert.equal(fluent.text,'rain falls softly.');assert.equal(speech.tracking,'native');fluent.boundary({name:'word',charIndex:5,charLength:5});assert.ok(events.some(e=>e.word?.charOffset===11&&e.end===16));speech.stop();
+
+test('long paragraph chunks respect the native text limit and retain one paragraph range',async()=>{
+ const {speech,calls,pending,events}=speechHarness(),text='A sentence with words. '.repeat(240);await speech.play([{text}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});const first=calls.find(c=>typeof c==='object');assert.ok(first.text.length<=4000);pending[0].resolve();await tick();const chunks=calls.filter(c=>typeof c==='object');assert.equal(chunks.map(c=>c.text).join(''),text.trimEnd());assert.ok(events.filter(e=>e.paragraph).every(e=>e.paragraph.charOffset===0&&e.end===text.trimEnd().length));speech.stop();
 });
+
+test('native word events update checkpoints without splitting paragraph utterances',async()=>{
+ const {speech,calls,events}=speechHarness();await speech.play([{text:'Hello rain falls softly.'}],{chapterIndex:0,charOffset:0},{language:'en',rate:1});const first=calls.find(c=>typeof c==='object');first.boundary({name:'word',charIndex:11,charLength:5});assert.equal(first.text,'Hello rain falls softly.');assert.equal(calls.filter(c=>typeof c==='object').length,1);assert.equal(speech.tracking,'paragraph');assert.ok(events.some(e=>e.position?.charOffset===11));assert.equal(events.filter(e=>e.paragraph).length,1);speech.stop();
+});
+
 test('global theme migration preserves custom typography and moves the old reader palette to the whole app',async()=>{
  const {migrateReaderPreferences,globalPalette}=await import('../dist/advanced-reader.js');const migrated=migrateReaderPreferences({readerTheme:'paper',themeMode:'light',lineHeight:1.8,paragraphSpacing:12,textAlign:'left'});assert.equal(migrated.themeMode,'paper');assert.equal(migrated.readerTheme,'follow');assert.equal(migrated.lineHeight,1.6);assert.equal(migrated.paragraphSpacing,6);assert.equal(migrated.textAlign,'justify');
  const custom=migrateReaderPreferences({readerTheme:'follow',themeMode:'dark',lineHeight:1.5,paragraphSpacing:7,textAlign:'center'});assert.equal(custom.lineHeight,undefined);assert.equal(custom.paragraphSpacing,undefined);assert.equal(custom.textAlign,undefined);assert.equal(custom.themeMode,'dark');assert.equal(globalPalette({...custom,themeMode:'dark'}).dark,true);assert.equal(globalPalette({themeMode:'paper'}).variables['--bg'],globalPalette({themeMode:'paper'}).variables['--paper']);assert.equal(globalPalette({themeMode:'custom',customTextColor:'#ffffff',customBackgroundColor:'#ffffff'}).background,'#faf9f5');
