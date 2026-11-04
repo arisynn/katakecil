@@ -1,5 +1,7 @@
 # KataKecil Android dan source web bersama
 
+Pembaruan terbaru: [Preview 2](releases/v1.0.1-preview.2.md), [efek kaca dan updater](glass-and-updates.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
+
 Versi pertama: **1.0.0**, versionCode **1**, application ID
 `id.karisyono.katakecil`. Branch: `feat/android-app`, dari `85eb4e6`.
 Logo launcher dan splash menggunakan PNG asli repo tanpa perubahan gambar.
@@ -50,8 +52,7 @@ disediakan lingkungan melalui GRADLE_OPTS. Jangan menonaktifkan TLS.
 **Kunci penandatanganan:** folder privat berisi PKCS12 dan `signing.json`
 dengan password. Cadangkan secara pribadi dan gunakan kunci yang sama untuk
 setiap APK pembaruan. Backup ini terpisah dari source dan APK. Untuk pembaruan,
-naikkan versionCode/versionName, pertahankan ID paket, dan sesuaikan nama output
-di skrip build. Android Studio juga bisa dipakai melalui `npx cap open android`.
+naikkan versionCode/version di `app-version.json` dan pertahankan ID paket. Gradle, nama APK, checksum dan metadata release mengikuti berkas versi tersebut. Build release juga menjalankan `testReleaseUnitTest`. Android Studio juga bisa dipakai melalui `npx cap open android`.
 
 **Memindahkan data dari web:** source web baru menambahkan Save backup. Setelah
 source tersebut dipublikasikan pada situs asal, ekspor dari browser lama dan

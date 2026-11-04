@@ -8,6 +8,7 @@ import androidx.activity.EdgeToEdge;
 public class MainActivity extends BridgeActivity {
     @Override public void onCreate(Bundle savedInstanceState) {
         registerPlugin(KataKecilDevicePlugin.class);
+        registerPlugin(KataKecilUpdatePlugin.class);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);

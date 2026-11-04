@@ -4,6 +4,8 @@ import {resolve,join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('..',import.meta.url));
+const version=JSON.parse(await readFile(join(root,'app-version.json'),'utf8'));
+if(!/^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$/.test(version.version)||!Number.isSafeInteger(version.versionCode)||version.versionCode<1)throw Error('Invalid app-version.json.');
 const debug=process.argv.includes('--debug'),output=resolve(process.env.KATAKECIL_OUTPUT_DIR||join(root,'artifacts'));
 const env={...process.env};
 const java=env.JAVA_HOME?join(env.JAVA_HOME,'bin','java'):'java';
@@ -27,10 +29,10 @@ if(env.HTTPS_PROXY||env.https_proxy){
 await run(java,['-version']);
 await run('npm',['run','build']);
 await run('npx',['cap','sync','android']);
-const tasks=debug?['assembleDebug']:['assembleRelease','lintRelease'];
+const tasks=debug?['assembleDebug']:['testReleaseUnitTest','assembleRelease','lintRelease'];
 await run('./gradlew',['--no-daemon','--max-workers=2',...tasks],join(root,'android'));
 await mkdir(output,{recursive:true});
-const name=debug?'KataKecil-1.0.0-debug.apk':'KataKecil-1.0.0-Karisyono.apk',artifact=join(output,name);
+const name=`KataKecil-${version.version}-${debug?'debug':'Karisyono'}.apk`,artifact=join(output,name);
 if(debug)await copyFile(join(root,'android/app/build/outputs/apk/debug/app-debug.apk'),artifact);
 else{
  let sdk=env.ANDROID_HOME||env.ANDROID_SDK_ROOT;
@@ -45,4 +47,5 @@ else{
 }
 const bytes=await readFile(artifact),checksum=createHash('sha256').update(bytes).digest('hex');
 await writeFile(artifact+'.sha256',checksum+'  '+name+'\n');
+if(!debug)await writeFile(join(output,'KataKecil-release-info.json'),JSON.stringify({schemaVersion:1,applicationId:'id.karisyono.katakecil',version:version.version,versionCode:version.versionCode,releaseTag:'v'+version.version,releaseStatus:version.version.includes('-')?'prerelease':'stable',signedApk:{file:name,bytes:bytes.length,sha256:checksum}},null,2)+'\n');
 console.log('APK: '+artifact+' ('+bytes.length+' bytes)');

@@ -55,7 +55,7 @@ test('appearance tabs retain the same sheet, header, tabs and panel container',(
  s.prefs.uiLanguage='id';s.features.appearance('layout');assert.equal(doc.querySelector('#dialog-title'),heading);assert.match(heading.textContent,/Tampilan baca/);assert.equal(tabs.querySelector('[data-value=text] span').textContent,'Teks');assert.equal(openings,1,'only entering the appearance menu opens a sheet');s.features.leave();s.w.close();
 });
 test('book tabs and theme preset changes update the existing bottom sheet',()=>{
- const s=scene();s.features.contents('contents');let dialog=s.w.document.querySelector('.dialog'),backdrop=s.w.document.querySelector('.overlay-backdrop');
- for(const tab of ['highlights','notes','bookmarks']){s.features.action({dataset:{action:'reader-tab',value:tab}});assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);}
+ const s=scene();s.features.contents('contents');let dialog=s.w.document.querySelector('.dialog'),backdrop=s.w.document.querySelector('.overlay-backdrop');const nav=dialog.querySelector('.reader-tabs'),body=dialog.querySelector('#drawer-content');
+ for(const tab of ['highlights','notes','bookmarks']){s.features.action({dataset:{action:'reader-tab',value:tab}});assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);assert.equal(dialog.querySelector('.reader-tabs'),nav);assert.equal(dialog.querySelector('#drawer-content'),body);}
  s.features.themeDialog();dialog=s.w.document.querySelector('.dialog');backdrop=s.w.document.querySelector('.overlay-backdrop');s.w.document.querySelector('[data-action=app-theme-preset][data-value=paper]').click();assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);s.features.leave();s.w.close();
 });

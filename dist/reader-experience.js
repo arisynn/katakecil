@@ -92,12 +92,13 @@ export function createReaderExperience(ctx){
  function showPanel(html,key){
   let dialog=$('.dialog');
   if(dialog?.dataset.readerPanel===key){
-   if(key==='appearance'&&$('#appearance-body')){
-    const fragment=document.createElement('template');fragment.innerHTML=html;const next=fragment.content.querySelector('#appearance-body'),body=$('#appearance-body'),previous=$('.appearance-tabs button.active')?.dataset.value;
-    body.innerHTML=next.innerHTML;body.setAttribute('aria-labelledby',next.getAttribute('aria-labelledby'));const heading=dialog.querySelector('#dialog-title'),nextHeading=fragment.content.querySelector('#dialog-title');if(heading&&nextHeading&&heading.textContent!==nextHeading.textContent)heading.innerHTML=nextHeading.innerHTML;const nav=dialog.querySelector('.appearance-tabs');nav.setAttribute('aria-label',fragment.content.querySelector('.appearance-tabs').getAttribute('aria-label'));
-    $$('.appearance-tabs button').forEach(button=>{const active=button.dataset.value===appearanceTab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;const label=button.querySelector('span'),nextLabel=fragment.content.querySelector('#'+button.id+' span');if(label.textContent!==nextLabel.textContent)label.textContent=nextLabel.textContent;});
+   const isAppearance=key==='appearance',bodySelector=isAppearance?'#appearance-body':'#drawer-content',tabsSelector=isAppearance?'.appearance-tabs':'.reader-tabs',selected=isAppearance?appearanceTab:activeTab;
+   if((isAppearance||key==='book')&&$(bodySelector)){
+    const fragment=document.createElement('template');fragment.innerHTML=html;const next=fragment.content.querySelector(bodySelector),body=$(bodySelector),previous=$(tabsSelector+' button.active')?.dataset.value;
+    body.innerHTML=next.innerHTML;body.setAttribute('aria-labelledby',next.getAttribute('aria-labelledby'));const heading=dialog.querySelector('#dialog-title'),nextHeading=fragment.content.querySelector('#dialog-title');if(heading&&nextHeading&&heading.textContent!==nextHeading.textContent)heading.innerHTML=nextHeading.innerHTML;const nav=dialog.querySelector(tabsSelector);nav.setAttribute('aria-label',fragment.content.querySelector(tabsSelector).getAttribute('aria-label'));
+    nav.querySelectorAll('button').forEach(button=>{const active=button.dataset.value===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;const label=button.querySelector('span'),nextLabel=fragment.content.querySelector('#'+button.id+' span');if(label.textContent!==nextLabel.textContent)label.textContent=nextLabel.textContent;});
     const oldHint=$('.appearance-hint'),newHint=fragment.content.querySelector('.appearance-hint');if(!newHint)oldHint?.remove();else if(!oldHint)dialog.append(newHint);else if(oldHint.textContent!==newHint.textContent)oldHint.innerHTML=newHint.innerHTML;
-    if(previous!==appearanceTab)dialog.scrollTop=0;
+    if(previous!==selected)dialog.scrollTop=0;
    }else dialog.innerHTML=html;
   }else{ctx.show(html);dialog=$('.dialog');}
   if(dialog)dialog.dataset.readerPanel=key;

@@ -2,6 +2,15 @@ import {Capacitor, registerPlugin, SystemBars as Bars, SystemBarsStyle, type Plu
 import {App} from '@capacitor/app';
 import type {SpeechDriver, SpeechBoundary} from '../reader/speech';
 export {installBackNavigation} from './navigation';
+interface AppUpdate { version: string; tag: string; size: number; notes: string; preview: boolean }
+interface UpdatePlugin {
+  check(): Promise<{currentVersion: string; versionCode: number; previewChannel: boolean; update: AppUpdate | null}>;
+  download(): Promise<{ready: boolean}>;
+  install(): Promise<{permissionRequired: boolean}>;
+  cancel(): Promise<void>;
+  addListener(name: 'downloadProgress', listener: (event: {percent: number; received: number; total: number}) => void): Promise<PluginListenerHandle>;
+}
+export const nativeUpdates = registerPlugin<UpdatePlugin>('KataKecilUpdates');
 
 interface Voice { name: string; lang: string; localService: boolean }
 interface DevicePlugin {

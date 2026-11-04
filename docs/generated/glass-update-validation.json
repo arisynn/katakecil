@@ -1,0 +1,86 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "796a26fe9990b6e8e3efa3a72c97049b2ba838f7",
+  "branch": "feat/advanced-reader",
+  "version": "1.0.1-preview.2",
+  "versionCode": 2,
+  "baselineTests": {
+    "passed": 63,
+    "failed": 0
+  },
+  "webTests": {
+    "passed": 69,
+    "failed": 0
+  },
+  "finalFocusedTests": {
+    "passed": 14,
+    "failed": 0
+  },
+  "androidUnitTests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "build": "passed",
+  "typecheck": "passed",
+  "syntaxPublicationModuleGraphChecks": "passed",
+  "androidBuild": [
+    "testReleaseUnitTest passed",
+    "assembleRelease passed",
+    "lintRelease passed with warnings"
+  ],
+  "browser": {
+    "engine": "Chromium headless/CDP",
+    "realApp": "Library/Settings, theme popup and real Reader with local public-domain Alice EPUB",
+    "tabLensGeometryChecks": 18,
+    "widths": [
+      320,
+      375,
+      390,
+      430,
+      768,
+      1280
+    ],
+    "sameSheetAndLensAcrossTabs": true,
+    "reducedMotion": true,
+    "uncaughtJavaScriptErrors": 0,
+    "sliderPreviewChecks": 120,
+    "sliderThemes": [
+      "light",
+      "dark"
+    ],
+    "nativeUpdateButtonHiddenOnWeb": true
+  },
+  "signedApk": {
+    "file": "KataKecil-1.0.1-preview.2-Karisyono.apk",
+    "bytes": 7293303,
+    "sha256": "a77630c51a6c2dc576bccef5468d17132b45053ba9f09b0e66ad38ced2ecf7ac",
+    "certificateSubject": "CN=Karisyono",
+    "certificateSHA256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "matchesPreview1Certificate": true,
+    "signatureSchemes": [
+      "v2",
+      "v3"
+    ],
+    "zipalign": "passed (4 bytes / 16KB page checks)",
+    "matchingBundledWebFiles": 59
+  },
+  "nativeUpdatePolicy": {
+    "repository": "arisynn/katakecil",
+    "checks": "anonymous HTTPS GitHub Releases list, including published prereleases for preview builds",
+    "installation": "Android user confirmation and per-app unknown-source permission when applicable",
+    "verification": [
+      "official repository/download host allowlist",
+      "SHA-256 and expected size",
+      "package ID",
+      "strictly higher versionCode",
+      "versionName equals release tag without v",
+      "same installed signing certificate"
+    ],
+    "storage": "private cache updates/ exposed only through scoped FileProvider grant",
+    "manuscriptSent": false
+  },
+  "newDependencies": [],
+  "databaseChanges": false,
+  "productionDeployment": false,
+  "physicalDeviceOrEmulatorQA": "Not performed; native install-permission flow, actual upgrade/data persistence and low-end device performance remain to be verified."
+}

@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.0.0-preview.1">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.0.1-preview.2">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -21,7 +21,7 @@
 
 ## Pasang di Android
 
-1. Unduh **[KataKecil 1.0.0 — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.0.0-preview.1/KataKecil-1.0.0-Karisyono.apk)** dari halaman rilis.
+1. Unduh **[KataKecil 1.0.1 Preview 2 — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.0.1-preview.2/KataKecil-1.0.1-preview.2-Karisyono.apk)** dari halaman rilis.
 2. Buka berkas APK. Jika diminta Android, izinkan pemasangan dari aplikasi tempat berkas dibuka.
 3. Jalankan KataKecil, pilih buku dari Library, lalu mulai membaca.
 
@@ -30,11 +30,11 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 7 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.0.0` · build `1` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.0.1-preview.2` · build `2` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Rilis ini berstatus Preview.** Build, pemeriksaan kode, dan 63 tes otomatis lulus pada build APK ini. Pengujian HP fisik/emulator, sentuhan, pemilih berkas, dan suara perangkat masih perlu dilakukan. Ini belum merupakan rilis Play Store.
+**Rilis ini berstatus Preview.** Build, pemeriksaan kode, dan 69 tes web dan 3 unit test Android lulus; 14 tes terarah akhir juga lulus. Pengujian HP fisik/emulator, sentuhan, pemilih berkas, dan suara perangkat masih perlu dilakukan. Ini belum merupakan rilis Play Store.
 
 ## Yang bisa dilakukan
 
@@ -60,6 +60,10 @@ Android juga memiliki integrasi layar penuh, area aman layar, orientasi, opsi la
 | Suara online | Dapat memakai jaringan layanan mesin suara. Suara offline bergantung pada paket suara yang terpasang. |
 
 Penyimpanan browser dan APK terpisah. Menghapus data browser, menghapus data aplikasi, atau uninstall dapat menghapus data lokal. Simpan backup sebelum berpindah perangkat atau mengganti instalasi.
+
+### Memperbarui APK
+
+Preview 1 perlu diperbarui secara manual satu kali memakai APK Preview 2 di atas. Pasang di atas aplikasi lama dengan sertifikat Karisyono yang sama, tanpa uninstall. Selanjutnya buka **Settings → App → App updates** untuk memeriksa GitHub Releases, mengunduh dan memverifikasi APK, lalu membuka pemasang Android. Konfirmasi instalasi dan izin dari Android tetap diperlukan. Preview builds memeriksa rilis Preview juga; pemeriksaan otomatis dilakukan paling sering sekali sehari setelah pemeriksaan berhasil. Isi buku tidak dikirim ke GitHub.
 
 ### Pindah dari web ke APK
 
@@ -138,7 +142,7 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android Preview](docs/releases/v1.0.0-preview.1.md)
+- [Catatan rilis Android Preview](docs/releases/v1.0.1-preview.2.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)

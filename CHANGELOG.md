@@ -2,6 +2,15 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## v1.0.1-preview.2 — 4 November 2026
+
+- Efek kaca konsisten di seluruh permukaan UI, mengikuti tema dan aksen global.
+- Lensa aktif untuk tab yang ada; sheet dan elemen tab bertahan saat berpindah.
+- Updater APK melalui GitHub Releases: pemeriksaan manual/harian, Preview channel, progres/cancel download, pemeriksaan SHA-256, package/version/signature dan installer Android.
+- Identitas Karisyono tetap sama, versionCode naik ke 2; versi aplikasi `1.0.1-preview.2`.
+- Konfigurasi versi terpusat dan unit test native pada build release.
+- 69 tes web, 14 tes terarah akhir, 3 tes native, serta pemeriksaan browser nyata; belum QA perangkat Android. [Catatan rilis](docs/releases/v1.0.1-preview.2.md).
+
 ## v1.0.0-preview.1 — 4 November 2026
 
 Rilis APK Android pertama, dengan versi aplikasi `1.0.0` dan versionCode `1`.
