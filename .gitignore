@@ -1,0 +1,17 @@
+node_modules/
+*.tar.gz
+*.tar
+.DS_Store
+
+__pycache__/
+*.pyc
+
+# Signing secrets and machine-local Android tools/output never belong in source.
+*.jks
+*.keystore
+*.p12
+signing.json
+keystore.properties
+*.apk
+*.aab
+artifacts/

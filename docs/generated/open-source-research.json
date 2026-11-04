@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-04",
+  "repositories": [
+    {
+      "repo": "recogito/text-annotator-js",
+      "url": "https://github.com/recogito/text-annotator-js",
+      "license": "BSD-3-Clause",
+      "pushed_at": "2026-10-12T05:38:46Z",
+      "archived": false,
+      "language": "TypeScript",
+      "description": "A JavaScript library for text annotation.",
+      "branch": "main"
+    },
+    {
+      "repo": "readium/speech",
+      "url": "https://github.com/readium/speech",
+      "license": "BSD-3-Clause",
+      "pushed_at": "2026-11-02T17:06:14Z",
+      "archived": false,
+      "language": "TypeScript",
+      "description": "\ud83d\udcac A TypeScript library for implementing read aloud on the Web",
+      "branch": "main"
+    },
+    {
+      "repo": "readium/web",
+      "url": "https://github.com/readium/web",
+      "license": "BSD-3-Clause",
+      "pushed_at": "2025-05-29T11:07:34Z",
+      "archived": false,
+      "language": "HTML",
+      "description": "\ud83c\udf10 Readium Web is a toolkit for building Web Readers that support ebooks, audiobooks and comics",
+      "branch": "main"
+    },
+    {
+      "repo": "readest/readest",
+      "url": "https://github.com/readest/readest",
+      "license": "AGPL-3.0",
+      "pushed_at": "2026-11-04T04:54:07Z",
+      "archived": false,
+      "language": "TypeScript",
+      "description": "Readest is a modern, feature-rich ebook reader designed for avid readers offering seamless cross-platform access, powerful tools, and an intuitive interface to elevate your reading experience.",
+      "branch": "main"
+    },
+    {
+      "repo": "leaonline/easy-speech",
+      "url": "https://github.com/leaonline/easy-speech",
+      "license": null,
+      "pushed_at": "2026-04-03T22:01:47Z",
+      "archived": false,
+      "language": "JavaScript",
+      "description": "\ud83d\udd0a Cross browser Speech Synthesis also known as Text to speech or TTS; no dependencies; uses Web Speech API",
+      "branch": "master"
+    },
+    {
+      "repo": "tilgovi/dom-anchor-text-quote",
+      "url": "https://github.com/tilgovi/dom-anchor-text-quote",
+      "license": "MIT",
+      "pushed_at": "2023-07-17T14:48:14Z",
+      "archived": false
+    }
+  ],
+  "licenseEvidence": {
+    "easy-speech@2.4.0": "MIT in installed package.json and LICENSE; GitHub metadata for the historical leaonline alias did not identify an SPDX license."
+  }
+}

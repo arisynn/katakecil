@@ -1,0 +1,121 @@
+Compact Reader follow-up — 2026-11-04
+Production deploy: none
+Database/publication writes: none
+Manual device QA: user-owned, not run
+
+BUILD
+
+> build
+> node scripts/build-reader.mjs
+
+Reader modules bundled; third-party licenses copied.
+
+TYPECHECK
+
+> typecheck
+> tsc -p tsconfig.json
+
+
+CHECK
+
+> check
+> node scripts/check-reader.mjs
+
+JavaScript/Edge syntax, entry assets and publication boundaries checked.
+Runtime module graph resolves with consistent cache versions.
+
+TESTS
+
+> test
+> npm run build && node --test tests/*.test.mjs
+
+
+> build
+> node scripts/build-reader.mjs
+
+Reader modules bundled; third-party licenses copied.
+✔ open-source quote anchors use context, survive changed offsets, and stay in their episode (2.532192ms)
+✔ one-time old EPUB anchor migration requires a unique exact contextual quotation (0.210947ms)
+✔ literal search handles regex punctuation, Unicode offsets, sentences, and bounded result lists (1.519411ms)
+✔ reading settings clamp invalid layout values and gate spreads at adequate screen widths (0.687182ms)
+✔ word counts and bounded speech segments use source-language text without rewriting it (8.922248ms)
+✔ secure source ignores source URLs, excludes empty publications and rejects malformed identities (1.001053ms)
+✔ published fetch fails closed on stale revisions, unavailable content, wrong MIME and oversized responses (26.389586ms)
+✔ translation sends only explicit selected text and rejects oversized selections before a request (1.289376ms)
+✔ dictionary uses one selected word, renders service errors and supports dependency injection (1.798381ms)
+✔ TTS plays, pauses, resumes at the last boundary and ignores stale callbacks after stop (10.012325ms)
+✔ TTS automatically advances within the available published chapter list and completes (1.095855ms)
+✔ wake lock releases on exit, rejects unsupported browsers and closes asynchronous request races (0.534082ms)
+✔ paragraph layout wrappers retain source offsets and separators without extra text (339.299753ms)
+✔ Indonesian dictionary strips resource-bearing markup and returns cited definitions (6.899039ms)
+✔ chapter content hashes keep repeated quotations at exact offsets after layout changes (3.730371ms)
+✔ concurrent speech initialization shares one device voice request (0.408513ms)
+✔ TTS speed changes apply during playback without losing the last spoken position (0.543135ms)
+✔ voices without native word boundaries highlight every actually started word and keep punctuation (1.49855ms)
+✔ native boundary support switches to fluent utterances after one real word without repeating it (0.89196ms)
+✔ global theme migration preserves custom typography and moves the old reader palette to the whole app (0.798869ms)
+✔ saved text anchors follow their source chapter after title and imprint pages disappear (1.322025ms)
+✔ ambiguous repeated highlights are retained for review rather than attached to the wrong passage (0.131428ms)
+✔ custom choice dialogs update the native data interface once, restore focus and never open a browser picker (158.898027ms)
+✔ custom color dialogs validate hex input, cite the selected color and keep disabled choices unavailable (94.646968ms)
+✔ UI language switches in place while EPUB headings, prose, and personal notes stay original (64.540892ms)
+✔ dynamic app labels retain book titles verbatim and whitespace stays stable (0.241873ms)
+✔ English defaults apply to new devices and migrate an old automatic Indonesian preference (53.07104ms)
+✔ an explicitly selected Indonesian language remains selected after reload (18.175622ms)
+✔ legacy gateway lists only allowlisted nonempty publications without server credentials (30.65469ms)
+✔ legacy EPUB links go through published authorization with an exact revision and fail closed (3.339636ms)
+✔ measured pagination preserves full text including short chapters and astral characters (1.59138ms)
+✔ pagination can be cancelled and reports impossible layouts without clipping text (1.117198ms)
+✔ a paragraph ending at 61% of a page does not leave the other 39% empty (0.329034ms)
+✔ measurer receives exact source offsets even when the same words repeat (0.267211ms)
+✔ slider preview hides the sheet, retains its input, applies CSS live and commits the original anchor on release (527.274597ms)
+✔ closing a slider preview cancels unsaved style and global theme changes affect the app and reader together (63.73278ms)
+✔ read-aloud closes its panel and paints each real word through the CSS Highlight API across page turns (55.163011ms)
+✔ a second slider drag stays visible when the previous pagination request finishes (906.43883ms)
+alice: 12 chapters, 116 pages; opening: Down the Rabbit-Hole
+pride: 61 chapters, 512 pages; opening: 
+frankenstein: 28 chapters, 345 pages; opening: Letter 1
+sherlock: 12 chapters, 428 pages; opening: I. A SCANDAL IN BOHEMIA
+treasure: 35 chapters, 301 pages; opening: TREASURE ISLAND
+time: 17 chapters, 152 pages; opening: I. Introduction
+✔ all bundled EPUBs contain real chapters and pagination preserves every character (1960.436866ms)
+✔ malformed and encrypted files fail without executing markup (3.447908ms)
+✔ local persistence and BroadcastChannel apply preferences, annotations, and progress (111.694201ms)
+✔ personal carousel, reader controls, highlights, copy blocking, and settings work together (5097.404045ms)
+✔ catalog normalization accepts production data and rejects duplicate IDs and unsafe URLs (1.385541ms)
+✔ chapter names are extracted once from nested spans and numbered paragraph headings (13.582535ms)
+✔ language setting persists and synchronizes while reader text and reading positions remain intact (177.156043ms)
+✔ advanced reader integrates display, scroll, spread, page jumps, search, annotations and selected-text tools (54646.413418ms)
+✔ notes recover after LocalStorage mirror failure and deleted notes never resurrect on hydration (87.478345ms)
+✔ a failure of both storage mechanisms produces a visible recovery warning (42.57422ms)
+✔ custom drag highlights text across marks without creating a native Selection (64.670425ms)
+✔ touch long-press selects a word; a swipe or second finger cancels pending selection (85.1847ms)
+✔ word boundaries and DOM text offsets preserve punctuation and UTF-16 anchor positions (6.684469ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69682.283283
+
+NPM AUDIT
+{
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "dependencies": {
+    "prod": 9,
+    "dev": 90,
+    "optional": 46,
+    "peer": 0,
+    "peerOptional": 0,
+    "total": 98
+  }
+}

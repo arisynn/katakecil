@@ -1,0 +1,3 @@
+# Preserve upstream Windows wrappers/notices while checking their CRLF correctly.
+*.bat whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+dist/vendor/licenses/*.txt whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

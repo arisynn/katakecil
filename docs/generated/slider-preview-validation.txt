@@ -1,0 +1,32 @@
+Slider preview surface validation — 2026-11-04 UTC
+
+Executed: Chromium headless/CDP against local fixture using real dist/reader-experience.js and app styles.
+Baseline screenshot inspected: opaque spread ring plus independent glass background reproduced.
+After screenshots inspected: 390px light/dark, one continuous surface.
+Dimensions: 320, 375, 390, 430, 768, 1280px.
+Themes: light, dark.
+Controls: fontSize, lineHeight, fontWeight, paragraphSpacing, letterSpacing, paragraphIndent, marginHorizontal, marginVertical, readerWidth, brightness.
+Assertions per combination: preview active; input x/y unchanged during press; input within viewport; no shared glass class; no spread shadow; pseudo-element surface visible and pointer-events:none; preview inactive immediately after release.
+{"checks":120,"baseline":false,"passed":true}
+
+Build, typecheck and syntax/publication/runtime graph checks passed.
+
+$ node --test tests/reader-controls.test.mjs tests/app-popups.test.mjs
+✔ custom choice dialogs update the native data interface once, restore focus and never open a browser picker (197.650825ms)
+✔ custom color dialogs validate hex input, cite the selected color and keep disabled choices unavailable (111.668358ms)
+✔ slider preview hides the sheet, retains its input, applies CSS live and commits the original anchor on release (103.343939ms)
+✔ closing a slider preview cancels unsaved style and global theme changes affect the app and reader together (68.505911ms)
+✔ read-aloud closes its panel and paints each real word through the CSS Highlight API across page turns (70.942726ms)
+✔ release ends preview immediately without waiting for pagination or a native change event (19.354789ms)
+✔ appearance tabs retain the same sheet, header, tabs and panel container (83.178516ms)
+✔ book tabs and theme preset changes update the existing bottom sheet (31.441458ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1565.307465
+
+No production deployment or database changes. Full production/physical-device QA remains user-owned.

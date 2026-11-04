@@ -1,0 +1,61 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {createReaderExperience} from '../dist/reader-experience.js';
+import {readerDefaults,globalPalette} from '../dist/advanced-reader.js';
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function scene(speechDriver){
+ const dom=new JSDOM('<html lang="en"><body><main class="reader-shell" data-mode="controls"><article class="reading-page"><div class="page-inner"><div class="page-text" data-chapter-index="0" data-start="0">Hello</div></div></article></main><div id="overlay-root"></div></body></html>',{url:'https://katakecil.test/',pretendToBeVisual:true}),w=dom.window;
+ Object.assign(globalThis,{window:w,document:w.document,innerWidth:390,innerHeight:760,requestAnimationFrame:w.requestAnimationFrame.bind(w)});
+ const prefs={...readerDefaults,uiLanguage:'en',fontFamily:'Lora',fontSize:19,lineHeight:1.6,spreadMode:'single',pageAnimation:'fade',themeMode:'light'};
+ const book={id:'story-one',language:'en',chapters:[{href:'section-one.xhtml',title:'A quiet moment',text:'Hello rain.'}]},pages=[{chapterIndex:0,start:0,end:5,text:'Hello'},{chapterIndex:0,start:5,end:11,text:' rain.'}];let index=0,features;const reflows=[],speechSaves=[];
+ const ctx={prefs:()=>prefs,book:()=>book,pages:()=>pages,index:()=>index,annotations:()=>[],progress:()=>null,saveAnnotation(){},savePreferences:change=>Object.assign(prefs,change),saveSpeech:value=>speechSaves.push(value),speechDriver,
+  apply(){const palette=globalPalette(prefs);w.document.body.dataset.theme=palette.dark?'dark':'light';for(const [key,value] of Object.entries(palette.variables))w.document.body.style.setProperty(key,value);features.apply();},
+  mode:mode=>w.document.querySelector('.reader-shell').dataset.mode=mode,heading:title=>'<h2 id="dialog-title">'+title+'</h2>',
+  show:html=>w.document.querySelector('#overlay-root').innerHTML='<div class="overlay-backdrop"><section class="dialog">'+html+'</section></div>',close(){features.closePanel();w.document.querySelector('#overlay-root').innerHTML='';},
+  reflow:async anchor=>reflows.push({...anchor}),paint(){},persist(){},toast(){},selection:()=>null,clearSelection(){},download(){},syncIndex:i=>index=i,
+  goPage:i=>{index=i;const root=w.document.querySelector('.page-text');root.textContent=pages[i].text;root.dataset.start=pages[i].start;features.afterRender();},
+ };
+ features=createReaderExperience(ctx);ctx.apply();
+ w.document.addEventListener('input',event=>features.input(event.target));w.document.addEventListener('change',event=>features.change(event.target));w.document.addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(button)features.action(button);});
+ return{dom,w,features,prefs,reflows,speechSaves,ctx,get index(){return index;}};
+}
+test('slider preview hides the sheet, retains its input, applies CSS live and commits the original anchor on release',async()=>{
+ const s=scene();s.features.setPosition({chapterIndex:0,start:3});s.features.appearance('text');const input=s.w.document.querySelector('[data-reader-pref=fontSize]');
+ input.dispatchEvent(new s.w.MouseEvent('pointerdown',{bubbles:true}));assert.equal(s.w.document.querySelector('.reader-peek-control input'),input);assert.equal(s.w.document.querySelector('.reader-shell').dataset.mode,'reading');assert.ok(s.w.document.querySelector('.overlay-backdrop').classList.contains('appearance-peeking'));assert.equal(input.closest('.dialog'),s.w.document.querySelector('.dialog'),'the input stays in its original dialog during touch drag');
+ input.value='26';input.dispatchEvent(new s.w.Event('input',{bubbles:true}));assert.equal(s.prefs.fontSize,19,'preview has not committed storage');assert.equal(s.w.document.documentElement.style.getPropertyValue('--reader-size'),'26px');
+ input.dispatchEvent(new s.w.Event('change',{bubbles:true}));input.dispatchEvent(new s.w.MouseEvent('pointerup',{bubbles:true}));
+ assert.equal(s.prefs.fontSize,26);assert.deepEqual(s.reflows.at(-1),{chapterIndex:0,start:3});assert.equal(s.w.document.querySelector('.reader-peek-control'),null);assert.equal(s.w.document.querySelector('[data-reader-pref=fontSize]'),input);assert.equal(s.w.document.querySelector('.reader-shell').dataset.mode,'controls');assert.equal(s.w.document.querySelector('.overlay-backdrop').classList.contains('appearance-peeking'),false);s.features.leave();s.w.close();
+});
+test('closing a slider preview cancels unsaved style and global theme changes affect the app and reader together',()=>{
+ const s=scene();s.features.appearance('text');const input=s.w.document.querySelector('[data-reader-pref=fontSize]');input.dispatchEvent(new s.w.MouseEvent('pointerdown',{bubbles:true}));input.value='30';input.dispatchEvent(new s.w.Event('input',{bubbles:true}));s.features.closePanel();assert.equal(s.prefs.fontSize,19);assert.equal(s.w.document.documentElement.style.getPropertyValue('--reader-size'),'19px');assert.equal(input.value,'19');assert.equal(s.w.document.querySelector('.reader-peek-control'),null);
+ s.features.themeDialog();s.w.document.querySelector('[data-action=app-theme-preset][data-value=paper]').click();assert.equal(s.prefs.themeMode,'paper');assert.equal(s.prefs.readerTheme,'follow');assert.equal(s.w.document.body.style.getPropertyValue('--bg'),'#f1f0e9');assert.equal(s.w.document.documentElement.style.getPropertyValue('--reader-paper'),'#f1f0e9');s.features.leave();s.w.close();
+});
+test('read-aloud closes its panel and paints each real word through the CSS Highlight API across page turns',async()=>{
+ const pending=[],spoken=[];const driver={init:async()=>true,voices:()=>[{voiceURI:'local-en',name:'Local English',lang:'en-US',localService:true}],speak:options=>{spoken.push(options.text);options.start();return new Promise(resolve=>pending.push(resolve));},pause(){},resume(){},cancel(){}};
+ const s=scene(driver),registry=new Map();s.w.CSS={highlights:registry};s.w.Highlight=class{constructor(...ranges){this.ranges=ranges;}};
+ s.features.action({dataset:{action:'reader-speech'}});await wait(20);assert.ok(s.w.document.querySelector('[data-action=tts-play]'));s.features.action({dataset:{action:'tts-play'}});await wait(10);
+ assert.equal(s.w.document.querySelector('.dialog'),null);assert.equal(s.w.document.querySelector('.reader-shell').dataset.mode,'reading');assert.equal(registry.get('katakecil-tts-word').ranges[0].toString(),'Hello');assert.equal(s.w.getSelection().rangeCount,0);
+ pending[0]();await wait(10);assert.equal(spoken[1],'rain.');assert.equal(s.index,1);assert.equal(registry.get('katakecil-tts-word').ranges[0].toString(),'rain');s.features.action({dataset:{action:'tts-pause'}});assert.equal(registry.get('katakecil-tts-word').ranges[0].toString(),'rain');s.features.action({dataset:{action:'tts-stop'}});assert.equal(registry.has('katakecil-tts-word'),false);assert.ok(s.speechSaves.some(p=>p.charOffset===6));s.features.leave();s.w.close();
+});
+
+test('release ends preview immediately without waiting for pagination or a native change event',async()=>{
+ const s=scene(),pending=[];s.ctx.reflow=()=>new Promise(resolve=>pending.push(resolve));s.features.appearance('text');const input=s.w.document.querySelector('[data-reader-pref=fontSize]');
+ const event=name=>input.dispatchEvent(name.startsWith('pointer')?new s.w.MouseEvent(name,{bubbles:true}):new s.w.Event(name,{bubbles:true}));
+ event('pointerdown');input.value='24';event('input');event('pointerup');
+ assert.equal(s.w.document.body.classList.contains('reader-previewing'),false,'pointerup restores the sheet synchronously');assert.equal(s.prefs.fontSize,24);assert.equal(pending.length,1);
+ event('change');assert.equal(pending.length,1,'the later native change must not launch a duplicate layout');
+ event('pointerdown');input.value='25';event('input');pending[0]();await Promise.resolve();await Promise.resolve();assert.ok(s.w.document.body.classList.contains('reader-previewing'),'old pagination cannot interrupt a new drag');
+ event('pointerup');assert.equal(s.prefs.fontSize,25);assert.equal(s.w.document.body.classList.contains('reader-previewing'),false);pending[1]();s.features.leave();s.w.close();
+});
+test('appearance tabs retain the same sheet, header, tabs and panel container',()=>{
+ const s=scene();let openings=0;const show=s.ctx.show;s.ctx.show=html=>{openings++;show(html);};s.features.appearance('text');
+ const doc=s.w.document,dialog=doc.querySelector('.dialog'),backdrop=doc.querySelector('.overlay-backdrop'),heading=doc.querySelector('#dialog-title'),tabs=doc.querySelector('.appearance-tabs'),body=doc.querySelector('#appearance-body');
+ for(const tab of ['layout','theme','text']){doc.querySelector('[data-action=appearance-tab][data-value='+tab+']').click();assert.equal(doc.querySelector('.dialog'),dialog);assert.equal(doc.querySelector('.overlay-backdrop'),backdrop);assert.equal(doc.querySelector('#dialog-title'),heading);assert.equal(doc.querySelector('.appearance-tabs'),tabs);assert.equal(doc.querySelector('#appearance-body'),body);assert.equal(tabs.querySelector('[aria-selected=true]').dataset.value,tab);assert.equal(doc.activeElement,tabs.querySelector('[data-value='+tab+']'));}
+ s.prefs.uiLanguage='id';s.features.appearance('layout');assert.equal(doc.querySelector('#dialog-title'),heading);assert.match(heading.textContent,/Tampilan baca/);assert.equal(tabs.querySelector('[data-value=text] span').textContent,'Teks');assert.equal(openings,1,'only entering the appearance menu opens a sheet');s.features.leave();s.w.close();
+});
+test('book tabs and theme preset changes update the existing bottom sheet',()=>{
+ const s=scene();s.features.contents('contents');let dialog=s.w.document.querySelector('.dialog'),backdrop=s.w.document.querySelector('.overlay-backdrop');
+ for(const tab of ['highlights','notes','bookmarks']){s.features.action({dataset:{action:'reader-tab',value:tab}});assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);}
+ s.features.themeDialog();dialog=s.w.document.querySelector('.dialog');backdrop=s.w.document.querySelector('.overlay-backdrop');s.w.document.querySelector('[data-action=app-theme-preset][data-value=paper]').click();assert.equal(s.w.document.querySelector('.dialog'),dialog);assert.equal(s.w.document.querySelector('.overlay-backdrop'),backdrop);s.features.leave();s.w.close();
+});

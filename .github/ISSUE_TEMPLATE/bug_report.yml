@@ -1,0 +1,59 @@
+name: Laporkan bug
+description: Laporkan masalah reader, APK, atau source web.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Terima kasih sudah mencoba KataKecil. Gunakan contoh domain publik; samarkan naskah pribadi, catatan, token, dan detail akun pada lampiran."
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - APK Android
+        - Browser web
+        - Build dari source
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versi aplikasi atau commit
+      placeholder: "Contoh: Android 1.0.0, tag v1.0.0-preview.1"
+    validations:
+      required: true
+  - type: textarea
+    id: device
+    attributes:
+      label: Perangkat dan lingkungan
+      description: Model HP, Android, versi WebView/browser; untuk build, versi OS, Node, JDK, dan SDK.
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Sumber buku
+      options:
+        - Buku server
+        - EPUB impor pribadi
+        - Tidak terkait buku
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah mengulang masalah
+      placeholder: "1. Buka...\n2. Tekan...\n3. Masalah muncul..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Hasil yang diharapkan
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Hasil yang terjadi
+      description: Sertakan pesan error atau screenshot yang sudah disamarkan bila membantu.
+    validations:
+      required: true

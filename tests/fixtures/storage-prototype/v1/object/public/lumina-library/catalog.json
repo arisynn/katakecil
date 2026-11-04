@@ -1,0 +1,66 @@
+{
+  "name": "LuminaGlass demo bucket",
+  "prototype": true,
+  "books": [
+    {
+      "id": "alice",
+      "title": "Alice’s Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "genre": "Fantasy",
+      "year": "1865",
+      "url": "/books/alice.epub",
+      "cover": "/covers/alice.svg",
+      "source": "demo"
+    },
+    {
+      "id": "pride",
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "genre": "Romance",
+      "year": "1813",
+      "url": "/books/pride.epub",
+      "cover": "/covers/pride.svg",
+      "source": "demo"
+    },
+    {
+      "id": "frankenstein",
+      "title": "Frankenstein",
+      "author": "Mary Shelley",
+      "genre": "Gothic fiction",
+      "year": "1818",
+      "url": "/books/frankenstein.epub",
+      "cover": "/covers/frankenstein.svg",
+      "source": "demo"
+    },
+    {
+      "id": "sherlock",
+      "title": "The Adventures of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "genre": "Mystery",
+      "year": "1892",
+      "url": "/books/sherlock.epub",
+      "cover": "/covers/sherlock.svg",
+      "source": "demo"
+    },
+    {
+      "id": "treasure",
+      "title": "Treasure Island",
+      "author": "Robert Louis Stevenson",
+      "genre": "Adventure",
+      "year": "1883",
+      "url": "/books/treasure.epub",
+      "cover": "/covers/treasure.svg",
+      "source": "demo"
+    },
+    {
+      "id": "time",
+      "title": "The Time Machine",
+      "author": "H. G. Wells",
+      "genre": "Science fiction",
+      "year": "1895",
+      "url": "/books/time.epub",
+      "cover": "/covers/time.svg",
+      "source": "demo"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-04",
+  "branch": "feat/android-app",
+  "baseCommit": "85eb4e6",
+  "version": "1.0.0",
+  "applicationId": "id.karisyono.katakecil",
+  "minimumAndroidAPI": 24,
+  "targetAndroidAPI": 36,
+  "minimumWebView": 113,
+  "tests": {
+    "command": "node --test tests/*.test.mjs",
+    "passed": 63,
+    "failed": 0
+  },
+  "typecheck": "passed",
+  "syntaxAndPublicationChecks": "passed",
+  "androidBuild": "assembleRelease passed",
+  "androidLint": "lintRelease passed (warnings retained in XML report)",
+  "signedApk": {
+    "file": "KataKecil-1.0.0-Karisyono.apk",
+    "bytes": 7280799,
+    "sha256": "4b01fcbf89c5c4d9499f54c4bcd08ac6b9643c60a7a0b5936c34df45aa1fb887",
+    "subject": "CN=Karisyono",
+    "certificateSHA256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "schemes": [
+      "v2",
+      "v3"
+    ],
+    "alignment": "zipalign 4 / 16 KB page checks passed",
+    "matchingWebAssets": 56,
+    "signingSecretsPresent": false
+  },
+  "logoMatchesOriginal": true,
+  "network": {
+    "catalog": {
+      "status": 200,
+      "books": 2,
+      "allowOrigin": "*"
+    },
+    "epub": {
+      "contentType": "application/epub+zip",
+      "revisionMatches": true,
+      "allowOrigin": "*",
+      "exposeHeaders": "X-KataKecil-Revision"
+    },
+    "origin": "https://localhost",
+    "method": "Host HTTPS requests; no Android runtime claimed"
+  },
+  "deviceQA": "Not performed: no emulator or physical Android device",
+  "browserQA": "JSDOM tests only; no rendered browser QA",
+  "webDeployment": "Not performed; source-only request",
+  "backendDeployment": "Not performed"
+}
