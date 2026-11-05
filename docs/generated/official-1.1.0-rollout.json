@@ -2,7 +2,7 @@
   "version": "1.1.0",
   "versionCode": 4,
   "status": "official",
-  "stage": "prepared",
+  "stage": "production",
   "user_authorized_production": true,
   "user_authorized_official": true,
   "qa_repeated": false,
@@ -14,6 +14,50 @@
     "bytes": 4904816,
     "sha256": "5d4fa4675a395575aad8168ff20f44122cef285bc4b641b5469e9ae46310cd8a"
   },
-  "production_deployment": "pending",
-  "book_data_changes": false
+  "production_deployment": "active",
+  "book_data_changes": false,
+  "reader_function_version": 6,
+  "legacy_gateway_function_version": 4,
+  "reader_protocol": 2,
+  "web_entry": "app.js?v=40",
+  "web_assets_match_signed_build": true,
+  "migrations": [
+    "reader_episode_delivery",
+    "tolerate_reader_network_changes"
+  ],
+  "direct_manuscript_select": {
+    "anon": false,
+    "authenticated": false
+  },
+  "fingerprints_before_after_equal": true,
+  "fingerprints": {
+    "books": "a3fac2337a868c99b29bb633dfac7f70",
+    "sections": "cb150b8968e77110dc86f6334de80308",
+    "schedule": "9ff061ec6f36592f3cf9cc3e80db967b"
+  },
+  "deployment_responses": {
+    "catalog": 200,
+    "protocol": 2,
+    "session": 200,
+    "manifest": 200,
+    "episode": 200,
+    "episodeCharacters": 11595
+  },
+  "release_url": "https://github.com/arisynn/katakecil/releases/tag/v1.1.0",
+  "android_tasks": [
+    "assembleRelease"
+  ],
+  "integrity_checks": [
+    "APK signature v2/v3",
+    "same signing certificate",
+    "zipalign",
+    "SHA-256"
+  ],
+  "existing_advisors": {
+    "audio_tables_without_policies": "INFO: access denied by RLS",
+    "auth_leaked_password_protection": {
+      "level": "WARN",
+      "url": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+    }
+  }
 }

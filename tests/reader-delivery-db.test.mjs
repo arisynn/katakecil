@@ -15,6 +15,7 @@ test('actual PostgreSQL migration closes raw manuscript reads and enforces share
  create policy sections_public on kk_sections for select to anon,authenticated using(is_enabled and release_at<=now() and exists(select 1 from kk_books where id=kk_sections.book_id and is_published));
  grant all on kk_books,kk_sections to anon,authenticated,service_role;`);
  await db.exec(migration);
+ await db.exec(await readFile(new URL('../supabase/migrations/20261105111351_tolerate_reader_network_changes.sql',import.meta.url),'utf8'));
  for(const role of ['anon','authenticated']){
   await db.exec('set role '+role);
   assert.deepEqual((await db.query('select title from kk_sections')).rows,[{title:'First'}]);
@@ -29,7 +30,7 @@ test('actual PostgreSQL migration closes raw manuscript reads and enforces share
  assert.equal((await gate('open')).allowed,true);
  assert.equal((await gate('request')).allowed,true);
  assert.equal((await gate('request',visitor,session,'another-book')).reason,'session');
- assert.equal((await gate('request','d'.repeat(64))).reason,'session');
+ assert.equal((await gate('request','d'.repeat(64))).allowed,true,'network changes retain the original session/network quota');
  assert.equal((await gate('request',visitor,'e'.repeat(64))).reason,'session');
  assert.equal((await gate('open',visitor,'f'.repeat(64),'draft')).allowed,false);
  for(let i=0;i<4;i++)assert.equal((await gate('deliver',visitor,session,'one',15000)).allowed,true);

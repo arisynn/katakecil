@@ -32,7 +32,7 @@
 | --- | --- |
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
-| Ukuran APK | Sekitar 7 MB |
+| Ukuran APK | Sekitar 4,9 MB |
 | Identitas aplikasi | `id.karisyono.katakecil` · versi `1.1.0` · build `4` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |

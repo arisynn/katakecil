@@ -1,6 +1,6 @@
 # Pengiriman episode dan batas perlindungan konten
 
-5 November 2026. Baseline `a3dfe77`. **Status: implementasi di branch pengembangan, belum dipasang pada Supabase atau web produksi.** Instruksi terbaru pengguna: pembaca tanpa login; kirim satu episode utuh ketika dibuka, bukan potongan 3.000 karakter.
+5 November 2026. Baseline `a3dfe77`. **Status: dipasang di produksi pada rilis official1.1.0 setelah persetujuan pengguna. QA lanjutan ditangani pengguna.** Instruksi terbaru pengguna: pembaca tanpa login; kirim satu episode utuh ketika dibuka, bukan potongan 3.000 karakter.
 
 ## Temuan audit produksi, dibaca tanpa mengubah naskah
 
@@ -79,7 +79,7 @@ Belum dilakukan: pemasangan migrasi/fungsi ini di produksi, verifikasi efektif s
 
 ## Deployment terkoordinasi dan rollback
 
-Migrasi yang disiapkan: `supabase/migrations/20261105101452_reader_episode_delivery.sql`. Tambah schema internal, gate dan revoke akses naskah; tidak mengubah isi buku. **Jangan push commit ini ke main dengan asumsi backend sudah siap.** Preview frontend yang menunjuk backend versi4 belum bisa memakai protokol baru.
+Migrasi yang disiapkan: `supabase/migrations/20261105101452_reader_episode_delivery.sql`. Tambah schema internal, gate dan revoke akses naskah; tidak mengubah isi buku. Pada rollout1.1.0, backend protokol2 dipasang sebelum frontend baru. Tahapan di bawah tetap menjadi panduan untuk pemasangan berikutnya.
 
 1. Minta persetujuan produksi sesuai instruksi pengguna. Simpan snapshot fungsi aktif, grant/policy/schema yang terkait dan flag bucket di lokasi privat; tidak perlu mengekspor naskah ke Git.
 2. Verifikasi bucket sumber/arsip tetap private, cover publik hanya berkas gambar, tidak ada view/RPC/publication baru yang membuka naskah, serta asal header IP pada ingress. Atur secret fungsi `KK_READER_PREVIEW_ORIGINS` berisi origin HTTPS Vercel Preview yang disetujui, dipisahkan koma, tanpa path/trailing slash; allowlist harus mencakup URL preview yang benar-benar dipakai. Origin lain tetap ditolak; tidak memakai wildcard `*.vercel.app`. Siapkan APK dari source ini dengan signer yang sama dan versi baru; APK lama tidak kompatibel dengan penutupan action EPUB.
@@ -101,3 +101,15 @@ Pembaca tetap menerima satu episode utuh. Mereka dapat menyimpan respons/DOM, me
 Pemeriksaan langsung setelah laporan pengguna: backend produksi masih reader versi4, catalog200 tanpa protocol2, sedangkan POST session mendapat405. Main masih entry app v37 dan deployment preview branch keamanan memakai frontend baru. Ini ketidakcocokan rollout, bukan bukti arsip sumber telah hilang. Source sekarang mengenali405 pada pembukaan sesi sebagai `reader_backend_not_ready` dan menampilkan penjelasan sesuai bahasa UI, tanpa fallback EPUB. Allowlist origin preview yang dikonfigurasi di atas juga disiapkan untuk backend baru; belum aktif di produksi.
 
 Pemeriksaan tambahan: build/check/typecheck, enam tes delivery (termasuk pesan backend lama dan origin HTTPS exact), serta Deno check reader. Suite penuh98 tes yang dicatat di atas adalah pemeriksaan commit sebelumnya; tidak dijalankan ulang hanya untuk koreksi pesan ini. Preview tetap memerlukan pemasangan backend/migrasi terkoordinasi sebelum pembacaan online dapat diuji.
+
+## Hasil rollout official1.1.0
+
+Pengguna mengizinkan produksi dan status official setelah pemeriksaan Android, lalu meminta agar QA tidak diulang. APK1.1.0 code4 dibangun dengan `--skip-qa`, memakai signer Karisyono yang sama. Tidak menjalankan ulang suite/browser/HP. Pemeriksaan respons pemasangan bukan klaim QA perangkat.
+
+Gateway lama kini versi4 dengan410; reader maintenance versi5 digantikan reader protokol2 versi6. Migrasi `reader_episode_delivery` mencabut SELECT naskah langsung dan menambah gate privat. Fingerprint buku, HTML/UUID/jadwal section, dan release schedule identik sebelum/sesudah pemasangan. Origin preview yang disetujui ada pada `preview-origins.json`; secret `KK_READER_PREVIEW_ORIGINS` dapat menambah origin HTTPS exact. Domain Vercel lain tidak otomatis diizinkan.
+
+Pemeriksaan respons menemukan perubahan alamat proxy memutus sesi anonim. Migrasi lanjutan `tolerate_reader_network_changes` menghapus penolakan berdasarkan kesamaan IP dan mempertahankan kuota agregat jaringan asal sesi. Sesi tetap terikat token acak, buku, revisi dan expiry; bukan identitas IP. Pergantian jaringan normal tidak memerlukan login dan tidak mereset kuota sesi. Definisi tes database ikut disesuaikan, tanpa menjalankannya ulang atas instruksi pengguna.
+
+Status dan bukti build/pemasangan: [laporan rollout](generated/official-1.1.0-rollout.json). Snapshot fungsi dan policy sebelum pemasangan disimpan privat pada `artifacts/rollout-backups/`, di luar source Git. Tidak mengekspor naskah asli.
+
+Respons setelah koreksi sesi: catalog200/protocol2, session200, manifest200 dengan48 episode dan satu episode utuh200 (11.595 karakter). Ini pemeriksaan operasional pemasangan, bukan pengulangan QA. Entry web v40 dan modul platform/app-info cocok dengan source yang dibundel dalam APK bertanda tangan. Pemilik menangani QA visual/penggunaan selanjutnya. Peringatan Auth existing: [perlindungan kata sandi bocor belum aktif](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection); konfigurasi Auth tidak diubah.
