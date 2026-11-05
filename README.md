@@ -26,7 +26,7 @@
 
 **Pemasangan APK 1.1.1 ditunda:** Play Protect dilaporkan memblokir versi ini. Penyebab belum teridentifikasi. Jangan menonaktifkan atau melewati Play Protect. [Status pemeriksaan](docs/play-protect-review.md).
 
-Build uji **[1.1.2-rc.1](https://github.com/arisynn/katakecil/releases/tag/v1.1.2-rc.1)** memuat perbaikan bingkai sampul di mode gelap. Build ini belum dinyatakan menyelesaikan peringatan Play Protect dan tidak ditawarkan sebagai pembaruan stable otomatis. Jika masih diblokir, hentikan pemasangan; [catatan build](docs/releases/v1.1.2-rc.1.md) menjelaskan batas pemeriksaannya.
+Build uji **[1.1.2-rc.1](https://github.com/arisynn/katakecil/releases/tag/v1.1.2-rc.1)** memuat perbaikan bingkai sampul di mode gelap. Pemilik telah mengonfirmasi Play Protect juga memblokir build ini; perbaikan visual tidak menyelesaikan blokir. Build tidak ditawarkan sebagai pembaruan stable otomatis. Hentikan pemasangan; [catatan build](docs/releases/v1.1.2-rc.1.md) menjelaskan batas pemeriksaannya.
 
 | Kebutuhan | Keterangan |
 | --- | --- |

@@ -1,0 +1,21 @@
+{
+  "scope": "limited static follow-up; not malware certification",
+  "affected_versions": [
+    "1.1.1",
+    "1.1.2-rc.1"
+  ],
+  "same_native_dex": true,
+  "native_dex_sha256": "56199224ba7cb004653d1bb89c68bde58f0297c94256b9313128d22a9a6af02a",
+  "dex_class_count": 5309,
+  "unexpected_executable_archive_entries": [],
+  "maven_advisory_review": {
+    "provider": "OSV",
+    "queried_coordinates": 50,
+    "listed_vulnerabilities": 0
+  },
+  "malware_scan_result_obtained": false,
+  "google_appeal_submitted": false,
+  "cause_identified": false,
+  "additional_apk_published": false,
+  "qa_tests_run": false
+}
