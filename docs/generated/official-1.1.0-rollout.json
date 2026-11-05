@@ -59,5 +59,9 @@
       "level": "WARN",
       "url": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
     }
+  },
+  "migration_versions": {
+    "reader_episode_delivery": "20261105110838",
+    "tolerate_reader_network_changes": "20261105111409"
   }
 }

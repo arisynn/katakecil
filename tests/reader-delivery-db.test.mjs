@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
-const migration=await readFile(new URL('../supabase/migrations/20261105101452_reader_episode_delivery.sql',import.meta.url),'utf8');
+const migration=await readFile(new URL('../supabase/migrations/20261105110838_reader_episode_delivery.sql',import.meta.url),'utf8');
 test('actual PostgreSQL migration closes raw manuscript reads and enforces shared quotas',async()=>{
  const db=new PGlite();try{
  await db.exec(`create role anon; create role authenticated; create role service_role bypassrls; grant usage on schema public to anon,authenticated,service_role;
@@ -15,7 +15,7 @@ test('actual PostgreSQL migration closes raw manuscript reads and enforces share
  create policy sections_public on kk_sections for select to anon,authenticated using(is_enabled and release_at<=now() and exists(select 1 from kk_books where id=kk_sections.book_id and is_published));
  grant all on kk_books,kk_sections to anon,authenticated,service_role;`);
  await db.exec(migration);
- await db.exec(await readFile(new URL('../supabase/migrations/20261105111351_tolerate_reader_network_changes.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/20261105111409_tolerate_reader_network_changes.sql',import.meta.url),'utf8'));
  for(const role of ['anon','authenticated']){
   await db.exec('set role '+role);
   assert.deepEqual((await db.query('select title from kk_sections')).rows,[{title:'First'}]);

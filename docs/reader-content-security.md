@@ -79,7 +79,7 @@ Belum dilakukan: pemasangan migrasi/fungsi ini di produksi, verifikasi efektif s
 
 ## Deployment terkoordinasi dan rollback
 
-Migrasi yang disiapkan: `supabase/migrations/20261105101452_reader_episode_delivery.sql`. Tambah schema internal, gate dan revoke akses naskah; tidak mengubah isi buku. Pada rollout1.1.0, backend protokol2 dipasang sebelum frontend baru. Tahapan di bawah tetap menjadi panduan untuk pemasangan berikutnya.
+Migrasi yang disiapkan: `supabase/migrations/20261105110838_reader_episode_delivery.sql`. Tambah schema internal, gate dan revoke akses naskah; tidak mengubah isi buku. Pada rollout1.1.0, backend protokol2 dipasang sebelum frontend baru. Tahapan di bawah tetap menjadi panduan untuk pemasangan berikutnya.
 
 1. Minta persetujuan produksi sesuai instruksi pengguna. Simpan snapshot fungsi aktif, grant/policy/schema yang terkait dan flag bucket di lokasi privat; tidak perlu mengekspor naskah ke Git.
 2. Verifikasi bucket sumber/arsip tetap private, cover publik hanya berkas gambar, tidak ada view/RPC/publication baru yang membuka naskah, serta asal header IP pada ingress. Atur secret fungsi `KK_READER_PREVIEW_ORIGINS` berisi origin HTTPS Vercel Preview yang disetujui, dipisahkan koma, tanpa path/trailing slash; allowlist harus mencakup URL preview yang benar-benar dipakai. Origin lain tetap ditolak; tidak memakai wildcard `*.vercel.app`. Siapkan APK dari source ini dengan signer yang sama dan versi baru; APK lama tidak kompatibel dengan penutupan action EPUB.
