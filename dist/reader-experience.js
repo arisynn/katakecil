@@ -1,6 +1,6 @@
 import {transitionContent} from './motion.js?v=1';
 import {layoutDialog} from './panel-layout.js?v=3';
-import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=12';
+import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=13';
 import {escapeHTML as esc,icon,$,$$} from './ui.js?v=12';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
@@ -23,7 +23,7 @@ export function createReaderExperience(ctx){
  let pendingSpeechPosition=null,lastSpeechSave=0;
  let draftInk='#28302b',draftPaper='#faf9f5',speechRange=null;
  const wake=ctx.wakeLock||new ReadingWakeLock();
- const speech=new ReadAloud({change:()=>updateSpeechUI(),paragraph:(pos,end)=>speechAt(pos,end),position:pos=>followSpeech(pos),error:message=>ctx.toast(message)},ctx.speechDriver);
+ const speech=new ReadAloud({change:()=>updateSpeechUI(),paragraph:(pos,end)=>speechAt(pos,end),position:pos=>followSpeech(pos),error:message=>ctx.toast(message),...(ctx.nextSpeech?{next:ctx.nextSpeech}:{})},ctx.speechDriver);
  const chapterName=index=>ctx.book()?.chapters[index]?.navigationTitle||ctx.book()?.chapters[index]?.title||tr('Book information','Informasi buku');
  const field=(label,key,type,attributes,value)=>`<label class="reader-setting appearance-field"><span>${label}</span><input data-reader-pref="${key}" type="${type}" ${attributes} value="${esc(value)}"><output data-output="${key}">${esc(value)}</output></label>`;
  const select=(label,key,options,value)=>`<label class="reader-setting"><span>${label}</span><select data-reader-pref="${key}" aria-label="${label}">${options.map(([id,title])=>`<option value="${id}" ${id===String(value)?'selected':''}>${title}</option>`).join('')}</select></label>`;
@@ -45,6 +45,11 @@ export function createReaderExperience(ctx){
  function resolveAnnotations(){
   const book=ctx.book();if(!book)return;
   for(const a of ctx.annotations().filter(a=>a.bookId===book.id)){
+   // Unloaded episodes are not missing/edited episodes. Resolve only when opened.
+   if(book.remote){
+    if(a.legacySourceAnchor&&a.anchor){const matches=book.chapters.map((c,i)=>({c,i})).filter(({c})=>a.legacyChapterTitle&&c.title===a.legacyChapterTitle);if(matches.length===1&&a.chapterIndex!==matches[0].i){ctx.saveAnnotation({...a,chapterIndex:matches[0].i});a.chapterIndex=matches[0].i;}if(!migrateLegacyAnchor(book.chapters,a.anchor))continue;}
+    const ch=a.anchor?book.chapters.find(c=>c.href===a.anchor.episodeId):book.chapters[a.chapterIndex];if(ch&&!ch.text)continue;
+   }
    if(a.anchor){const found=resolveAnchor(book.chapters,a.anchor)||(a.legacySourceAnchor?migrateLegacyAnchor(book.chapters,a.anchor):null);const changed=!found?!a.needsReview:a.legacySourceAnchor||a.needsReview||a.chapterIndex!==found.chapterIndex||(a.startOffset??a.charOffset)!==found.start;
     if(changed)ctx.saveAnnotation(found?{...a,legacySourceAnchor:false,anchor:makeAnchor(book.chapters[found.chapterIndex],found.start,found.end),chapterIndex:found.chapterIndex,charOffset:found.start,...(a.type==='highlight'?{startOffset:found.start,endOffset:found.end}:{}),needsReview:false}:{...a,needsReview:true});
    }else if(!a.needsReview){
@@ -89,6 +94,8 @@ export function createReaderExperience(ctx){
  }
  function jump(anchor,source='user'){
   if(source!=='speech')speech.stop();
+  const book=ctx.book(),ch=book?.chapters[anchor.chapterIndex];
+  if(book?.remote&&ch&&!ch.text){void ctx.loadPosition(anchor,source).catch(()=>{});return true;}
   const index=findPage(ctx.pages(),anchor.chapterIndex,anchor.start??anchor.charOffset??0);if(index<0)return false;
   scrollPosition={chapterIndex:anchor.chapterIndex,start:anchor.start??anchor.charOffset??0};ctx.goPage(index,source==='speech'?'speech':'anchor');return true;
  }
@@ -188,13 +195,13 @@ export function createReaderExperience(ctx){
   finishPeek();
  }
  function tools(){panel='tools';ctx.mode('controls');const book=ctx.book(),a=position(),stats=readingStats(book.chapters[a.chapterIndex].text,book.language);
-  ctx.show(ctx.heading(tr('Reading tools','Alat baca'))+`<div class="tool-grid"><button data-action="reader-search">${icon('search')}<span>${tr('Search episode','Cari dalam episode')}</span></button><button data-action="reader-speech">${icon('speaker')}<span>${tr('Read aloud','Baca nyaring')}</span></button><button data-action="previous-episode" ${a.chapterIndex===0?'disabled':''}>${icon('left')}<span>${tr('Previous episode','Episode sebelumnya')}</span></button><button data-action="next-episode" ${a.chapterIndex===book.chapters.length-1?'disabled':''}>${icon('chevron')}<span>${tr('Next episode','Episode berikutnya')}</span></button></div><form id="page-jump-form" class="page-jump"><label for="page-jump">${tr('Go to page','Ke halaman')}</label><input type="number" id="page-jump" min="1" max="${ctx.pages().length}" value="${ctx.index()+1}" required><button class="secondary" type="submit">${tr('Go','Buka')}</button></form><div class="reading-statistics"><span>${stats.words.toLocaleString()} ${tr('words','kata')}</span><span>≈ ${stats.minutes} ${tr('min / episode','menit / episode')}</span></div><p class="settings-caption">${tr('Copying and sharing book text are disabled. Select a passage to highlight, add a note, or open word tools.','Menyalin dan membagikan teks buku dinonaktifkan. Pilih teks untuk highlight, catatan, atau alat kata.')}</p>`);
+  ctx.show(ctx.heading(tr('Reading tools','Alat baca'))+`<div class="tool-grid"><button data-action="reader-search">${icon('search')}<span>${tr('Search episode','Cari dalam episode')}</span></button><button data-action="reader-speech">${icon('speaker')}<span>${tr('Read aloud','Baca nyaring')}</span></button><button data-action="previous-episode" ${a.chapterIndex===0?'disabled':''}>${icon('left')}<span>${tr('Previous episode','Episode sebelumnya')}</span></button><button data-action="next-episode" ${a.chapterIndex===book.chapters.length-1?'disabled':''}>${icon('chevron')}<span>${tr('Next episode','Episode berikutnya')}</span></button></div><form id="page-jump-form" class="page-jump"><label for="page-jump">${book.remote?tr('Page in this episode','Halaman episode ini'):tr('Go to page','Ke halaman')}</label><input type="number" id="page-jump" min="1" max="${ctx.pages().length}" value="${ctx.index()+1}" required><button class="secondary" type="submit">${tr('Go','Buka')}</button></form><div class="reading-statistics"><span>${stats.words.toLocaleString()} ${tr('words','kata')}</span><span>≈ ${stats.minutes} ${tr('min / episode','menit / episode')}</span></div><p class="settings-caption">${tr('Copying and sharing book text are disabled. Select a passage to highlight, add a note, or open word tools.','Menyalin dan membagikan teks buku dinonaktifkan. Pilih teks untuk highlight, catatan, atau alat kata.')}</p>`);
  }
  function searchDialog(){panel='search';ctx.mode('controls');if(!search.query)search.chapterIndex=position().chapterIndex;
   showPanel(ctx.heading(tr('Search','Pencarian'))+`<form id="reader-search-form"><label class="field-label" for="reader-search-query">${tr('Word or sentence','Kata atau kalimat')}</label><input id="reader-search-query" class="text-input" maxlength="200" value="${esc(search.query)}" type="search" autocomplete="off"><label class="field-label" for="search-episode">${tr('Episode','Episode')}</label><select id="search-episode">${ctx.book().chapters.map((c,i)=>`<option data-book-content translate="no" value="${i}" ${i===search.chapterIndex?'selected':''}>${esc(chapterName(i))}</option>`).join('')}</select><button type="submit" class="primary">${tr('Search','Cari')}</button></form><div id="search-results" aria-live="polite">${searchResults()}</div>`,'search');
  }
  function searchResults(){
-  if(!search.query)return `<p class="settings-caption">${tr('Search stays on this device.','Pencarian tetap di perangkat ini.')}</p>`;
+  if(!search.query)return `<p class="settings-caption">${ctx.book().remote?tr('Search covers the open episode only.','Pencarian mencakup episode yang sedang dibuka saja.'):tr('Search stays on this device.','Pencarian tetap di perangkat ini.')}</p>`;
   const text=ctx.book().chapters[search.chapterIndex].text;
   return `<div class="search-summary"><span>${search.total} ${tr('results','hasil')}${search.total>search.matches.length?' · '+tr('first 1,000 shown','1.000 pertama ditampilkan'):''}</span><button class="icon-button" data-action="search-previous" ${search.total?'':'disabled'} aria-label="${tr('Previous result','Hasil sebelumnya')}">${icon('left')}</button><button class="icon-button" data-action="search-next" ${search.total?'':'disabled'} aria-label="${tr('Next result','Hasil berikutnya')}">${icon('chevron')}</button><button class="icon-button" data-action="clear-search" aria-label="${tr('Clear search','Hapus pencarian')}">${icon('close')}</button></div>${search.matches.slice(0,100).map((m,i)=>`<button class="search-result" data-action="search-result" data-index="${i}"><span>${i+1}</span><span data-book-content translate="no">${esc(text.slice(Math.max(0,m.start-35),m.start))}<strong>${esc(text.slice(m.start,m.end))}</strong>${esc(text.slice(m.end,m.end+65))}</span></button>`).join('')}`;
  }
@@ -280,7 +287,7 @@ export function createReaderExperience(ctx){
   return false;
  }
  function submit(event){
-  if(event.target.id==='reader-search-form'){event.preventDefault();search.query=$('#reader-search-query').value.trim();search.chapterIndex=Number($('#search-episode').value);const result=findMatches(ctx.book().chapters[search.chapterIndex].text,search.query);search={...search,...result,index:-1};$('#search-results').innerHTML=searchResults();ctx.paint();return true;}
+  if(event.target.id==='reader-search-form'){event.preventDefault();search.query=$('#reader-search-query').value.trim();search.chapterIndex=Number($('#search-episode').value);const ch=ctx.book().chapters[search.chapterIndex];if(ctx.book().remote&&!ch.text){ctx.toast(tr('Open that episode before searching it.','Buka episode itu sebelum mencari di dalamnya.'));return true;}const result=findMatches(ch.text,search.query);search={...search,...result,index:-1};$('#search-results').innerHTML=searchResults();ctx.paint();return true;}
   if(event.target.id==='page-jump-form'){event.preventDefault();const index=Number($('#page-jump').value)-1;if(!Number.isInteger(index)||index<0||index>=ctx.pages().length)return true;ctx.close();const pg=ctx.pages()[index];jump({chapterIndex:pg.chapterIndex,start:pg.start});ctx.mode('reading');return true;}
   if(event.target.id==='bookmark-label-form'){event.preventDefault();const a=ctx.annotations().find(a=>a.id===event.target.dataset.id&&a.bookId===ctx.book()?.id&&a.type==='bookmark');if(a)ctx.saveAnnotation({...a,label:$('#bookmark-label').value.trim().slice(0,120)});ctx.close();ctx.toast(tr('Bookmark saved.','Bookmark tersimpan.'));return true;}
   return false;

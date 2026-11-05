@@ -1,4 +1,4 @@
-import {readerDefaults,migrateReaderPreferences} from './advanced-reader.js?v=12';
+import {readerDefaults,migrateReaderPreferences} from './advanced-reader.js?v=13';
 export const DEFAULTS = { ...readerDefaults, glassBlur:20, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.6, margin:52, spreadMode:'single', pageAnimation:'fade', accentColor:'#54756c', uiLanguage:'en' };
 const safeRead = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 export let storageHealthy = true;

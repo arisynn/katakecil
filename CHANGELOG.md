@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Pengembangan — Keamanan pengiriman episode (5 November 2026)
+
+- Siapkan pembacaan anonim per episode utuh, tanpa prefetch buku, dengan pemeriksaan publikasi setiap request dan kuota PostgreSQL untuk request, volume teks, episode berbeda dan concurrency.
+- Siapkan penutupan EPUB publik/gateway penandatangan lama dan pencabutan SELECT naskah langsung. Publisher tetap memiliki unduhan terotorisasi.
+- Pertahankan parser, arc, anchor, pagination, highlight, notes dan TTS; nomor halaman/pencarian berlaku per episode aktif. Resume membuka episode terakhir saja.
+- 98 tes Node, dua tes Deno, build/typecheck/check, audit npm, dan Chromium terarah selesai. **Belum dipasang di produksi atau dirilis dalam APK baru.** [Audit, batas teknis, deployment dan rollback](docs/reader-content-security.md).
+
 ## Web — Rapikan halaman Publisher (5 November 2026)
 
 - Ringkas form login, tambahkan kontrol tampilkan kata sandi, dan beri padding pada pesan verifikasi maupun error.

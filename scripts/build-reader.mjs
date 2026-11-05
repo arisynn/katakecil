@@ -27,6 +27,8 @@ for(const name of ['core','android','app'])await writeFile('dist/vendor/licenses
 await writeFile('dist/vendor/licenses/tslib.txt',await readFile('node_modules/tslib/CopyrightNotice.txt','utf8')+'\n'+await readFile('node_modules/tslib/LICENSE.txt','utf8'));
 await writeFile('dist/vendor/OPEN_SOURCE_ATTRIBUTIONS.md',(await readFile('OPEN_SOURCE_ATTRIBUTIONS.md','utf8')).replaceAll('(dist/vendor/','(./').replaceAll('(dist/fonts/','(../fonts/'));
 console.log('Reader modules bundled; third-party licenses copied.');
+// Deploy the exact browser parser on the server so normalized text/anchors stay compatible.
+await writeFile('supabase/functions/katakecil-reader/parser.js',await readFile('dist/epub.js'));
 
 // About app always follows the release configuration used by the APK build.
 const appInfo=JSON.parse(await readFile('app-version.json','utf8'));

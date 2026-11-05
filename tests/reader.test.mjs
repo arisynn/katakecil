@@ -36,7 +36,13 @@ globalThis.fetch=async(url)=>{
   let bytes;
   if(book.id.includes('garis'))bytes=await tinyEpub([{name:'section-'+sectionIds[0]+'.xhtml',html:'<h1>Bab 1 — Bahasa yang Tetap</h1><p>Ini cerita berbahasa Indonesia. Buku tetap dalam bahasa aslinya.</p>'}]);
   else{if(!publishedAlice){const parsed=await parseEpub(await readFile(new URL('./fixtures/epubs/alice.epub',import.meta.url)));publishedAlice=await tinyEpub(parsed.chapters.map((c,i)=>({name:'section-'+sectionIds[i]+'.xhtml',html:'<h1>'+c.chapterLabel+' — '+c.title+'</h1><p>'+c.text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('\n\n','</p><p>')+'</p>'})));}bytes=publishedAlice;}
-  return new Response(bytes,{headers:{'Content-Type':'application/epub+zip','X-KataKecil-Revision':book.revision}});
+  const action=address.searchParams.get('action');
+  if(action==='session')return Response.json({session:'rs_'+'a'.repeat(64),revision:book.revision});
+  const chapters=(await parseEpub(bytes)).chapters.map(c=>({...c,href:c.href.replace(/^OPS\//,'OEBPS/')}));
+  const metadata=await Promise.all(chapters.map(async c=>{const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(c.text)))).map(n=>n.toString(16).padStart(2,'0')).join('');const {text,...m}=c;return {...m,contentHash:hash,length:text.length};}));
+  if(action==='manifest')return Response.json({protocol:2,revision:book.revision,chapters:metadata});
+  if(action==='episode'){const index=Number(address.searchParams.get('chapter'));return Response.json({revision:book.revision,chapter:index,href:chapters[index].href,text:chapters[index].text,contentHash:metadata[index].contentHash});}
+  return new Response('retired',{status:410});
  }
  try{return new Response(await readFile(new URL('../dist'+address.pathname,import.meta.url)));}catch{return new Response('missing',{status:404});}
 };
@@ -76,7 +82,7 @@ test('malformed and encrypted files fail without executing markup',async()=>{
 });
 
 test('local persistence and BroadcastChannel apply preferences, annotations, and progress',async()=>{
- const store=await import('../dist/store.js?v=15');
+ const store=await import('../dist/store.js?v=16');
  await store.openDatabase();
  store.updatePreferences({glassBlur:34});
  assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).glassBlur,34);
@@ -94,7 +100,7 @@ test('local persistence and BroadcastChannel apply preferences, annotations, and
 });
 
 test('personal carousel, reader controls, highlights, copy blocking, and settings work together',async()=>{
- const store=await import('../dist/store.js?v=15');
+ const store=await import('../dist/store.js?v=16');
  const legacyChapters=[{href:'title.xhtml',title:'Title',text:'Edition info'},...parsedBooks.get('alice').chapters];
  await store.dbPut('books',{...fixtureBooks[0],parsedRevision:2,chapters:legacyChapters});
  store.saveProgress({bookId:fixtureBooks[0].id,chapterIndex:1,charOffset:0,pageIndex:0,totalPages:100,percentage:0});
@@ -127,7 +133,7 @@ test('personal carousel, reader controls, highlights, copy blocking, and setting
  $('#note-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.ok(store.annotations.some(a=>a.noteText==='Bagian yang ingin kusimpan.'));
  click('[data-action="bookmark"]');assert.ok(store.annotations.some(a=>a.bookId===fixtureBooks[0].id&&a.type==='bookmark'));
  click('[data-action="appearance"]');const anchor=store.progress[fixtureBooks[0].id].charOffset;input('[data-reader-pref="fontSize"]','24');$('[data-reader-pref="fontSize"]').dispatchEvent(new w.Event('change',{bubbles:true}));await until(()=>$('.reader-loading')?.classList.contains('hidden'),'font reflow');assert.ok($('mark'));assert.equal(store.progress[fixtureBooks[0].id].charOffset,anchor);click('[data-action="close"]');
- click('[data-action="contents"]');assert.equal(w.document.querySelectorAll('.toc-item').length,12);click('[data-action="chapter"][data-index="2"]');assert.equal(store.progress[fixtureBooks[0].id].chapterIndex,2);assert.equal($('.reader-shell').dataset.mode,'reading');
+ click('[data-action="contents"]');assert.equal(w.document.querySelectorAll('.toc-item').length,12);click('[data-action="chapter"][data-index="2"]');await until(()=>store.progress[fixtureBooks[0].id].chapterIndex===2,'selected episode loaded');assert.equal(store.progress[fixtureBooks[0].id].chapterIndex,2);assert.equal($('.reader-shell').dataset.mode,'reading');
  // A two-finger gesture must open controls without also advancing a page.
  const beforePinch=store.progress[fixtureBooks[0].id].charOffset;
  const touch=(name,touches,changed=touches)=>{const e=new w.Event(name,{bubbles:true,cancelable:true});Object.defineProperties(e,{touches:{value:touches},changedTouches:{value:changed}});$('.page-text').dispatchEvent(e);return e;};
@@ -176,7 +182,7 @@ test('chapter names are extracted once from nested spans and numbered paragraph 
 
 
 test('language setting persists and synchronizes while reader text and reading positions remain intact',async()=>{
- const store=await import('../dist/store.js?v=15');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
+ const store=await import('../dist/store.js?v=16');const device=store.deviceId;const previousNotes=JSON.stringify(store.annotations);
  click('[data-action="settings"]');assert.ok($('.settings-header [data-action="library"]'),'Settings has a back action');assert.equal($('.bottom-tabs'),null);assert.equal($('#app-language').value,'id');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));await wait();
  assert.equal(w.document.documentElement.lang,'en');assert.equal($('.settings-header h1').textContent,'Settings');assert.match($('.settings-shell').textContent,/App language/);assert.ok(!$('.settings-shell').textContent.includes('Books stay in their original language'));assert.equal($('.settings-shell .settings-caption'),null);assert.equal(JSON.parse(localStorage.getItem('lumina_device_settings')).uiLanguage,'en');assert.equal(store.deviceId,device);assert.equal(JSON.stringify(store.annotations),previousNotes);
  click('[data-action="library"]');await wait();assert.equal($('.bottom-tabs'),null);assert.equal($('.library-header-actions [data-action="settings"]').getAttribute('aria-label'),'Settings');click('[data-action="settings"]');await wait();assert.equal($('#app-language').value,'en');assert.equal($('.settings-header h1').textContent,'Settings');
@@ -187,7 +193,7 @@ test('language setting persists and synchronizes while reader text and reading p
 });
 
 test('advanced reader integrates display, scroll, spread, page jumps, search, annotations and selected-text tools',async()=>{
- const store=await import('../dist/store.js?v=15');const bookId=fixtureBooks[0].id;
+ const store=await import('../dist/store.js?v=16');const bookId=fixtureBooks[0].id;
  click('[data-action="library"]');click('[data-action="settings"]');$('#app-language').value='en';$('#app-language').dispatchEvent(new w.Event('change',{bubbles:true}));
  click('[data-action="library"]');click('[data-action="open"][data-id="'+bookId+'"]');await until(()=>$('.reader-loading')?.classList.contains('hidden'),'advanced reader opened');
  const otherProgress=JSON.stringify(store.progress[fixtureBooks[1].id]);
@@ -199,7 +205,7 @@ test('advanced reader integrates display, scroll, spread, page jumps, search, an
  for(const [key,value,css] of [['fontWeight',600,'--reader-weight'],['lineHeight',1.6,'--reader-line'],['paragraphSpacing',8,'--paragraph-space'],['letterSpacing',.4,'--letter-space'],['paragraphIndent',1,'--paragraph-indent'],['marginHorizontal',20,'--reader-inset-x'],['marginVertical',18,'--reader-inset-y'],['readerWidth',680,'--reader-width']]){await changePref(key,value);assert.ok(w.document.documentElement.style.getPropertyValue(css).startsWith(String(value)),key+' affects actual CSS');assert.equal(store.progress[bookId].charOffset,originalOffset);}
  await changePref('textAlign','justify');assert.equal(w.document.documentElement.style.getPropertyValue('--reader-align'),'justify');
  click('[data-action="appearance-tab"][data-value="theme"]');click('[data-action="app-theme-preset"][data-value="sepia"]');assert.equal(store.preferences.themeMode,'sepia');assert.equal(store.preferences.readerTheme,'follow');assert.equal(w.document.body.style.getPropertyValue('--paper'),'#eee2c8');
- click('[data-action="app-theme-preset"][data-value="custom"]');$('#reader-ink').value='#ffffff';$('#reader-ink').dispatchEvent(new w.Event('input',{bubbles:true}));$('#reader-paper').value='#ffffff';$('#reader-paper').dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal($('[data-action="apply-reader-theme"]').disabled,true,'unreadable custom contrast cannot be applied');assert.ok($('.global-theme-chip[data-value="custom"]').classList.contains('active'));
+ click('[data-action="app-theme-preset"][data-value="custom"]');$('#reader-ink').value='#ffffff';$('#reader-ink').dispatchEvent(new w.Event('input',{bubbles:true}));$('#reader-paper').value='#ffffff';$('#reader-paper').dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal($('[data-action="apply-reader-theme"]').disabled,true,'unreadable custom contrast cannot be applied');assert.ok($('.custom-theme-popup'));click('[data-action="custom-theme-back"]');
  await changePref('readingMode','scroll');assert.equal($('.reader-shell').dataset.readingMode,'scroll');assert.equal(store.progress[bookId].charOffset,originalOffset);
  click('[data-action="close"]');click('[data-action="reader-tools"]');$('#page-jump').value='4';$('#page-jump-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));const scrollOffset=store.progress[bookId].charOffset;assert.ok(scrollOffset>0);assert.notEqual(scrollOffset,originalOffset,'direct navigation moves the scroll anchor');
  click('[data-action="appearance"]');await changePref('fontSize',23);assert.equal(store.progress[bookId].charOffset,scrollOffset);await changePref('readingMode','pages');assert.equal(store.progress[bookId].charOffset,scrollOffset);await changePref('spreadMode','double');click('[data-action="close"]');assert.equal(w.document.querySelectorAll('.spread-leaf').length,2);
@@ -213,7 +219,9 @@ test('advanced reader integrates display, scroll, spread, page jumps, search, an
  click('[data-action="contents"]');click('[data-action="reader-tab"][data-value="highlights"]');$('#annotation-color').value='all';$('#annotation-color').dispatchEvent(new w.Event('change',{bubbles:true}));click('[data-action="edit-annotation"][data-id="'+highlight.id+'"]');$('#note-text').value='Keep the thought with this highlight.';$('#note-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.equal(store.annotations.find(a=>a.id===highlight.id).noteText,'Keep the thought with this highlight.');
  click('[data-action="contents"]');click('[data-action="reader-tab"][data-value="notes"]');click('[data-action="delete-note"][data-id="'+highlight.id+'"]');assert.equal(store.annotations.find(a=>a.id===highlight.id).noteText,'');assert.ok(store.annotations.find(a=>a.id===highlight.id),'removing a note preserves its highlight');
 
- click('[data-action="reader-tools"]');click('[data-action="reader-search"]');$('#reader-search-query').value='Alice';$('#search-episode').value='0';$('#reader-search-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));assert.ok($('#search-results').textContent.includes('results'));assert.ok($('.search-result'));click('[data-action="search-result"][data-index="0"]');assert.ok($('.search-match'));assert.ok($('.search-navigation'));assert.equal(store.progress[bookId].chapterIndex,0);click('[data-action="search-next"]');assert.ok($('.search-match.is-current'));click('[data-action="clear-search"]');assert.equal($('.search-match'),null);
+ click('[data-action="reader-tools"]');click('[data-action="reader-search"]');$('#reader-search-query').value='Alice';$('#search-episode').value='0';$('#reader-search-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));
+ if(store.progress[bookId].chapterIndex!==0){assert.equal($('.search-result'),null,'search cannot silently fetch another episode');click('[data-action="close"]');click('[data-action="contents"]');click('[data-action="reader-tab"][data-value="contents"]');click('[data-action="chapter"][data-index="0"]');await until(()=>store.progress[bookId].chapterIndex===0&&$('.reader-loading')?.classList.contains('hidden'),'open episode for local search');click('[data-action="reader-tools"]');click('[data-action="reader-search"]');$('#reader-search-query').value='Alice';$('#search-episode').value='0';$('#reader-search-form').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));}
+ assert.ok($('#search-results').textContent.includes('results'));assert.ok($('.search-result'));click('[data-action="search-result"][data-index="0"]');assert.ok($('.search-match'));assert.ok($('.search-navigation'));assert.equal(store.progress[bookId].chapterIndex,0);click('[data-action="search-next"]');assert.ok($('.search-match.is-current'));click('[data-action="clear-search"]');assert.equal($('.search-match'),null);
  // No lookup request happens until an explicit button action.
  const originalFetch=globalThis.fetch,lookupCalls=[];globalThis.fetch=async(url,options)=>{if(String(url).includes('dictionaryapi.dev')){lookupCalls.push(String(url));return Response.json([{meanings:[{partOfSpeech:'noun',definitions:[{definition:'<script>text only</script>'}]}]}]);}if(String(url).includes('mymemory.translated.net')){lookupCalls.push(String(url));return Response.json({responseStatus:200,responseData:{translatedText:'Only the selected word.'}});}return originalFetch(url,options);};
  $('.page-text').dispatchEvent(new w.KeyboardEvent('keydown',{key:'h',bubbles:true,cancelable:true}));click('[data-action="selection-tools"]');assert.equal(lookupCalls.length,0);$('#lookup-source').value='en';click('[data-action="lookup-definition"]');await until(()=>lookupCalls.length===1&&$('#lookup-result').getAttribute('aria-busy')==='false','definition loaded');assert.equal($('#lookup-result script'),null);assert.ok($('#lookup-result').textContent.includes('<script>text only</script>'));$('#lookup-source').value='id';$('#lookup-target').value='en';click('[data-action="lookup-translate"]');await until(()=>lookupCalls.length===2&&$('#lookup-result').getAttribute('aria-busy')==='false','translation loaded');assert.equal(new URL(lookupCalls[1]).searchParams.get('q'),$('.note-quote').textContent);click('[data-action="close"]');globalThis.fetch=originalFetch;
@@ -223,7 +231,7 @@ test('advanced reader integrates display, scroll, spread, page jumps, search, an
 });
 
 test('shared web UI previews and restores a backup, and browser Back closes its sheet before Settings',async()=>{
- const store=await import('../dist/store.js?v=15'),identity=store.deviceId;
+ const store=await import('../dist/store.js?v=16'),identity=store.deviceId;
  click('[data-action="settings"]');await wait(40);
  const note={id:'backup-ui-note',bookId:fixtureBooks[0].id,type:'bookmark',color:'sapphire',chapterIndex:0,charOffset:0,label:'From another device',createdAt:'2026-11-01T00:00:00.000Z',updatedAt:'2026-11-01T00:00:00.000Z'};
  const raw=JSON.stringify({format:'katakecil-backup',schemaVersion:2,preferences:{fontSize:20},progress:[],annotations:[note]});
@@ -236,7 +244,7 @@ test('shared web UI previews and restores a backup, and browser Back closes its 
 });
 
 test('notes recover after LocalStorage mirror failure and deleted notes never resurrect on hydration',async()=>{
- const store=await import('../dist/store.js?v=15'),oldSet=w.Storage.prototype.setItem;
+ const store=await import('../dist/store.js?v=16'),oldSet=w.Storage.prototype.setItem;
  w.Storage.prototype.setItem=function(key,value){if(key==='lumina_annotations')throw Error('QuotaExceededError');return oldSet.call(this,key,value);};
  const note={id:'quota-note',bookId:'test-book-only',type:'highlight',selectedText:'a small quote',chapterIndex:0,startOffset:0,endOffset:13,noteText:'Recover this note',color:'amber',createdAt:new Date().toISOString()};
  assert.equal(store.saveAnnotation(note),false);await wait(40);const recovered=await import('../dist/store.js?quota-recovery');await recovered.hydrate();assert.ok(recovered.annotations.some(a=>a.id===note.id),'a new module instance recovers the note from IndexedDB');await store.hydrate();

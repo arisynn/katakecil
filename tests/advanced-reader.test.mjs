@@ -58,10 +58,8 @@ test('secure source ignores source URLs, excludes empty publications and rejects
  assert.throws(()=>normalizePublishedCatalog({books:[{...metadata,id:'../draft'}]}));
 });
 
-test('published fetch fails closed on stale revisions, unavailable content, wrong MIME and oversized responses',async()=>{
- const book=normalizePublishedCatalog({books:[metadata]})[0];let options;
- const bytes=await fetchPublishedBook(book,async(url,init)=>{options=init;return new Response('epub',{headers:{'Content-Type':'application/epub+zip','X-KataKecil-Revision':book.version}});});assert.equal(bytes.byteLength,4);assert.equal(options.credentials,'omit');assert.equal(options.cache,'no-store');assert.equal(options.redirect,'error');
- for(const response of [new Response('draft',{status:404}),new Response('changed',{status:409}),new Response('bad',{headers:{'Content-Type':'application/epub+zip','X-KataKecil-Revision':'b'.repeat(64)}}),new Response('bad',{headers:{'Content-Type':'text/html','X-KataKecil-Revision':book.version}}),new Response('large',{headers:{'Content-Type':'application/epub+zip','X-KataKecil-Revision':book.version,'Content-Length':String(31*1024*1024)}})])await assert.rejects(()=>fetchPublishedBook(book,async()=>response));
+test('whole-book fetch is retired without an HTTP request or fallback',async()=>{
+ await assert.rejects(()=>fetchPublishedBook(),/retired/);
 });
 
 test('translation sends only explicit selected text and rejects oversized selections before a request',async()=>{

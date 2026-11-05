@@ -4,7 +4,7 @@ import {JSDOM} from 'jsdom';
 import {createAppUpdater} from '../dist/app-updates.js';
 
 function fixture(overrides={}){
- const w=new JSDOM('<body><span id="app-update-summary"></span><div id="overlay-root"></div></body>').window;globalThis.document=w.document;
+ const w=new JSDOM('<body><span id="app-update-summary"></span><div id="overlay-root"></div></body>',{pretendToBeVisual:true}).window;globalThis.document=w.document;
  let checks=0,downloads=0,installs=0,removed=0,progress;const response={currentVersion:'1.0.1-preview.2',versionCode:2,previewChannel:true,update:{version:'1.0.1-preview.3',tag:'v1.0.1-preview.3',size:8*1024*1024,notes:'<script>book()</script>',preview:true}};
  const api={check:async()=>{checks++;return response;},download:async()=>{downloads++;progress({percent:42});return{ready:true};},install:async()=>{installs++;return{permissionRequired:installs===1};},cancel:async()=>{},addListener:async(name,callback)=>{progress=callback;return{remove:async()=>{removed++;}};},...overrides};
  let saved=0,openings=0;const updater=createAppUpdater({enabled:true,api,language:()=>w.document.documentElement.lang||'en',heading:title=>'<h2>'+title+'</h2>',show:html=>{openings++;w.document.querySelector('#overlay-root').innerHTML='<section class="dialog">'+html+'</section>';},saveCheck:date=>saved=date,lastCheck:()=>saved});

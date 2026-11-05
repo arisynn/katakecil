@@ -12,6 +12,9 @@ export function chapterLabelOf(value=''){
 
 /* EPUB content is parsed as inert XML and rendered as text only. */
 export async function parseEpub(buffer, fallback = 'Untitled book', options = {}) {
+  // Server reading uses the same inert parser with explicit dependencies, without shared globals.
+  const JSZip = options.JSZip || globalThis.JSZip;
+  const DOMParser = options.DOMParser || globalThis.DOMParser;
   if (buffer.byteLength > 30 * 1024 * 1024) throw new Error('This EPUB is larger than 30 MB. Please choose a smaller file.');
   const zip = await JSZip.loadAsync(buffer);
   const entries = Object.values(zip.files);

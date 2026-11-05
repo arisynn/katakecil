@@ -1,4 +1,4 @@
-import {parseEpub,chapterLabelOf} from './epub.js?v=8';
+import {parseEpub,chapterLabelOf} from './epub.js?v=9';
 import {marked} from './vendor/marked.js?v=1';
 import {escapeHTML as esc} from './ui.js?v=12';
 

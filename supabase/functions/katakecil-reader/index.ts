@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { makeEpub } from './epub.ts';
-import { privateEditionPath, EDITION_VERSION } from './completed.ts';
-import { readCover } from './cover.ts';
+import { EDITION_VERSION } from './completed.ts';
+import { parseEdition } from './edition.ts';
+import { createDelivery, sha256 as digest, type Book, type Chapter } from './delivery.ts';
 
 const named = (name: string) => {
   try {
@@ -11,31 +11,17 @@ const named = (name: string) => {
   }
 };
 const url = Deno.env.get('SUPABASE_URL')!;
-const publicKey = named('SUPABASE_PUBLISHABLE_KEYS') || Deno.env.get('SUPABASE_ANON_KEY')!;
+const publicKey=named('SUPABASE_PUBLISHABLE_KEYS')||Deno.env.get('SUPABASE_ANON_KEY')!;
 const secret = named('SUPABASE_SECRET_KEYS') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const options = { auth: { persistSession: false, autoRefreshToken: false } };
-// User-supplied Authorization is intentionally not forwarded: all readers get published data only.
-const reader = createClient(url, publicKey, options);
+// User Authorization is never used for publisher privileges here. All access is published-only.
 const admin = createClient(url, secret, options);
-const headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'apikey, authorization, content-type, x-client-info',
-  'Access-Control-Expose-Headers': 'X-KataKecil-Revision',
-  'Cross-Origin-Resource-Policy': 'cross-origin',
-  'Cache-Control': 'no-store',
-  'X-Content-Type-Options': 'nosniff',
-};
-const json = (body: unknown, status = 200) => Response.json(body, { status, headers });
-const digest = async (value: string) =>
-  Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))))
-    .map((x) => x.toString(16).padStart(2, '0'))
-    .join('');
-
+// Public metadata uses RLS and database now(), even though HTML reads use the server role.
+const reader = createClient(url,publicKey,options);
 async function catalog(bookId?:string) {
   const query = reader
     .from('kk_books')
-    .select('id,title,author,synopsis,cover_url,language,status,updated_at')
+    .select('id,title,author,synopsis,cover_url,language,status,updated_at').eq('is_published',true)
     .order('title');
   const { data: books, error } = await (bookId?query.eq('id',bookId):query);
   if (error) throw error;
@@ -45,13 +31,13 @@ async function catalog(bookId?:string) {
       reader
         .from('kk_sections')
         .select('id,position,updated_at')
-        .eq('book_id', book.id)
+        .eq('book_id', book.id).eq('is_enabled',true).lte('release_at',new Date().toISOString())
         .order('position')
         .limit(600),
       reader
         .from('kk_release_schedule')
         .select('release_at')
-        .eq('book_id', book.id)
+        .eq('book_id', book.id).eq('is_enabled',true)
         .gt('release_at', new Date().toISOString())
         .order('release_at')
         .limit(1),
@@ -68,67 +54,22 @@ async function catalog(bookId?:string) {
   return results;
 }
 
-Deno.serve(async (request) => {
-  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
-  if (request.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
-  try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const visitor = await digest(
-      secret + ':' + ip + ':' + (request.headers.get('user-agent') || ''),
-    );
-    const budget = await admin.rpc('kk_consume_read_budget', { visitor_key: visitor });
-    if (budget.error) return json({ error: 'Reader temporarily unavailable' }, 503);
-    if (!budget.data) return json({ error: 'Please try again shortly' }, 429);
-    const target = new URL(request.url),
-      action = target.searchParams.get('action') || 'catalog';
-    if (action === 'catalog')
-      return json({ books: await catalog(), server_time: new Date().toISOString() });
-    if (action !== 'epub') return json({ error: 'Unknown action' }, 400);
-    const id = target.searchParams.get('book');
-    if (!id || !/^[a-z0-9][a-z0-9_-]{0,119}$/.test(id)) return json({ error: 'Invalid book' }, 400);
-    const book = (await catalog(id)).find((b) => b.id === id);
-    if (!book || !book.section_ids.length) return json({ error: 'Book not available' }, 404);
-    const requestedRevision = target.searchParams.get('revision');
-    if (requestedRevision && requestedRevision !== book.revision)
-      return json({ error: 'Book updated; refresh the catalog' }, 409);
-    const privatePath=privateEditionPath(book);
-    let bytes:Uint8Array|null=null;
-    if(privatePath){
-      const {data}=await admin.storage.from('kk-sources').download(privatePath);
-      if(data&&data.size<=18000000)bytes=new Uint8Array(await data.arrayBuffer());
-    }
-    if(!bytes){
-      const { data: sections, error } = await reader
-        .from('kk_sections')
-        .select('id,title,content_html')
-        .eq('book_id', id)
-        .order('position')
-        .limit(600);
-      if (error) throw error;
-      if (!sections || JSON.stringify(sections.map((s) => s.id)) !== JSON.stringify(book.section_ids))
-        return json({ error: 'Book updated; refresh the catalog' }, 409);
-      const cover=await readCover(book.cover_url,url).catch(()=>null);
-      bytes = makeEpub(book, sections,cover);
-      if(privatePath){
-        // Concurrent requests may race on an immutable revision key; no existing source is overwritten.
-        await admin.storage.from('kk-sources').upload(privatePath,bytes,{contentType:'application/epub+zip',cacheControl:'0',upsert:false});
-      }
-    }
-    // Check again after assembly so a withdrawal/version change cannot leak a stale release.
-    const current = (await catalog(id)).find((b) => b.id === id);
-    if (!current || current.revision !== book.revision)
-      return json({ error: 'Book updated; refresh the catalog' }, 409);
-    return new Response(new Uint8Array(bytes).buffer, {
-      headers: {
-        ...headers,
-        'Content-Type': 'application/epub+zip',
-        'Content-Disposition': `inline; filename="${id}.epub"`,
-        'X-KataKecil-Revision': book.revision,
-      },
-    });
-  } catch (error) {
-    console.error('Kata Kecil reader:', error instanceof Error ? error.name : 'request failed');
-    return json({ error: 'Reading service temporarily unavailable' }, 503);
-  }
+// A small server-only LRU avoids reparsing an edition on every page turn. It never bypasses
+// the fresh publication checks before/after delivery and is never exposed as an archive.
+const editions=new Map<string,Chapter[]>();
+async function edition(book:Book):Promise<Chapter[]>{
+ const cached=editions.get(book.revision);if(cached){editions.delete(book.revision);editions.set(book.revision,cached);return cached;}
+ const {data:sections,error}=await admin.from('kk_sections').select('id,title,content_html').eq('book_id',book.id).in('id',book.section_ids).eq('is_enabled',true).lte('release_at',new Date().toISOString()).order('position').limit(600);
+ if(error||!sections||JSON.stringify(sections.map(s=>s.id))!==JSON.stringify(book.section_ids))throw Error('Publication changed');
+ if(sections.reduce((n,s)=>n+s.content_html.length,0)>16000000)throw Error('Edition too large');
+ const chapters=await parseEdition(book,sections);
+ editions.set(book.revision,chapters);while(editions.size>2)editions.delete(editions.keys().next().value!);
+ return chapters;
+}
+const handle=createDelivery({catalog,edition,
+ // The ingress must overwrite X-Forwarded-For. Treat this as a best-effort network signal,
+ // not an authenticated identity. Global and session quotas still apply when it changes.
+ visitor:request=>digest(secret+':'+new Date().toISOString().slice(0,10)+':'+(request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim()||'unknown')),
+ budget:async input=>{const {data,error}=await admin.rpc('kk_reader_gate',{p_kind:input.kind,p_visitor:input.visitor,p_session:input.session,p_book:input.book,p_revision:input.revision,p_cost:input.cost,p_episode:input.episode,p_lease:input.lease});if(error||!data)throw Error('Budget unavailable');return data;}
 });
-
+Deno.serve(handle);

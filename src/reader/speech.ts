@@ -27,6 +27,7 @@ export class ReadAloud {
     paragraph: (position: SpeechPosition,end: number) => void;
     position?: (position: SpeechPosition) => void;
     error: (message: string) => void;
+    next?: (position: SpeechPosition) => Promise<SpeechPosition | null>;
   }, private driver: SpeechDriver = EasySpeech as unknown as SpeechDriver) {}
   async initialize() {
     if (this.ready) { this.voices=this.driver.voices();return; }
@@ -73,9 +74,14 @@ export class ReadAloud {
   private async pump(token:number) {
     if (token!==this.generation||this.state!=='playing') return;
     if (this.cursor>=this.queue.length) {
+      if(this.hooks.next){
+        try{const next=await this.hooks.next({...this.position});if(token!==this.generation||this.state!=='playing')return;if(!next){this.state='idle';this.hooks.change();return;}this.position=next;this.makeQueue();if(!this.queue.length){this.state='idle';this.hooks.change();return;}}
+        catch(error){if(token!==this.generation)return;this.state='error';this.hooks.change();this.hooks.error(error instanceof Error?error.message:'Reading unavailable');return;}
+      } else {
       if (this.position.chapterIndex+1>=this.chapters.length) {this.state='idle';this.hooks.change();return;}
       this.position={chapterIndex:this.position.chapterIndex+1,charOffset:0};this.makeQueue();
       if (!this.queue.length) {void this.pump(token);return;}
+      }
     }
     const chunk=this.queue[this.cursor];
     this.position.charOffset=chunk.start;
@@ -100,5 +106,5 @@ export class ReadAloud {
   setRate(rate:number) {this.rate=Math.min(2,Math.max(.5,Number.isFinite(rate)?rate:1));if(this.state==='playing'){this.pause();this.resume();}}
   pause() {if(this.state!=='playing')return;this.generation++;this.state='paused';this.driver.pause();this.driver.cancel();this.hooks.change();}
   resume() {if(this.state!=='paused')return;this.state='playing';this.makeQueue();this.driver.resume();this.hooks.change();void this.pump(this.generation);}
-  stop() {this.generation++;if(this.ready)this.driver.cancel();this.state='idle';this.hooks.change();}
+  stop() {this.generation++;if(this.ready)this.driver.cancel();this.queue=[];this.chapters=[];this.cursor=0;this.state='idle';this.hooks.change();}
 }
