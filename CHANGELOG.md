@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Logo loading bergelombang dari kanan ke kiri (5 November 2026)
+
+- Terapkan pilihan logo ke loading membuka buku dan menata halaman, tanpa spinner atau teks status yang terlihat. Label aksesibilitas tetap tersedia.
+- Gunakan artwork logo asli, dengan fade bertahap dari kanan ke kiri dan gelombang vertikal tipis. Tidak menambah waktu tunggu buatan.
+- Sederhanakan Settings → Advanced → Loading preview agar menampilkan animasi yang sudah dipilih; hapus tiga percobaan lainnya.
+- Animasi berhenti ketika loading tersembunyi dan menjadi statis pada reduced motion. About/header tidak berubah.
+- Pemeriksaan: build, check, typecheck dan diff check; Chromium memverifikasi arah fade (kanan memudar lebih dahulu, lalu kiri), gerak vertikal, reduced motion, loading reader tanpa teks/spinner dan animasi berhenti setelah selesai.
+
 ## Web — Percobaan animasi loading (5 November 2026)
 
 - Tambahkan Settings → Advanced → Loading previews untuk membandingkan empat animasi bernomor: kutip bergantian, kutip melayang, logo fade, dan napas lembut.

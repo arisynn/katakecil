@@ -1,0 +1,6 @@
+/* A soft fade travels right to left. The original logo is never retyped. */
+.loading-wordmark{position:relative;display:block;width:min(210px,64vw);aspect-ratio:3/1;flex-shrink:0}
+.loading-wordmark-piece{position:absolute;inset:0;background:var(--text);mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;-webkit-mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;clip-path:inset(0 var(--cut-right) 0 var(--cut-left));animation:loadingLogoWave 3.2s ease-in-out infinite;animation-delay:calc(var(--wave-order)*.13s - 3.2s)}
+@keyframes loadingLogoWave{0%,48%,100%{opacity:1;transform:translateY(0)}18%{opacity:.16;transform:translateY(-1.2px)}33%{opacity:.72;transform:translateY(.6px)}}
+.reader-loading.hidden .loading-wordmark-piece{animation:none}
+@media(prefers-reduced-motion:reduce){.loading-wordmark-piece{animation:none;opacity:1;transform:none}}
