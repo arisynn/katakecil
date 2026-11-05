@@ -25,6 +25,7 @@ export class PublishedReader {
     if(Date.now()<this.blockedUntil)throw Error('Please wait before loading more text.');
     const url=new URL(this.book.url);url.searchParams.set('action',action);for(const [key,value] of Object.entries(params))url.searchParams.set(key,value);
     const response=await this.fetcher(url.href,{method:action==='session'?'POST':'GET',headers:this.session?{'x-reader-session':this.session}:{},credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(30000)});
+    if(response.status===405&&action==='session')throw Object.assign(new Error('The episode backend has not been activated for this preview.'),{code:'reader_backend_not_ready'});
     if(response.status===401&&action!=='session'&&retry){await this.connect();return this.request(action,params,false);}
     if(response.status===429){const delay=Math.min(86400,Math.max(1,Number(response.headers.get('Retry-After'))||10));this.blockedUntil=Date.now()+delay*1000;throw Error(`Please wait ${delay}s before loading more text.`);}
     if(!response.ok)throw Error(response.status===409?'Book changed. Refresh the library and open it again.':response.status===410?'Update the app to continue reading.':'Published content is unavailable. Please retry online.');

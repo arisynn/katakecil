@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Pengembangan — Jelaskan ketidakcocokan backend Preview (5 November 2026)
+
+- Kenali respons405 backend lama saat membuka sesi dan jelaskan bahwa backend episode untuk preview belum diaktifkan, tanpa fallback EPUB.
+- Siapkan allowlist origin HTTPS preview melalui konfigurasi server, tanpa wildcard Vercel. Backend/migrasi produksi tetap menunggu persetujuan.
+- Build/check/typecheck, enam tes delivery terarah, dan Deno check dijalankan; tidak mengulang seluruh QA.
+
 ## Pengembangan — Keamanan pengiriman episode (5 November 2026)
 
 - Siapkan pembacaan anonim per episode utuh, tanpa prefetch buku, dengan pemeriksaan publikasi setiap request dan kuota PostgreSQL untuk request, volume teks, episode berbeda dan concurrency.

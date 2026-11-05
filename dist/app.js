@@ -14,11 +14,11 @@ import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=12';
-import * as Store from './store.js?v=16';
+import * as Store from './store.js?v=17';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
-import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=13';
-import {createReaderExperience} from './reader-experience.js?v=24';
+import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=14';
+import {createReaderExperience} from './reader-experience.js?v=25';
 import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=3';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
@@ -227,7 +227,7 @@ async function openBook(id,anchor=null){
  scrubber.finish();features.leave();currentBook?.remote?.clear();const request=++readingRequest;closeOverlay(true);removeSelection();layoutRequest++;currentBook=null;pages=[];pageIndex=0;reflowing=false;
  clearTimeout(toastTimer);$('#toast').classList.remove('visible');mountOpeningPage();
  try{const book=await ensureBook(id,anchor);if(request!==readingRequest){book.remote?.clear();return;}currentBook=book;const saved=Store.progress[id];features.enter();features.resolveAnnotations();mountReader();features.apply();await reflow(anchor||features.savedPosition(saved));if(request!==readingRequest)return;if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia. Progres mungkin tidak tersimpan.');}
- catch(error){if(request===readingRequest){reflowing=false;if(currentBook){setReaderMode('controls');$('.reader-loading')?.classList.add('hidden');}else{rememberReader(null);renderLibrary();}toast(error.message||'Buku belum bisa dibuka.');}}
+ catch(error){if(request===readingRequest){reflowing=false;if(currentBook){setReaderMode('controls');$('.reader-loading')?.classList.add('hidden');}else{rememberReader(null);renderLibrary();}toast(error.code==='reader_backend_not_ready'?(p().uiLanguage==='id'?'Backend episode untuk preview belum diaktifkan. Buku online belum bisa dibuka di versi ini.':'The episode backend for this preview is not active yet. Online books cannot be opened in this version.'):error.message||'Buku belum bisa dibuka.');}}
 }
 let episodeRequest=0;
 async function loadReadingPosition(anchor,source='user'){

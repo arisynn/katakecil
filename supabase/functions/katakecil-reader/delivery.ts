@@ -10,12 +10,16 @@ export interface DeliveryDependencies {
   visitor: (request:Request)=>Promise<string>;
 }
 const origins=new Set(['https://katakecil.vercel.app','https://localhost','capacitor://localhost']);
-export function createDelivery(deps:DeliveryDependencies){return async(request:Request)=>{
+export function createDelivery(deps:DeliveryDependencies,previewOrigins:string[]=[]){
+  // Explicit full origins only; never trust a caller-supplied origin or a *.vercel.app suffix.
+  const allowedOrigins=new Set(origins);
+  for(const value of previewOrigins){try{const url=new URL(value);if(url.protocol==='https:'&&url.origin===value)allowedOrigins.add(value);}catch{/* Ignore malformed deployment configuration. */}}
+  return async(request:Request)=>{
   const origin=request.headers.get('origin');
   const headers:Record<string,string>={'Cache-Control':'private, no-store, max-age=0','Vary':'Origin','X-Content-Type-Options':'nosniff','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'content-type, x-reader-session','Access-Control-Expose-Headers':'Retry-After','Cross-Origin-Resource-Policy':'same-site'};
-  if(origin&&origins.has(origin))headers['Access-Control-Allow-Origin']=origin;
+  if(origin&&allowedOrigins.has(origin))headers['Access-Control-Allow-Origin']=origin;
   const json=(body:unknown,status=200,extra:Record<string,string>={})=>Response.json(body,{status,headers:{...headers,...extra}});
-  if(origin&&!origins.has(origin))return json({error:'Origin not allowed'},403);
+  if(origin&&!allowedOrigins.has(origin))return json({error:'Origin not allowed'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   const target=new URL(request.url),action=target.searchParams.get('action')||'catalog';
   if(action==='epub')return json({error:'Update the app to use online reading',code:'reader_upgrade_required'},410);

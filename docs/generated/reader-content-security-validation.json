@@ -81,5 +81,17 @@
     "tests/reader-delivery-db.test.mjs",
     "tests/reader-delivery.test.mjs",
     "tests/reader.test.mjs"
-  ]
+  ],
+  "full_suite_last_recorded_revision": "e4500ad",
+  "preview_followup": {
+    "production_reader_version": 4,
+    "production_catalog_status": 200,
+    "production_catalog_protocol": null,
+    "production_session_status": 405,
+    "targeted_delivery_tests_passed": 6,
+    "full_suite_rerun": false,
+    "production_changed": false,
+    "preview_reading_enabled": false,
+    "origin_configuration": "KK_READER_PREVIEW_ORIGINS (exact HTTPS origins)"
+  }
 }

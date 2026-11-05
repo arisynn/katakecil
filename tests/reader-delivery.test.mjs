@@ -45,3 +45,16 @@ test('TTS requests the next episode only after the current paragraph queue compl
  const speech=new ReadAloud({change(){},paragraph(){},error:e=>assert.fail(e),next:async pos=>{if(pos.chapterIndex===1)return null;loads++;chapters[0].text='';chapters[1].text='Next paragraph.';return{chapterIndex:1,charOffset:0};}},driver);
  await speech.play(chapters,{chapterIndex:0,charOffset:0},{language:'en',rate:1});assert.equal(loads,0);assert.deepEqual(spoken,['First paragraph.']);pending.shift()();await new Promise(r=>setImmediate(r));assert.equal(loads,1);assert.deepEqual(spoken,['First paragraph.','Next paragraph.']);speech.stop();
 });
+test('legacy backend reports a pending rollout without falling back to EPUB',async()=>{
+ const calls=[],meta=normalizePublishedCatalog({books:[book]},url)[0];
+ const client=new PublishedReader(meta,async(address)=>{calls.push(new URL(address).searchParams.get('action'));return Response.json({error:'Method not allowed'},{status:405});});
+ await assert.rejects(client.open(),error=>error.code==='reader_backend_not_ready'&&/not been activated/.test(error.message));assert.deepEqual(calls,['session']);
+});
+test('only explicitly configured HTTPS preview origins are allowed',async()=>{
+ const preview='https://katakecil-fixture-team.vercel.app',f=fixture();
+ const handle=createDelivery({catalog:async()=>[book],edition:async()=>[chapter],budget:async()=>({allowed:true}),visitor:async()=> 'a'.repeat(64)},[preview,'https://not-allowed.vercel.app/path','http://insecure.vercel.app']);
+ const req=origin=>new Request(url+'?action=catalog',{headers:{origin}});
+ const allowed=await handle(req(preview));assert.equal(allowed.status,200);assert.equal(allowed.headers.get('access-control-allow-origin'),preview);
+ for(const origin of ['https://other.vercel.app','https://not-allowed.vercel.app','http://insecure.vercel.app',preview+'.evil.invalid'])assert.equal((await handle(req(origin))).status,403);
+ assert.equal((await f.handle(req(preview))).status,403);
+});

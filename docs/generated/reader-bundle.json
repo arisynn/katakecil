@@ -1,5 +1,5 @@
 {
-  "bytes": 55676,
+  "bytes": 55838,
   "dependencies": [
     "node_modules/diff-match-patch/index.js",
     "node_modules/dom-node-iterator/lib/adapter.js",
