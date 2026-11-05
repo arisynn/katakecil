@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-05",
+  "publisherEdgeVersion": 4,
+  "nodeTests": 10,
+  "readerRegressionTests": 3,
+  "denoTests": 3,
+  "productionDependencyAuditVulnerabilities": 0,
+  "chromium": {
+    "fixtureOnly": true,
+    "completedEpubWhole": true,
+    "ongoingIdsAndExistingReleaseDatesPreserved": true,
+    "newEpisodesAfterExistingFutureSchedule": true,
+    "epubBackupNotesDownloads": true
+  },
+  "liveCors": {
+    "appPreflight": 204,
+    "unauthenticatedPublisher": 401,
+    "foreignOrigin": 403
+  },
+  "authCallbackVerified": "https://katakecil.vercel.app/?publisher=1",
+  "native": {
+    "version": "1.0.2-preview.3",
+    "versionCode": 3,
+    "releaseBuild": true,
+    "unitAndLint": true,
+    "signedByExistingKey": true,
+    "physicalDeviceTest": false
+  },
+  "schemaMigrations": false,
+  "testPublicationsInProduction": false
+}
