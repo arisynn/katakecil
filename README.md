@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.1.0">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.1.1">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-1. Unduh **[KataKecil 1.1.0 Official — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.1.0/KataKecil-1.1.0-Karisyono.apk)** dari halaman rilis.
+1. Unduh **[KataKecil 1.1.1 Official — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.1.1/KataKecil-1.1.1-Karisyono.apk)** dari halaman rilis.
 2. Buka berkas APK. Jika diminta Android, izinkan pemasangan dari aplikasi tempat berkas dibuka.
 3. Jalankan KataKecil, pilih buku dari Library, lalu mulai membaca.
 
@@ -33,7 +33,7 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 4,9 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.1.0` · build `4` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.1.1` · build `5` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
@@ -145,7 +145,7 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android official](docs/releases/v1.1.0.md)
+- [Catatan rilis Android official](docs/releases/v1.1.1.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)

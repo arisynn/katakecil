@@ -34,6 +34,22 @@ public class KataKecilDevicePlugin extends Plugin {
     private String utteranceId;
     private boolean saving = false;
 
+    private Boolean lastSystemDark;
+    static boolean systemDark(android.content.Context context){
+        android.app.UiModeManager manager=context.getSystemService(android.app.UiModeManager.class);
+        if(manager!=null){int mode=manager.getNightMode();if(mode==android.app.UiModeManager.MODE_NIGHT_YES)return true;if(mode==android.app.UiModeManager.MODE_NIGHT_NO)return false;}
+        int night=android.content.res.Resources.getSystem().getConfiguration().uiMode&android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        if(night==android.content.res.Configuration.UI_MODE_NIGHT_YES)return true;
+        if(night==android.content.res.Configuration.UI_MODE_NIGHT_NO)return false;
+        return (context.getResources().getConfiguration().uiMode&android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+    private void reportSystemAppearance(){
+        boolean dark=systemDark(getContext());if(lastSystemDark!=null&&lastSystemDark==dark)return;lastSystemDark=dark;
+        notifyListeners("systemAppearanceChange",new JSObject().put("dark",dark));
+    }
+    @PluginMethod public void systemAppearance(PluginCall call){boolean dark=systemDark(getContext());lastSystemDark=dark;call.resolve(new JSObject().put("dark",dark));}
+    @Override protected void handleOnConfigurationChanged(android.content.res.Configuration config){reportSystemAppearance();if(getActivity() instanceof MainActivity)((MainActivity)getActivity()).applyLaunchAppearance();}
+
     @PluginMethod
     public void rememberAppearance(PluginCall call) {
         String mode=call.getString("mode","light"),background=call.getString("background","#faf9f5"),accent=call.getString("accent","#54756c");
@@ -44,13 +60,14 @@ public class KataKecilDevicePlugin extends Plugin {
         settings.edit().putString("mode",mode).putString("background",background).putString("accent",accent).putBoolean("dark",dark).apply();
         getActivity().runOnUiThread(()->{
             // Android persists this per-app mode and uses it for subsequent starting windows.
+            if(changed)androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode.equals("system")?androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:dark?androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES:androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
             if(changed&&android.os.Build.VERSION.SDK_INT>=31){
                 android.app.UiModeManager manager=getContext().getSystemService(android.app.UiModeManager.class);
                 int next=mode.equals("system")?android.app.UiModeManager.MODE_NIGHT_AUTO:dark?android.app.UiModeManager.MODE_NIGHT_YES:android.app.UiModeManager.MODE_NIGHT_NO;
                 if(manager!=null)manager.setApplicationNightMode(next);
             }
             if(getActivity() instanceof MainActivity)((MainActivity)getActivity()).applyLaunchAppearance();
-            call.resolve();
+            reportSystemAppearance();call.resolve();
         });
     }
 
@@ -234,6 +251,7 @@ public class KataKecilDevicePlugin extends Plugin {
     }
 
     @Override protected void handleOnResume() {
+        reportSystemAppearance();
         notifyListeners("activityChange", new JSObject().put("active", true));
     }
 

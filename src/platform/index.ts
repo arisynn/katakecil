@@ -26,9 +26,18 @@ interface DevicePlugin {
   setOrientation(options: {orientation: string}): Promise<void>;
   rememberAppearance(options: {mode:string;background:string;accent:string;dark:boolean}):Promise<void>;
   finishLaunch():Promise<void>;
+  systemAppearance():Promise<{dark:boolean}>;
+  addListener(name:'systemAppearanceChange',listener:(event:{dark:boolean})=>void):Promise<PluginListenerHandle>;
 }
 const Device = registerPlugin<DevicePlugin>('KataKecilDevice');
 export const isNativeApp = Capacitor.isNativePlatform();
+let nativeSystemDark:boolean|null=null;
+export function systemDark(){return isNativeApp&&nativeSystemDark!==null?nativeSystemDark:matchMedia('(prefers-color-scheme: dark)').matches;}
+export async function initializeNativeTheme(changed:()=>void){
+  if(!isNativeApp)return;
+  await Device.addListener('systemAppearanceChange',event=>{if(nativeSystemDark!==event.dark){nativeSystemDark=event.dark;changed();}});
+  nativeSystemDark=(await Device.systemAppearance()).dark;
+}
 export async function rememberLaunchAppearance(mode:string,background:string,accent:string,dark:boolean){
   if(isNativeApp)await Device.rememberAppearance({mode,background,accent,dark});
 }

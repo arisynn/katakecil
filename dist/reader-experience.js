@@ -1,5 +1,5 @@
 import {transitionContent} from './motion.js?v=1';
-import {layoutDialog} from './panel-layout.js?v=3';
+import {layoutDialog} from './panel-layout.js?v=4';
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=14';
 import {escapeHTML as esc,icon,$,$$} from './ui.js?v=12';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';

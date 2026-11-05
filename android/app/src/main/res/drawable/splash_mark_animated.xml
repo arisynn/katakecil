@@ -1,6 +1,0 @@
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/splash_mark">
-    <target android:name="left_quote" android:animation="@animator/splash_fade_left"/>
-    <target android:name="right_quote" android:animation="@animator/splash_fade_right"/>
-    <target android:name="left_float" android:animation="@animator/splash_float_left"/>
-    <target android:name="right_float" android:animation="@animator/splash_float_right"/>
-</animated-vector>

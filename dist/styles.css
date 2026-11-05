@@ -126,3 +126,9 @@ body .dialog-body,body .app-picker-options,body .app-picker>.app-color-editor{ma
 .brand-wordmark{display:block;width:240px;max-width:70vw;aspect-ratio:3/1;background:var(--text);mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;-webkit-mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat}
 .about-brand{display:flex;justify-content:center;padding:12px 0 6px}.about-brand .brand-wordmark{width:230px}
 .reader-loading .brand-wordmark{margin-bottom:12px;width:220px}
+
+/* Center short library states in the space below the unchanged header. */
+.library-shell>.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;flex:1;min-height:0;width:100%;max-width:600px;margin:0 auto;padding:24px;text-align:center}
+.library-shell>.empty-state svg{width:32px;height:32px;color:var(--muted)}.library-shell>.empty-state h2{max-width:28ch;font-size:clamp(19px,5vw,25px);line-height:1.35}.library-shell>.empty-state p{max-width:34ch;line-height:1.65;color:var(--muted)}
+/* Keep updater actions visible above its independently scrolling changelog. */
+body .dialog[data-app-updates].compact-settings-dialog{max-height:min(54dvh,440px,calc(var(--app-visible-height,100dvh) - 24px));padding-bottom:12px}.dialog[data-app-updates] .update-summary{flex:none;min-width:0;margin-bottom:10px}.update-summary .update-state{margin-top:5px;font-size:12px;line-height:1.4}.update-summary .update-version{margin-top:5px;font-size:11px}.update-summary .update-actions{display:flex;margin:10px 0 0;gap:8px}.update-summary .update-actions button{min-height:44px;flex:1}.update-summary .settings-caption{padding:6px 0 0}.update-changelog h3{font-size:12px;margin:0 0 8px}.dialog[data-app-updates] .update-notes{font-size:11px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}.dialog[data-app-updates] .update-privacy{font-size:10px;line-height:1.5;margin-top:12px}

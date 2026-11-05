@@ -2,6 +2,15 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.1.1 Official — Startup, tema sistem dan updater (5 November 2026)
+
+- Kembalikan PNG logo asli, dengan ruang aman launcher agar kutip tidak terpotong. Tidak mengubah gambar sumber atau rasio logo.
+- Ganti animasi kutip native dengan loading wordmark yang sama seperti Reader. Saat resume, splash web menunggu episode dan pagination siap; Library menunggu katalog serta sampul pilihan.
+- Baca tema sistem dari Android langsung, sinkronkan perubahan konfigurasi/resume, dan perbarui mode AppCompat ketika memilih System.
+- Pusatkan error Library. Ringkas updater dengan kontrol unduh/pasang tetap di atas dan changelog bergulir di bawah.
+- Tampilkan loading sebelum menghitung ulang pagination pada resize/rotasi/font; pulihkan posisi sebelum loading hilang.
+- Sinkronkan origin preview sah pada rollout. Tidak ada migrasi database atau perubahan naskah/jadwal. QA lanjutan oleh pengguna; build dan integritas APK saja pada sesi ini.
+
 ## 1.1.0 Official — Reader per episode dan splash Android (5 November 2026)
 
 - Aktifkan backend episode anonim, penutupan jalur EPUB publik, akses metadata terbatas dan gate kuota terpusat; UUID/naskah/jadwal tetap.
