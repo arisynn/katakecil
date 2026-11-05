@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Reader — Buku tamat, cover dan arc EPUB (5 November 2026)
+
+- Ganti cover Apa Itu Rumah? dan rapikan halaman judul tanpa sinopsis; metadata Masa Panen menjadi completed sesuai konfirmasi penulis.
+- Kenali arc Romawi, hierarki TOC dan judul bab secara adaptif. Rentang episode divider tidak menjadi halaman cerita; BAB1 tampil pada bab pertama Apa Itu Rumah?.
+- Simpan EPUB siap baca dua buku tamat di bucket private dengan pemeriksaan publikasi/revisi yang sama. Naskah sumber, jadwal buku ongoing, dan UUID episode dipertahankan.
+- Rincian, pemeriksaan dan rollback: [dokumen pembaruan](docs/completed-books-and-epub-structure.md).
+
 ## Web — Sinkronkan gelombang dan fade (5 November 2026)
 
 - Gunakan kembali satu animasi dengan tempo normal 3,2 detik dan jeda antarbagian 0,13 detik agar gerak vertikal serta fade selalu sinkron, dari kiri ke kanan.

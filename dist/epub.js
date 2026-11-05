@@ -1,4 +1,9 @@
-export const PARSER_REVISION = 6;
+export const PARSER_REVISION = 7;
+
+const arcName=(value='',nested=false)=>{
+ const match=String(value).trim().match(new RegExp('^(arc|ark|part'+(nested?'|bagian|book|buku':'')+')\\s+(\\d+|[ivxlcdm]+)(?=\\s|[.:—–-]|$)[\\s.:—–-]*(.*)$','i'));
+ return match?{label:'ARC '+match[2].toUpperCase(),title:match[3].trim()}:null;
+};
 
 export function chapterLabelOf(value=''){
  const match=String(value).match(/^(bab|episode|chapter|bagian)\s*(\d+(?:\.\d+)?|[ivxlcdm]+(?=\s|[.:—–-]|$))/i);
@@ -34,15 +39,21 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     for (const part of parts) { if (part === '..') normalized.pop(); else if (part !== '.') normalized.push(part); }
     return normalized.join('/');
   };
-  const chapterNames = new Map();
+  const chapterNames = new Map(),chapterArcs=new Map();
+  const navTarget=(href,path)=>decodeURIComponent(new URL(href,'https://epub.local/'+path).pathname.slice(1));
   const ncx = Array.from(manifest.values()).find(el => el.getAttribute('media-type') === 'application/x-dtbncx+xml');
   if (ncx) {
     try {
-      const toc = xml(await read(resolve(ncx.getAttribute('href'))));
+      const ncxPath=resolve(ncx.getAttribute('href')),toc = xml(await read(ncxPath));
       for (const point of toc.getElementsByTagName('navPoint')) {
         const content = point.getElementsByTagName('content')[0];
         const label = point.getElementsByTagName('text')[0]?.textContent?.trim();
-        if (content && label) chapterNames.set(resolve(content.getAttribute('src')), label);
+        if (content && label){const key=navTarget(content.getAttribute('src'),ncxPath);if(!chapterNames.has(key))chapterNames.set(key,label);
+          for(let parent=point.parentElement;parent;parent=parent.parentElement)if(parent.localName==='navPoint'){
+            const named=parent.getElementsByTagName('text')[0]?.textContent?.trim(),arc=arcName(named,true);
+            if(arc){chapterArcs.set(key,{...arc,id:navTarget(parent.getElementsByTagName('content')[0]?.getAttribute('src')||key,ncxPath)+'#'+arc.label});break;}
+          }
+        }
       }
     } catch { /* Chapter headings remain available without optional navigation. */ }
   }
@@ -51,10 +62,15 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
   if(navItem){try{
     const navPath=resolve(navItem.getAttribute('href'));
     const navDoc=new DOMParser().parseFromString(await read(navPath),'text/html');
-    for(const link of navDoc.querySelectorAll('a[href]')){
+    const toc=Array.from(navDoc.querySelectorAll('nav')).find(node=>node.getAttribute('epub:type')?.split(/\s+/).includes('toc')||node.getAttribute('role')==='doc-toc')||navDoc.querySelector('nav')||navDoc.body;
+    for(const link of toc.querySelectorAll('a[href]')){
       const target=new URL(link.getAttribute('href'),'https://epub.local/'+navPath);
       const key=decodeURIComponent(target.pathname.slice(1));
       if(!chapterNames.has(key))chapterNames.set(key,link.textContent.replace(/\s+/g,' ').trim());
+      for(let li=link.closest('li')?.parentElement?.closest('li');li;li=li.parentElement?.closest('li')){
+        const parent=li.querySelector(':scope > a,:scope > span'),arc=arcName(parent?.textContent?.replace(/\s+/g,' ').trim(),true);
+        if(arc){chapterArcs.set(key,{...arc,id:(parent?.getAttribute('href')?navTarget(parent.getAttribute('href'),navPath):navPath)+'#'+arc.label});break;}
+      }
     }
   }catch{/* The spine still supplies readable text. */}}
   const chapterMarker=/^(?:bab|episode|chapter|bagian)\s*(?:\d+(?=\s|[.:—–-]|[A-ZÀ-Ý]|$)|[ivxlcdm]+(?=\s|[.:—–-]|$))[\s.:—–-]*/i;
@@ -67,7 +83,7 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
   const isMarker=value=>value.length<=180&&chapterMarker.test(value);
   // Some EPUBs keep chapter numbers in semantic heading IDs rather than visible text.
   const headingLabel=node=>{
-    const match=node.id?.match(/^(bab|chapter|episode|bagian)[_-](\d+)(?:[_-](?:title|heading))?$/i);
+    const match=node.id?.match(/^(bab|chapter|episode|bagian)[_-]?(\d+)(?:[_-](?:title|heading))?$/i);
     return match?chapterLabelOf(match[1]+' '+Number(match[2])):'';
   };
   const isGenerated=value=>/^(?:section|bagian|bab|chapter)\s*\d*$/i.test(value);
@@ -84,6 +100,21 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     const doc = new DOMParser().parseFromString(await read(path), 'text/html');
     doc.querySelectorAll('script,style,nav,iframe,object,embed,form,header,footer,[hidden],#pg-header,#pg-footer,.pg-boilerplate,.toc').forEach(el => el.remove());
     const blocks = Array.from(doc.body.querySelectorAll('p,h1,h2,h3,h4,pre,li')).filter(el => !el.parentElement?.closest('p,pre,li'));
+    const navigationTitle=chapterNames.get(path)||'',bodyTitle=blocks.find(el=>/^H[1-4]$/.test(el.tagName));
+    const semanticFront=Array.from(doc.querySelectorAll('*')).some(el=>el.getAttributeNames().some(name=>/(?:^|:)type$/.test(name)&&/\b(?:titlepage|copyright-page|toc)\b/.test(el.getAttribute(name)||'')));
+    const frontName=/^(?:halaman\s+judul(?:\s*&\s*sinopsis)?|sinopsis|synopsis|title\s*page|copyright|hak\s*cipta|imprint|informasi\s+buku|daftar\s+isi)$/i;
+    const isBookTitle=bodyTitle&&plain(bodyTitle).toLocaleLowerCase()===(metadata('title')||fallback).toLocaleLowerCase();
+    if(!chapters.length&&(semanticFront||frontName.test(navigationTitle)||frontName.test(bodyTitle?plain(bodyTitle):'')||isBookTitle&&doc.body.textContent.length<1800&&doc.body.textContent.toLocaleLowerCase().includes((metadata('creator')||'\u0000').toLocaleLowerCase())))continue;
+    const arcHeading=blocks.find(el=>/^H[1-3]$/.test(el.tagName)&&/^arc[_-]\d+(?:[_-](?:title|heading))?$/i.test(el.id));
+    const textArc=blocks.slice(0,3).map(el=>arcName(plain(el))).find(Boolean);
+    const declaredArc=arcName(navigationTitle)||textArc||(arcHeading?{label:'ARC '+Number(arcHeading.id.match(/\d+/)[0]),title:plain(arcHeading)}:null);
+    if(chapterArcs.has(path))currentArc=chapterArcs.get(path);
+    if(declaredArc){
+      const title=declaredArc.title||plain(bodyTitle||blocks[0]);
+      currentArc={...declaredArc,title:arcName(title)?'':title,id:path+'#'+(arcHeading?.id||declaredArc.label)};
+      const range=/^(?:episode|bab|chapter)\s*\d+\s*(?:[–—-]|sampai|to)\s*\d+$/i;
+      if(blocks.every(el=>/^H[1-4]$/.test(el.tagName)||arcName(plain(el))||range.test(plain(el))||plain(el)===currentArc.title))continue;
+    }
     const headings = blocks.filter(el => /^H[123]$/.test(el.tagName)||isMarker(plain(el)));
     const explicit = headings.filter(el=>isMarker(plain(el))||/^H[123]$/.test(el.tagName)&&/chapter\s*[IVXLCDM\d]+/i.test(plain(el)));
     const level = headings.some(el=>el.tagName==='H2') ? 'H2' : headings.some(el=>el.tagName==='H1') ? 'H1' : 'H3';
@@ -103,6 +134,8 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
       const value = plain(block);
       if (!value) continue;
       const arcMarker=/^H[1-3]$/.test(block.tagName)&&block.id.match(/^arc[_-](\d+)(?:[_-](?:title|heading))?$/i);
+      const inlineArc=/^H[1-3]$/.test(block.tagName)&&arcName(value);
+      if(inlineArc){if(started)flush();currentArc={...inlineArc,id:path+'#'+(block.id||inlineArc.label)};sourceTitle=value;sourceLabel='';title=inlineArc.title;started=true;continue;}
       if(arcMarker){
         if(started)flush();
         currentArc={id:path+'#'+block.id,label:'ARC '+Number(arcMarker[1]),title:value};
@@ -127,6 +160,8 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     }
   }
   if (!chapters.length) throw new Error('No readable text was found. Image-only and fixed-layout EPUBs are not supported.');
+  let narrativeNumber=0;
+  for(const chapter of chapters)if(chapter.arc){narrativeNumber++;if(!chapter.chapterLabel&&chapter.title)chapter.chapterLabel=(/^id(?:-|$)/i.test(metadata('language')||'')?'BAB ':'CHAPTER ')+narrativeNumber;}
   return { title: metadata('title') || fallback, author: metadata('creator') || 'Unknown author', language: metadata('language') || 'en', parsedRevision:PARSER_REVISION, chapters };
 }
 

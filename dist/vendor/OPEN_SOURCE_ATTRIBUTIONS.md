@@ -66,6 +66,10 @@ Browser Web Speech, Intl.Segmenter, CSS Custom Highlight, Fullscreen, Screen Ori
 Research details and activity snapshots: `docs/advanced-reader-report.md` and `docs/generated/open-source-research.json`.
 
 
+## Published EPUB service
+
+The existing `katakecil-reader` service source is now tracked in this repository. It retains its pinned packages: [supabase-js 2.117.3](https://github.com/supabase/supabase-js) (MIT, server-only Storage/RLS clients; [license](./licenses/supabase-js.txt)), [fflate 0.8.3](https://github.com/101arrowz/fflate) (MIT, EPUB ZIP assembly; [license](./licenses/fflate.txt)), [sanitize-html 2.18.1](https://github.com/apostrophecms/sanitize-html) (MIT, published HTML sanitization; [license](./licenses/sanitize-html.txt)), and [@xmldom/xmldom 0.9.12](https://github.com/xmldom/xmldom) (MIT, EPUB XML serialization; [license](./licenses/xmldom.txt)). No additional frontend dependency is introduced. Book text and the replacement cover are owner-supplied content, not third-party open-source code.
+
 ## Color wheel
 
 - [Reinvented Color Wheel](https://github.com/luncheon/reinvented-color-wheel), npm `reinvented-color-wheel@0.4.0`, WTFPL v2. Standalone hue ring, saturation/value canvas, pointer handling and color conversion integration; no framework UI imported and upstream source unchanged. [License](./licenses/reinvented-color-wheel.txt).

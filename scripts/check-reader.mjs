@@ -1,6 +1,7 @@
 import {readdir,readFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 for(const file of (await readdir('dist')).filter(f=>f.endsWith('.js'))){const result=spawnSync(process.execPath,['--check','dist/'+file],{stdio:'inherit'});if(result.status)process.exit(result.status);}
+for(const file of (await readdir('supabase/functions/katakecil-reader')).filter(f=>f.endsWith('.ts'))){const result=spawnSync(process.execPath,['--check','supabase/functions/katakecil-reader/'+file],{stdio:'inherit'});if(result.status)process.exit(result.status);}
 const edge=spawnSync(process.execPath,['--check','supabase/functions/lumina-library/index.ts'],{stdio:'inherit'});if(edge.status)process.exit(edge.status);
 const html=await readFile('dist/index.html','utf8');
 for(const asset of ['advanced-reader.css','app.js','styles.css'])if(!html.includes(asset))throw Error('Missing entry asset: '+asset);
