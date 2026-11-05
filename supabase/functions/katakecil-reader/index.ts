@@ -32,11 +32,12 @@ const digest = async (value: string) =>
     .map((x) => x.toString(16).padStart(2, '0'))
     .join('');
 
-async function catalog() {
-  const { data: books, error } = await reader
+async function catalog(bookId?:string) {
+  const query = reader
     .from('kk_books')
     .select('id,title,author,synopsis,cover_url,language,status,updated_at')
     .order('title');
+  const { data: books, error } = await (bookId?query.eq('id',bookId):query);
   if (error) throw error;
   const results = [];
   for (const book of books || []) {
@@ -85,7 +86,7 @@ Deno.serve(async (request) => {
     if (action !== 'epub') return json({ error: 'Unknown action' }, 400);
     const id = target.searchParams.get('book');
     if (!id || !/^[a-z0-9][a-z0-9_-]{0,119}$/.test(id)) return json({ error: 'Invalid book' }, 400);
-    const book = (await catalog()).find((b) => b.id === id);
+    const book = (await catalog(id)).find((b) => b.id === id);
     if (!book || !book.section_ids.length) return json({ error: 'Book not available' }, 404);
     const requestedRevision = target.searchParams.get('revision');
     if (requestedRevision && requestedRevision !== book.revision)
@@ -114,7 +115,7 @@ Deno.serve(async (request) => {
       }
     }
     // Check again after assembly so a withdrawal/version change cannot leak a stale release.
-    const current = (await catalog()).find((b) => b.id === id);
+    const current = (await catalog(id)).find((b) => b.id === id);
     if (!current || current.revision !== book.revision)
       return json({ error: 'Book updated; refresh the catalog' }, 409);
     return new Response(new Uint8Array(bytes).buffer, {

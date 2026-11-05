@@ -12,7 +12,7 @@ Masa Panen memiliki seluruh49 section terbit tetapi metadata masih ongoing. Sesu
 
 ## Pembacaan private
 
-Source fungsi katakecil-reader yang sebelumnya hanya ada di server kini dilacak di repo. Dua ID yang disetujui memakai EPUB siap baca dalam bucket private kk-sources, pada `reader-editions/<book-id>/<revision>.epub`. Edisi ini dibuat dari section yang lolos RLS saat ini dan memuat cover; arsip asli tidak ditimpa. Setelah dibuat sekali, request selanjutnya memuat EPUB private tanpa merakit ulang HTML.
+Source fungsi katakecil-reader yang sebelumnya hanya ada di server kini dilacak di repo. Dua ID yang disetujui memakai EPUB siap baca dalam bucket private kk-sources, pada `reader-editions/<book-id>/<revision>.epub`. Edisi ini dibuat dari section yang lolos RLS saat ini dan memuat cover; arsip asli tidak ditimpa. Setelah dibuat sekali, request selanjutnya memuat EPUB private tanpa merakit ulang HTML. Sampul inline lama dirujukkan ke satu aset cover agar tidak memperbesar unduhan; halaman sampul duplikat tidak ikut alur linear. Pemeriksaan EPUB hanya membaca metadata buku yang diminta, dengan filter RLS yang sama.
 
 Pembaca tetap mengakses endpoint katakecil-reader yang sama dan menerima X-KataKecil-Revision. Tidak ada URL bertanda tangan, kunci admin, atau path private yang diberikan kepada browser. Endpoint memeriksa ulang revisi/publikasi setelah memuat/merakit bytes. Cache hanya berlaku untuk dua buku completed tanpa jadwal mendatang; buku ongoing tetap melalui perakitan section terbit. Frontend mempertahankan pemeriksaan UUID section, ukuran file, revisi, serta larangan menyimpan naskah server ke localStorage/IndexedDB. Tidak ada tabel atau migrasi schema baru.
 
@@ -29,3 +29,11 @@ Perubahan data hanya cover/status buku serta judul/HTML halaman pembuka Apa Itu 
 Rollback: restore fungsi lama dari backup, pulihkan metadata/front dari backup, lalu revert commit frontend bila diperlukan. Cache reader-editions bersifat immutable dan private; biarkan arsip asli tetap utuh. Jangan memulihkan tanggal rilis atau data buku ongoing dari snapshot lain.
 
 QA HP: cek cover Library, BAB1 Apa Itu Rumah?, accordion empat arc, resume/progres lama dan highlight, serta pembukaan Masa Panen. Browser/HP fisik tidak menjadi klaim pemeriksaan ini.
+
+## Hasil pemasangan
+
+Source/frontend sudah dipublikasikan, fungsi katakecil-reader versi4 aktif, dan tiga perubahan metadata/front berhasil diverifikasi. Kedua edisi terbaru sudah dipanaskan di bucket private. Akses Storage publik langsung ditolak; permintaan buku belum diterbitkan/ID tidak dikenal ditolak. Dua arsip sumber asli tetap ada dan jadwal Garis yang Kita Teruskan memiliki hash identik dengan sebelum perubahan.
+
+Sesudah pemasangan, seluruh106 bagian bacaan dari tiga buku tetap identik teksnya dan106 anchor contoh tetap ditemukan pada episode yang sama. Cover Apa Itu Rumah? di dalam ZIP sama persis dengan aset pengganti; halaman judul tidak memuat Sinopsis. EPUB Masa Panen berukuran824.577 byte setelah duplikasi sampul dihapus. Request ulang dua buku tamat menghasilkan bytes yang sama. Angka waktu permintaan hanya observasi sesi ini, bukan jaminan kecepatan perangkat/jaringan.
+
+Security advisor memiliki dua INFO existing untuk tabel audio dengan RLS aktif tanpa policy (akses klien ditolak); tidak ada perubahan policy/RLS pada pekerjaan ini. Pengujian HP fisik tetap menjadi QA pengguna.

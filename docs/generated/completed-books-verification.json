@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-05",
+  "edgeFunction": "katakecil-reader",
+  "edgeVersion": 4,
+  "parserRevision": 7,
+  "tests": {
+    "parserAndSource": 4,
+    "existingChapterArcRegression": 2,
+    "epubSanitizationDeno": 1
+  },
+  "preservedReadableParts": {
+    "apa-itu-rumah": 48,
+    "masa-panen-google-play-ready-1": 47,
+    "garis-yang-kita-teruskan-karisyono-final-45-bab": 11
+  },
+  "sampleAnchorsResolved": 106,
+  "apaArcs": [
+    "ARC I",
+    "ARC II",
+    "ARC III",
+    "ARC IV"
+  ],
+  "coverEmbeddedBytesMatch": true,
+  "frontSynopsisRemoved": true,
+  "privateBucket": true,
+  "publicStorageAccessDenied": true,
+  "unpublishedUnknownBooksDenied": true,
+  "ongoingScheduleHashUnchanged": true,
+  "schemaOrRlsChanges": false,
+  "physicalDeviceQa": false,
+  "observedRequests": [
+    {
+      "id": "apa-itu-rumah",
+      "status": "completed",
+      "publishedSections": 53,
+      "bytes": 409342,
+      "seconds": 5.065,
+      "repeatSameBytes": true,
+      "repeatSeconds": 3.117
+    },
+    {
+      "id": "garis-yang-kita-teruskan-karisyono-final-45-bab",
+      "status": "ongoing",
+      "publishedSections": 13,
+      "bytes": 96092,
+      "seconds": 3.54
+    },
+    {
+      "id": "masa-panen-google-play-ready-1",
+      "status": "completed",
+      "publishedSections": 49,
+      "bytes": 824577,
+      "seconds": 5.867,
+      "repeatSameBytes": true,
+      "repeatSeconds": 4.232
+    }
+  ]
+}

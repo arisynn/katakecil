@@ -117,9 +117,12 @@ export function makeEpub(book: EpubBook, sections: EpubSection[], cover:EpubCove
       `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${escapeXml(book.language)}"><head><title>${escapeXml(section.title)}</title><style>body{line-height:1.7}img{max-width:100%;height:auto}p{margin:0 0 1em}h1,h2,h3{break-after:avoid}.title-panel{text-align:center;padding:18vh 6vw}.title-panel h1{font-size:2.4em}.title-panel p{margin:1.2em 0}</style></head><body>${html}</body></html>`,
       'text/html',
     );
+    const body=doc.getElementsByTagName('body')[0],images=doc.getElementsByTagName('img');
+    const coverOnly=!!cover&&!body?.textContent?.trim()&&images.length>0&&(section.title.toLocaleLowerCase()===book.title.toLocaleLowerCase()||/^(?:sampul|cover)$/i.test(section.title));
+    if(coverOnly)for(let i=0;i<images.length;i++)images[i].setAttribute('src','cover.'+cover!.extension);
     files[`OEBPS/${name}`] = xml(new XMLSerializer().serializeToString(doc));
     manifest.push(`<item id="${item}" href="${name}" media-type="application/xhtml+xml"/>`);
-    spine.push(`<itemref idref="${item}"/>`);
+    spine.push(`<itemref idref="${item}"${coverOnly?' linear="no"':''}/>`);
     toc.push(`<li><a href="${name}">${escapeXml(section.title)}</a></li>`);
   }
   files['OEBPS/nav.xhtml'] = xml(
