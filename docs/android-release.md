@@ -84,3 +84,11 @@ dijalankan. Situs live tidak dipublikasikan oleh pekerjaan source ini. Status
 hardening gateway lama `lumina-library` yang disebut dokumentasi sebelumnya
 tetap perlu diverifikasi pada proses rilis publik backend; membangun APK tidak
 menerapkan patch tersebut.
+
+## Rilis official 1.1.0
+
+Versi1.1.0, versionCode4, package dan signer Karisyono tetap. Status official disetujui pengguna setelah pemeriksaan Android. Atas instruksi terbaru, QA suite/browser/HP tidak diulang pada sesi rilis ini. Perintah `npm run android:release -- --skip-qa` membangun dan menyelaraskan/menandatangani APK tanpa `testReleaseUnitTest` atau `lintRelease`; default skrip tetap menjalankan keduanya. Verifikasi signature/checksum merupakan pemeriksaan integritas paket, bukan QA penggunaan.
+
+Splash memakai AndroidX Core SplashScreen1.2.0 existing. Animated vector kutip melakukan fade dan gerak vertikal berurutan dari kiri ke kanan. Preferensi tema/accent dicerminkan secara lokal ke SharedPreferences. Saat Activity menyediakan splash view, latar memakai palette tersimpan dan lingkaran logo memakai accent; WebView diberi warna dasar yang sama. Android12+ memakai application night mode untuk starting window selanjutnya. Frame pertama yang digambar OS masih mengikuti resource launch theme, terutama sebelum preferensi APK baru pernah dicerminkan; custom color diterapkan saat callback splash tersedia. Ikon launcher memakai accent default Sage, bukan ikon dinamis per-pengguna. Tidak ada janji mengubah ikon launcher mengikuti setiap accent custom.
+
+Animasi dihentikan/dihapus saat web telah merender tampilan pertama, menghormati pengaturan animasi Android, dan memiliki batas pemulihan8 detik bila bootstrap gagal. Batas tersebut bukan penundaan minimum dan tidak menunggu unduhan buku. Tidak ada library splash tambahan.

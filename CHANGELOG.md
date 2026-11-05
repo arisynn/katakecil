@@ -1,6 +1,13 @@
 # Catatan perubahan
 
-Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
+Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
+
+## 1.1.0 Official — Reader per episode dan splash Android (5 November 2026)
+
+- Aktifkan backend episode anonim, penutupan jalur EPUB publik, akses metadata terbatas dan gate kuota terpusat; UUID/naskah/jadwal tetap.
+- Splash Android memakai tema/accent tersimpan dan animasi kutip berurutan; hentikan setelah frame web pertama.
+- Rilis APK stable dengan package/signer sama, versionCode4, updater GitHub dan checksum.
+- Status official disetujui pengguna setelah pemeriksaan Android. QA lanjutan oleh pengguna; sesi ini tidak mengulang QA suite/browser/HP. [Catatan rilis](docs/releases/v1.1.0.md).
 
 ## Pengembangan — Jelaskan ketidakcocokan backend Preview (5 November 2026)
 

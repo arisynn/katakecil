@@ -35,6 +35,31 @@ public class KataKecilDevicePlugin extends Plugin {
     private boolean saving = false;
 
     @PluginMethod
+    public void rememberAppearance(PluginCall call) {
+        String mode=call.getString("mode","light"),background=call.getString("background","#faf9f5"),accent=call.getString("accent","#54756c");
+        if(!mode.matches("light|dark|system|sepia|paper|green|custom")||!background.matches("#[0-9a-fA-F]{6}")||!accent.matches("#[0-9a-fA-F]{6}")){call.reject("Invalid appearance");return;}
+        boolean dark=Boolean.TRUE.equals(call.getBoolean("dark",false));
+        android.content.SharedPreferences settings=getContext().getSharedPreferences("katakecil_appearance",0);
+        boolean changed=!settings.contains("mode")||!mode.equals(settings.getString("mode","light"))||dark!=settings.getBoolean("dark",false);
+        settings.edit().putString("mode",mode).putString("background",background).putString("accent",accent).putBoolean("dark",dark).apply();
+        getActivity().runOnUiThread(()->{
+            // Android persists this per-app mode and uses it for subsequent starting windows.
+            if(changed&&android.os.Build.VERSION.SDK_INT>=31){
+                android.app.UiModeManager manager=getContext().getSystemService(android.app.UiModeManager.class);
+                int next=mode.equals("system")?android.app.UiModeManager.MODE_NIGHT_AUTO:dark?android.app.UiModeManager.MODE_NIGHT_YES:android.app.UiModeManager.MODE_NIGHT_NO;
+                if(manager!=null)manager.setApplicationNightMode(next);
+            }
+            if(getActivity() instanceof MainActivity)((MainActivity)getActivity()).applyLaunchAppearance();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void finishLaunch(PluginCall call){
+        getActivity().runOnUiThread(()->{if(getActivity() instanceof MainActivity)((MainActivity)getActivity()).finishLaunch();call.resolve();});
+    }
+
+    @PluginMethod
     public void saveJson(PluginCall call) {
         String filename = call.getString("filename", "katakecil-backup.json");
         String text = call.getString("text", "");

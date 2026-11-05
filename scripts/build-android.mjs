@@ -29,7 +29,8 @@ if(env.HTTPS_PROXY||env.https_proxy){
 await run(java,['-version']);
 await run('npm',['run','build']);
 await run('npx',['cap','sync','android']);
-const tasks=debug?['assembleDebug']:['testReleaseUnitTest','assembleRelease','lintRelease'];
+// Explicit release option for a user who takes responsibility for further QA.
+const tasks=debug?['assembleDebug']:process.argv.includes('--skip-qa')?['assembleRelease']:['testReleaseUnitTest','assembleRelease','lintRelease'];
 await run('./gradlew',['--no-daemon','--max-workers=2',...tasks],join(root,'android'));
 await mkdir(output,{recursive:true});
 const name=`KataKecil-${version.version}-${debug?'debug':'Karisyono'}.apk`,artifact=join(output,name);

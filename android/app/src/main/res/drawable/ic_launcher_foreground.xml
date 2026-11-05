@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<inset xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/katakecil_logo" android:inset="0dp" />
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/splash_mark" android:inset="0dp" />

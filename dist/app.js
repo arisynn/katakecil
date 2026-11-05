@@ -5,7 +5,7 @@ import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
 import {layoutDialog,installAccordionReveal,scheduleSheetFit} from './panel-layout.js?v=3';
-import {APP_INFO} from './app-info.js?v=1';
+import {APP_INFO} from './app-info.js?v=2';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=3';
 import {installAppPopups} from './app-popups.js?v=14';
@@ -19,7 +19,7 @@ import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12'
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=14';
 import {createReaderExperience} from './reader-experience.js?v=25';
-import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=3';
+import {isNativeApp,rememberLaunchAppearance,finishNativeLaunch,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=4';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
 const ACTIVE_READER_KEY='katakecil_active_reader';
@@ -72,7 +72,7 @@ function applyPreferences(){
  s.setProperty('--reader-font',['DM Sans','Plus Jakarta Sans'].includes(p().fontFamily)?'system-ui,sans-serif':"'Lora',Georgia,serif");
  s.setProperty('--reader-size',`${Math.max(14,Math.min(32,p().fontSize))}px`);s.setProperty('--reader-line',String(Math.max(1.4,Math.min(2,p().lineHeight))));
  $('meta[name="theme-color"]').content=palette.background;
- features.apply();void updateSystemTheme(palette.dark).catch(()=>{});
+ features.apply();void updateSystemTheme(palette.dark).catch(()=>{});void rememberLaunchAppearance(p().themeMode||'light',palette.background,accent,palette.dark).catch(()=>{});
 }
 function shell(content,page='library'){
  return `<main class="personal-shell ${page==='library'?'library-shell':'settings-shell'}">${content}</main>`;
@@ -517,9 +517,9 @@ window.visualViewport?.addEventListener('scroll',syncVisibleViewport);
 syncVisibleViewport();
 async function init(){
  const resume=readLocal(ACTIVE_READER_KEY,null),restoring=resume&&typeof resume.bookId==='string'&&new URL(location.href).searchParams.get('publisher')!=='1';activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();
- if(restoring)mountOpeningPage();else renderLibrary();await loadCatalog();
+ if(restoring)mountOpeningPage();else renderLibrary();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));await finishNativeLaunch().catch(()=>{});await loadCatalog();
  if(restoring&&view==='loading'){if(books.some(book=>book.id===resume.bookId))await openBook(resume.bookId);else{rememberReader(null);renderLibrary();}}
  if(new URL(location.href).searchParams.get('publisher')==='1'){const link=new URL(location.href);link.searchParams.delete('publisher');history.replaceState(history.state,'',link);view='publisher';rememberReader(null);await publisher.open();}
  void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');
 }
-init().catch(()=>{rememberReader(null);catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});
+init().catch(()=>{rememberReader(null);catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();void finishNativeLaunch().catch(()=>{});});

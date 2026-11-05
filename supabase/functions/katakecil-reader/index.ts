@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { EDITION_VERSION } from './completed.ts';
 import { parseEdition } from './edition.ts';
 import { createDelivery, sha256 as digest, type Book, type Chapter } from './delivery.ts';
+import releasePreviewOrigins from './preview-origins.json' with {type:'json'};
 
 const named = (name: string) => {
   try {
@@ -71,5 +72,5 @@ const handle=createDelivery({catalog,edition,
  // not an authenticated identity. Global and session quotas still apply when it changes.
  visitor:request=>digest(secret+':'+new Date().toISOString().slice(0,10)+':'+(request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim()||'unknown')),
  budget:async input=>{const {data,error}=await admin.rpc('kk_reader_gate',{p_kind:input.kind,p_visitor:input.visitor,p_session:input.session,p_book:input.book,p_revision:input.revision,p_cost:input.cost,p_episode:input.episode,p_lease:input.lease});if(error||!data)throw Error('Budget unavailable');return data;}
-},(Deno.env.get('KK_READER_PREVIEW_ORIGINS')||'').split(',').map(value=>value.trim()).filter(Boolean));
+},[...releasePreviewOrigins,...(Deno.env.get('KK_READER_PREVIEW_ORIGINS')||'').split(',').map(value=>value.trim()).filter(Boolean)]);
 Deno.serve(handle);

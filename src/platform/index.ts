@@ -24,9 +24,15 @@ interface DevicePlugin {
   addListener(name: 'activityChange', listener: (event: {active: boolean}) => void): Promise<PluginListenerHandle>;
   setKeepAwake(options: {enabled: boolean}): Promise<void>;
   setOrientation(options: {orientation: string}): Promise<void>;
+  rememberAppearance(options: {mode:string;background:string;accent:string;dark:boolean}):Promise<void>;
+  finishLaunch():Promise<void>;
 }
 const Device = registerPlugin<DevicePlugin>('KataKecilDevice');
 export const isNativeApp = Capacitor.isNativePlatform();
+export async function rememberLaunchAppearance(mode:string,background:string,accent:string,dark:boolean){
+  if(isNativeApp)await Device.rememberAppearance({mode,background,accent,dark});
+}
+export async function finishNativeLaunch(){if(isNativeApp)await Device.finishLaunch();}
 let fullscreen = false;
 export const nativeFullscreen = () => fullscreen;
 export async function toggleNativeFullscreen() {

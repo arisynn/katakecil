@@ -12,11 +12,11 @@
 <p align="center">
   <img alt="Android 7 atau lebih baru" src="https://img.shields.io/badge/Android-7%2B-54756c">
   <img alt="Android System WebView 113 atau lebih baru" src="https://img.shields.io/badge/WebView-113%2B-4269a5">
-  <img alt="Status Android Preview" src="https://img.shields.io/badge/Status-Preview-a07732">
+  <img alt="Status Android Official" src="https://img.shields.io/badge/Status-Official-54756c">
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.0.2-preview.3">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.1.0">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-1. Unduh **[KataKecil 1.0.2 Preview 3 — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.0.2-preview.3/KataKecil-1.0.2-preview.3-Karisyono.apk)** dari halaman rilis.
+1. Unduh **[KataKecil 1.1.0 Official — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.1.0/KataKecil-1.1.0-Karisyono.apk)** dari halaman rilis.
 2. Buka berkas APK. Jika diminta Android, izinkan pemasangan dari aplikasi tempat berkas dibuka.
 3. Jalankan KataKecil, pilih buku dari Library, lalu mulai membaca.
 
@@ -33,11 +33,11 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 7 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.0.2-preview.3` · build `3` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.1.0` · build `4` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Rilis ini berstatus Preview.** Build, pemeriksaan kode, dan 69 tes web dan 3 unit test Android lulus; 14 tes terarah akhir juga lulus. Pengujian HP fisik/emulator, sentuhan, pemilih berkas, dan suara perangkat masih perlu dilakukan. Ini belum merupakan rilis Play Store.
+**Rilis official untuk distribusi langsung.** Pemilik telah menyetujui status official setelah pemeriksaan Android. QA lanjutan versi ini ditangani pemilik; proses rilis hanya membangun, menandatangani, dan memverifikasi paket serta pemasangan backend. Ini bukan publikasi Play Store.
 
 ## Yang bisa dilakukan
 
@@ -66,7 +66,7 @@ Penyimpanan browser dan APK terpisah. Menghapus data browser, menghapus data apl
 
 ### Memperbarui APK
 
-Preview 1 perlu diperbarui secara manual satu kali memakai APK Preview 2 di atas. Pasang di atas aplikasi lama dengan sertifikat Karisyono yang sama, tanpa uninstall. Selanjutnya buka **Settings → App → App updates** untuk memeriksa GitHub Releases, mengunduh dan memverifikasi APK, lalu membuka pemasang Android. Konfirmasi instalasi dan izin dari Android tetap diperlukan. Preview builds memeriksa rilis Preview juga; pemeriksaan otomatis dilakukan paling sering sekali sehari setelah pemeriksaan berhasil. Isi buku tidak dikirim ke GitHub.
+APK lama yang belum memiliki updater perlu diperbarui secara manual satu kali memakai APK official di atas. Pasang di atas aplikasi lama dengan sertifikat Karisyono yang sama, tanpa uninstall. Selanjutnya buka **Settings → Advanced → App updates** untuk memeriksa GitHub Releases, mengunduh dan memverifikasi APK, lalu membuka pemasang Android. Konfirmasi instalasi dan izin dari Android tetap diperlukan. Preview builds memeriksa rilis Preview juga; pemeriksaan otomatis dilakukan paling sering sekali sehari setelah pemeriksaan berhasil. Isi buku tidak dikirim ke GitHub.
 
 ### Pindah dari web ke APK
 
@@ -145,7 +145,7 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android Preview](docs/releases/v1.0.2-preview.3.md)
+- [Catatan rilis Android official](docs/releases/v1.1.0.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)

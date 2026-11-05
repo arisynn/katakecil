@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources><color name="icon_background">#073f2e</color></resources>
+<resources><color name="icon_background">#54756c</color><color name="splash_background">#faf9f5</color><color name="splash_accent">#54756c</color></resources>
