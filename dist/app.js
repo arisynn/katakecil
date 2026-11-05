@@ -1,3 +1,4 @@
+import {loadingPreviews,selectLoadingPreview} from './loading-previews.js?v=1';
 import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
@@ -110,7 +111,7 @@ function renderSettings(){
  <button class="settings-link" data-action="backup-import"><span class="setting-label">${icon('upload')}Pulihkan backup</span>${icon('chevron')}</button>
  <button class="settings-link" data-action="export-notes"><span class="setting-label">${icon('notes')}Ekspor catatan</span>${icon('chevron')}</button>
  <button class="settings-link" data-action="status"><span class="setting-label">${icon('device')}Penyimpanan perangkat</span>${icon('chevron')}</button></div>
- <details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="import"><span class="setting-label">${icon('upload')}Impor EPUB dari perangkat</span>${icon('chevron')}</button><button class="settings-link" data-action="about"><span class="setting-label">${icon('bookOpen')}Tentang aplikasi</span><span class="settings-value" data-book-content translate="no">${escapeHTML(APP_INFO.version)}</span>${icon('chevron')}</button>${isNativeApp?`<button class="settings-link" data-action="updates"><span class="setting-label">${icon('download')}${p().uiLanguage==='id'?'Pembaruan aplikasi':'App updates'}</span><span class="update-summary" id="app-update-summary">${escapeHTML(updates.summary())}</span>${icon('chevron')}</button>`:''}</div></details></section>
+ <details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="import"><span class="setting-label">${icon('upload')}Impor EPUB dari perangkat</span>${icon('chevron')}</button><button class="settings-link" data-action="loading-previews"><span class="setting-label">${icon('sparkle')}${p().uiLanguage==='id'?'Pratinjau loading':'Loading previews'}</span>${icon('chevron')}</button><button class="settings-link" data-action="about"><span class="setting-label">${icon('bookOpen')}Tentang aplikasi</span><span class="settings-value" data-book-content translate="no">${escapeHTML(APP_INFO.version)}</span>${icon('chevron')}</button>${isNativeApp?`<button class="settings-link" data-action="updates"><span class="setting-label">${icon('download')}${p().uiLanguage==='id'?'Pembaruan aplikasi':'App updates'}</span><span class="update-summary" id="app-update-summary">${escapeHTML(updates.summary())}</span>${icon('chevron')}</button>`:''}</div></details></section>
  </div>`,'settings');
 }
 async function fetchLimited(url,type='buffer'){
@@ -329,6 +330,8 @@ async function handleAction(button,event){
  if(button.dataset.action==='updates'||button.dataset.action.startsWith('updates-')){await updates.action(button.dataset.action);return;}
  switch(action){
   case 'library':navigateLibrary();break;
+  case 'loading-previews':showOverlay(`${dialogHeading(p().uiLanguage==='id'?'Animasi loading':'Loading animations')}${loadingPreviews(p().uiLanguage)}`);break;
+  case 'loading-preview':selectLoadingPreview($('.loading-previews'),button.dataset.value);break;
   case 'about':aboutDialog();break;
   case 'settings':persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;closeOverlay(true);removeSelection();renderSettings();break;
   case 'refresh':await loadCatalog();break;

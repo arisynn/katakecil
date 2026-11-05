@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Percobaan animasi loading (5 November 2026)
+
+- Tambahkan Settings → Advanced → Loading previews untuk membandingkan empat animasi bernomor: kutip bergantian, kutip melayang, logo fade, dan napas lembut.
+- Ganti pilihan tanpa membuka ulang sheet; preview mengikuti tema dan reduced motion. Animasi hanya berjalan pada preview yang sedang ditampilkan.
+- Galeri ini belum mengganti loading utama atau menyimpan pilihan final.
+- Pemeriksaan: build, check, typecheck, diff check, serta Chromium untuk empat pilihan, identitas sheet, reduced motion dan panel 320×568 tanpa scroll.
+
 ## Web — Motion, branding dan panel adaptif (5 November 2026)
 
 - Perbarui ikon tab dan aktifkan motion singkat ketika tab berubah; transisi isi mempertahankan header, tab, dan sheet yang sama.

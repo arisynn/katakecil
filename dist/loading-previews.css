@@ -1,0 +1,25 @@
+/* Experimental loaders: CSS-only motion, no artificial loading delay or saved setting. */
+.loading-previews{display:grid;gap:10px;padding:2px}
+.loading-preview-stage{min-height:132px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;overflow:hidden}
+.loading-art{height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.loading-art .brand-wordmark{width:146px;max-width:60vw;margin:0}
+.loading-art:has(.loading-quotes) .brand-wordmark{width:106px;height:35px}
+.loading-quotes{width:56px;height:36px;fill:var(--accent);overflow:visible}
+.loading-preview-status{font-size:11px;color:var(--muted)}
+.loading-preview-name{margin:0;text-align:center;font-size:12px;font-weight:700}
+.loading-preview-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.loading-preview-choices .secondary{display:flex;align-items:center;justify-content:center;min-height:42px;padding:8px 5px;font-size:11px;line-height:1.35;border:1px solid var(--line);border-radius:12px;color:var(--muted)}
+.loading-preview-choices [aria-pressed=true]{color:var(--text);border-color:var(--accent);background:rgba(var(--accent-rgb),.1)}
+.loading-preview-caption{margin:0;text-align:center;color:var(--muted);font-size:10px;line-height:1.5}
+.loading-art-1 .loading-quotes path{animation:quoteAlternate 1.9s ease-in-out infinite}
+.loading-art-1 .loading-quotes path+path{animation-delay:-.95s}
+.loading-art-2 .loading-quotes path{animation:quoteFloat 2.4s ease-in-out infinite}
+.loading-art-2 .loading-quotes path+path{animation-delay:-1.2s}
+.loading-art-3 .brand-wordmark{animation:wordmarkFade 3.6s ease-in-out infinite}
+.loading-art-4 .brand-wordmark{animation:wordmarkBreathe 3.4s ease-in-out infinite}
+@keyframes quoteAlternate{0%,100%{opacity:.24}50%{opacity:1}}
+@keyframes quoteFloat{0%,100%{transform:translateY(2px);opacity:.55}50%{transform:translateY(-3px);opacity:1}}
+@keyframes wordmarkFade{0%,100%{opacity:.12}45%,55%{opacity:1}}
+@keyframes wordmarkBreathe{0%,100%{transform:scale(.96);opacity:.55}50%{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.loading-art *{animation:none!important;transform:none!important;opacity:1!important}}
+@media(max-height:620px){.loading-preview-stage{min-height:108px;gap:8px}.loading-art{height:70px}.loading-previews{gap:7px}.loading-preview-choices .secondary{min-height:40px}}
