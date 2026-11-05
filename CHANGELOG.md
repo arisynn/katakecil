@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.1.2-rc.1 — Sampul mode gelap dan status APK (5 November 2026)
+
+- Hapus bayangan persegi pada kotak gambar sampul Library di mode gelap; ukuran dan rasio sampul tetap.
+- Masukkan koreksi CSS web ke aset APK, dengan identitas paket dan penanda tangan yang sama, versionCode6.
+- Perjelas pesan updater: yang diperiksa adalah tanda tangan dan checksum, bukan sertifikasi keamanan malware.
+- Catat laporan Play Protect untuk 1.1.1 dan beri peringatan pada catatan rilisnya. Penyebab belum teridentifikasi; build kandidat ini tidak diklaim memperbaiki klasifikasi Google.
+- Audit dependensi runtime npm melaporkan nol kerentanan yang dikenal; ini bukan pemindaian malware. Tidak menjalankan QA/browser/perangkat atau suite tes. Build, tanda tangan dan checksum saja.
+
 ## 1.1.1 Official — Startup, tema sistem dan updater (5 November 2026)
 
 - Kembalikan PNG logo asli, dengan ruang aman launcher agar kutip tidak terpotong. Tidak mengubah gambar sumber atau rasio logo.

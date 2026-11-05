@@ -1,0 +1,27 @@
+{
+  "version": "1.1.2-rc.1",
+  "versionCode": 6,
+  "status": "release-candidate",
+  "apk": {
+    "file": "KataKecil-1.1.2-rc.1-Karisyono.apk",
+    "bytes": 4900384,
+    "sha256": "dbed7f06ade2cbbce535724231c027eecd351181f8bacf7607a7edd289bac850"
+  },
+  "qa_repeated": false,
+  "qa_owner": "user",
+  "build_tasks": [
+    "assembleRelease"
+  ],
+  "signer_sha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+  "packaged_assets_match_source": true,
+  "npm_runtime_known_vulnerabilities": 0,
+  "malware_scan_performed": false,
+  "play_protect_report": {
+    "affected_version": "1.1.1",
+    "resolved": false,
+    "google_review_submitted": false
+  },
+  "database_migration": false,
+  "native_code_changed": false,
+  "permissions_changed": false
+}

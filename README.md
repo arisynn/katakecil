@@ -12,7 +12,7 @@
 <p align="center">
   <img alt="Android 7 atau lebih baru" src="https://img.shields.io/badge/Android-7%2B-54756c">
   <img alt="Android System WebView 113 atau lebih baru" src="https://img.shields.io/badge/WebView-113%2B-4269a5">
-  <img alt="Status Android Official" src="https://img.shields.io/badge/Status-Official-54756c">
+  <img alt="Status Android dalam peninjauan" src="https://img.shields.io/badge/Android-Dalam_peninjauan-a0782f">
 </p>
 
 <p align="center">
@@ -24,9 +24,9 @@
 
 ## Pasang di Android
 
-1. Unduh **[KataKecil 1.1.1 Official — APK Karisyono](https://github.com/arisynn/katakecil/releases/download/v1.1.1/KataKecil-1.1.1-Karisyono.apk)** dari halaman rilis.
-2. Buka berkas APK. Jika diminta Android, izinkan pemasangan dari aplikasi tempat berkas dibuka.
-3. Jalankan KataKecil, pilih buku dari Library, lalu mulai membaca.
+**Pemasangan APK 1.1.1 ditunda:** Play Protect dilaporkan memblokir versi ini. Penyebab belum teridentifikasi. Jangan menonaktifkan atau melewati Play Protect. [Status pemeriksaan](docs/play-protect-review.md).
+
+Build uji **[1.1.2-rc.1](https://github.com/arisynn/katakecil/releases/tag/v1.1.2-rc.1)** memuat perbaikan bingkai sampul di mode gelap. Build ini belum dinyatakan menyelesaikan peringatan Play Protect dan tidak ditawarkan sebagai pembaruan stable otomatis. Jika masih diblokir, hentikan pemasangan; [catatan build](docs/releases/v1.1.2-rc.1.md) menjelaskan batas pemeriksaannya.
 
 | Kebutuhan | Keterangan |
 | --- | --- |
@@ -37,7 +37,7 @@
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Rilis official untuk distribusi langsung.** Pemilik telah menyetujui status official setelah pemeriksaan Android. QA lanjutan versi ini ditangani pemilik; proses rilis hanya membangun, menandatangani, dan memverifikasi paket serta pemasangan backend. Ini bukan publikasi Play Store.
+**Status terbaru:** distribusi APK sedang ditinjau setelah laporan Play Protect pada 1.1.1. Build kandidat berikut disediakan untuk pemeriksaan pemilik, bukan sebagai pernyataan keamanan. Ini bukan publikasi Play Store.
 
 ## Yang bisa dilakukan
 

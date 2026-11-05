@@ -7,7 +7,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 | Peringatan Play Protect dan batas pemeriksaan APK | [Laporan Play Protect](play-protect-review.md) |
 | Audit keamanan konten, pengiriman episode, batas perlindungan dan deployment | [Keamanan konten Reader](reader-content-security.md) |
 | Audit seluruh UI dan konversi tiga lapis liquid glass terbaru | [Audit UI glass](ui-liquid-glass-audit.md) |
-| Mengunduh APK terkini dan membaca batas pengujian | [Android 1.1.1 Official](releases/v1.1.1.md) |
+| Build uji terbaru dan batas pemeriksaan | [Android 1.1.2-rc.1](releases/v1.1.2-rc.1.md) |
 | Efek kaca, lensa tab dan updater GitHub | [Glass dan app updates](glass-and-updates.md) |
 | Fakta build dan QA terbaru | [Hasil rollout 1.1.0](generated/official-1.1.0-rollout.json) |
 | Membangun APK, menandatangani, dan memindahkan data | [Panduan Android](android-release.md) |

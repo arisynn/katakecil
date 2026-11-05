@@ -1,6 +1,6 @@
 # Play Protect report — 2026-11-05
 
-Status: unresolved. A user reported the “Harmful app blocked” dialog while updating KataKecil. The screenshot does not identify the target version, malware category, or offending component. This is not sufficient evidence to call the warning a false positive or to attribute it to sideloading or the updater permission.
+Status: unresolved. A user reported the “Harmful app blocked” dialog while updating KataKecil. The owner confirmed that the blocked target was version 1.1.1. The screenshot does not identify the malware category or offending component. This is not sufficient evidence to call the warning a false positive or to attribute it to sideloading or the updater permission.
 
 Do not bypass Play Protect or disable scanning. No replacement APK is being presented as a fix for this warning.
 
@@ -12,7 +12,7 @@ Do not bypass Play Protect or disable scanning. No replacement APK is being pres
 - Signing certificate SHA-256: `a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba`.
 - Source revision: `55f2b7e5875cddfe40f36b4cfec8c91feb9f8bea`.
 
-The screenshot's blocked artifact has not been independently matched to this hash. Release publication verified its signature, alignment and GitHub asset digest; these checks establish integrity, not freedom from malware.
+The owner confirmed version 1.1.1; the file on the affected device has not been independently matched to this hash. Release publication verified its signature, alignment and GitHub asset digest; these checks establish integrity, not freedom from malware.
 
 ## Limited static inspection
 
@@ -23,6 +23,8 @@ The application-owned native code was inspected. Updates are limited to this rep
 `REQUEST_INSTALL_PACKAGES` enables the requested direct updater. Its presence has not been established as the reason for Google's classification. Removing it would change that feature and would not prove the APK safe or remove Google's classification. Package identity and signing keys were not changed to evade detection.
 
 No antivirus scan, complete third-party SDK/binary analysis, device behavior analysis, or Google classification response has been obtained. No browser/device QA or test suites were run for this report. The cause remains undetermined.
+
+A follow-up `npm audit --omit=dev --json` reported zero known runtime dependency vulnerabilities. npm advisories are not a malware scanner or a Google classification result. Build 1.1.2-rc.1 includes the dark cover CSS correction; it does not claim to resolve the Play Protect report. It retains the existing package, signing identity and permissions.
 
 ## Review request preparation (not submitted)
 
