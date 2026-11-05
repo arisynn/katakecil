@@ -1,4 +1,4 @@
-import {createPublisher} from './publisher.js?v=1';
+import {createPublisher} from './publisher.js?v=2';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';
 import {installPageScrubber} from './page-scrubber.js?v=1';

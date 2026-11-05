@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Rapikan halaman Publisher (5 November 2026)
+
+- Ringkas form login, tambahkan kontrol tampilkan kata sandi, dan beri padding pada pesan verifikasi maupun error.
+- Satukan daftar buku dalam panel dengan status dan tindakan yang lebih padat; toolbar unggah, refresh, dan keluar tetap satu baris di layar kecil.
+- Pemeriksaan: `npm run check`, `git diff --check`, serta Chromium 320/375px untuk overflow, padding pesan, fokus kata sandi, dan header tetap saat daftar digulir. Auth/API memakai fixture selama pemeriksaan browser; tidak mengirim email atau mengubah buku produksi.
+
 ## Preview 3 — Publisher dan ekspor file (5 November 2026)
 
 - Tambahkan Advanced → Publisher, login pemilik terverifikasi dan dukungan publisher key existing.
