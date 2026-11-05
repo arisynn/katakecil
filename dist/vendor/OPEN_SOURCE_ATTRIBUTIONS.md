@@ -76,3 +76,10 @@ The existing `katakecil-reader` service source is now tracked in this repository
 - [pure-color](https://github.com/WickyNilliams/pure-color), npm `pure-color@1.3.0`, MIT. Upstream wheel dependency for hex/RGB/HSL conversion. [License](./licenses/pure-color.txt).
 
 MIT `@radial-color-picker/color-wheel` was evaluated but only draws hue and does not supply a full picker. `@jaames/iro` (MPL-2.0) was evaluated but not integrated. The selected small vanilla picker provides both hue and saturation/value controls without RGB sliders. Its permissive WTFPL license and the dependency's MIT notice are shipped with the app.
+
+
+## Publisher
+
+- [Marked](https://github.com/markedjs/marked), npm `marked@18.1.3`, MIT. Markdown parsing for owner-selected chapter updates; imported markup is reviewed as text and sanitized by the existing server EPUB module before publication. [License](./licenses/marked.txt).
+- [Supabase JS](https://github.com/supabase/supabase-js), npm `@supabase/supabase-js@2.117.3`, MIT. Official email/password signup, login, recovery and in-memory session handling, lazy-loaded only in Publisher. [License](./licenses/supabase-js.txt). Its pinned MIT subpackages auth-js, functions-js, postgrest-js, realtime-js and storage-js are version2.117.3; phoenix0.4.5 and iceberg-js0.8.1 are MIT. Their notices are shipped in `dist/vendor/licenses/supabase-*.txt` and `iceberg-js.txt`; the nested tslib2.8.1 0BSD notice is in `tslib-2.8.1.txt`.
+- Existing JSZip and KataKecil EPUB parser are reused for EPUB structure/markup/cover extraction. The server publisher shares the existing reader EPUB/sanitizer code through source links, rather than implementing a second EPUB generator. No third-party application UI is imported.

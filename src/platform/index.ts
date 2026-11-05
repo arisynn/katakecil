@@ -1,5 +1,6 @@
 import {Capacitor, registerPlugin, SystemBars as Bars, SystemBarsStyle, type PluginListenerHandle} from '@capacitor/core';
 import {App} from '@capacitor/app';
+import {downloadBlob} from './files';
 import type {SpeechDriver, SpeechBoundary} from '../reader/speech';
 export {installBackNavigation} from './navigation';
 interface AppUpdate { version: string; tag: string; size: number; notes: string; preview: boolean }
@@ -15,6 +16,7 @@ export const nativeUpdates = registerPlugin<UpdatePlugin>('KataKecilUpdates');
 interface Voice { name: string; lang: string; localService: boolean }
 interface DevicePlugin {
   saveJson(options: {filename: string; text: string}): Promise<{saved: boolean}>;
+  saveFile(options: {filename:string; mime:string; base64:string}):Promise<{saved:boolean}>;
   initializeSpeech(): Promise<{voices: Voice[]}>;
   speak(options: {text: string; voice: string; rate: number; utteranceId: string}): Promise<void>;
   stopSpeech(): Promise<void>;
@@ -50,16 +52,14 @@ export async function setReaderOrientation(orientation: string) {
 }
 export async function saveJSON(filename: string, text: string): Promise<boolean> {
   if (isNativeApp) return (await Device.saveJson({filename, text})).saved;
-  const file = new File([text], filename, {type: 'application/json'});
-  // Share is initiated directly by the export button; cancellation creates no false success.
-  if (navigator.canShare?.({files: [file]}) && navigator.share) {
-    try { await navigator.share({files: [file]}); return true; }
-    catch (error) { if ((error as Error).name === 'AbortError') return false; throw error; }
-  }
-  const url = URL.createObjectURL(file), link = document.createElement('a');
-  link.href = url; link.download = filename; document.body.append(link); link.click(); link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 30000);
-  return true;
+  return downloadBlob(filename,new Blob([text],{type:'application/json'}));
+}
+export async function saveFile(filename:string,blob:Blob):Promise<boolean>{
+ if(!isNativeApp)return downloadBlob(filename,blob);
+ const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';
+ for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
+ try{return(await Device.saveFile({filename,mime:blob.type,base64:btoa(binary)})).saved;}
+ catch(error){if(/not implemented|unimplemented/i.test(String((error as Error).message)))throw Error('Update the Android app to save EPUB files.');throw error;}
 }
 export function createNativeWakeLock() {
   if (!isNativeApp) return undefined;

@@ -1,3 +1,4 @@
+import {createPublisher} from './publisher.js?v=1';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';
 import {installPageScrubber} from './page-scrubber.js?v=1';
@@ -8,7 +9,7 @@ import {APP_INFO} from './app-info.js?v=1';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=3';
 import {installAppPopups} from './app-popups.js?v=14';
-import {parseEpub,PARSER_REVISION} from './epub.js?v=7';
+import {parseEpub,PARSER_REVISION} from './epub.js?v=8';
 import {relocateAnchor} from './anchors.js?v=4';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
@@ -17,8 +18,8 @@ import * as Store from './store.js?v=15';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,fetchPublishedBook,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=12';
-import {createReaderExperience} from './reader-experience.js?v=22';
-import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=2';
+import {createReaderExperience} from './reader-experience.js?v=23';
+import {isNativeApp,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=3';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
 const app=$('#app'),overlay=$('#overlay-root');
 const ACTIVE_READER_KEY='katakecil_active_reader';
@@ -52,6 +53,10 @@ const scrubber=installPageScrubber(document,{
  snapshot:()=>({index:pageIndex,position:{...features.position()}}),begin:()=>{features.stopSpeech();removeSelection();},
  preview:(index,origin)=>{if(!currentBook||!pages[index])return;if(index===pageIndex&&!origin)return;pageIndex=index;features.setPosition(origin?.position||{chapterIndex:pages[index].chapterIndex,start:pages[index].start});updatePage();},
  save:persistPosition,active:value=>{const shell=$('.reader-shell');if(shell){if(value)shell.dataset.scrubbing='true';else delete shell.dataset.scrubbing;}}
+});
+const publisher=createPublisher({language:()=>p().uiLanguage,active:()=>view==='publisher',
+ mount:html=>{disconnectCarousel();currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Publisher · KataKecil';app.innerHTML=shell(html,'publisher');},
+ show:showOverlay,close:closeOverlay,heading:dialogHeading,toast,saveFile,updated:()=>{void loadCatalog();}
 });
 let publicationCheck=null;
 const selectedBook=()=>books.find(b=>b.id===activeLibraryId)||books[0];
@@ -112,7 +117,7 @@ function renderSettings(){
  <button class="settings-link" data-action="backup-import"><span class="setting-label">${icon('upload')}Pulihkan backup</span>${icon('chevron')}</button>
  <button class="settings-link" data-action="export-notes"><span class="setting-label">${icon('notes')}Ekspor catatan</span>${icon('chevron')}</button>
  <button class="settings-link" data-action="status"><span class="setting-label">${icon('device')}Penyimpanan perangkat</span>${icon('chevron')}</button></div>
- <details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="import"><span class="setting-label">${icon('upload')}Impor EPUB dari perangkat</span>${icon('chevron')}</button><button class="settings-link" data-action="loading-previews"><span class="setting-label">${icon('sparkle')}${p().uiLanguage==='id'?'Pratinjau loading':'Loading preview'}</span>${icon('chevron')}</button><button class="settings-link" data-action="about"><span class="setting-label">${icon('bookOpen')}Tentang aplikasi</span><span class="settings-value" data-book-content translate="no">${escapeHTML(APP_INFO.version)}</span>${icon('chevron')}</button>${isNativeApp?`<button class="settings-link" data-action="updates"><span class="setting-label">${icon('download')}${p().uiLanguage==='id'?'Pembaruan aplikasi':'App updates'}</span><span class="update-summary" id="app-update-summary">${escapeHTML(updates.summary())}</span>${icon('chevron')}</button>`:''}</div></details></section>
+ <details class="advanced-settings"><summary><span class="setting-label">${icon('sliders')}Lanjutan</span>${icon('chevron')}</summary><div class="settings-surface"><button class="settings-link" data-action="publisher"><span class="setting-label">${icon('edit')}Publisher</span>${icon('chevron')}</button><button class="settings-link" data-action="import"><span class="setting-label">${icon('upload')}Impor EPUB dari perangkat</span>${icon('chevron')}</button><button class="settings-link" data-action="loading-previews"><span class="setting-label">${icon('sparkle')}${p().uiLanguage==='id'?'Pratinjau loading':'Loading preview'}</span>${icon('chevron')}</button><button class="settings-link" data-action="about"><span class="setting-label">${icon('bookOpen')}Tentang aplikasi</span><span class="settings-value" data-book-content translate="no">${escapeHTML(APP_INFO.version)}</span>${icon('chevron')}</button>${isNativeApp?`<button class="settings-link" data-action="updates"><span class="setting-label">${icon('download')}${p().uiLanguage==='id'?'Pembaruan aplikasi':'App updates'}</span><span class="update-summary" id="app-update-summary">${escapeHTML(updates.summary())}</span>${icon('chevron')}</button>`:''}</div></details></section>
  </div>`,'settings');
 }
 async function fetchLimited(url,type='buffer'){
@@ -326,10 +331,12 @@ function setAccent(color){if(!/^#[a-f\d]{6}$/i.test(color))return;Store.updatePr
 function navigateLibrary(){scrubber.finish();rememberReader(null);persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay(true);removeSelection();renderLibrary();}
 async function handleAction(button,event){
  if(!button.closest('.liquid-tabs'))animateIcon(button.querySelector('svg'));
+ if(publisher.action(button))return;
  if(features.action(button))return;
  const action=button.dataset.action,id=button.dataset.id,value=button.dataset.value;
  if(button.dataset.action==='updates'||button.dataset.action.startsWith('updates-')){await updates.action(button.dataset.action);return;}
  switch(action){
+  case 'publisher':persistPosition();features.leave();rememberReader(null);view='publisher';closeOverlay(true);await publisher.open();break;
   case 'library':navigateLibrary();break;
   case 'loading-previews':showOverlay(`${dialogHeading(p().uiLanguage==='id'?'Animasi loading':'Loading animation')}${loadingPreviews(p().uiLanguage)}`);break;
   case 'about':aboutDialog();break;
@@ -385,7 +392,7 @@ document.addEventListener('input',event=>{
  if(el.id==='settings-font-size'){Store.updatePreferences({fontSize:Number(el.value)});if($('#font-size-output'))$('#font-size-output').textContent=el.value;if(!currentBook)applyPreferences();}
 
 });
-document.addEventListener('change',event=>{const el=event.target;if(features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
+document.addEventListener('change',event=>{const el=event.target;if(publisher.change(el)||features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
 // Keep HTML constraints intact, but present validation feedback in the app's glass toast.
 document.addEventListener('invalid',event=>{
  const field=event.target;if(!field.closest?.('.dialog,.app-picker'))return;
@@ -393,7 +400,7 @@ document.addEventListener('invalid',event=>{
  const message=v.valueMissing?(id?'Kolom ini wajib diisi.':'This field is required.'):(v.rangeUnderflow||v.rangeOverflow||v.badInput)&&field.min!==''&&field.max!==''?(id?`Masukkan nilai antara ${field.min} dan ${field.max}.`:`Enter a value between ${field.min} and ${field.max}.`):(id?'Periksa nilai kolom ini.':'Check this field’s value.');
  toast(message);field.focus({preventScroll:true});
 },true);
-document.addEventListener('submit',event=>{if(features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note,noteDraftRange);});
+document.addEventListener('submit',event=>{if(publisher.submit(event)||features.submit(event))return;if(event.target.id!=='note-form')return;event.preventDefault();const note=$('#note-text').value.trim();if(editingAnnotation){Store.saveAnnotation({...editingAnnotation,noteText:note,color:noteColor});closeOverlay();updatePage();toast('Catatan tersimpan.');}else saveHighlight(noteColor,note,noteDraftRange);});
 document.addEventListener('selectionchange',()=>{if(selectedRange&&!customSelection.active&&window.getSelection()?.isCollapsed){selectedRange=null;$('.selection-popover')?.remove();}});
 document.addEventListener('mouseup',()=>setTimeout(selectionChanged,20));
 document.addEventListener('keyup',event=>{if(event.shiftKey||event.key==='Shift')selectionChanged();});
@@ -475,6 +482,7 @@ function appBack(){
  if(focused?.matches('input:not([hidden]),textarea,[contenteditable="true"]')){focused.blur();return;}
  if(overlay.firstChild){closeOverlay();return;}
  if(selectedRange){removeSelection();return;}
+ if(view==='publisher'){renderSettings();return;}
  if(view!=='library')navigateLibrary();
 }
 const navigation=installBackNavigation({window,canGoBack,back:appBack,native:isNativeApp});
@@ -487,9 +495,10 @@ window.visualViewport?.addEventListener('resize',syncVisibleViewport);
 window.visualViewport?.addEventListener('scroll',syncVisibleViewport);
 syncVisibleViewport();
 async function init(){
- const resume=readLocal(ACTIVE_READER_KEY,null),restoring=resume&&typeof resume.bookId==='string';activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();
+ const resume=readLocal(ACTIVE_READER_KEY,null),restoring=resume&&typeof resume.bookId==='string'&&new URL(location.href).searchParams.get('publisher')!=='1';activeLibraryId=readLocal('lumina_selected_book','');applyPreferences();await Store.hydrate();
  if(restoring)mountOpeningPage();else renderLibrary();await loadCatalog();
  if(restoring&&view==='loading'){if(books.some(book=>book.id===resume.bookId))await openBook(resume.bookId);else{rememberReader(null);renderLibrary();}}
+ if(new URL(location.href).searchParams.get('publisher')==='1'){const link=new URL(location.href);link.searchParams.delete('publisher');history.replaceState(history.state,'',link);view='publisher';rememberReader(null);await publisher.open();}
  void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');
 }
 init().catch(()=>{rememberReader(null);catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();});

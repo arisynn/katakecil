@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Preview 3 — Publisher dan ekspor file (5 November 2026)
+
+- Tambahkan Advanced → Publisher, login pemilik terverifikasi dan dukungan publisher key existing.
+- Unggah EPUB: tamat terbit utuh, ongoing dijadwalkan bertahap. Update TXT/MD/HTML/EPUB dicocokkan dengan bab existing dan wajib ditinjau sebelum disimpan.
+- Pertahankan ID/jadwal lama, periksa konflik versi, cegah request duplikat, dan arsipkan EPUB private yang dapat diunduh oleh publisher.
+- Perbaiki Save backup/Export notes dengan unduhan browser langsung; perbarui dialog simpan Android dan dukungan EPUB.
+- Tambahkan SDK Supabase 2.117.3 dan Marked 18.1.3; lisensi disertakan. [Panduan dan pemeriksaan](docs/publisher.md).
+
 ## Reader — Buku tamat, cover dan arc EPUB (5 November 2026)
 
 - Ganti cover Apa Itu Rumah? dan rapikan halaman judul tanpa sinopsis; metadata Masa Panen menjadi completed sesuai konfirmasi penulis.

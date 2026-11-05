@@ -11,7 +11,7 @@ export function chapterLabelOf(value=''){
 }
 
 /* EPUB content is parsed as inert XML and rendered as text only. */
-export async function parseEpub(buffer, fallback = 'Untitled book') {
+export async function parseEpub(buffer, fallback = 'Untitled book', options = {}) {
   if (buffer.byteLength > 30 * 1024 * 1024) throw new Error('This EPUB is larger than 30 MB. Please choose a smaller file.');
   const zip = await JSZip.loadAsync(buffer);
   const entries = Object.values(zip.files);
@@ -125,9 +125,15 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
     if(isGenerated(title))title='';
     let content = [];
     let started = !boundaries.size;
-    const flush = () => {
+    let markupAfter=null;
+    const markup = end => {
+      const range=doc.createRange();if(markupAfter)range.setStartAfter(markupAfter);else range.setStart(doc.body,0);
+      if(end)range.setEndBefore(end);else range.setEnd(doc.body,doc.body.childNodes.length);
+      const holder=doc.createElement('div');holder.append(range.cloneContents());return holder.innerHTML;
+    };
+    const flush = (end=null) => {
       const text = content.join('\n\n').trim();
-      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path))||sourceLabel,navigationTitle:sourceTitle||title||'Informasi buku',...(currentArc?{arc:{...currentArc}}:{})});
+      if(text.length>0&&!/^(?:by\s)|contents|illustrations|project gutenberg|copyright|titlepage/i.test(sourceTitle||title))chapters.push({title,text,href:path,chapterLabel:chapterLabelOf(sourceTitle)||chapterLabelOf(chapterNames.get(path))||sourceLabel,navigationTitle:sourceTitle||title||'Informasi buku',...(options.includeMarkup?{html:markup(end)}:{}),...(currentArc?{arc:{...currentArc}}:{})});
       content=[];
     };
     for (const block of blocks) {
@@ -135,21 +141,22 @@ export async function parseEpub(buffer, fallback = 'Untitled book') {
       if (!value) continue;
       const arcMarker=/^H[1-3]$/.test(block.tagName)&&block.id.match(/^arc[_-](\d+)(?:[_-](?:title|heading))?$/i);
       const inlineArc=/^H[1-3]$/.test(block.tagName)&&arcName(value);
-      if(inlineArc){if(started)flush();currentArc={...inlineArc,id:path+'#'+(block.id||inlineArc.label)};sourceTitle=value;sourceLabel='';title=inlineArc.title;started=true;continue;}
+      if(inlineArc){if(started)flush(block);currentArc={...inlineArc,id:path+'#'+(block.id||inlineArc.label)};sourceTitle=value;sourceLabel='';title=inlineArc.title;markupAfter=block;started=true;continue;}
       if(arcMarker){
-        if(started)flush();
+        if(started)flush(block);
         currentArc={id:path+'#'+block.id,label:'ARC '+Number(arcMarker[1]),title:value};
-        sourceTitle=value;sourceLabel='';title=value;started=true;
+        sourceTitle=value;sourceLabel='';title=value;markupAfter=block;started=true;
         continue;
       }
-      if(started&&!title&&!content.length&&(/^H[1-4]$/.test(block.tagName)||block.matches('.chapter-name,.chapter-title,.subtitle'))&&!isMarker(value)){title=realTitle(value,block);sourceLabel=headingLabel(block)||sourceLabel;sourceTitle=sourceTitle?sourceTitle+' — '+value:value;continue;}
+      if(started&&!title&&!content.length&&(/^H[1-4]$/.test(block.tagName)||block.matches('.chapter-name,.chapter-title,.subtitle'))&&!isMarker(value)){title=realTitle(value,block);sourceLabel=headingLabel(block)||sourceLabel;sourceTitle=sourceTitle?sourceTitle+' — '+value:value;markupAfter=block;continue;}
       if (boundaries.has(block)) {
-        if (started) flush();
+        if (started) flush(block);
         // Some illustrated editions put image captions inside chapter headings.
         sourceTitle=(value.match(/chapter\s*[IVXLCDM\d]+(?:[.\s:–—-].*)?$/i)?.[0]||value).trim();
         sourceLabel=headingLabel(block);
         title=realTitle(sourceTitle,block);
         if(isGenerated(title))title='';
+        markupAfter=block;
         started = true;
       } else if (started) content.push(value);
     }

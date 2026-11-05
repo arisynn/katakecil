@@ -313,7 +313,7 @@ export function createReaderExperience(ctx){
   case 'tts-pause':speech.pause();return true;
   case 'tts-resume':speech.resume();return true;
   case 'tts-stop':speech.stop();return true;
-  case 'export-reader':{const book=ctx.book();ctx.download('katakecil-'+book.id+'-annotations.json',JSON.stringify({schemaVersion:1,bookId:book.id,bookTitle:book.title,exportedAt:new Date().toISOString(),annotations:ctx.annotations().filter(a=>a.bookId===book.id)},null,2));return true;}
+  case 'export-reader':{const book=ctx.book();Promise.resolve(ctx.download('katakecil-'+book.id+'-annotations.json',JSON.stringify({schemaVersion:1,bookId:book.id,bookTitle:book.title,exportedAt:new Date().toISOString(),annotations:ctx.annotations().filter(a=>a.bookId===book.id)},null,2))).catch(error=>ctx.toast(error.message));return true;}
   default:return false;
  }}
  document.addEventListener('pointerdown',event=>{if(event.target.matches?.('input[type=range][data-reader-pref]'))beginPeek(event.target);},true);

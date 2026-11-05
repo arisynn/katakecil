@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Base64;
 import android.media.AudioAttributes;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -46,9 +47,22 @@ public class KataKecilDevicePlugin extends Plugin {
             Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("application/json");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.putExtra(Intent.EXTRA_TITLE, filename);
             try { startActivityForResult(call, intent, "documentCreated"); }
             catch (Exception error) { saving = false; call.reject("No file picker is available.", error); }
+        });
+    }
+
+    @PluginMethod
+    public void saveFile(PluginCall call) {
+        String filename=call.getString("filename", "book.epub"), mime=call.getString("mime", ""), data=call.getString("base64", "");
+        if(!filename.matches("[a-zA-Z0-9._-]{1,150}\\.epub") || !mime.equals("application/epub+zip") || data.isEmpty() || data.length()>32*1024*1024) {call.reject("Invalid EPUB file.");return;}
+        getActivity().runOnUiThread(() -> {
+            if(saving){call.reject("Another file is being saved.");return;}saving=true;
+            Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType(mime);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);intent.putExtra(Intent.EXTRA_TITLE,filename);
+            try{startActivityForResult(call,intent,"documentCreated");}catch(Exception error){saving=false;call.reject("No file picker is available.",error);}
         });
     }
 
@@ -59,9 +73,10 @@ public class KataKecilDevicePlugin extends Plugin {
         if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
             call.resolve(new JSObject().put("saved", false)); return;
         }
-        try (OutputStream output = getContext().getContentResolver().openOutputStream(result.getData().getData(), "wt")) {
+        try (OutputStream output = getContext().getContentResolver().openOutputStream(result.getData().getData(), "w")) {
             if (output == null) throw new java.io.IOException("File is unavailable.");
-            output.write(call.getString("text", "").getBytes(StandardCharsets.UTF_8));
+            String encoded=call.getString("base64");
+            output.write(encoded==null?call.getString("text", "").getBytes(StandardCharsets.UTF_8):Base64.decode(encoded,Base64.DEFAULT));
             output.flush();
             call.resolve(new JSObject().put("saved", true));
         } catch (Exception error) { call.reject("Unable to save the file. Choose another location.", error); }

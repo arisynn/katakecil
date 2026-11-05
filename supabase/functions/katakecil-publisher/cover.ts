@@ -1,0 +1,1 @@
+../katakecil-reader/cover.ts

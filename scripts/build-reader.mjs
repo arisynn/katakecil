@@ -6,6 +6,14 @@ await build({entryPoints:['src/reader/index.ts'],outdir:'dist',entryNames:'advan
 });
 await build({entryPoints:{platform:'src/platform/index.ts','device-backup':'src/platform/backup.ts'},outdir:'dist',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
 await mkdir('dist/vendor/licenses',{recursive:true});
+await build({entryPoints:['node_modules/@supabase/supabase-js/dist/index.mjs'],outfile:'dist/vendor/supabase.js',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
+await build({entryPoints:['node_modules/marked/lib/marked.esm.js'],outfile:'dist/vendor/marked.js',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
+for(const name of ['marked','@supabase/supabase-js'])await writeFile('dist/vendor/licenses/'+(name==='marked'?'marked':'supabase-js')+'.txt',await readFile('node_modules/'+name+'/LICENSE'));
+for(const name of ['auth-js','functions-js','phoenix','postgrest-js','realtime-js','storage-js'])await writeFile('dist/vendor/licenses/supabase-'+name+'.txt',await readFile('node_modules/@supabase/'+name+(name==='phoenix'?'/LICENSE.md':'/LICENSE')));
+await writeFile('dist/vendor/licenses/iceberg-js.txt',await readFile('node_modules/iceberg-js/LICENSE'));
+await writeFile('dist/vendor/licenses/tslib-2.8.1.txt',await readFile('node_modules/@supabase/auth-js/node_modules/tslib/CopyrightNotice.txt','utf8')+'\n'+await readFile('node_modules/@supabase/auth-js/node_modules/tslib/LICENSE.txt','utf8'));
+
+
 await build({entryPoints:['node_modules/reinvented-color-wheel/es/reinvented-color-wheel.js'],outfile:'dist/vendor/color-wheel.js',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true});
 await writeFile('dist/vendor/color-wheel.css',await readFile('node_modules/reinvented-color-wheel/css/reinvented-color-wheel.min.css'));
 for(const name of ['reinvented-color-wheel','pure-color'])await writeFile('dist/vendor/licenses/'+name+'.txt',await readFile('node_modules/'+name+'/LICENSE'));
