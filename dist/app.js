@@ -1,5 +1,5 @@
-import {loadingPreviews} from './loading-previews.js?v=2';
-import {loadingLogo} from './loading-logo.js?v=1';
+import {loadingPreviews} from './loading-previews.js?v=3';
+import {loadingLogo} from './loading-logo.js?v=2';
 import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
@@ -81,7 +81,7 @@ function bookCard(book,index){
  return `<article class="shelf-book ${book.id===activeLibraryId?'is-current':''}" data-book-id="${escapeHTML(book.id)}" aria-label="${index+1} dari ${books.length}: ${escapeHTML(book.title)}"><button class="cover-button" data-action="open" data-id="${escapeHTML(book.id)}" aria-label="Baca ${escapeHTML(book.title)}"><img class="book-cover" src="${escapeHTML(book.cover||genericCover(book.title,book.author))}" alt="Sampul ${escapeHTML(book.title)}" ${index===0?'fetchpriority="high"':'loading="lazy"'} draggable="false"></button></article>`;
 }
 function libraryBody(){
- if(catalogState==='loading')return `<div class="library-loading" role="status"><div class="skeleton-cover"></div><p>Menyiapkan rak buku…</p></div>`;
+ if(catalogState==='loading')return `<div class="library-loading" role="status" aria-label="${p().uiLanguage==='id'?'Menyiapkan rak buku':'Loading your library'}">${loadingLogo()}</div>`;
  if(!books.length)return `<div class="empty-state">${icon('bookOpen')}<h2>${catalogState==='error'?'Rak belum bisa dibuka':'Rak masih kosong'}</h2><p>${escapeHTML(catalogError||'Koleksi buku akan muncul di sini.')}</p><button class="secondary" data-action="refresh">Coba lagi</button></div>`;
  return `<section class="shelf" aria-label="Koleksi buku"><div class="book-carousel" id="book-carousel" tabindex="0" aria-label="Geser untuk memilih buku">${books.map(bookCard).join('')}</div><div class="shelf-navigation"><button class="icon-button" data-action="carousel-prev" aria-label="Buku sebelumnya">${icon('left')}</button><div class="shelf-dots" role="group" aria-label="Pilih buku">${books.map((b,i)=>`<button data-action="select-book" data-id="${escapeHTML(b.id)}" aria-label="Buku ${i+1}: ${escapeHTML(b.title)}" aria-pressed="${b.id===activeLibraryId}" class="shelf-dot ${b.id===activeLibraryId?'active':''}"><span></span></button>`).join('')}</div><button class="icon-button" data-action="carousel-next" aria-label="Buku selanjutnya">${icon('chevron')}</button></div><div class="shelf-action" id="shelf-action">${shelfAction()}</div>${catalogOffline?'<p class="offline-label">Menampilkan koleksi tersimpan · <button data-action="refresh">Coba lagi</button></p>':''}</section>`;
 }

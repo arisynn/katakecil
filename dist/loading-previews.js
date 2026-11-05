@@ -1,4 +1,4 @@
-import {loadingLogo} from './loading-logo.js?v=1';
+import {loadingLogo} from './loading-logo.js?v=2';
 
 // Inspect the chosen animation without artificially delaying book loading.
 export function loadingPreviews(){

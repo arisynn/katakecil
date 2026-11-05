@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Typing indicator dan loading Library (5 November 2026)
+
+- Tambahkan tiga titik berdenyut berurutan di samping kanan logo, sejajar dengan dasar huruf. Fade logo tetap bergerak dari kanan ke kiri.
+- Pakai komponen yang sama untuk loading Library, membuka buku, menata halaman, dan preview. Hapus placeholder sampul serta teks loading Library dari tampilan; status aksesibilitas dipertahankan.
+- Reduced motion menampilkan titik/logo statis. Loading reader yang tersembunyi menghentikan seluruh animasinya.
+- Pemeriksaan: build, check, typecheck dan diff check; Chromium 320×568 memverifikasi tiga titik berada di samping logo tanpa overflow, loading Library tanpa skeleton/teks, preview yang sama, dan reduced motion.
+
 ## Web — Logo loading bergelombang dari kanan ke kiri (5 November 2026)
 
 - Terapkan pilihan logo ke loading membuka buku dan menata halaman, tanpa spinner atau teks status yang terlihat. Label aksesibilitas tetap tersedia.
