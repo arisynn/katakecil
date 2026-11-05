@@ -13,9 +13,13 @@
     "queried_coordinates": 50,
     "listed_vulnerabilities": 0
   },
-  "malware_scan_result_obtained": false,
-  "google_appeal_submitted": false,
+  "malware_scan_result_obtained": true,
+  "google_appeal_submitted": true,
   "cause_identified": false,
   "additional_apk_published": false,
-  "qa_tests_run": false
+  "qa_tests_run": false,
+  "malware_scan_result_source": "owner-provided VirusTotal Detection screenshot; full report not independently retrieved",
+  "google_submission_status": "ACCEPTED",
+  "google_email_verification_completed": false,
+  "classification_cleared": false
 }

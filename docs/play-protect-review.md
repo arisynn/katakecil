@@ -38,6 +38,12 @@ A follow-up `npm audit --omit=dev --json` reported zero known runtime dependency
 - Packaged Capacitor configuration loads UI from bundled `dist` assets, has no remote `server.url` or `allowNavigation` additions, disables mixed content and WebView debugging, and requires WebView113+. The inspected modern Capacitor message listener scopes native plugin messages to its allowed origin and main frame. Its upstream implementation also has a legacy `addJavascriptInterface` fallback; presence of this API alone is not a malware finding. This inspection is not an exploitability assessment of every SDK method.
 - Public hash searches and direct attempts to read the VirusTotal report did not produce an accessible result. This does not mean VirusTotal has no record or that scanners found zero detections. No file was uploaded and no malware scanner result is available.
 
+## Owner-provided VirusTotal result
+
+The owner supplied the VirusTotal report URL for the exact candidate SHA-256 and a screenshot of its Detection tab. The screenshot shows the summary “No security vendors flagged this file as malicious” and visible rows marked “Undetected”, alongside engines that could not process the file type. The precise engine count and scan time are not legible at this resolution. This is evidence of no detections reported by that scan, not a malware-free certification, proof that Play Protect is wrong, or independent access to the full report. Both device installation blocks remain unresolved. No new APK or permission change is justified by this screenshot alone.
+
+Report: https://www.virustotal.com/gui/file/dbed7f06ade2cbbce535724231c027eecd351181f8bacf7607a7edd289bac850/detection
+
 ## What the official policies establish
 
 The [Play Protect developer guide](https://developers.google.com/android/play-protect/warning-dev-guidance) distinguishes a harmful-app block from an unknown-app scan prompt and from sensitive SMS/accessibility permission blocks. The screenshot matches the harmful-app heading. It does not disclose the cause or a malware category.
@@ -46,7 +52,7 @@ The [Play Store installer-permission policy](https://support.google.com/googlepl
 
 Google also documents [sensitive JavaScript bridge risks](https://support.google.com/googleplay/android-developer/answer/10768383). The appropriate review is whether untrusted content can reach privileged functionality, not assuming all WebView applications are unsafe. No such cause has been established for this report.
 
-## Review request preparation (not submitted)
+## Review request and submission status
 
 Google's developer guidance distinguishes harmful-app blocks from unknown-app scan prompts and provides a classification appeal route:
 https://developers.google.com/android/play-protect/warning-dev-guidance
@@ -61,4 +67,4 @@ Suggested classification-review description, to review against the VirusTotal re
 
 > Please review the Play Protect classification of our EPUB reader KataKecil, package id.karisyono.katakecil, version 1.1.2-rc.1 (versionCode6). A user reported “Harmful app blocked” both for 1.1.1 and for the candidate downloaded directly from our GitHub release. Candidate APK SHA-256: dbed7f06ade2cbbce535724231c027eecd351181f8bacf7607a7edd289bac850. Signing certificate SHA-256: a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba. The direct updater is user-initiated, restricted to our own GitHub release APK, verifies its digest/package/version/certificate, and opens Android's installer for user confirmation. The APK requests internet and package-installation permission, plus an app-scoped signature receiver permission; it does not request SMS, contacts, accessibility, microphone or notification-listener access. The candidate only changed UI assets and release metadata; its native DEX matches 1.1.1. We have not established the cause and are not asking users to bypass Play Protect. We request classification review of the exact uploaded sample; the static inspection and advisory results are supporting information, not a malware-free certification.
 
-No appeal, APK upload to a scanning service, or external message has been submitted.
+With the owner's explicit authorization, the Play Protect appeal was submitted through Google's official form. Google returned `ACCEPTED` with a case identifier and displayed “Your email has been sent”. The case identifier, contact email, exact submitted text and confirmation evidence are kept in the private review workspace. Google also requested email verification; no confirmation email was found in the owner's connected Gmail during the initial targeted checks. Verification and the classification decision remain pending. Submission is not a cleared verdict. The owner, not this agent, uploaded the APK to VirusTotal. No replacement APK or new QA was performed.
