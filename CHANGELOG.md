@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Arah dan tempo loading (5 November 2026)
+
+- Balik fade logo menjadi kiri ke kanan, searah urutan tiga titik typing indicator.
+- Percepat siklus logo dari 3,2 menjadi 2,4 detik dan titik dari 1,4 menjadi 1,2 detik. Gelombang tipis, posisi titik di kanan, tema dan reduced motion dipertahankan.
+- Pemeriksaan singkat: `npm run check` dan `git diff --check`. Kenyamanan tempo di HP diserahkan ke pengguna.
+
 ## Web — Typing indicator dan loading Library (5 November 2026)
 
 - Tambahkan tiga titik berdenyut berurutan di samping kanan logo, sejajar dengan dasar huruf. Fade logo tetap bergerak dari kanan ke kiri.

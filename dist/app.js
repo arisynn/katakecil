@@ -1,5 +1,5 @@
-import {loadingPreviews} from './loading-previews.js?v=3';
-import {loadingLogo} from './loading-logo.js?v=2';
+import {loadingPreviews} from './loading-previews.js?v=4';
+import {loadingLogo} from './loading-logo.js?v=3';
 import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
