@@ -1,8 +1,9 @@
 /* A soft fade travels left to right. The original logo is never retyped. */
 .loading-brand{display:inline-flex;align-items:flex-end;justify-content:center;gap:0}
 .loading-wordmark{position:relative;display:block;width:min(210px,64vw);aspect-ratio:3/1;flex-shrink:0}
-.loading-wordmark-piece{position:absolute;inset:0;background:var(--text);mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;-webkit-mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;clip-path:inset(0 var(--cut-right) 0 var(--cut-left));animation:loadingLogoWave 2.4s ease-in-out infinite;animation-delay:calc(var(--wave-order)*.1s - 2.4s)}
-@keyframes loadingLogoWave{0%,48%,100%{opacity:1;transform:translateY(0)}18%{opacity:.16;transform:translateY(-1.2px)}33%{opacity:.72;transform:translateY(.6px)}}
+.loading-wordmark-piece{position:absolute;inset:0;background:var(--text);mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;-webkit-mask:url('./assets/katakecil-wordmark.png') center/contain no-repeat;clip-path:inset(0 var(--cut-right) 0 var(--cut-left));animation:loadingLogoFade 2.4s ease-in-out infinite,loadingLogoFloat 3.2s ease-in-out infinite;animation-delay:calc(var(--wave-order)*.1s - 2.4s),calc(var(--wave-order)*.13s - 3.2s)}
+@keyframes loadingLogoFade{0%,48%,100%{opacity:1}18%{opacity:.16}33%{opacity:.72}}
+@keyframes loadingLogoFloat{0%,48%,100%{transform:translateY(0)}18%{transform:translateY(-1.2px)}33%{transform:translateY(.6px)}}
 .loading-dots{display:flex;align-items:center;gap:3px;height:6px;margin-left:-4px;margin-bottom:clamp(6px,2.1vw,9px);flex-shrink:0}
 .loading-dots i{display:block;width:4px;height:4px;border-radius:50%;background:var(--text);animation:loadingTypingDot 1.2s ease-in-out infinite}
 .loading-dots i:nth-child(2){animation-delay:.14s}.loading-dots i:nth-child(3){animation-delay:.28s}

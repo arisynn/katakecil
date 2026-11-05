@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Pulihkan ritme gelombang logo (5 November 2026)
+
+- Pisahkan fade dan gerak vertikal agar percepatan fade tidak ikut mempercepat gelombang.
+- Kembalikan gelombang ke siklus 3,2 detik dengan jeda antarbagian 0,13 detik dan amplitudo lama. Fade tetap 2,4 detik dari kiri ke kanan; titik tetap di kanan.
+- Pemeriksaan singkat: `npm run check` dan `git diff --check`.
+
 ## Web — Arah dan tempo loading (5 November 2026)
 
 - Balik fade logo menjadi kiri ke kanan, searah urutan tiga titik typing indicator.
