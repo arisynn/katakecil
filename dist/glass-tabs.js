@@ -1,3 +1,4 @@
+import {animateIcon} from './motion.js?v=1';
 // One controller for tabs; pointer velocity and optional SVG edge distortion adapt the owner-supplied liquid helper.
 // Existing buttons remain the only focus/action targets.
 export function installGlassTabs(doc=document){
@@ -29,6 +30,7 @@ export function installGlassTabs(doc=document){
    const active=nav.querySelector(':scope > button.active,:scope > button[aria-selected=true]');record.lens.hidden=!active;if(!active)continue;
    const box=nav.getBoundingClientRect(),target=active.getBoundingClientRect();
    if(!box.width||!target.width)continue;
+   if(record.active&&record.active!==active)animateIcon(active.querySelector('svg'));record.active=active;
    if(record.width!==box.width){if(gesture?.nav===nav)cancelGesture();nav.dataset.lensReady='false';record.width=box.width;}
    if(gesture?.nav===nav&&gesture.dragging)continue;
    setGeometry(nav,{'--lens-x':target.left-box.left+nav.scrollLeft+'px','--lens-y':target.top-box.top+nav.scrollTop+'px','--lens-w':target.width+'px','--lens-h':target.height+'px'});
@@ -59,8 +61,8 @@ export function installGlassTabs(doc=document){
   event.preventDefault();
   const now=event.timeStamp||win.performance.now(),dt=Math.max(8,now-g.lastTime);g.velocity=g.velocity*.45+((event.clientX-g.lastX)/dt)*.55;g.lastX=event.clientX;g.lastTime=now;
   // Bounded stretch follows real pointer velocity; release clears it synchronously.
-  g.nav.style.setProperty('--lens-stretch-x',String(Math.min(1.16,1.04+Math.abs(g.velocity)*.06)));
-  g.nav.style.setProperty('--lens-stretch-y',String(Math.max(.92,1.08-Math.abs(g.velocity)*.04)));
+  g.nav.style.setProperty('--lens-stretch-x',String(Math.min(1.06,1.01+Math.abs(g.velocity)*.025)));
+  g.nav.style.setProperty('--lens-stretch-y',String(Math.max(.97,1.01-Math.abs(g.velocity)*.015)));
   const x=Math.min(g.items.at(-1).x,Math.max(g.items[0].x,event.clientX-g.box.left+g.nav.scrollLeft-g.grab)),center=x+g.width/2;
   g.chosen=g.items.reduce((best,item)=>Math.abs(item.x+item.width/2-center)<Math.abs(best.x+best.width/2-center)?item:best).button;
   setGeometry(g.nav,{'--lens-x':x+'px','--lens-y':g.y+'px','--lens-w':g.width+'px','--lens-h':g.height+'px'});

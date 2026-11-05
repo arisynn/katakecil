@@ -40,3 +40,6 @@ body .liquid-tabs { touch-action: pan-y; user-select: none; -webkit-user-select:
 /* Reader toolbar keeps a single surface, with no circular button chrome. */
 body[data-theme] .reader-toolbar .icon-button{background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 body[data-theme] .reader-toolbar .icon-button:hover{background:rgba(var(--accent-rgb),.08)}
+
+.glass-tab-lens{scale:var(--lens-stretch-x,1) var(--lens-stretch-y,1);transition:transform .24s cubic-bezier(.25,.85,.25,1),width .24s cubic-bezier(.25,.85,.25,1),height .24s cubic-bezier(.25,.85,.25,1),scale .16s ease-out}
+@media(prefers-reduced-motion:reduce){.glass-tab-lens{scale:1;transition:none!important}}

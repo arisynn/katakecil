@@ -1,6 +1,7 @@
-import {layoutDialog} from './panel-layout.js?v=2';
+import {transitionContent} from './motion.js?v=1';
+import {layoutDialog} from './panel-layout.js?v=3';
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=12';
-import {escapeHTML as esc,icon,$,$$} from './ui.js?v=11';
+import {escapeHTML as esc,icon,$,$$} from './ui.js?v=12';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
 
@@ -93,14 +94,14 @@ export function createReaderExperience(ctx){
  }
  function nextChapter(delta){const a=position(),index=a.chapterIndex+delta;if(index<0||index>=ctx.book().chapters.length)return;jump({chapterIndex:index,start:0});ctx.mode('reading');}
  function showPanel(html,key){
-  let dialog=$('.dialog');
+  let dialog=$('.overlay-backdrop:not([data-sheet-closing]) .dialog');
   if(dialog?.dataset.readerPanel===key){
    const isAppearance=key==='appearance',bodySelector=isAppearance?'#appearance-body':'#drawer-content',tabsSelector=isAppearance?'.appearance-tabs':'.reader-tabs',selected=isAppearance?appearanceTab:activeTab;
    if((isAppearance||key==='book')&&$(bodySelector)){
     const fragment=document.createElement('template');fragment.innerHTML=html;const next=fragment.content.querySelector(bodySelector),body=$(bodySelector),previous=$(tabsSelector+' button.active')?.dataset.value;
     body.innerHTML=next.innerHTML;body.setAttribute('aria-labelledby',next.getAttribute('aria-labelledby'));const heading=dialog.querySelector('#dialog-title'),nextHeading=fragment.content.querySelector('#dialog-title');if(heading&&nextHeading&&heading.textContent!==nextHeading.textContent)heading.innerHTML=nextHeading.innerHTML;const nav=dialog.querySelector(tabsSelector);nav.setAttribute('aria-label',fragment.content.querySelector(tabsSelector).getAttribute('aria-label'));
     nav.querySelectorAll('button').forEach(button=>{const active=button.dataset.value===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;const label=button.querySelector('span'),nextLabel=fragment.content.querySelector('#'+button.id+' span');if(label.textContent!==nextLabel.textContent)label.textContent=nextLabel.textContent;});
-    if(previous!==selected)(dialog.querySelector('.dialog-body')||dialog).scrollTop=0;
+    if(previous!==selected){(dialog.querySelector('.dialog-body')||dialog).scrollTop=0;const names=isAppearance?['text','layout','theme']:['contents','highlights','notes','bookmarks'];transitionContent(body,names.indexOf(selected)>=names.indexOf(previous)?1:-1);}
    }else dialog.innerHTML=html;
   }else{ctx.show(html);dialog=$('.dialog');}
   if(dialog){layoutDialog(dialog);dialog.dataset.readerPanel=key;}

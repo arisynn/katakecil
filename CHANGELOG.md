@@ -2,6 +2,15 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Motion, branding dan panel adaptif (5 November 2026)
+
+- Perbarui ikon tab dan aktifkan motion singkat ketika tab berubah; transisi isi mempertahankan header, tab, dan sheet yang sama.
+- Samakan animasi masuk/keluar dialog dan picker, dengan cleanup setelah animasi, penanganan buka ulang cepat, dan reduced motion.
+- Geser slider progres untuk menampilkan halaman dan persentase secara langsung; simpan posisi saat dilepas. Escape/pointercancel mengembalikan posisi semula tanpa timer.
+- Kecilkan color wheel secara responsif. Panel pendek boleh memakai tambahan ruang hingga 48px agar tidak memerlukan scroll kecil; konten panjang dan keyboard tetap memakai scroll konten saja.
+- Ganti logo lama dengan wordmark transparan di About/loading dan ikon kutip untuk favicon/launcher. Header Library/Settings dipertahankan.
+- Resource ikon/splash Android diperbarui dalam source; belum menerbitkan APK baru.
+
 ## Web — TTS paragraf dan custom theme popup (4 November 2026)
 
 - Baca TTS per paragraf dan highlight paragraf utuh; event kata hanya untuk posisi/navigasi. Hapus fallback utterance per kata. Paragraf sangat panjang tetap dibatasi sesuai batas 4.000 karakter Android.

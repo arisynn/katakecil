@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="dist/assets/katakecil-logo.png" width="120" alt="Logo KataKecil">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="dist/assets/katakecil-wordmark-cream.png">
+    <img src="dist/assets/katakecil-wordmark.png" width="320" alt="Logo KataKecil">
+  </picture>
 </p>
 
 <h1 align="center">KataKecil</h1>
