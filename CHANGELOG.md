@@ -2,6 +2,11 @@
 
 Perubahan dicatat per rilis. Status Preview menandakan pengujian perangkat belum selesai.
 
+## Web — Sinkronkan gelombang dan fade (5 November 2026)
+
+- Gunakan kembali satu animasi dengan tempo normal 3,2 detik dan jeda antarbagian 0,13 detik agar gerak vertikal serta fade selalu sinkron, dari kiri ke kanan.
+- Pemeriksaan singkat: `npm run check` dan `git diff --check`.
+
 ## Web — Pulihkan ritme gelombang logo (5 November 2026)
 
 - Pisahkan fade dan gerak vertikal agar percepatan fade tidak ikut mempercepat gelombang.
