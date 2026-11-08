@@ -100,7 +100,7 @@ function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.
 function renderLibrary(){
  disconnectCarousel();view='library';currentBook=null;document.body.classList.remove('is-reading');document.body.classList.add('is-library');document.title='Library · KataKecil';
  if(catalogState!=='loading'&&!books.some(b=>b.id===activeLibraryId))activeLibraryId=books[0]?.id||'';
- app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="header-brand-space" aria-hidden="true"></div><h1>Library</h1></div><div class="library-header-actions" role="group" aria-label="Aksi Library">${actionButton('import','upload','Impor EPUB')}${actionButton('refresh','refresh','Segarkan koleksi')}${actionButton('settings','sliders','Pengaturan')}</div></header>${libraryBody()}`);
+ app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="header-brand-space" aria-hidden="true"></div><h1>Library</h1></div><div class="library-header-actions" role="group" aria-label="Aksi Library">${actionButton('refresh','refresh','Segarkan koleksi')}${actionButton('settings','sliders','Pengaturan')}</div></header>${libraryBody()}`);
  $('.library-header [data-action=refresh]')?.setAttribute('aria-busy',String(catalogState==='loading'));connectCarousel();
 }
 function disconnectCarousel(){carouselObserver?.disconnect();clearTimeout(carouselTimer);}
