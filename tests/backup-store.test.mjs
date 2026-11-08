@@ -4,7 +4,7 @@ import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 const dom=new JSDOM('',{url:'https://backup.example/'}),w=dom.window;
 Object.assign(globalThis,{window:w,localStorage:w.localStorage,indexedDB,BroadcastChannel:class{postMessage(){}close(){}}});
-const store=await import('../dist/store.js?v=19');
+const store=await import('../dist/store.js?v=20');
 const old='2026-11-01T00:00:00.000Z',recent='2026-11-04T00:00:00.000Z';
 const bookmark=(id,at=old)=>({id,bookId:'book-one',chapterIndex:0,charOffset:0,type:'bookmark',color:'sapphire',label:'Return here',createdAt:at,updatedAt:at});
 test('restore merges new notes, keeps newer local data and tombstones, and retains the device identity',async()=>{

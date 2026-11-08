@@ -1,0 +1,55 @@
+{
+  "version": "1.2.0",
+  "versionCode": 8,
+  "releaseChannel": "stable",
+  "owner_authorized_stable": true,
+  "validation_scope": "quick targeted tests; not full device QA",
+  "node_tests": {
+    "passed": 34,
+    "failed": 0,
+    "full_suite_run": false
+  },
+  "epub_fixtures": [
+    "alice",
+    "pride",
+    "frankenstein",
+    "sherlock",
+    "treasure",
+    "time"
+  ],
+  "browser_local_management": {
+    "viewport": "390x844",
+    "serverExcluded": true,
+    "customCoverSaved": true,
+    "customCoverSurvivesReparse": true,
+    "originalCoverRestored": true,
+    "deleteCancellation": true,
+    "deleteDurable": true,
+    "progressAndNotesRetained": true,
+    "reimportIdentityRetained": true,
+    "noHeaderImportButton": true,
+    "pageErrors": []
+  },
+  "helper_build": true,
+  "typecheck": true,
+  "runtime_module_check": true,
+  "apk": {
+    "file": "KataKecil-1.2.0-Karisyono.apk",
+    "bytes": 4916918,
+    "sha256": "c911fc65e67ce4aa61059b65ddfa07b6dee2a8d6297f719bb501309b55ad636d",
+    "signer_certificate_sha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signature_schemes_verified": [
+      "v2",
+      "v3"
+    ],
+    "zipalign_verified": true,
+    "asset_mismatches": [],
+    "build_flags": [
+      "--skip-qa"
+    ]
+  },
+  "physical_android_tested": false,
+  "malware_scan_run": false,
+  "play_protect_cleared": false,
+  "backend_deployed": false
+}

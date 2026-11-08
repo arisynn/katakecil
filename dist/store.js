@@ -38,6 +38,20 @@ export async function dbDelete(store, id) {
   const db = await openDatabase(); if (!db) return;
   return new Promise(resolve => { const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>resolve(); });
 }
+// Local book management leaves progress/annotations intact for a later re-import.
+async function changeLocalBook(id,change){
+ const db=await openDatabase();if(!db)return false;
+ return new Promise(resolve=>{try{
+  const tx=db.transaction('books','readwrite'),store=tx.objectStore('books'),request=store.get(id);let result=false;
+  request.onsuccess=()=>{const book=request.result;if(book?.source!=='local'){tx.abort();return;}result=change(book);if(result)store.put(result);else store.delete(id);};
+  tx.oncomplete=()=>resolve(result||true);tx.onerror=()=>resolve(false);tx.onabort=()=>resolve(false);
+ }catch{resolve(false);}});
+}
+export const deleteLocalBook=id=>changeLocalBook(id,()=>null);
+export function setLocalBookCover(id,cover,custom=true){
+ if(typeof cover!=='string'||!cover.startsWith('data:image/')||cover.length>5*1024*1024)return Promise.resolve(false);
+ return changeLocalBook(id,book=>({...book,cover,coverChecked:true,coverCustom:custom}));
+}
 export let progress = safeRead('lumina_reading_progress', {});
 export let annotations = safeRead('lumina_annotations', []);
 const removedAnnotations=new Set();

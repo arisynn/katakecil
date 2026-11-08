@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.0 Stable — EPUB pribadi dan fokus RSVP (8 November 2026)
+
+- Rilis stable pemilik, versionCode 8, dengan package/signer Karisyono yang sama.
+- Gabungkan perbaikan cover/impor EPUB lokal, parser bab/arc adaptif, sheet ringkas serta RSVP/fokus dengan ukuran huruf konsisten.
+- Tambahkan pengelolaan EPUB pribadi di Advanced: ganti/reset cover dan hapus berkas lokal sambil mempertahankan progres/catatan.
+- 34 tes terarah dan smoke test browser lulus; build APK dan integritas diverifikasi. QA HP lanjutan oleh pemilik; Play Protect belum dinyatakan selesai.
+- [Catatan rilis dan batas pemeriksaan](docs/releases/v1.2.0.md).
+
 ## Pengembangan web — Ukuran huruf RSVP tetap (8 November 2026)
 
 - Tentukan satu ukuran font untuk seluruh episode, menggantikan pengecilan per kata panjang.

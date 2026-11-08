@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.1.1">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.0">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,20 +24,20 @@
 
 ## Pasang di Android
 
-**Pemasangan APK 1.1.1 ditunda:** Play Protect dilaporkan memblokir versi ini. Penyebab belum teridentifikasi. Jangan menonaktifkan atau melewati Play Protect. [Status pemeriksaan](docs/play-protect-review.md).
+**Rilis stable terbaru: [1.2.0](https://github.com/arisynn/katakecil/releases/tag/v1.2.0)**, sesuai persetujuan pemilik. Memuat perbaikan EPUB pribadi, pengelolaan cover/buku lokal, serta mode fokus RSVP. [Catatan rilis](docs/releases/v1.2.0.md).
 
-Build uji **[1.1.2-rc.1](https://github.com/arisynn/katakecil/releases/tag/v1.1.2-rc.1)** memuat perbaikan bingkai sampul di mode gelap. Pemilik telah mengonfirmasi Play Protect juga memblokir build ini; perbaikan visual tidak menyelesaikan blokir. Build tidak ditawarkan sebagai pembaruan stable otomatis. Hentikan pemasangan; [catatan build](docs/releases/v1.1.2-rc.1.md) menjelaskan batas pemeriksaannya.
+**Status Play Protect belum terselesaikan:** versi 1.1.1 dan 1.1.2-rc.1 sebelumnya dilaporkan diblokir. Klasifikasi Google untuk 1.2.0 belum diverifikasi; rilis ini tidak diklaim memperbaiki blokir tersebut. Jika Play Protect memblokir, hentikan pemasangan dan jangan menonaktifkan atau melewati pemindaian. [Status pemeriksaan](docs/play-protect-review.md).
 
 | Kebutuhan | Keterangan |
 | --- | --- |
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 4,9 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.1.1` · build `5` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.0` · build `8` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Status terbaru:** distribusi APK sedang ditinjau setelah laporan Play Protect pada 1.1.1. Build kandidat berikut disediakan untuk pemeriksaan pemilik, bukan sebagai pernyataan keamanan. Ini bukan publikasi Play Store.
+**Status terbaru:** 1.2.0 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
 
 ## Yang bisa dilakukan
 
@@ -45,7 +45,8 @@ Build uji **[1.1.2-rc.1](https://github.com/arisynn/katakecil/releases/tag/v1.1.
 - **Temukan kembali bagian penting.** Simpan highlight, catatan, dan bookmark; cari kata di episode yang sedang dibaca.
 - **Lanjutkan bacaan.** Posisi baca disimpan di perangkat, termasuk ketika meninggalkan reader atau berpindah aplikasi.
 - **Dengarkan cerita.** Kontrol play, pause, resume, kecepatan, bahasa, dan suara. Android memakai TextToSpeech perangkat; web memakai suara browser.
-- **Bawa buku sendiri.** Impor EPUB tanpa DRM hingga 30 MB. EPUB impor tetap lokal dan bisa dibaca offline.
+- **Bawa buku sendiri.** Impor EPUB tanpa DRM hingga 30 MB melalui Advanced atau file manager Android. Kelola cover dan hapus buku pribadi melalui Advanced; EPUB tetap lokal dan dapat dibaca offline.
+- **Baca cepat dengan fokus.** RSVP satu kata bergantian, 100–600 kata/menit, huruf penanda tetap di tengah, serta fullscreen bila browser mendukung.
 - **Pindahkan data.** Ekspor dan pulihkan backup progres, catatan, bookmark, dan pengaturan. Data yang lebih baru di perangkat tujuan dipertahankan.
 - **Pakai di Android dan web.** Handler kembali, backup/pemulihan, checkpoint progres, dan dialog mobile berasal dari source yang sama. Bahasa aplikasi tersedia dalam Inggris dan Indonesia.
 
@@ -145,11 +146,11 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android official](docs/releases/v1.1.1.md)
+- [Catatan rilis Android stable terbaru](docs/releases/v1.2.0.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)
 
-Manifest hosting yang sudah ada tetap dipertahankan. Update repo dan rilis APK tidak menerbitkan ulang situs atau backend. Patch gateway lama `lumina-library` masih memerlukan rollout dan verifikasi terpisah sebelum rilis produksi; lihat [panduan deployment](docs/advanced-reader-deployment.md).
+Manifest hosting yang sudah ada tetap dipertahankan. Update repo dan rilis APK tidak menerbitkan ulang situs atau backend. Perubahan backend baru tetap memerlukan rollout terpisah; protokol episode yang sudah terpasang dan batas perlindungannya dijelaskan pada [keamanan konten Reader](docs/reader-content-security.md).
 
 Repo ini belum menetapkan lisensi umum untuk kode aplikasinya. Lisensi paket pihak ketiga dan font dicatat pada atribusi; tidak ada naskah pribadi yang disertakan dalam paket rilis.

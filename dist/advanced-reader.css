@@ -98,3 +98,5 @@ body .dialog.speed-focus-dialog{position:relative;display:block;width:100%;heigh
 /* This hidden CSS-size probe never changes the visible word's fixed episode size. */
 .speed-reading-sheet .speed-size-probe{position:absolute;visibility:hidden;pointer-events:none;height:0;overflow:hidden}
 .dialog.speed-focus-dialog .speed-focus-stage{grid-template-columns:minmax(0,1fr);justify-content:stretch}
+
+.local-book-manager{display:grid;gap:12px}.local-book-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.local-book-row:last-child{border:0}.local-book-row>img{width:56px;height:84px;object-fit:contain;border-radius:4px}.local-book-row h3{font-size:13px;line-height:1.5;overflow-wrap:anywhere}.local-book-row p{font-size:11px;line-height:1.5;color:var(--muted);margin-top:3px}.local-book-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.local-book-actions .secondary{min-height:40px;padding:7px 10px;gap:6px;font-size:11px}.local-book-actions svg{width:14px;height:14px}
