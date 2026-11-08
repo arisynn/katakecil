@@ -3,6 +3,7 @@ import {App} from '@capacitor/app';
 import {downloadBlob} from './files';
 import type {SpeechDriver, SpeechBoundary} from '../reader/speech';
 export {installBackNavigation} from './navigation';
+export {listenIncomingEpub} from './imports';
 interface AppUpdate { version: string; tag: string; size: number; notes: string; preview: boolean }
 interface UpdatePlugin {
   check(): Promise<{currentVersion: string; versionCode: number; previewChannel: boolean; update: AppUpdate | null}>;

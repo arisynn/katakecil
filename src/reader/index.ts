@@ -4,3 +4,4 @@ export * from './search';
 export * from './source';
 export * from './speech';
 export * from './tools';
+export * from './speed';

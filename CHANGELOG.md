@@ -2,6 +2,15 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.0-rc.1 — EPUB pribadi dan baca cepat (8 November 2026)
+
+- Ambil cover asli EPUB lokal dan pulihkan cover impor lama dari arsip tersimpan.
+- Tambahkan pratinjau impor Library, tombol impor, deteksi duplikat dan penerimaan EPUB dari file manager Android melalui Buka dengan/Bagikan.
+- Kenali TOC berfragmen, arc, prolog/epilog dan beberapa bab dalam satu file; pertahankan progres dan anotasi melalui migrasi anchor.
+- Tambahkan RSVP satu kata bergantian, 100–600 kata/menit, jeda tanda baca, ±5 kata, pause dan resume posisi.
+- Lulus 34 tes terarah dan smoke test Chromium mobile; QA HP oleh pemilik. [Perubahan dan daftar uji](docs/local-import-and-speed-reading.md).
+- APK kandidat memakai signer sama dan versionCode 7. Tidak menerbitkan GitHub Release, web atau backend; bukan perbaikan klasifikasi Play Protect.
+
 ## 1.1.2-rc.1 — Sampul mode gelap dan status APK (5 November 2026)
 
 - Hapus bayangan persegi pada kotak gambar sampul Library di mode gelap; ukuran dan rasio sampul tetap.

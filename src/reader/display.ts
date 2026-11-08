@@ -3,7 +3,7 @@ export const readerDefaults = {
   letterSpacing: 0, textAlign: 'justify', paragraphIndent: 1.5, marginHorizontal: 24,
   marginVertical: 22, readerWidth: 720, contentPosition: 'top', brightness: 100,
   tapNavigation: true, wakeLock: false, orientation: 'auto', customTextColor: '#28302b',
-  customBackgroundColor: '#faf9f5', ttsRate: 1, ttsVoice: '', ttsLanguage: '',
+  customBackgroundColor: '#faf9f5', ttsRate: 1, ttsVoice: '', ttsLanguage: '', speedWpm:250,
 };
 export const palettes: Record<string, {background: string; text: string}> = {
   light: {background: '#faf9f5', text: '#28302b'}, dark: {background: '#191d1b', text: '#dddcd4'},

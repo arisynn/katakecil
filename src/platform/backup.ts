@@ -40,7 +40,7 @@ function readingRecord(value: unknown, annotation: boolean): RecordValue {
   if (value.type === 'highlight' && (!integer(out.startOffset) || !integer(out.endOffset) || (out.endOffset as number) <= (out.startOffset as number))) invalid();
   return out;
 }
-const preferenceKeys = new Set(['uiLanguage','uiLanguageChosen','uiLanguageDefaultVersion','themeMode','accentColor','fontFamily','fontSize','lineHeight','fontWeight','paragraphSpacing','letterSpacing','paragraphIndent','textAlign','marginHorizontal','marginVertical','readerWidth','readingMode','readerTheme','spreadMode','pageAnimation','contentPosition','brightness','tapNavigation','wakeLock','orientation','customTextColor','customBackgroundColor','ttsRate','ttsVoice','ttsLanguage','globalThemeVersion','comfortDefaultsVersion','paragraphIndentVersion']);
+const preferenceKeys = new Set(['uiLanguage','uiLanguageChosen','uiLanguageDefaultVersion','themeMode','accentColor','fontFamily','fontSize','lineHeight','fontWeight','paragraphSpacing','letterSpacing','paragraphIndent','textAlign','marginHorizontal','marginVertical','readerWidth','readingMode','readerTheme','spreadMode','pageAnimation','contentPosition','brightness','tapNavigation','wakeLock','orientation','customTextColor','customBackgroundColor','speedWpm','ttsRate','ttsVoice','ttsLanguage','globalThemeVersion','comfortDefaultsVersion','paragraphIndentVersion']);
 function preferences(value: unknown) {
   if (!record(value)) invalid();
   const out: RecordValue = {};
@@ -50,7 +50,7 @@ function preferences(value: unknown) {
     else invalid();
   }
   // UI code assumes these values have specific types, even when imported from another device.
-  for (const key of ['fontSize','lineHeight','fontWeight','paragraphSpacing','letterSpacing','paragraphIndent','marginHorizontal','marginVertical','readerWidth','brightness','ttsRate']) if (key in out && typeof out[key] !== 'number') invalid();
+  for (const key of ['fontSize','lineHeight','fontWeight','paragraphSpacing','letterSpacing','paragraphIndent','marginHorizontal','marginVertical','readerWidth','brightness','ttsRate','speedWpm']) if (key in out && typeof out[key] !== 'number') invalid();
   const choices: Record<string, string[]> = {uiLanguage:['id','en'],themeMode:['light','dark','system','auto-sensor','sepia','paper','green','custom'],fontFamily:['Lora','Plus Jakarta Sans','DM Sans','Georgia','system','monospace'],readingMode:['pages','scroll'],readerTheme:['follow','light','dark','sepia','paper','green','custom'],spreadMode:['single','double'],pageAnimation:['none','fade','slide'],contentPosition:['top','center'],textAlign:['left','justify','center','right'],orientation:['auto','portrait','landscape']};
   for (const [key, allowed] of Object.entries(choices)) if (key in out && !allowed.includes(String(out[key]))) invalid();
   for (const key of ['accentColor','customTextColor','customBackgroundColor']) if (key in out && !/^#[a-f\d]{6}$/i.test(String(out[key]))) invalid();

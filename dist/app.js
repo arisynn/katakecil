@@ -1,3 +1,4 @@
+import {createSpeedReading} from './speed-reading.js?v=1';
 import {createPublisher} from './publisher.js?v=3';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';
@@ -9,18 +10,18 @@ import {APP_INFO} from './app-info.js?v=4';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=5';
 import {installAppPopups} from './app-popups.js?v=15';
-import {parseEpub,PARSER_REVISION} from './epub.js?v=9';
-import {relocateAnchor} from './anchors.js?v=4';
+import {parseEpub,extractEpubCover,PARSER_REVISION} from './epub.js?v=10';
+import {relocateAnchor} from './anchors.js?v=5';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=12';
-import * as Store from './store.js?v=17';
+import * as Store from './store.js?v=18';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
-import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=14';
-import {createReaderExperience} from './reader-experience.js?v=26';
-import {isNativeApp,systemDark,initializeNativeTheme,rememberLaunchAppearance,finishNativeLaunch,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation} from './platform.js?v=5';
-import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=1';
+import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=15';
+import {createReaderExperience} from './reader-experience.js?v=27';
+import {isNativeApp,systemDark,initializeNativeTheme,rememberLaunchAppearance,finishNativeLaunch,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation,listenIncomingEpub} from './platform.js?v=6';
+import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=2';
 const app=$('#app'),overlay=$('#overlay-root');
 const ACTIVE_READER_KEY='katakecil_active_reader';
 const rememberReader=id=>Store.writeLocal(ACTIVE_READER_KEY,id?{bookId:id}:null);
@@ -31,6 +32,8 @@ installAccordionReveal(document);
 const updates=createAppUpdater({enabled:isNativeApp,api:nativeUpdates,language:()=>p().uiLanguage,show:showOverlay,heading:dialogHeading,lastCheck:()=>readLocal('katakecil_update_checked',0),saveCheck:date=>Store.writeLocal('katakecil_update_checked',date)});
 const colors={amber:'#e7ca7e',emerald:'#a4c9ae',sapphire:'#acc7e6',rose:'#e4b3c3'};
 const accents=[['#54756c','Sage'],['#4269a5','Biru'],['#82669c','Ungu'],['#a15e73','Rose'],['#a07732','Amber'],['#58616e','Graphite']];
+let pendingImport=null,finishImportPreview=null,importGeneration=0;
+const tr=(en,id)=>Store.preferences.uiLanguage==='id'?id:en;
 let books=[],catalogState='loading',catalogError='',catalogOffline=false,view='library';
 let activeLibraryId='',carouselObserver=null,carouselTimer;
 let currentBook=null,pages=[],pageIndex=0,readerMode='reading',readingRequest=0,layoutRequest=0;
@@ -47,6 +50,9 @@ const features=createReaderExperience({
  savePreferences:Store.updatePreferences,resetReadingPreferences:Store.resetReadingPreferences,saveAnnotation:Store.saveAnnotation,saveSpeech:tts=>{if(currentBook)Store.saveProgress({...Store.progress[currentBook.id],bookId:currentBook.id,tts});},
  goPage:goToPage,loadPosition:loadReadingPosition,nextSpeech:nextSpeechEpisode,reflow,paint:updatePage,persist:persistPosition,apply:applyPreferences,show:showOverlay,close:closeOverlay,heading:dialogHeading,mode:setReaderMode,toast,selection:()=>selectedRange,clearSelection:removeSelection,download,
  syncIndex:index=>{if(index>=0){pageIndex=index;syncPageControls();}},
+});
+const speed=createSpeedReading({book:()=>currentBook,prefs:p,current:()=>features.position(),stopSpeech:()=>features.stopSpeech(),close:()=>closeOverlay(true),show:showOverlay,heading:dialogHeading,toast,save:Store.updatePreferences,persist:persistPosition,load:loadReadingPosition,
+ position:pos=>{if(!currentBook)return;const index=findPage(pages,pos.chapterIndex,pos.start);if(index<0)return;const changed=pageIndex!==index;pageIndex=index;features.setPosition(pos);if(changed)updatePage();}
 });
 const scrubber=installPageScrubber(document,{
  enabled:()=>!!currentBook&&pages.length>0&&!reflowing,
@@ -94,7 +100,7 @@ function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.
 function renderLibrary(){
  disconnectCarousel();view='library';currentBook=null;document.body.classList.remove('is-reading');document.body.classList.add('is-library');document.title='Library · KataKecil';
  if(catalogState!=='loading'&&!books.some(b=>b.id===activeLibraryId))activeLibraryId=books[0]?.id||'';
- app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="header-brand-space" aria-hidden="true"></div><h1>Library</h1></div><div class="library-header-actions" role="group" aria-label="Aksi Library">${actionButton('refresh','refresh','Segarkan koleksi')}${actionButton('settings','sliders','Pengaturan')}</div></header>${libraryBody()}`);
+ app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="header-brand-space" aria-hidden="true"></div><h1>Library</h1></div><div class="library-header-actions" role="group" aria-label="Aksi Library">${actionButton('import','upload','Impor EPUB')}${actionButton('refresh','refresh','Segarkan koleksi')}${actionButton('settings','sliders','Pengaturan')}</div></header>${libraryBody()}`);
  $('.library-header [data-action=refresh]')?.setAttribute('aria-busy',String(catalogState==='loading'));connectCarousel();
 }
 function disconnectCarousel(){carouselObserver?.disconnect();clearTimeout(carouselTimer);}
@@ -134,7 +140,7 @@ async function fetchLimited(url,type='buffer'){
 export function normalizeCatalog(manifest,base=CATALOG_URL){return normalizePublishedCatalog(manifest,base);}
 async function loadCatalog(){
  catalogState='loading';catalogError='';if(view==='library')renderLibrary();
- try{const manifest=await fetchLimited(CATALOG_URL+'?action=catalog','json');const fresh=normalizeCatalog(manifest);const stored=await Store.dbGetAll('books');
+ try{const manifest=await fetchLimited(CATALOG_URL+'?action=catalog','json');const fresh=normalizeCatalog(manifest);const stored=await recoverLocalCovers(await Store.dbGetAll('books'));
   // Purge legacy downloaded server manuscripts. Only user-imported books are kept offline.
   for(const cached of stored.filter(b=>b.source!=='local')){
    const saved=Store.progress[cached.id],chapter=cached.chapters?.[saved?.chapterIndex];
@@ -143,8 +149,14 @@ async function loadCatalog(){
    await Store.dbDelete('books',cached.id);
   }
   books=fresh.map(b=>{const memory=books.find(s=>s.id===b.id&&s.version===b.version&&s.source==='supabase');return memory?{...memory,...b}:b;});books.push(...stored.filter(b=>b.source==='local'));Store.writeLocal(CATALOG_CACHE_KEY,fresh);catalogState='ready';catalogOffline=false;
- }catch(error){const cached=readLocal(CATALOG_CACHE_KEY,[]),stored=await Store.dbGetAll('books');books=cached.map(({chapters,epubBuffer,...metadata})=>metadata);books.push(...stored.filter(b=>b.source==='local'));catalogState=books.length?'ready':'error';catalogOffline=books.length>0;catalogError='Periksa koneksi internet, lalu coba lagi.';}
+ }catch(error){const cached=readLocal(CATALOG_CACHE_KEY,[]),stored=await recoverLocalCovers(await Store.dbGetAll('books'));books=cached.map(({chapters,epubBuffer,...metadata})=>metadata);books.push(...stored.filter(b=>b.source==='local'));catalogState=books.length?'ready':'error';catalogOffline=books.length>0;catalogError='Periksa koneksi internet, lalu coba lagi.';}
  if(view==='library')renderLibrary();
+}
+async function recoverLocalCovers(stored){
+ for(const book of stored.filter(b=>b.source==='local'&&b.epubBuffer&&!b.coverChecked)){
+  const cover=await extractEpubCover(book.epubBuffer);book.cover=cover||book.cover||genericCover(book.title,book.author);book.coverChecked=true;await Store.dbPut('books',book);
+ }
+ return stored;
 }
 function readLocal(key,fallback){try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}}
 async function ensureBook(id,requestedAnchor=null){
@@ -160,9 +172,9 @@ async function ensureBook(id,requestedAnchor=null){
  }
  if(book.chapters&&book.parsedRevision===PARSER_REVISION){if(book.chapters.some(ch=>!ch.contentHash))book={...book,chapters:await prepareChapters(book.chapters)};return book;}
  if(book.source==='local'&&!book.epubBuffer){book={...book,parsedRevision:PARSER_REVISION,chapters:await prepareChapters(book.chapters.map(ch=>({...ch,title:/^Section\s*\d+$/i.test(ch.title)?'':ch.title.replace(/^(?:bab|chapter|episode|bagian)\s*(?:\d+|[ivxlcdm]+)[\s.:—–-]*/i,'')})))};return book;}
- const parsed=await parseEpub(book.epubBuffer||await fetchLimited(book.url),book.title);
+ const parsed=await parseEpub(book.epubBuffer||await fetchLimited(book.url),book.title,{includeCover:book.source==='local'});
  if(book.chapters)migrateSavedAnchors(id,book.chapters,parsed.chapters);
- book={...book,...parsed,chapters:await prepareChapters(parsed.chapters),title:book.title,author:book.author,parsedRevision:PARSER_REVISION};books=books.map(b=>b.id===id?book:b);await Store.dbPut('books',book);return book;
+ book={...book,...parsed,cover:parsed.cover||book.cover,coverChecked:true,chapters:await prepareChapters(parsed.chapters),title:book.title,author:book.author,parsedRevision:PARSER_REVISION};books=books.map(b=>b.id===id?book:b);await Store.dbPut('books',book);return book;
 }
 async function validatePublication(){
  if(!currentBook||currentBook.source!=='supabase'||publicationCheck)return;
@@ -180,8 +192,8 @@ function mountReader(){
  app.innerHTML=`<main class="reader-shell" data-mode="reading"><header class="reader-toolbar glass" inert aria-hidden="true"><button class="icon-button" data-action="library" aria-label="Kembali ke Library">${icon('back')}</button><span class="reader-title" data-book-content translate="no">${escapeHTML(currentBook.title)}</span><button class="icon-button" data-action="bookmark" aria-label="Bookmark halaman">${icon('bookmark')}</button></header><div class="reader-stage"><article class="reading-page" id="reading-page" aria-label="Halaman buku">${pageMarkup({chapterIndex:0,start:0,end:0},0,true)}</article></div><button class="reader-menu-trigger" data-action="show-controls" aria-label="Buka menu baca">${icon('more')}</button><footer class="reader-controls glass" inert aria-hidden="true"><div class="reader-tool-actions"><button data-action="contents">${icon('list')}<span>Daftar isi</span></button><button data-action="appearance">${icon('type')}<span>Tampilan</span></button><button data-action="reader-tools">${icon('sliders')}<span>Alat</span></button><button data-action="fullscreen" aria-label="Masuk layar penuh" aria-pressed="false">${icon('expand')}<span>Layar penuh</span></button></div><div class="scrubber-row"><button class="icon-button" data-action="prev" aria-label="Halaman sebelumnya">${icon('left')}</button><label><span class="sr-only">Posisi baca</span><input type="range" id="page-scrubber" min="0" max="1" value="0" aria-label="Posisi baca"></label><button class="icon-button" data-action="next" aria-label="Halaman berikutnya">${icon('chevron')}</button></div><div class="reader-progress"><span id="page-counter"></span><span id="reading-percent"></span></div></footer><div class="reader-loading" role="status" aria-label="${p().uiLanguage==='id'?'Menata halaman':'Preparing pages'}">${loadingLogo()}</div></main>`;
 }
 function migrateSavedAnchors(bookId,oldChapters,newChapters){
- const saved=Store.progress[bookId];if(saved){const moved=relocateAnchor(oldChapters,newChapters,saved.chapterIndex,saved.charOffset||0);Store.saveProgress({...saved,...moved,anchorBeforeV3:saved.anchorBeforeV3||{chapterIndex:saved.chapterIndex,charOffset:saved.charOffset},parserRevision:PARSER_REVISION});}
- for(const annotation of [...Store.annotations].filter(a=>a.bookId===bookId)){const moved=relocateAnchor(oldChapters,newChapters,annotation.chapterIndex,annotation.charOffset??annotation.startOffset??0,annotation.selectedText||'');const original=annotation.anchorBeforeV3||{chapterIndex:annotation.chapterIndex,charOffset:annotation.charOffset,startOffset:annotation.startOffset,endOffset:annotation.endOffset};Store.saveAnnotation(moved?{...annotation,...moved,...(annotation.type==='highlight'?{startOffset:moved.charOffset,endOffset:moved.charOffset+annotation.selectedText.length}:{}),needsReview:false,anchorBeforeV3:original,parserRevision:PARSER_REVISION}:{...annotation,needsReview:true,anchorBeforeV3:original,parserRevision:PARSER_REVISION});}
+ const saved=Store.progress[bookId];if(saved){const moved=relocateAnchor(oldChapters,newChapters,saved.chapterIndex,saved.charOffset||0);Store.saveProgress({...saved,...moved,anchor:moved?makeAnchor(newChapters[moved.chapterIndex],moved.charOffset,Math.min(newChapters[moved.chapterIndex].text.length,moved.charOffset+80)):undefined,anchorBeforeV3:saved.anchorBeforeV3||{chapterIndex:saved.chapterIndex,charOffset:saved.charOffset},parserRevision:PARSER_REVISION});}
+ for(const annotation of [...Store.annotations].filter(a=>a.bookId===bookId)){const moved=relocateAnchor(oldChapters,newChapters,annotation.chapterIndex,annotation.charOffset??annotation.startOffset??0,annotation.selectedText||'');const original=annotation.anchorBeforeV3||{chapterIndex:annotation.chapterIndex,charOffset:annotation.charOffset,startOffset:annotation.startOffset,endOffset:annotation.endOffset};Store.saveAnnotation(moved?{...annotation,...moved,anchor:makeAnchor(newChapters[moved.chapterIndex],moved.charOffset,Math.min(newChapters[moved.chapterIndex].text.length,moved.charOffset+(annotation.type==='highlight'?annotation.selectedText.length:80))),...(annotation.type==='highlight'?{startOffset:moved.charOffset,endOffset:moved.charOffset+annotation.selectedText.length}:{}),needsReview:false,anchorBeforeV3:original,parserRevision:PARSER_REVISION}:{...annotation,needsReview:true,anchorBeforeV3:original,parserRevision:PARSER_REVISION});}
 }
 function fullscreenElement(){return nativeFullscreen()||document.fullscreenElement||document.webkitFullscreenElement;}
 function syncFullscreenButton(){const button=$('[data-action="fullscreen"]');if(!button)return;const active=!!fullscreenElement();button.innerHTML=icon(active?'collapse':'expand')+`<span>${active?'Keluar layar penuh':'Layar penuh'}</span>`;button.setAttribute('aria-label',active?'Keluar layar penuh':'Masuk layar penuh');button.setAttribute('aria-pressed',String(active));}
@@ -282,7 +294,7 @@ function showOverlay(html){
  document.body.classList.add('sheet-open');requestAnimationFrame(()=>{if(dialog?.isConnected&&!dialog.contains(document.activeElement))dialog.focus({preventScroll:true});});
 }
 function closeOverlay(immediate=false){
- popups.close(false,immediate);features.closePanel();const layer=overlay.firstChild,focus=previousFocus;
+ popups.close(false,immediate);speed.close();features.closePanel();importGeneration++;pendingImport=null;finishImportPreview?.();finishImportPreview=null;const layer=overlay.firstChild,focus=previousFocus;
  const cleanup=()=>{if(layer&&overlay.firstChild!==layer){layer.remove();return;}overlay.innerHTML='';document.body.classList.remove('sheet-open');focus?.focus?.({preventScroll:true});previousFocus=null;editingAnnotation=null;noteDraftRange=null;pendingBackup=null;if(deferredEditorReflow){deferredEditorReflow=false;if(currentBook)void reflow().catch(e=>toast(e.message));}};
  return leaveSheet(layer,cleanup,immediate);
 }
@@ -314,16 +326,35 @@ function contentsDialog(){features.contents();}
 function appearanceDialog(){features.appearance();}
 function importDialog(){showOverlay(`${dialogHeading('Impor EPUB')}<p class="dialog-caption">Tambahkan buku dari perangkat ke rak pribadimu.</p><button class="upload-zone" data-action="choose-file" id="upload-zone">${icon('upload')}<span>Pilih berkas EPUB</span><small>DRM-free · maksimal 30 MB</small></button><div class="form-error" id="import-error" role="alert"></div>`);const zone=$('#upload-zone');zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragging');});zone.addEventListener('dragleave',()=>zone.classList.remove('dragging'));zone.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files[0])importFile(e.dataTransfer.files[0]);});}
 async function importFile(file){
+ const generation=++importGeneration;
  const fail=message=>{if($('#import-error'))$('#import-error').textContent=message;else toast(message);};
- if(!/\.epub$/i.test(file.name)){fail('Pilih berkas .epub.');return;}if(file.size>30*1024*1024){fail('Ukuran maksimal 30 MB.');return;}
- if($('#upload-zone'))$('#upload-zone').disabled=true;
- try{const buffer=await file.arrayBuffer(),parsed=await parseEpub(buffer,file.name);const hash=await crypto.subtle.digest('SHA-256',buffer),id='import-'+Array.from(new Uint8Array(hash),v=>v.toString(16).padStart(2,'0')).join('').slice(0,24);
- if(books.some(b=>b.id===id)){closeOverlay();toast('Buku ini sudah ada di rak.');return;}
- const book={...parsed,id,source:'local',chapters:await prepareChapters(parsed.chapters),epubBuffer:buffer,cover:genericCover(parsed.title,parsed.author)};if(!await Store.dbPut('books',book))throw Error('Penyimpanan perangkat penuh atau tidak tersedia.');books.push(book);activeLibraryId=id;
- try{const channel=new BroadcastChannel('lumina-library');channel.postMessage({kind:'book-added',id});channel.close();}catch{}
- closeOverlay();renderLibrary();toast('Buku ditambahkan ke rak.');
- }catch(e){fail(e.message||'Berkas tidak dapat dibuka.');}finally{if($('#upload-zone'))$('#upload-zone').disabled=false;$('#epub-input').value='';}
+ if(!/\.epub$/i.test(file.name)){fail(tr('Choose an EPUB file.','Pilih berkas EPUB.'));return;}
+ if(file.size>30*1024*1024){fail(tr('Maximum EPUB size is 30 MB.','Ukuran EPUB maksimal 30 MB.'));return;}
+ speed.close();persistPosition();features.leave();currentBook?.remote?.clear();rememberReader(null);readingRequest++;layoutRequest++;removeSelection();renderLibrary();
+ showOverlay(dialogHeading(tr('Import EPUB','Impor EPUB'))+`<p role="status">${tr('Reading book information…','Membaca informasi buku…')}</p><div id="import-error" class="form-error" role="alert"></div>`);
+ try{
+  const buffer=await file.arrayBuffer(),parsed=await parseEpub(buffer,file.name,{includeCover:true});
+  const hash=await crypto.subtle.digest('SHA-256',buffer),id='import-'+Array.from(new Uint8Array(hash),v=>v.toString(16).padStart(2,'0')).join('').slice(0,24);
+  if(generation!==importGeneration)return;
+  const existing=books.find(b=>b.id===id);
+  pendingImport={...parsed,id,source:'local',chapters:await prepareChapters(parsed.chapters),epubBuffer:buffer,cover:parsed.cover||genericCover(parsed.title,parsed.author),coverChecked:true};
+  if(generation!==importGeneration){pendingImport=null;return;}
+  showOverlay(dialogHeading(tr('Import to Library','Impor ke Library'))+`<div class="local-import-preview"><img src="${escapeHTML(pendingImport.cover)}" alt="${tr('Book cover','Sampul buku')}"><div data-book-content translate="no"><h3>${escapeHTML(parsed.title)}</h3><p>${escapeHTML(parsed.author)}</p></div><p>${parsed.chapters.length} ${tr('reading sections','bagian bacaan')} · ${(file.size/1024/1024).toFixed(1)} MB</p><p>${existing?tr('This book is already in your Library.','Buku ini sudah ada di Library.'):tr('Saved on this device for offline reading.','Disimpan di perangkat ini untuk dibaca offline.')}</p></div><div class="dialog-actions"><button class="secondary" data-action="close">${tr('Cancel','Batal')}</button><button class="primary" data-action="confirm-local-import">${existing?tr('Open book','Buka buku'):tr('Import to Library','Impor ke Library')}</button></div><div id="import-error" class="form-error" role="alert"></div>`);
+  await new Promise(resolve=>{finishImportPreview=resolve;});
+ }catch(error){if(generation===importGeneration)fail(error.message||tr('Unable to open this EPUB.','EPUB belum bisa dibuka.'));}
+ finally{$('#epub-input').value='';}
 }
+async function confirmLocalImport(button){
+ const book=pendingImport;if(!book)return;button.disabled=true;
+ try{
+  const existing=books.find(b=>b.id===book.id);
+  if(!existing){if(!await Store.dbPut('books',book))throw Error(tr('Storage is full or unavailable.','Penyimpanan penuh atau tidak tersedia.'));books.push(book);}
+  activeLibraryId=book.id;Store.writeLocal('lumina_selected_book',book.id);
+  try{const channel=new BroadcastChannel('lumina-library');channel.postMessage({kind:'book-added',id:book.id});channel.close();}catch{}
+  await closeOverlay(true);renderLibrary();if(existing)await openBook(book.id);else toast(tr('Book added to Library.','Buku ditambahkan ke Library.'));
+ }catch(error){if($('#import-error'))$('#import-error').textContent=error.message;button.disabled=false;}
+}
+
 async function download(filename,text){return saveJSON(filename,text);}
 async function exportNotes(){if(await download('katakecil-catatan.json',JSON.stringify({exportedAt:new Date().toISOString(),deviceId:Store.deviceId,annotations:Store.annotations.map(a=>({...a,bookTitle:books.find(b=>b.id===a.bookId)?.title||a.bookId}))},null,2)))toast('Catatan diekspor.');}
 let pendingBackup=null;
@@ -353,11 +384,13 @@ function setAccent(color){if(!/^#[a-f\d]{6}$/i.test(color))return;Store.updatePr
 function navigateLibrary(){scrubber.finish();rememberReader(null);persistPosition();currentBook?.remote?.clear();pages=[];void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;reflowing=false;closeOverlay(true);removeSelection();renderLibrary();}
 async function handleAction(button,event){
  if(!button.closest('.liquid-tabs'))animateIcon(button.querySelector('svg'));
+ if(speed.action(button))return;
  if(publisher.action(button))return;
  if(features.action(button))return;
  const action=button.dataset.action,id=button.dataset.id,value=button.dataset.value;
  if(button.dataset.action==='updates'||button.dataset.action.startsWith('updates-')){await updates.action(button.dataset.action);return;}
  switch(action){
+  case 'confirm-local-import':await confirmLocalImport(button);break;
   case 'publisher':persistPosition();features.leave();rememberReader(null);view='publisher';closeOverlay(true);await publisher.open();break;
   case 'library':navigateLibrary();break;
   case 'loading-previews':showOverlay(`${dialogHeading(p().uiLanguage==='id'?'Animasi loading':'Loading animation')}${loadingPreviews(p().uiLanguage)}`);break;
@@ -410,6 +443,7 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('pointerdown',event=>{if(event.pointerType!=='touch')pointerStart={x:event.clientX,y:event.clientY,at:performance.now()};else pointerStart=null;});
 document.addEventListener('input',event=>{
+ if(speed.input(event.target))return;
  const el=event.target;if(features.input(el))return;if(el.id==='accent-custom')setAccent(el.value);
  if(el.id==='settings-font-size'){Store.updatePreferences({fontSize:Number(el.value)});if($('#font-size-output'))$('#font-size-output').textContent=el.value;if(!currentBook)applyPreferences();}
 
@@ -500,7 +534,7 @@ startUiTranslations(syncAppTitle);
 let appActive=document.visibilityState!=='hidden';
 function appActivity(active){
  if(appActive===active)return;appActive=active;
- if(!active){persistPosition();features.pauseSpeech();void Store.flush();}
+ if(!active){speed.pause();persistPosition();features.pauseSpeech();void Store.flush();}
  else {void validatePublication();if(currentBook){void features.resumeScreen().catch(()=>{});void reflow().catch(e=>toast(e.message));}}
 }
 function canGoBack(){return !!($('.app-picker-backdrop:not([data-sheet-closing])')||overlay.firstChild||selectedRange||view!=='library');}
@@ -542,6 +576,7 @@ async function init(){
   if(restoring&&view==='loading'){if(books.some(book=>book.id===resume.bookId))await openBook(resume.bookId);else{rememberReader(null);renderLibrary();}}
   if(new URL(location.href).searchParams.get('publisher')==='1'){const link=new URL(location.href);link.searchParams.delete('publisher');history.replaceState(history.state,'',link);view='publisher';rememberReader(null);await publisher.open();}
  }finally{await hideLaunchLoading();}
+ void listenIncomingEpub(importFile,toast).catch(e=>toast(e.message));
  void updates.check({silent:true});if(!Store.storageHealthy)toast('Penyimpanan perangkat tidak tersedia.');
 }
 init().catch(()=>{rememberReader(null);catalogState='error';catalogError='Rak belum bisa dibuka. Coba segarkan halaman.';renderLibrary();document.getElementById('launch-loading')?.remove();void finishNativeLaunch().catch(()=>{});});

@@ -30,6 +30,7 @@ public class MainActivity extends BridgeActivity {
         });
         registerPlugin(KataKecilDevicePlugin.class);
         registerPlugin(KataKecilUpdatePlugin.class);
+        registerPlugin(KataKecilImportPlugin.class);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);setVolumeControlStream(AudioManager.STREAM_MUSIC);
         applyLaunchAppearance();

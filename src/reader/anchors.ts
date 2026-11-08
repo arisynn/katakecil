@@ -11,7 +11,16 @@ export function makeAnchor(chapter: Chapter, start: number, end: number): TextAn
 }
 export function resolveAnchor(chapters: Chapter[], anchor: TextAnchor): { chapterIndex: number; start: number; end: number } | null {
   if (!anchor.exact || anchor.exact.length > 4000 || !anchor.episodeId) return null;
-  const candidates = chapters.map((chapter, chapterIndex) => ({ chapter, chapterIndex })).filter(x => x.chapter.href === anchor.episodeId);
+  let candidates = chapters.map((chapter, chapterIndex) => ({ chapter, chapterIndex })).filter(x => x.chapter.href === anchor.episodeId);
+  if (!candidates.length) {
+    // Parser 8 gives split sections their own fragments. Only migrate inside the same file.
+    const sameFile=chapters.map((chapter,chapterIndex)=>({chapter,chapterIndex})).filter(x=>x.chapter.href?.split('#')[0]===anchor.episodeId.split('#')[0]);
+    const found=sameFile.flatMap(({chapter,chapterIndex})=>{
+      const resolved=resolveAnchor([chapter],{...anchor,episodeId:chapter.href!});
+      return resolved?[{...resolved,chapterIndex}]:[];
+    });
+    return found.length===1?found[0]:null;
+  }
   if (candidates.length !== 1) return null; // Never move a quote to a different episode.
   const { chapter, chapterIndex } = candidates[0];
   const text = chapter.text, exact = anchor.exact;

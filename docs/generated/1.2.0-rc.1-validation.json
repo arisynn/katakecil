@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-08",
+  "version": "1.2.0-rc.1",
+  "versionCode": 7,
+  "validation_scope": "quick targeted checks; physical Android QA by owner",
+  "tests": {
+    "passed": 34,
+    "failed": 0,
+    "full_suite_run": false
+  },
+  "build": true,
+  "typecheck": true,
+  "module_check": true,
+  "browser": {
+    "viewport": "390x844",
+    "catalog": "mocked",
+    "local_epub": "public-domain Alice fixture",
+    "import_preview": true,
+    "duplicate_detection": true,
+    "rsvp_wpm": 600,
+    "pause_and_seek": true,
+    "resume_offset_after_reload": 32,
+    "page_errors": []
+  },
+  "apk": {
+    "filename": "KataKecil-1.2.0-rc.1-Karisyono.apk",
+    "bytes": 4908652,
+    "sha256": "d247f1c6a2d31cf46ee30f331425c2f5ad80d6cd40f776874bbc3813dbb32a0d",
+    "signer_certificate_sha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signature_schemes_verified": [
+      "v2",
+      "v3"
+    ],
+    "asset_mismatches": [],
+    "build_flags": [
+      "--skip-qa"
+    ],
+    "device_tested": false
+  },
+  "backend_deployed": false,
+  "github_release_published": false,
+  "malware_scan_run": false,
+  "manual_checklist": "docs/local-import-and-speed-reading.md"
+}

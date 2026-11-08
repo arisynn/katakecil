@@ -3,8 +3,8 @@ export function relocateAnchor(oldChapters,newChapters,chapterIndex,offset=0,quo
  const old=oldChapters[chapterIndex];if(!old)return {chapterIndex:0,charOffset:0};
  const needle=quote||old.text.slice(offset,offset+100).trim();
  const candidates=newChapters.map((chapter,index)=>({chapter,index}));
- const sameFile=candidates.filter(c=>c.chapter.href===old.href);
- const ordered=[...sameFile,...candidates.filter(c=>c.chapter.href!==old.href)];
+ const sameFile=candidates.filter(c=>c.chapter.href?.split('#')[0]===old.href?.split('#')[0]);
+ const ordered=[...sameFile,...candidates.filter(c=>c.chapter.href?.split('#')[0]!==old.href?.split('#')[0])];
  if(needle){
   for(const group of [sameFile,ordered]){
    const matches=group.flatMap(({chapter,index})=>{const start=chapter.text.indexOf(needle);return start>=0&&chapter.text.indexOf(needle,start+1)===-1?[{chapterIndex:index,charOffset:start}]:[];});
