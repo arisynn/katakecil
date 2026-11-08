@@ -2,6 +2,15 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Carousel rak melingkar (8 November 2026)
+
+- Tampilkan satu sampul untuk satu buku, carousel sampul untuk 2–4 buku, dan rak punggung buku mulai 5 buku.
+- Loop kedua arah lewat swipe, tombol dan keyboard, tanpa menggandakan data atau elemen buku.
+- Ketuk buku samping untuk memilih, lalu sampul aktif/tombol baca untuk membuka. Batalkan drag tanpa membuka reader.
+- Pertahankan pilihan berdasarkan ID saat refresh, reload dan perubahan jumlah buku; pilih tetangga terdekat bila buku terpilih dihapus.
+- Batasi indikator menjadi lima titik dan nomor posisi untuk rak besar; dukung layar pendek/landscape serta reduced motion.
+- Pemeriksaan cepat Node dan Chromium dengan katalog mock. Web saja, tanpa APK/rilis baru. [Perilaku dan daftar uji](docs/shelf-carousel-web.md).
+
 ## 1.2.0 Stable — EPUB pribadi dan fokus RSVP (8 November 2026)
 
 - Rilis stable pemilik, versionCode 8, dengan package/signer Karisyono yang sama.

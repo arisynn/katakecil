@@ -1,0 +1,94 @@
+{
+  "scope": "Quick Chromium browser smoke test using mocked catalog and episode content",
+  "apk_built": false,
+  "physical_device_tested": false,
+  "checks": {
+    "syntax_and_runtime_modules": "passed",
+    "node_tests": 19,
+    "node_failures": 0
+  },
+  "browser": {
+    "results": [
+      {
+        "count": 0,
+        "empty": true
+      },
+      {
+        "count": 1,
+        "mode": "single",
+        "loop": false,
+        "centerError": 0,
+        "canonicalItems": 1,
+        "visibleDots": 1
+      },
+      {
+        "count": 2,
+        "mode": "covers",
+        "loop": true,
+        "centerError": 0,
+        "canonicalItems": 2,
+        "visibleDots": 2
+      },
+      {
+        "count": 4,
+        "mode": "covers",
+        "loop": true,
+        "centerError": 0,
+        "canonicalItems": 4,
+        "visibleDots": 4
+      },
+      {
+        "count": 5,
+        "mode": "rack",
+        "loop": true,
+        "centerError": 0,
+        "canonicalItems": 5,
+        "visibleDots": 5
+      },
+      {
+        "count": 6,
+        "mode": "rack",
+        "loop": true,
+        "centerError": 0,
+        "canonicalItems": 6,
+        "visibleDots": 5
+      },
+      {
+        "count": 12,
+        "mode": "rack",
+        "loop": true,
+        "centerError": 0,
+        "canonicalItems": 12,
+        "visibleDots": 5
+      },
+      {
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "centerError": 0
+      },
+      {
+        "viewport": {
+          "width": 667,
+          "height": 375
+        },
+        "centerError": 0.005218505859375
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "centerError": 0
+      }
+    ],
+    "thresholdSelectionRetained": true,
+    "cancelledSwipeDoesNotOpen": true,
+    "activeCoverOpensReader": true,
+    "mouseDrag": true,
+    "reducedMotion": true,
+    "removedSelectionChoosesNearest": true,
+    "pageErrors": []
+  }
+}

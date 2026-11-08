@@ -1,3 +1,4 @@
+import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=1';
 import {createLocalBooks} from './local-books.js?v=1';
 import {createSpeedReading} from './speed-reading.js?v=4';
 import {createPublisher} from './publisher.js?v=3';
@@ -36,7 +37,7 @@ const accents=[['#54756c','Sage'],['#4269a5','Biru'],['#82669c','Ungu'],['#a15e7
 let pendingImport=null,finishImportPreview=null,importGeneration=0;
 const tr=(en,id)=>Store.preferences.uiLanguage==='id'?id:en;
 let books=[],catalogState='loading',catalogError='',catalogOffline=false,view='library';
-let activeLibraryId='',carouselObserver=null,carouselTimer;
+let activeLibraryId='',shelfCarousel=null,lastLibraryIndex=0;
 let currentBook=null,pages=[],pageIndex=0,readerMode='reading',readingRequest=0,layoutRequest=0;
 let selectedRange=null,noteDraftRange=null,editingAnnotation=null,noteColor='amber',drawerTab='contents',previousFocus=null;
 let customSelection;
@@ -56,7 +57,7 @@ const speed=createSpeedReading({book:()=>currentBook,prefs:p,current:()=>feature
  position:pos=>{if(!currentBook)return;const index=findPage(pages,pos.chapterIndex,pos.start);if(index<0)return;const changed=pageIndex!==index;pageIndex=index;features.setPosition(pos);if(changed)updatePage();}
 });
 const localBooks=createLocalBooks({language:()=>p().uiLanguage,books:()=>books,show:showOverlay,heading:dialogHeading,toast,original:extractEpubCover,fallback:book=>genericCover(book.title,book.author),saveCover:Store.setLocalBookCover,remove:Store.deleteLocalBook,
- changed:(book,id)=>{books=book?books.map(item=>item.id===id?book:item):books.filter(item=>item.id!==id);if(!books.some(item=>item.id===activeLibraryId)){activeLibraryId=books[0]?.id||'';Store.writeLocal('lumina_selected_book',activeLibraryId);}if(view==='library')renderLibrary();}
+ changed:(book,id)=>{books=book?books.map(item=>item.id===id?book:item):books.filter(item=>item.id!==id);if(!books.some(item=>item.id===activeLibraryId)){activeLibraryId=books[Math.min(lastLibraryIndex,books.length-1)]?.id||'';Store.writeLocal('lumina_selected_book',activeLibraryId);}if(view==='library')renderLibrary();}
 });
 const scrubber=installPageScrubber(document,{
  enabled:()=>!!currentBook&&pages.length>0&&!reflowing,
@@ -93,27 +94,39 @@ function genericCover(title,author=''){
  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 }
 function bookCard(book,index){
- return `<article class="shelf-book ${book.id===activeLibraryId?'is-current':''}" data-book-id="${escapeHTML(book.id)}" aria-label="${index+1} dari ${books.length}: ${escapeHTML(book.title)}"><button class="cover-button" data-action="open" data-id="${escapeHTML(book.id)}" aria-label="Baca ${escapeHTML(book.title)}"><img class="book-cover" src="${escapeHTML(book.cover||genericCover(book.title,book.author))}" alt="Sampul ${escapeHTML(book.title)}" ${index===0?'fetchpriority="high"':'loading="lazy"'} draggable="false"></button></article>`;
+ const hash=Array.from(book.id).reduce((n,ch)=>(n*31+ch.charCodeAt(0))>>>0,0),colors=['#4b6259','#66526c','#775b48','#4c6275','#795461','#696344'];
+ return `<article class="shelf-book ${book.id===activeLibraryId?'is-current':''}" data-book-id="${escapeHTML(book.id)}" data-spine-height="${.84+(hash%4)*.025}" role="group" aria-roledescription="${tr('slide','slide')}" aria-label="${index+1} ${tr('of','dari')} ${books.length}: ${escapeHTML(book.title)}" style="--spine-color:${colors[hash%colors.length]}"><button class="cover-button" data-action="shelf-cover" data-id="${escapeHTML(book.id)}" aria-label="${escapeHTML(tr('Read ','Baca ')+book.title)}"><span class="book-spine" aria-hidden="true"><span class="spine-title" data-book-content translate="no">${escapeHTML(book.title)}</span><span class="spine-mark" aria-hidden="true"></span></span><span class="shelf-cover-frame" data-rak-cover><img class="book-cover" src="${escapeHTML(book.cover||genericCover(book.title,book.author))}" alt="Sampul ${escapeHTML(book.title)}" ${book.id===activeLibraryId?'fetchpriority="high"':'loading="lazy"'} draggable="false"></span></button></article>`;
 }
 function libraryBody(){
  if(catalogState==='loading')return `<div class="library-loading" role="status" aria-label="${p().uiLanguage==='id'?'Menyiapkan rak buku':'Loading your library'}">${loadingLogo()}</div>`;
  if(!books.length)return `<div class="empty-state">${icon('bookOpen')}<h2>${catalogState==='error'?'Rak belum bisa dibuka':'Rak masih kosong'}</h2><p>${escapeHTML(catalogError||'Koleksi buku akan muncul di sini.')}</p><button class="secondary" data-action="refresh">Coba lagi</button></div>`;
- return `<section class="shelf" aria-label="Koleksi buku"><div class="book-carousel" id="book-carousel" tabindex="0" aria-label="Geser untuk memilih buku">${books.map(bookCard).join('')}</div><div class="shelf-navigation"><button class="icon-button" data-action="carousel-prev" aria-label="Buku sebelumnya">${icon('left')}</button><div class="shelf-dots" role="group" aria-label="Pilih buku">${books.map((b,i)=>`<button data-action="select-book" data-id="${escapeHTML(b.id)}" aria-label="Buku ${i+1}: ${escapeHTML(b.title)}" aria-pressed="${b.id===activeLibraryId}" class="shelf-dot ${b.id===activeLibraryId?'active':''}"><span></span></button>`).join('')}</div><button class="icon-button" data-action="carousel-next" aria-label="Buku selanjutnya">${icon('chevron')}</button></div><div class="shelf-action" id="shelf-action">${shelfAction()}</div>${catalogOffline?'<p class="offline-label">Menampilkan koleksi tersimpan · <button data-action="refresh">Coba lagi</button></p>':''}</section>`;
+ const index=Math.max(0,books.findIndex(b=>b.id===activeLibraryId)),visible=shelfDots(books.length,index);
+ return `<section class="shelf" data-shelf-mode="${shelfMode(books.length)}" aria-label="Koleksi buku"><div class="book-carousel" id="book-carousel" tabindex="0" role="region" aria-roledescription="carousel" aria-label="${tr('Choose a book. Use the left and right arrow keys.','Pilih buku. Gunakan tombol panah kiri dan kanan.')}"><span class="shelf-measure" data-shelf-measure aria-hidden="true"></span>${books.map(bookCard).join('')}</div><div class="shelf-navigation" ${books.length===1?'hidden':''}><button class="icon-button" data-action="carousel-prev" aria-label="Buku sebelumnya">${icon('left')}</button><div class="shelf-dots" role="group" aria-label="Pilih buku">${books.map((b,i)=>`<button data-action="select-book" data-id="${escapeHTML(b.id)}" aria-label="Buku ${i+1}: ${escapeHTML(b.title)}" aria-pressed="${b.id===activeLibraryId}" class="shelf-dot ${b.id===activeLibraryId?'active':''}" ${visible.includes(i)?'':'hidden'}><span></span></button>`).join('')}</div><span class="shelf-position" role="status" aria-live="polite" ${books.length<5?'hidden':''}>${index+1} / ${books.length}</span><button class="icon-button" data-action="carousel-next" aria-label="Buku selanjutnya">${icon('chevron')}</button></div><div class="shelf-action" id="shelf-action">${shelfAction()}</div>${catalogOffline?'<p class="offline-label">Menampilkan koleksi tersimpan · <button data-action="refresh">Coba lagi</button></p>':''}</section>`;
 }
+
 function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.progress[b.id];return `<p class="reading-status">${saved?percentage(b.id)===100?'Selesai dibaca':`${percentage(b.id)}% dibaca`:'Belum dibaca'}</p><button class="primary read-button" data-action="open" data-id="${escapeHTML(b.id)}">${saved?'Lanjutkan membaca':'Baca buku'} ${icon('arrow')}</button>`;}
 function renderLibrary(){
  disconnectCarousel();view='library';currentBook=null;document.body.classList.remove('is-reading');document.body.classList.add('is-library');document.title='Library · KataKecil';
- if(catalogState!=='loading'&&!books.some(b=>b.id===activeLibraryId))activeLibraryId=books[0]?.id||'';
+ if(catalogState!=='loading'&&!books.some(b=>b.id===activeLibraryId)){activeLibraryId=books[Math.max(0,Math.min(lastLibraryIndex,books.length-1))]?.id||'';Store.writeLocal('lumina_selected_book',activeLibraryId);}
  app.innerHTML=shell(`<header class="library-header"><div class="library-heading"><div class="header-brand-space" aria-hidden="true"></div><h1>Library</h1></div><div class="library-header-actions" role="group" aria-label="Aksi Library">${actionButton('refresh','refresh','Segarkan koleksi')}${actionButton('settings','sliders','Pengaturan')}</div></header>${libraryBody()}`);
  $('.library-header [data-action=refresh]')?.setAttribute('aria-busy',String(catalogState==='loading'));connectCarousel();
 }
-function disconnectCarousel(){carouselObserver?.disconnect();clearTimeout(carouselTimer);}
-function connectCarousel(){const el=$('#book-carousel');if(!el)return;el.addEventListener('scroll',()=>{clearTimeout(carouselTimer);carouselTimer=setTimeout(()=>{
- const center=el.getBoundingClientRect().left+el.clientWidth/2;let best=null,distance=Infinity;
- $$('.shelf-book',el).forEach(card=>{const r=card.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-center);if(d<distance){best=card;distance=d;}});if(best)selectBook(best.dataset.bookId,false);
- },90);},{passive:true});requestAnimationFrame(()=>scrollToSelected(false));}
-function scrollToSelected(smooth=true){const el=$('#book-carousel'),card=$$('.shelf-book').find(c=>c.dataset.bookId===activeLibraryId);if(!el||!card)return;const left=card.offsetLeft-(el.clientWidth-card.offsetWidth)/2;if(el.scrollTo)el.scrollTo({left,behavior:smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?'smooth':'instant'});else el.scrollLeft=left;}
-function selectBook(id,scroll=true){if(!books.some(b=>b.id===id))return;activeLibraryId=id;Store.writeLocal('lumina_selected_book',id);$$('.shelf-book').forEach(c=>c.classList.toggle('is-current',c.dataset.bookId===id));$$('.shelf-dot').forEach(c=>{c.classList.toggle('active',c.dataset.id===id);c.setAttribute('aria-pressed',String(c.dataset.id===id));});if($('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();if(scroll)scrollToSelected();}
+function disconnectCarousel(){shelfCarousel?.destroy();shelfCarousel=null;}
+function connectCarousel(){
+ const viewport=$('#book-carousel');if(!viewport)return;
+ const start=Math.max(0,books.findIndex(b=>b.id===activeLibraryId));
+ shelfCarousel=createShelfCarousel({viewport,start,onChange:index=>selectBook(books[index].id,false),onOpen:index=>{void openBook(books[index].id);}});
+ selectBook(books[start].id,false);
+}
+function selectBook(id,scroll=true){
+ const index=books.findIndex(b=>b.id===id);if(index<0)return;activeLibraryId=id;lastLibraryIndex=index;Store.writeLocal('lumina_selected_book',id);
+ $$('.shelf-book').forEach((card,i)=>{const active=card.dataset.bookId===id;card.classList.toggle('is-current',active);const button=card.querySelector('.cover-button'),book=books[i];if(button&&book)button.setAttribute('aria-label',tr(active?'Read ':'Select ',active?'Baca ':'Pilih ')+book.title);});
+ const visible=shelfDots(books.length,index);
+ $$('.shelf-dot').forEach((dot,i)=>{dot.classList.toggle('active',dot.dataset.id===id);dot.setAttribute('aria-pressed',String(dot.dataset.id===id));dot.hidden=!visible.includes(i);dot.style.order=String(visible.indexOf(i));});
+ const position=$('.shelf-position');if(position){position.textContent=`${index+1} / ${books.length}`;position.setAttribute('aria-label',tr('Book ','Buku ')+(index+1)+tr(' of ',' dari ')+books.length);}
+ if($('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();if(scroll)shelfCarousel?.goTo(index);
+}
+
 function renderSettings(){
  rememberReader(null);disconnectCarousel();view='settings';currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Pengaturan · KataKecil';
  app.innerHTML=shell(`<header class="settings-header"><div class="header-brand-space" aria-hidden="true"></div><div class="settings-title-row"><h1>Pengaturan</h1><button class="header-back" data-action="library" aria-label="Kembali ke Library">${icon('left')}<span>Library</span></button></div></header><div class="settings-content">
@@ -403,7 +416,7 @@ async function handleAction(button,event){
   case 'settings':persistPosition();void resetNativeScreen().catch(()=>{});features.leave();readingRequest++;layoutRequest++;closeOverlay(true);removeSelection();renderSettings();break;
   case 'refresh':await loadCatalog();break;
   case 'select-book':selectBook(id);break;
-  case 'carousel-prev':case 'carousel-next':{const index=books.findIndex(b=>b.id===activeLibraryId);const next=Math.max(0,Math.min(books.length-1,index+(action==='carousel-next'?1:-1)));if(books[next])selectBook(books[next].id);break;}
+  case 'carousel-prev':case 'carousel-next':{if(shelfCarousel){if(action==='carousel-next')shelfCarousel.next();else shelfCarousel.prev();}break;}
   case 'open':await openBook(id);break;
   case 'show-controls':setReaderMode('controls');break;
   case 'toggle-hud':setReaderMode(readerMode==='reading'?'controls':'reading');break;
@@ -488,7 +501,7 @@ document.addEventListener('keydown',event=>{
  if(event.key==='Tab'&&overlay.firstChild){const panel=$('.dialog'),focusable=$$('button:not(:disabled),input,textarea,select,summary,a[href]',panel).filter(el=>{if(el.closest('[hidden]'))return false;for(let details=el.closest('details');details;details=details.parentElement?.closest('details'))if(!details.open&&!details.querySelector(':scope > summary')?.contains(el))return false;return true;});const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&(document.activeElement===first||document.activeElement===panel)){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}return;}
  if(input||overlay.firstChild||customSelection.active||!window.getSelection()?.isCollapsed)return;
  if(currentBook){if(event.key.toLowerCase()==='h'){event.preventDefault();const root=features.rootFor(event),bounds=wordBounds(root.textContent,0);customSelection.select(bounds.start,bounds.end,root);$('.selection-handle-start')?.focus();return;}if(event.key==='ArrowRight'){event.preventDefault();goToPage(pageIndex+(features.spread()?2:1));}if(event.key==='ArrowLeft'){event.preventDefault();goToPage(pageIndex-(features.spread()?2:1));}if(event.key==='Enter'||event.key===' '){event.preventDefault();setReaderMode(readerMode==='reading'?'controls':'reading');}if(event.key.toLowerCase()==='b')toggleBookmark();}
- else if(view==='library'&&['ArrowRight','ArrowLeft'].includes(event.key)){event.preventDefault();const index=books.findIndex(b=>b.id===activeLibraryId),next=books[Math.max(0,Math.min(books.length-1,index+(event.key==='ArrowRight'?1:-1)))];if(next)selectBook(next.id);}
+ else if(view==='library'&&['ArrowRight','ArrowLeft'].includes(event.key)){event.preventDefault();if(event.key==='ArrowRight')shelfCarousel?.next();else shelfCarousel?.prev();}
 });
 const touchDistance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
 const touchCenter=touches=>({x:(touches[0].clientX+touches[1].clientX)/2,y:(touches[0].clientY+touches[1].clientY)/2});

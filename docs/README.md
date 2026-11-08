@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Carousel sampul/rak melingkar dan daftar uji web | [Carousel Library](shelf-carousel-web.md) |
 | Rilis stable 1.2.0 dan pengelolaan EPUB pribadi | [Android 1.2.0](releases/v1.2.0.md) |
 | Mode fokus RSVP layar penuh dan huruf penanda | [Mode fokus web](focus-reading-web.md) |
 | Impor EPUB pribadi, cover, RSVP dan daftar uji HP | [EPUB pribadi dan baca cepat](local-import-and-speed-reading.md) |
