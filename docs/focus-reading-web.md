@@ -8,7 +8,7 @@ Kata tetap utuh. Tiga kolom simetris menempatkan awalan di kiri, satu grapheme p
 
 Pemilihan huruf adalah heuristik untuk kata berhuruf/angka: 1 karakter memilih pertama, 2–5 memilih kedua, 6–9 memilih ketiga, 10–13 memilih keempat, selebihnya sekitar 30% dari awal. Tanda baca di luar huruf/angka tidak dihitung; Unicode grapheme menjaga huruf beraksen dan emoji tetap utuh. Ini pilihan tampilan yang dapat disempurnakan, bukan formula optimal yang terbukti berlaku untuk semua bahasa atau pembaca.
 
-Lebar kedua sisi diukur dan font diperkecil seperlunya agar kata panjang tetap satu baris. Naskah dan offset UTF-16 tidak diubah. Warna penanda berasal dari aksen, dicampur ke warna teks bila diperlukan untuk mencapai kontras 4,5:1 terhadap latar tema.
+Ukuran font ditentukan sekali untuk seluruh episode berdasarkan kata dengan sisi terlebar. Semua kata memakai ukuran yang sama selama pemutaran; ukuran hanya dihitung ulang saat episode, tampilan, viewport atau font yang dimuat berubah. Grid fokus memakai lebar penuh area baca agar tidak menyempit mengikuti kata. Kata panjang tetap satu baris tanpa penyesuaian font per kata. Naskah dan offset UTF-16 tidak diubah. Warna penanda berasal dari aksen, dicampur ke warna teks bila diperlukan untuk mencapai kontras 4,5:1 terhadap latar tema.
 
 ## Kontrol dan posisi
 
@@ -34,3 +34,8 @@ RSVP adalah penyajian kata berurutan; huruf penanda tetap merupakan tambahan yan
 Chromium headless memakai katalog mock dan EPUB sintetis lokal: sampel kata pendek/panjang, kutipan, huruf beraksen, tiga ukuran viewport termasuk landscape, tema terang/gelap dengan aksen kustom, tampilan tanpa scroll, kontrol tersembunyi saat berjalan, tap untuk jeda, perpindahan sheet/fokus, fullscreen browser, fallback tanpa API, Escape, Back dan resume setelah reload. Pusat kotak grapheme menyimpang kurang dari 0,01 CSS pixel pada sampel yang diukur. Sepuluh pemeriksaan sheet Tools/RSVP di lima ukuran tetap tanpa overflow. [Bukti ringkas](generated/rsvp-focus-web.json).
 
 Belum diuji pada HP fisik atau Safari iOS. Pengukuran geometri bukan penelitian pemahaman membaca. Uji pemilik: coba Mode fokus, beberapa kecepatan, kata panjang, jeda dengan ketukan, fullscreen bila tersedia, Back/rotasi, tema gelap dan kembali ke posisi baca.
+
+
+### Koreksi ukuran huruf tetap
+
+Uji browser tambahan memastikan ukuran font seluruh sampel kata pendek/panjang sama, baik di sheet maupun mode fokus. Titik penanda tetap di tengah, tidak ada bagian kata terpotong, dan resize/landscape/fullscreen/resume tetap bekerja. Ini perubahan web saja, tanpa APK baru. [Bukti](generated/rsvp-fixed-font-web.json).

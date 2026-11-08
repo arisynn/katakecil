@@ -1,4 +1,4 @@
-import {createSpeedReading} from './speed-reading.js?v=3';
+import {createSpeedReading} from './speed-reading.js?v=4';
 import {createPublisher} from './publisher.js?v=3';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';

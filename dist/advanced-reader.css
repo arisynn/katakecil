@@ -94,3 +94,7 @@ body .dialog.speed-focus-dialog{position:relative;display:block;width:100%;heigh
 @media(max-height:520px){.dialog.speed-focus-dialog>.dialog-heading{top:6px}.speed-focus-toolbar{top:52px}.dialog.speed-focus-dialog .speed-playback{bottom:8px;grid-template-columns:1fr 1fr;gap:4px 16px;align-items:center;left:20px;right:20px}.speed-focus-dialog .speed-counter{grid-column:1/-1}.speed-focus-dialog .speed-help{display:none}.dialog.speed-focus-dialog .speed-rate{margin:0}.dialog.speed-focus-dialog .speed-word{font-size:clamp(28px,8vw,46px)}.speed-focus-stage::before{top:calc(50% - 38px)}.speed-focus-stage::after{top:calc(50% + 36px)}}
 @media(max-height:520px) and (max-width:560px){.dialog.speed-focus-dialog .speed-playback{grid-template-columns:minmax(0,1fr);left:20px;right:20px}.speed-focus-dialog .speed-counter{grid-column:auto}.speed-focus-dialog .speed-rate input{height:28px}}
 @media(max-height:520px){.dialog.speed-reading-sheet:not(.speed-focus-dialog) .speed-stage{height:52px}}
+
+/* This hidden CSS-size probe never changes the visible word's fixed episode size. */
+.speed-reading-sheet .speed-size-probe{position:absolute;visibility:hidden;pointer-events:none;height:0;overflow:hidden}
+.dialog.speed-focus-dialog .speed-focus-stage{grid-template-columns:minmax(0,1fr);justify-content:stretch}

@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Ukuran huruf RSVP tetap (8 November 2026)
+
+- Tentukan satu ukuran font untuk seluruh episode, menggantikan pengecilan per kata panjang.
+- Pertahankan grid fokus selebar area baca, huruf penanda tetap di tengah dan kata utuh.
+- Uji cepat browser pada sheet/fokus, resize, fullscreen dan resume; tidak membangun APK. [Bukti](docs/generated/rsvp-fixed-font-web.json).
+
 ## Pengembangan web — Mode fokus RSVP (8 November 2026)
 
 - Tambahkan mode fokus yang memenuhi halaman, dengan satu grapheme penanda tetap di tengah dan seluruh kata tetap terlihat.

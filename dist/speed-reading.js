@@ -2,26 +2,33 @@ import {SpeedReader,focusParts,contrast} from './advanced-reader.js?v=16';
 import {icon} from './ui.js?v=12';
 
 export function createSpeedReading(ctx){
- let active=false,focused=false,lastSave=0,fullscreenRoot=null,resizeObserver=null,paletteKey='';
+ let active=false,focused=false,lastSave=0,fullscreenRoot=null,resizeObserver=null,paletteKey='',sizedWords=null,measuredFont='',maxExtent=0;
  const tr=(en,id)=>ctx.prefs().uiLanguage==='id'?id:en;
  const root=()=>document.querySelector('.speed-reading-sheet');
  const fullElement=()=>document.fullscreenElement||document.webkitFullscreenElement;
  const engine=new SpeedReader({
-  word:(word,chapterIndex)=>{if(!active)return;paintWord(word.text);ctx.position({chapterIndex,start:word.start});if(Date.now()-lastSave>2000){ctx.persist();lastSave=Date.now();}},
+  word:(word,chapterIndex)=>{if(!active)return;paintWord(word.text);if(sizedWords!==engine.words)fitWord();ctx.position({chapterIndex,start:word.start});if(Date.now()-lastSave>2000){ctx.persist();lastSave=Date.now();}},
   change:refresh,
   next:async index=>{const book=ctx.book();if(!active||!book||index+1>=book.chapters.length)return null;if(book.remote)await ctx.load({chapterIndex:index+1,start:0},'speed');if(!active||ctx.book()!==book)return null;return{chapterIndex:index+1,text:book.chapters[index+1].text,start:0,language:book.language};},
   error:error=>ctx.toast(error.message),
  });
  function fitWord(){
-  const word=root()?.querySelector('.speed-word');if(!word)return;
-  word.style.removeProperty('font-size');
-  const before=word.querySelector('.speed-before'),pivot=word.querySelector('.speed-pivot'),after=word.querySelector('.speed-after');if(!pivot)return;
-  for(let i=0;i<3;i++){
-   const side=Math.max(before.getBoundingClientRect().width,after.getBoundingClientRect().width),available=(word.clientWidth-pivot.getBoundingClientRect().width)/2-2;
-   if(side<=available||!side)break;
-   const size=parseFloat(getComputedStyle(word).fontSize);word.style.fontSize=Math.max(.1,size*Math.max(.001,available/side)*.98)+'px';
+  const sheet=root(),word=sheet?.querySelector('.speed-word');if(!word||!engine.words.length)return;
+  // Measure the CSS size without resetting the visible word's font between tokens.
+  const probe=document.createElement('span');probe.className='speed-word speed-size-probe';probe.setAttribute('aria-hidden','true');word.parentElement.append(probe);
+  const style=getComputedStyle(probe),base=parseFloat(style.fontSize),font=`${style.fontStyle} ${style.fontWeight} 100px ${style.fontFamily}`;probe.remove();
+  if(sizedWords!==engine.words||measuredFont!==font){
+   const canvas=document.createElement('canvas'),measure=canvas.getContext('2d');if(!measure)return;measure.font=font;measure.fontKerning='none';maxExtent=0;
+   for(const token of new Set(engine.words.map(word=>word.text))){
+    const {before,pivot,after}=focusParts(token),halfPivot=measure.measureText(pivot).width/2;
+    maxExtent=Math.max(maxExtent,measure.measureText(before).width+halfPivot,measure.measureText(after).width+halfPivot);
+   }
+   sizedWords=engine.words;measuredFont=font;
   }
+  const size=Math.max(.1,Math.floor(Math.min(base,(word.clientWidth/2-3)*100/Math.max(1,maxExtent))*100)/100);
+  word.style.fontSize=size+'px';
  }
+
  function paintWord(text){
   const sheet=root(),word=sheet?.querySelector('.speed-word');if(!word)return;
   const style=getComputedStyle(sheet),accent=style.getPropertyValue('--accent').trim(),ink=style.getPropertyValue('--text').trim(),background=style.getPropertyValue('--bg').trim(),key=[accent,ink,background].join(':');
@@ -32,9 +39,9 @@ export function createSpeedReading(ctx){
    }
    sheet.style.setProperty('--speed-pivot-ink',color);
   }
-  if(word.textContent===text&&word.querySelector('.speed-pivot')){fitWord();return;}
+  if(word.textContent===text&&word.querySelector('.speed-pivot'))return;
   const parts=focusParts(text),nodes=['before','pivot','after'].map(key=>{const span=document.createElement('span');span.className='speed-'+key;span.textContent=parts[key];return span;});
-  word.replaceChildren(...nodes);fitWord();
+  word.replaceChildren(...nodes);
  }
  function refresh(){
   if(!active)return;const sheet=root();if(!sheet)return;
@@ -51,7 +58,7 @@ export function createSpeedReading(ctx){
   if(fullscreenRoot===owned)fullscreenRoot=null;
   if(owned&&fullElement()===owned){const exit=document.exitFullscreen||document.webkitExitFullscreen;try{Promise.resolve(exit?.call(document)).catch(()=>{});}catch{}}
  }
- function close(){if(!active)return;pause();active=false;focused=false;resizeObserver?.disconnect();releaseFullscreen();engine.stop();}
+ function close(){if(!active)return;pause();active=false;focused=false;resizeObserver?.disconnect();releaseFullscreen();sizedWords=null;measuredFont='';maxExtent=0;engine.stop();}
  function rateControls(){return `<label class="speed-rate" for="speed-wpm">${tr('Words per minute','Kata per menit')} <output id="speed-rate-value">${engine.wpm}</output><input id="speed-wpm" type="range" min="100" max="600" step="25" value="${engine.wpm}"></label><div class="speed-actions"><button class="secondary" data-action="speed-back" aria-label="${tr('Back five words','Mundur lima kata')}">−5</button><button class="primary speed-toggle" data-action="speed-toggle" aria-pressed="false">${tr('Start','Mulai')}</button><button class="secondary" data-action="speed-forward" aria-label="${tr('Forward five words','Maju lima kata')}">+5</button></div>`;}
  function render(){
   resizeObserver?.disconnect();
@@ -61,8 +68,8 @@ export function createSpeedReading(ctx){
   const sheet=root();sheet.classList.toggle('speed-focus-dialog',focused);sheet.parentElement.classList.toggle('speed-focus-layer',focused);
   if(focused){for(const node of [sheet,sheet.parentElement])for(const animation of node.getAnimations?.()||[])animation.cancel();}
   if(typeof ResizeObserver==='function'){resizeObserver=new ResizeObserver(fitWord);resizeObserver.observe(sheet.querySelector('.speed-stage'));}
-  paintWord(engine.words[engine.index]?.text||'');refresh();
-  document.fonts?.ready.then(()=>{if(active)fitWord();});
+  paintWord(engine.words[engine.index]?.text||'');fitWord();refresh();
+  document.fonts?.ready.then(()=>{if(active){measuredFont='';fitWord();}});
   if(focused)sheet.querySelector('[data-action="speed-toggle"]').focus({preventScroll:true});
  }
  function open(){
