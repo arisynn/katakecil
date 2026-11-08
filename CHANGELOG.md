@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Mode fokus RSVP (8 November 2026)
+
+- Tambahkan mode fokus yang memenuhi halaman, dengan satu grapheme penanda tetap di tengah dan seluruh kata tetap terlihat.
+- Sembunyikan kontrol saat berjalan; ketuk untuk jeda, kembali ke sheet tanpa kehilangan posisi, serta dukungan fullscreen browser dengan fallback.
+- Pertahankan huruf beraksen, sesuaikan kata panjang/kontras, dan cegah pemutaran ganda saat menunggu episode.
+- Uji cepat Node/browser; tidak membangun APK. [Perilaku, sumber dan batas pengujian](docs/focus-reading-web.md).
+
 ## Pengembangan web — Sheet alat baca ringkas (8 November 2026)
 
 - Rapikan alat baca menjadi tiga baris aksi dan sepasang tombol navigasi episode.

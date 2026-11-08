@@ -36,7 +36,7 @@ test('RSVP retains UTF-16 offsets and cancels a queued episode when closed',asyn
  engine.open({chapterIndex:2,text:'one two',start:4},999);assert.equal(engine.wpm,600);assert.equal(engine.index,1);engine.play();await new Promise(r=>setTimeout(r,130));assert.equal(engine.state,'loading');engine.stop();nextResolve({chapterIndex:3,text:'three',start:0});await Promise.resolve();assert.equal(engine.words.length,0);assert.equal(engine.state,'paused');
 });
 test('RSVP pauses during an episode load and keeps the newly loaded position paused',async()=>{
- let nextResolve;const engine=new SpeedReader({word:()=>{},change:()=>{},next:()=>new Promise(r=>nextResolve=r),error:e=>{throw e;}});engine.open({chapterIndex:0,text:'one',start:0},600);engine.play();await new Promise(r=>setTimeout(r,130));engine.pause();nextResolve({chapterIndex:1,text:'two words',start:0});await Promise.resolve();assert.equal(engine.state,'paused');assert.equal(engine.episode.chapterIndex,1);engine.stop();
+ let nextResolve;const engine=new SpeedReader({word:()=>{},change:()=>{},next:()=>new Promise(r=>nextResolve=r),error:e=>{throw e;}});engine.open({chapterIndex:0,text:'one',start:0},600);engine.play();await new Promise(r=>setTimeout(r,130));engine.pause();engine.play();assert.equal(engine.state,'paused','resume waits for the one pending episode request');nextResolve({chapterIndex:1,text:'two words',start:0});await Promise.resolve();assert.equal(engine.state,'paused');assert.equal(engine.episode.chapterIndex,1);engine.stop();
 });
 
 test('TOC targets on section containers and standalone anchors retain narrative paragraphs',async()=>{

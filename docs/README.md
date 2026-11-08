@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Mode fokus RSVP layar penuh dan huruf penanda | [Mode fokus web](focus-reading-web.md) |
 | Impor EPUB pribadi, cover, RSVP dan daftar uji HP | [EPUB pribadi dan baca cepat](local-import-and-speed-reading.md) |
 | Peringatan Play Protect dan batas pemeriksaan APK | [Laporan Play Protect](play-protect-review.md) |
 | Audit keamanan konten, pengiriman episode, batas perlindungan dan deployment | [Keamanan konten Reader](reader-content-security.md) |

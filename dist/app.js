@@ -1,4 +1,4 @@
-import {createSpeedReading} from './speed-reading.js?v=2';
+import {createSpeedReading} from './speed-reading.js?v=3';
 import {createPublisher} from './publisher.js?v=3';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';
@@ -15,11 +15,11 @@ import {relocateAnchor} from './anchors.js?v=5';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=12';
-import * as Store from './store.js?v=18';
+import * as Store from './store.js?v=19';
 import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
-import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=15';
-import {createReaderExperience} from './reader-experience.js?v=28';
+import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=16';
+import {createReaderExperience} from './reader-experience.js?v=29';
 import {isNativeApp,systemDark,initializeNativeTheme,rememberLaunchAppearance,finishNativeLaunch,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation,listenIncomingEpub} from './platform.js?v=6';
 import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=2';
 const app=$('#app'),overlay=$('#overlay-root');
@@ -540,6 +540,7 @@ function appActivity(active){
 function canGoBack(){return !!($('.app-picker-backdrop:not([data-sheet-closing])')||overlay.firstChild||selectedRange||view!=='library');}
 function appBack(){
  if($('.app-picker-backdrop:not([data-sheet-closing])')){popups.close();return;}
+ if(speed.focused){speed.leaveFocus();return;}
  const focused=document.activeElement;
  if(focused?.matches('input:not([hidden]),textarea,[contenteditable="true"]')){focused.blur();return;}
  if(overlay.firstChild){closeOverlay();return;}

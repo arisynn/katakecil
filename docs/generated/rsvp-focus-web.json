@@ -1,0 +1,220 @@
+{
+  "scope": "quick web checks with synthetic local EPUB and mocked catalog",
+  "apk_built": false,
+  "backend_deployed": false,
+  "node_tests_passed": 16,
+  "full_test_suite_run": false,
+  "helper_build": true,
+  "typecheck": true,
+  "runtime_module_check": true,
+  "max_anchor_error_css_pixels": 0.0078125,
+  "browser": {
+    "results": [
+      {
+        "case": "playing words anchored at center",
+        "samples": [
+          {
+            "word": "I",
+            "pivot": "I",
+            "dx": 0.0078125,
+            "dy": 0.0078125,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "“Perempuan,”",
+            "pivot": "r",
+            "dx": 0.0078125,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "membaca",
+            "pivot": "m",
+            "dx": 0.0078125,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "élan",
+            "pivot": "l",
+            "dx": 0.0078125,
+            "dy": 0.0078125,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "ketidakberkesinambungan",
+            "pivot": "k",
+            "dx": 0.0078125,
+            "dy": 0.0078125,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "aku",
+            "pivot": "k",
+            "dx": 0,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "membicarakannya",
+            "pivot": "i",
+            "dx": 0.0078125,
+            "dy": 0.0078125,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "ini",
+            "pivot": "n",
+            "dx": 0,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "“berkesempatan.”",
+            "pivot": "k",
+            "dx": 0,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          },
+          {
+            "word": "“berkesempatan.”",
+            "pivot": "k",
+            "dx": 0,
+            "dy": 0,
+            "width": 390,
+            "height": 844,
+            "scroll": 0,
+            "bodyScroll": 0,
+            "visibleWord": true
+          }
+        ]
+      },
+      {
+        "case": "resize",
+        "viewport": {
+          "width": 320,
+          "height": 568
+        },
+        "word": "tidak",
+        "pivot": "i",
+        "dx": 0.0078125,
+        "dy": 0.0078125,
+        "width": 320,
+        "height": 568,
+        "scroll": 0,
+        "bodyScroll": 0,
+        "visibleWord": true
+      },
+      {
+        "case": "resize",
+        "viewport": {
+          "width": 667,
+          "height": 375
+        },
+        "word": "tidak",
+        "pivot": "i",
+        "dx": 0.0078125,
+        "dy": 0.0078125,
+        "width": 667,
+        "height": 375,
+        "scroll": 0,
+        "bodyScroll": 0,
+        "visibleWord": true
+      },
+      {
+        "case": "resize",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "word": "tidak",
+        "pivot": "i",
+        "dx": 0,
+        "dy": 0,
+        "width": 390,
+        "height": 844,
+        "scroll": 0,
+        "bodyScroll": 0,
+        "visibleWord": true
+      },
+      {
+        "case": "fullscreen and fallback",
+        "word": "tidak",
+        "pivot": "i",
+        "dx": 0,
+        "dy": 0,
+        "width": 390,
+        "height": 844,
+        "scroll": 0,
+        "bodyScroll": 0,
+        "visibleWord": true
+      },
+      {
+        "case": "sheet, Escape, Back and resume",
+        "offset": 104
+      },
+      {
+        "case": "dark theme with custom accent",
+        "word": "tidak",
+        "pivot": "i",
+        "dx": 0,
+        "dy": 0,
+        "width": 390,
+        "height": 844,
+        "scroll": 0,
+        "bodyScroll": 0,
+        "visibleWord": true
+      }
+    ],
+    "pageErrors": []
+  },
+  "compact_sheets": {
+    "layouts_checked": 10,
+    "viewports": [
+      "390x844",
+      "360x640",
+      "320x568",
+      "360x450",
+      "667x375"
+    ],
+    "overflow": false
+  },
+  "physical_device_tested": false,
+  "safari_ios_tested": false
+}
