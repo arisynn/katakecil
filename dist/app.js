@@ -1,4 +1,4 @@
-import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=3';
+import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=4';
 import {createLocalBooks} from './local-books.js?v=1';
 import {createSpeedReading} from './speed-reading.js?v=4';
 import {createPublisher} from './publisher.js?v=3';

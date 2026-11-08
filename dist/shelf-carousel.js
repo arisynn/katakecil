@@ -21,13 +21,10 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
  function place(extra=0,animate=true){
   if(destroyed||!n)return;
   const center=viewport.clientWidth/2,{cover,height,spine,gap}=metrics,slots=mode==='rack'?3:2;
-  const pull=drag?.moving&&!reduced()?Math.max(-1,Math.min(1,extra/Math.max(1,cover))):0;
-  viewport.style.setProperty('--shelf-drag-tilt',pull*3+'deg');viewport.style.setProperty('--shelf-drag-lift',-Math.abs(pull)*5+'px');
   for(const [k,item] of items.entries()){
    const r=relative(k),active=k===index,w=mode==='rack'&&!active?spine:cover,old=positions.get(item),recycled=old!==undefined&&Math.abs(old-r)>Math.max(1,n/2),hidden=Math.abs(r)>slots;
    const x=mode==='rack'?(r===0?center-cover/2:r>0?center+cover/2+gap+(r-1)*(spine+gap):center-cover/2-gap-spine+(r+1)*(spine+gap)):center-cover/2+r*(cover+gap);
    item.classList.toggle('is-current',active);item.classList.toggle('is-recycling',!animate||reduced()||recycled);item.classList.toggle('is-wrapping',animate&&!reduced()&&recycled);item.hidden=hidden;item.setAttribute('aria-current',String(active));
-   item.style.setProperty('--shelf-yaw',(active?0:Math.sign(r)*(mode==='rack'?-3:-9))+'deg');item.style.setProperty('--shelf-depth',(active?0:mode==='rack'?-Math.min(3,Math.abs(r))*3:-36)+'px');
    item.style.setProperty('--shelf-x',x+extra+'px');item.style.setProperty('--shelf-item-width',w+'px');item.style.setProperty('--shelf-item-height',(mode==='rack'&&!active?height*(parseFloat(item.dataset.spineHeight)||.88):height)+'px');item.style.zIndex=active?'3':String(Math.max(0,2-Math.abs(r)));
    const button=item.querySelector('button');if(button)button.tabIndex=active?0:-1;
    positions.set(item,r);

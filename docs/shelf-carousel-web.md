@@ -27,13 +27,13 @@ Uji awal mouse dan pointer sintetis melewatkan implicit pointer capture pada tom
 
 Controller sekarang hanya membatalkan drag karena `lostpointercapture` bila target kejadiannya viewport itu sendiri. Swipe pelan juga diterima setelah melewati 20% jarak antarbuku, dibatasi 24–60 px; gerakan kecil tetap kembali ke posisi semula. Tiga tes regresi memeriksa perpindahan capture dari anak, kehilangan capture viewport dan swipe pelan; seluruh sepuluh tes controller lulus. Input sentuh melalui CDP Chromium memeriksa swipe kiri/kanan pada 2, 5 dan 12 buku, cancel, posisi sampul di tengah dan ketukan untuk membuka reader. Ini emulasi sentuh browser, belum pengujian HP fisik. [Hasil](generated/shelf-touch-fix-web.json).
 
-## Animasi 3D
+## Animasi datar
 
-Sampul membuka/menutup dari engsel kiri dengan perspektif 3D. Lebar gambar dan punggung tetap selama transisi, sementara ruang antarbuku serta tinggi kartu bergerak bersama. Buku samping memakai sedikit sudut dan kedalaman; buku aktif berhenti datar di tengah. Kurva 560 ms memperlambat gerak sebelum berhenti dengan overshoot kecil, dengan fallback cubic-bezier pada browser tanpa CSS `linear()`.
+Carousel memakai geseran horizontal, perubahan lebar/tinggi yang serempak, dan fade sampul/punggung. Semua buku tetap datar, tanpa perspektif, rotasi atau angkat. Easing cubic-bezier selama 440 ms memperlambat gerakan sebelum berhenti tanpa overshoot. Gambar dan punggung mempertahankan lebarnya saat ruang kartu berubah.
 
-Saat swipe, posisi mengikuti jari tanpa transisi, dengan kemiringan/angkat ringan pada buku aktif. Pembaruan pointer digabungkan lewat requestAnimationFrame, dan frame yang tertunda dibatalkan saat gesture selesai atau carousel dilepas. Buku yang melintasi ujung cincin dipindahkan saat transparan, lalu muncul kembali; perpindahan beberapa buku tidak dianggap daur ulang kecuali melewati batas cincin. Tombol baca dan indikator turut berganti dengan transisi singkat.
+Saat swipe, posisi mengikuti jari tanpa transisi. Pembaruan pointer digabungkan lewat requestAnimationFrame, dan frame yang tertunda dibatalkan saat gesture selesai atau carousel dilepas. Buku yang melintasi ujung cincin dipindahkan saat transparan, lalu muncul kembali; perpindahan beberapa buku tidak dianggap daur ulang kecuali melewati batas cincin. Keterangan/tombol baca hanya memakai fade singkat, dan titik indikator berganti secara halus.
 
-Reduced motion mematikan transisi, animasi keterangan dan kemiringan swipe. Perubahan diuji cepat dengan sepuluh tes controller serta Chromium: fase buka sampul, navigasi beruntun, loop, reduced motion, tiga ukuran layar dan input sentuh pada kedua mode. [Hasil](generated/shelf-motion-web.json). Belum diuji pada HP fisik; tidak membangun APK atau mengubah rilis stable.
+Reduced motion mematikan transisi dan animasi keterangan. Pemeriksaan cepat memakai sepuluh tes controller serta Chromium: gerakan datar, navigasi beruntun, loop, reduced motion, tiga ukuran layar dan input sentuh pada kedua mode. [Hasil](generated/shelf-flat-motion-web.json). Belum diuji pada HP fisik; tidak membangun APK atau mengubah rilis stable.
 
 ## Uji pemilik
 

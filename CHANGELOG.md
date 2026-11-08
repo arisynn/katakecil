@@ -2,13 +2,19 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Carousel datar dan halus (8 November 2026)
+
+- Sederhanakan animasi menjadi geser, perubahan lebar dan fade; lepas perspektif, engsel, kemiringan serta angkat sampul.
+- Gunakan easing 440 ms tanpa overshoot, sambil mempertahankan swipe per frame dan fade pada ujung loop.
+- Pertahankan reduced motion dan perbaikan gesture sentuh. Web saja, tanpa APK baru. [Rincian](docs/shelf-carousel-web.md#animasi-datar).
+
 ## Pengembangan web — Animasi carousel 3D (8 November 2026)
 
 - Tambahkan efek engsel saat sampul membuka/menutup, kedalaman buku samping dan kurva transisi yang berhenti lembut.
 - Ikuti swipe per frame dengan sedikit kemiringan/angkat; hilangkan loncatan buku yang didaur ulang di ujung loop memakai fade.
 - Batasi fling agar arah animasi pada koleksi kecil tetap mengikuti arah swipe; transisi dapat dilanjutkan saat navigasi cepat.
 - Haluskan indikator/progres Library dan tetap hormati reduced motion. Tidak membangun APK baru.
-- Uji cepat controller, input sentuh Chromium, perpindahan cepat, loop dan portrait/landscape. [Rincian](docs/shelf-carousel-web.md#animasi-3d).
+- Uji cepat controller, input sentuh Chromium, perpindahan cepat, loop dan portrait/landscape. [Rincian carousel](docs/shelf-carousel-web.md).
 
 ## Perbaikan web — Swipe sentuh Library (8 November 2026)
 
