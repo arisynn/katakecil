@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Sheet alat baca ringkas (8 November 2026)
+
+- Rapikan alat baca menjadi tiga baris aksi dan sepasang tombol navigasi episode.
+- Ringkas ruang kata, pengaturan kecepatan dan kontrol RSVP; kedua sheet dapat memakai ruang viewport yang tersedia tanpa batas scroll setengah layar.
+- Uji cepat Chromium pada lima ukuran layar, termasuk layar pendek/landscape: sepuluh tampilan sheet tanpa overflow dan seluruh kontrol terlihat. Tiga tes sheet existing lulus.
+- Perubahan web saja; tidak membangun APK baru. [Bukti ringkas](docs/generated/compact-tools-speed-web.json).
+
 ## 1.2.0-rc.1 — EPUB pribadi dan baca cepat (8 November 2026)
 
 - Ambil cover asli EPUB lokal dan pulihkan cover impor lama dari arsip tersimpan.

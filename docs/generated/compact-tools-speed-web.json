@@ -1,0 +1,119 @@
+{
+  "scope": "quick local browser layout check; mocked catalog and public-domain EPUB",
+  "apk_built": false,
+  "node_tests_passed": 3,
+  "module_check_passed": true,
+  "results": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "sheet": "tools",
+      "sheet_height": 398,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "sheet": "speed",
+      "sheet_height": 422,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 640
+      },
+      "sheet": "tools",
+      "sheet_height": 398,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 640
+      },
+      "sheet": "speed",
+      "sheet_height": 422,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "sheet": "tools",
+      "sheet_height": 398,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "sheet": "speed",
+      "sheet_height": 422,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 450
+      },
+      "sheet": "tools",
+      "sheet_height": 274,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 450
+      },
+      "sheet": "speed",
+      "sheet_height": 304,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "sheet": "tools",
+      "sheet_height": 274,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "sheet": "speed",
+      "sheet_height": 304,
+      "vertical_overflow": 0,
+      "horizontal_overflow": 0,
+      "controls_inside_sheet": true
+    }
+  ],
+  "page_errors": []
+}

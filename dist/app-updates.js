@@ -1,4 +1,4 @@
-import {layoutDialog} from './panel-layout.js?v=4';
+import {layoutDialog} from './panel-layout.js?v=5';
 import {escapeHTML as esc,icon} from './ui.js?v=12';
 
 // Android owns download URLs, checksums, package/signature checks and installer permissions.
