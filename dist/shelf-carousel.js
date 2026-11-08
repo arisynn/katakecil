@@ -8,7 +8,7 @@ export function shelfDots(count,index,limit=5){
 }
 export function createShelfCarousel({viewport,items=[...viewport.querySelectorAll('.shelf-book')],start=0,onChange=()=>{},onOpen=()=>{}}){
  const win=viewport.ownerDocument.defaultView,n=items.length,mode=shelfMode(n),media=win.matchMedia?.('(prefers-reduced-motion: reduce)');
- let index=n?wrapIndex(start,n):-1,direction=-1,drag=null,blocked=false,lastDrag=-Infinity,frame=0,destroyed=false,metrics={cover:0,height:0,spine:34,gap:6},positions=new Map();
+ let index=n?wrapIndex(start,n):-1,direction=-1,drag=null,blocked=false,lastDrag=-Infinity,frame=0,dragFrame=0,destroyed=false,metrics={cover:0,height:0,spine:34,gap:6},positions=new Map();
  const reduced=()=>!!media?.matches;
  const relative=k=>{let r=wrapIndex(k-index,n);if(r>n/2||(n%2===0&&r===n/2&&direction>0))r-=n;return r;};
  function measure(){
@@ -21,16 +21,19 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
  function place(extra=0,animate=true){
   if(destroyed||!n)return;
   const center=viewport.clientWidth/2,{cover,height,spine,gap}=metrics,slots=mode==='rack'?3:2;
+  const pull=drag?.moving&&!reduced()?Math.max(-1,Math.min(1,extra/Math.max(1,cover))):0;
+  viewport.style.setProperty('--shelf-drag-tilt',pull*3+'deg');viewport.style.setProperty('--shelf-drag-lift',-Math.abs(pull)*5+'px');
   for(const [k,item] of items.entries()){
-   const r=relative(k),active=k===index,w=mode==='rack'&&!active?spine:cover,old=positions.get(item),recycled=old!==undefined&&Math.abs(old-r)>1,hidden=Math.abs(r)>slots;
+   const r=relative(k),active=k===index,w=mode==='rack'&&!active?spine:cover,old=positions.get(item),recycled=old!==undefined&&Math.abs(old-r)>Math.max(1,n/2),hidden=Math.abs(r)>slots;
    const x=mode==='rack'?(r===0?center-cover/2:r>0?center+cover/2+gap+(r-1)*(spine+gap):center-cover/2-gap-spine+(r+1)*(spine+gap)):center-cover/2+r*(cover+gap);
-   item.classList.toggle('is-current',active);item.classList.toggle('is-recycling',!animate||reduced()||recycled);item.hidden=hidden;item.setAttribute('aria-current',String(active));
+   item.classList.toggle('is-current',active);item.classList.toggle('is-recycling',!animate||reduced()||recycled);item.classList.toggle('is-wrapping',animate&&!reduced()&&recycled);item.hidden=hidden;item.setAttribute('aria-current',String(active));
+   item.style.setProperty('--shelf-yaw',(active?0:Math.sign(r)*(mode==='rack'?-3:-9))+'deg');item.style.setProperty('--shelf-depth',(active?0:mode==='rack'?-Math.min(3,Math.abs(r))*3:-36)+'px');
    item.style.setProperty('--shelf-x',x+extra+'px');item.style.setProperty('--shelf-item-width',w+'px');item.style.setProperty('--shelf-item-height',(mode==='rack'&&!active?height*(parseFloat(item.dataset.spineHeight)||.88):height)+'px');item.style.zIndex=active?'3':String(Math.max(0,2-Math.abs(r)));
    const button=item.querySelector('button');if(button)button.tabIndex=active?0:-1;
    positions.set(item,r);
   }
   if(frame)win.cancelAnimationFrame(frame);
-  frame=win.requestAnimationFrame(()=>{frame=0;void viewport.offsetWidth;if(!destroyed&&!drag?.moving)for(const item of items)item.classList.remove('is-recycling');});
+  frame=win.requestAnimationFrame(()=>{frame=0;if(destroyed||drag?.moving)return;void viewport.offsetWidth;for(const item of items)item.classList.remove('is-recycling','is-wrapping');});
  }
  function goTo(value,animate=true){
   if(!n||!Number.isFinite(value)||destroyed)return;
@@ -53,17 +56,19 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
   const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
   if(!drag.moving){if(Math.max(Math.abs(dx),Math.abs(dy))<7)return;if(Math.abs(dy)>Math.abs(dx)){drag=null;blocked=true;return;}drag.moving=true;viewport.classList.add('is-dragging');try{viewport.setPointerCapture(event.pointerId);}catch{}}
   const now=win.performance.now(),dt=now-drag.time;if(dt>0)drag.velocity=.5*drag.velocity+.5*(event.clientX-drag.lastX)/dt;drag.lastX=event.clientX;drag.time=now;drag.dx=dx;
-  place(Math.max(-viewport.clientWidth,Math.min(viewport.clientWidth,dx)),false);
+  // Coalesce high-frequency touch updates; one layout write per display frame.
+  if(!dragFrame)dragFrame=win.requestAnimationFrame(()=>{dragFrame=0;if(!destroyed&&drag?.moving)place(Math.max(-viewport.clientWidth,Math.min(viewport.clientWidth,drag.dx)),false);});
  }
  function release(event,cancelled=false){
   if(!drag||(event&&event.pointerId!==drag.id))return;
-  const state=drag;drag=null;viewport.classList.remove('is-dragging');try{viewport.releasePointerCapture(state.id);}catch{}
+  const state=drag;drag=null;if(dragFrame){win.cancelAnimationFrame(dragFrame);dragFrame=0;}viewport.classList.remove('is-dragging');try{viewport.releasePointerCapture(state.id);}catch{}
   if(cancelled||state.moving)lastDrag=win.performance.now();if(!state.moving)return;
   if(cancelled){place();return;}
   const velocity=lastDrag-state.time>90?0:state.velocity,unit=mode==='rack'?metrics.spine+metrics.gap:metrics.cover+metrics.gap;
   const threshold=Math.max(24,Math.min(60,unit*.2));
   const wanted=Math.round(-(state.dx+velocity*120)/unit)||(Math.abs(state.dx)>=threshold?-Math.sign(state.dx):0);
-  const steps=Math.max(-Math.min(3,n-1),Math.min(Math.min(3,n-1),wanted));
+  // Never wrap so far in one fling that the shortest visible route reverses.
+  const limit=Math.min(3,Math.floor(n/2)),steps=Math.max(-limit,Math.min(limit,wanted));
   goTo(index+steps);
  }
  function cancel(event){if(blocked){blocked=false;lastDrag=win.performance.now();}release(event,true);}
@@ -82,5 +87,5 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
  viewport.addEventListener('pointerdown',down);viewport.addEventListener('pointermove',move);viewport.addEventListener('pointerup',up);viewport.addEventListener('pointercancel',cancel);viewport.addEventListener('lostpointercapture',lostCapture);viewport.addEventListener('click',click);
  const observer=typeof win.ResizeObserver==='function'?new win.ResizeObserver(resize):null;if(observer)observer.observe(viewport);else win.addEventListener('resize',resize);
  media?.addEventListener?.('change',resize);measure();place(0,false);
- return{goTo,next:()=>goTo(index+1),prev:()=>goTo(index-1),refresh:resize,get index(){return index;},destroy(){destroyed=true;if(frame)win.cancelAnimationFrame(frame);observer?.disconnect();win.removeEventListener('resize',resize);media?.removeEventListener?.('change',resize);for(const [name,handler] of [['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',cancel],['lostpointercapture',lostCapture],['click',click]])viewport.removeEventListener(name,handler);drag=null;}};
+ return{goTo,next:()=>goTo(index+1),prev:()=>goTo(index-1),refresh:resize,get index(){return index;},destroy(){destroyed=true;if(frame)win.cancelAnimationFrame(frame);if(dragFrame)win.cancelAnimationFrame(dragFrame);observer?.disconnect();win.removeEventListener('resize',resize);media?.removeEventListener?.('change',resize);for(const [name,handler] of [['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',cancel],['lostpointercapture',lostCapture],['click',click]])viewport.removeEventListener(name,handler);drag=null;viewport.classList.remove('is-dragging');}};
 }

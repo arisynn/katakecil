@@ -1,23 +1,71 @@
-/* Adaptive shelf: cover carousel for a small collection, book spines from five books. */
-.library-shell .book-carousel{display:block;position:relative;overflow:hidden;overflow:clip;padding:0;scroll-snap-type:none;scroll-padding:0;touch-action:pan-y;user-select:none;-webkit-user-select:none;--cover-gap:36px;--spine-width:34px;--spine-gap:6px;isolation:isolate}
+/* Adaptive shelf: coordinated depth, hinged covers and a gentle settling curve. */
+.library-shell .book-carousel{
+ --shelf-duration:560ms;--shelf-ease:cubic-bezier(.22,1,.36,1);--cover-gap:36px;--spine-width:34px;--spine-gap:6px;
+ display:block;position:relative;overflow:hidden;overflow:clip;padding:0;scroll-snap-type:none;scroll-padding:0;
+ touch-action:pan-y;user-select:none;-webkit-user-select:none;isolation:isolate;perspective:1200px;perspective-origin:50% 65%;
+}
+@supports(transition-timing-function:linear(0,1)){
+ .library-shell .book-carousel{--shelf-ease:linear(0,.045 6%,.18 16%,.45 30%,.72 45%,.9 60%,.99 76%,1.008 88%,1)}
+}
 .shelf-measure{position:absolute;width:var(--cover-width);height:var(--cover-max);visibility:hidden;pointer-events:none;top:0;left:0}
-.library-shell .book-carousel .shelf-book{position:absolute;left:0;bottom:12px;display:block;flex:none;width:var(--shelf-item-width);height:var(--shelf-item-height);max-height:none;min-height:0;min-width:0;opacity:.55;transform:translate3d(var(--shelf-x,0px),0,0) scale(.94);transform-origin:center bottom;transition:transform .45s cubic-bezier(.22,.8,.24,1),width .45s cubic-bezier(.22,.8,.24,1),height .45s cubic-bezier(.22,.8,.24,1),opacity .3s;will-change:transform}
-.library-shell .book-carousel .shelf-book.is-current{opacity:1;transform:translate3d(var(--shelf-x,0px),0,0) scale(1)}
+.library-shell .book-carousel .shelf-book{
+ position:absolute;left:0;bottom:12px;display:block;flex:none;width:var(--shelf-item-width);height:var(--shelf-item-height);max-height:none;min-height:0;min-width:0;
+ opacity:.58;transform:translate3d(var(--shelf-x,0px),0,var(--shelf-depth,0px)) rotateY(var(--shelf-yaw,0deg)) scale(.92);transform-origin:center bottom;
+ transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 300ms ease;
+}
+.library-shell .book-carousel .shelf-book.is-current{opacity:1;transform:translate3d(var(--shelf-x,0px),0,0) rotateY(0deg) scale(1)}
 .library-shell .book-carousel .shelf-book[hidden],.library-shell .shelf-navigation[hidden],.library-shell .shelf-dot[hidden],.shelf-position[hidden]{display:none}
 .library-shell .book-carousel .shelf-book.is-recycling,.library-shell .book-carousel.is-dragging .shelf-book{transition:none}
-.library-shell .book-carousel .cover-button{display:block;position:relative;width:100%;height:100%;padding:0;border-radius:4px;background:none;overflow:visible;transition:none;touch-action:pan-y}
+.library-shell .book-carousel .shelf-book.is-wrapping{opacity:0}
+.library-shell .book-carousel.is-dragging{cursor:grabbing}
+.library-shell .book-carousel .cover-button{
+ display:block;position:relative;width:100%;height:100%;padding:0;border-radius:4px;background:none;overflow:visible;perspective:900px;
+ transition:transform 480ms var(--shelf-ease);touch-action:pan-y;transform-origin:center bottom;
+}
 .library-shell .book-carousel .cover-button:active{transform:none}
-.shelf-cover-frame{display:block;position:absolute;inset:0 auto 0 0;width:var(--shelf-open-width,var(--cover-width));height:100%;pointer-events:none}
-.library-shell .book-carousel .book-cover{display:block;width:100%;height:100%;max-height:none;object-fit:contain;filter:drop-shadow(4px 9px 8px #1023191c);box-shadow:none;pointer-events:none}
-.book-spine{display:none}.shelf-position{font-size:10px;line-height:1;white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums;min-width:32px;text-align:center}.library-shell .shelf-navigation{gap:5px}.library-shell .shelf-dot{width:24px}.library-shell .shelf-dots{flex-shrink:1;min-width:0}
+.library-shell .book-carousel .is-current .cover-button{transform:translateY(var(--shelf-drag-lift,0px)) rotateZ(var(--shelf-drag-tilt,0deg))}
+.library-shell .book-carousel.is-dragging .cover-button{transition:none;cursor:grabbing}
+.shelf-cover-frame{
+ display:block;position:absolute;inset:0 auto 0 0;width:var(--shelf-open-width,var(--cover-width));height:100%;pointer-events:none;
+ transform-origin:left center;backface-visibility:hidden;
+}
+.library-shell .book-carousel .book-cover{
+ display:block;width:100%;height:100%;max-height:none;object-fit:contain;filter:drop-shadow(4px 9px 8px #1023191c);box-shadow:none;pointer-events:none;
+}
+.book-spine{display:none}
+.shelf-position{font-size:10px;line-height:1;white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums;min-width:32px;text-align:center}
+.library-shell .shelf-navigation{gap:5px}.library-shell .shelf-dot{width:24px}.library-shell .shelf-dots{flex-shrink:1;min-width:0}
+.library-shell .shelf-dot span{transition:width 360ms var(--shelf-ease,cubic-bezier(.22,1,.36,1)),background 240ms ease,transform 360ms ease}
+.library-shell .shelf-dot.active span{transform:scaleY(1.15)}
 .library-shell .shelf[data-shelf-mode=single]{grid-template-rows:minmax(0,1fr) auto}
 .library-shell .book-carousel[data-carousel-mode=rack]{--cover-width:clamp(210px,25vw,280px);--spine-width:36px;--spine-gap:6px}
-.library-shell .book-carousel[data-carousel-mode=rack] .shelf-book{opacity:.9;overflow:hidden;border-radius:3px;transform:translate3d(var(--shelf-x,0px),0,0)}
-.library-shell .book-carousel[data-carousel-mode=rack] .shelf-book.is-current{overflow:visible;opacity:1}
-.book-carousel[data-carousel-mode=rack] .book-spine{display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:space-between;gap:12px;padding:17px 7px;color:#faf9f5;background:linear-gradient(90deg,#0003,transparent 18%,#ffffff12 75%,#0002),var(--spine-color);border-left:1px solid #ffffff30;border-right:1px solid #0002;border-radius:3px;transition:opacity .2s;box-shadow:inset 2px 0 2px #ffffff16}
-.spine-title{writing-mode:vertical-rl;text-orientation:mixed;max-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11px/1.4 system-ui,sans-serif;letter-spacing:.3px}.spine-mark{flex:none;width:12px;height:2px;border-block:1px solid #ffffff8c}
-.book-carousel[data-carousel-mode=rack] .shelf-cover-frame{opacity:0;transition:opacity .25s .05s}.book-carousel[data-carousel-mode=rack] .is-current .shelf-cover-frame{opacity:1}.book-carousel[data-carousel-mode=rack] .is-current .book-spine{opacity:0;pointer-events:none}
+.library-shell .book-carousel[data-carousel-mode=rack] .shelf-book{opacity:1;overflow:hidden;border-radius:3px;transform:translate3d(var(--shelf-x,0px),0,var(--shelf-depth,0px)) rotateY(var(--shelf-yaw,0deg))}
+.library-shell .book-carousel[data-carousel-mode=rack] .shelf-book.is-current{overflow:visible;opacity:1;transform:translate3d(var(--shelf-x,0px),0,0) rotateY(0deg)}
+.library-shell .book-carousel[data-carousel-mode=rack] .shelf-book.is-wrapping{opacity:0}
+.book-carousel[data-carousel-mode=rack] .book-spine{
+ display:flex;position:absolute;inset:0 auto 0 0;width:var(--spine-width);flex-direction:column;align-items:center;justify-content:space-between;gap:12px;padding:17px 7px;
+ color:#faf9f5;background:linear-gradient(90deg,#0003,transparent 18%,#ffffff12 75%,#0002),var(--spine-color);
+ border-left:1px solid #ffffff30;border-right:1px solid #0002;border-radius:3px;box-shadow:inset 2px 0 2px #ffffff16;
+ transform-origin:left center;backface-visibility:hidden;transition:opacity 180ms ease,transform 440ms var(--shelf-ease);
+}
+.spine-title{writing-mode:vertical-rl;text-orientation:mixed;max-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11px/1.4 system-ui,sans-serif;letter-spacing:.3px}
+.spine-mark{flex:none;width:12px;height:2px;border-block:1px solid #ffffff8c}
+.book-carousel[data-carousel-mode=rack] .shelf-cover-frame{
+ opacity:0;transform:rotateY(-76deg) scaleX(.96);transition:transform var(--shelf-duration) var(--shelf-ease),opacity 130ms ease;
+}
+.book-carousel[data-carousel-mode=rack] .is-current .shelf-cover-frame{opacity:1;transform:rotateY(0deg) scaleX(1);transition:transform var(--shelf-duration) var(--shelf-ease),opacity 90ms linear 10ms}
+.book-carousel[data-carousel-mode=rack] .is-current .book-spine{opacity:0;transform:rotateY(78deg);pointer-events:none}
+@media(hover:hover) and (pointer:fine){
+ .library-shell .book-carousel:not(.is-dragging) .is-current .cover-button:hover{transform:translateY(-4px)}
+ .library-shell .shelf-navigation .icon-button:hover{transform:translateY(-1px)}
+}
+@media(prefers-reduced-motion:no-preference){
+ .library-shell .shelf-action .reading-status{animation:shelf-caption-in 240ms ease-out both}
+ .library-shell .shelf-action .read-button{animation:shelf-action-in 320ms cubic-bezier(.22,1,.36,1) both}
+}
+@keyframes shelf-caption-in{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shelf-action-in{from{opacity:.7;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:640px){.library-shell .book-carousel[data-carousel-mode=rack]{--cover-width:min(56vw,250px);--spine-width:31px;--spine-gap:5px}.library-shell .shelf-navigation{gap:3px}.shelf-position{font-size:9px}.library-shell .shelf-dot{width:22px}}
 @media(max-height:620px){.library-shell .book-carousel[data-carousel-mode=rack]{--cover-width:min(50vw,230px)}}
 @media(orientation:landscape) and (max-height:480px){.library-shell .book-carousel[data-carousel-mode=rack]{--cover-width:185px;--spine-width:28px}.library-shell .shelf[data-shelf-mode=single]{grid-template-rows:minmax(0,1fr) 0}.library-shell .shelf-navigation{gap:4px}.library-shell .shelf-navigation>.icon-button{width:28px;min-width:28px;height:40px}.library-shell .shelf-dots{flex:none}.library-shell .shelf-dot{width:16px}}
-@media(prefers-reduced-motion:reduce){.library-shell .book-carousel .shelf-book,.book-spine,.shelf-cover-frame{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.library-shell .book-carousel .shelf-book,.library-shell .book-carousel .cover-button,.book-spine,.shelf-cover-frame,.library-shell .shelf-dot span{transition:none!important}.library-shell .shelf-action .reading-status,.library-shell .shelf-action .read-button{animation:none!important}}

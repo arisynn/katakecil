@@ -1,0 +1,71 @@
+{
+  "scope": "Quick web animation and touch regression with mocked catalog/episodes",
+  "apkBuilt": false,
+  "physicalDeviceTested": false,
+  "checks": {
+    "syntaxAndRuntimeModules": "passed",
+    "controllerTestsPassed": 10,
+    "controllerTestsFailed": 0
+  },
+  "motion": {
+    "scope": "Quick Chromium animation checks with mock catalog",
+    "samples": {
+      "early": {
+        "width": 191.82366943359375,
+        "coverTransform": "matrix3d(0.97689, 0, 0.185477, 0, 0, 1, 0, 0, -0.186532, 0, 0.982449, 0, 0, 0, 0, 1)",
+        "coverOpacity": 1,
+        "dragTilt": "0deg"
+      },
+      "middle": {
+        "width": 218.390625,
+        "coverTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "coverOpacity": 1,
+        "dragTilt": "0deg"
+      },
+      "settled": {
+        "width": 218.390625,
+        "coverTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "coverOpacity": 1,
+        "dragTilt": "0deg"
+      }
+    },
+    "hingedCover": true,
+    "rapidNavigationAndLoop": true,
+    "reducedMotion": true,
+    "portraitAndLandscape": true,
+    "coverMode": true,
+    "pageErrors": []
+  },
+  "touch": {
+    "scope": "Chromium mobile touch input through CDP (implicit pointer capture enabled), mocked catalog/episodes",
+    "physicalDeviceTested": false,
+    "results": [
+      {
+        "count": 2,
+        "mode": "covers",
+        "swipeRight": "fixture-1",
+        "swipeLeft": "fixture-1",
+        "cancelRestoresSelection": true,
+        "centerError": 0
+      },
+      {
+        "count": 5,
+        "mode": "rack",
+        "swipeRight": "fixture-3",
+        "swipeLeft": "fixture-2",
+        "cancelRestoresSelection": true,
+        "centerError": 0
+      },
+      {
+        "count": 12,
+        "mode": "rack",
+        "swipeRight": "fixture-9",
+        "swipeLeft": "fixture-3",
+        "cancelRestoresSelection": true,
+        "centerError": 0
+      }
+    ],
+    "tapOpensReader": true,
+    "pageErrors": []
+  }
+}
