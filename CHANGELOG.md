@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Perbaikan web — Swipe sentuh Library (8 November 2026)
+
+- Perbaiki swipe yang langsung batal saat browser memindahkan pointer capture dari tombol sampul ke viewport carousel.
+- Abaikan kehilangan capture dari elemen anak saat perpindahan tersebut; pembatalan gesture dan kehilangan capture viewport tetap membatalkan swipe.
+- Terima swipe pelan yang melewati ambang 20% jarak antarbuku (24–60 px), tanpa mewajibkan geseran setengah lebar sampul.
+- Tambahkan tes regresi transfer capture dan uji input sentuh browser pada carousel sampul/rak. Naikkan versi cache modul agar koreksi dimuat setelah refresh.
+
 ## Pengembangan web — Carousel rak melingkar (8 November 2026)
 
 - Tampilkan satu sampul untuk satu buku, carousel sampul untuk 2–4 buku, dan rak punggung buku mulai 5 buku.

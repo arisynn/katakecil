@@ -61,10 +61,15 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
   if(cancelled||state.moving)lastDrag=win.performance.now();if(!state.moving)return;
   if(cancelled){place();return;}
   const velocity=lastDrag-state.time>90?0:state.velocity,unit=mode==='rack'?metrics.spine+metrics.gap:metrics.cover+metrics.gap;
-  const steps=Math.max(-Math.min(3,n-1),Math.min(Math.min(3,n-1),Math.round(-(state.dx+velocity*120)/unit)));
+  const threshold=Math.max(24,Math.min(60,unit*.2));
+  const wanted=Math.round(-(state.dx+velocity*120)/unit)||(Math.abs(state.dx)>=threshold?-Math.sign(state.dx):0);
+  const steps=Math.max(-Math.min(3,n-1),Math.min(Math.min(3,n-1),wanted));
   goTo(index+steps);
  }
  function cancel(event){if(blocked){blocked=false;lastDrag=win.performance.now();}release(event,true);}
+ // Touch starts with implicit capture on the cover button. Its bubbling loss is
+ // expected when a horizontal drag transfers capture to the viewport.
+ function lostCapture(event){if(event.target===viewport)cancel(event);}
  function up(event){if(blocked){blocked=false;lastDrag=win.performance.now();return;}release(event);}
  function click(event){
   const item=event.target.closest?.('.shelf-book');if(!item||!viewport.contains(item))return;
@@ -74,8 +79,8 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
  }
  const resize=()=>{cancel();measure();place(0,false);};
  viewport.dataset.carouselMode=mode;
- viewport.addEventListener('pointerdown',down);viewport.addEventListener('pointermove',move);viewport.addEventListener('pointerup',up);viewport.addEventListener('pointercancel',cancel);viewport.addEventListener('lostpointercapture',cancel);viewport.addEventListener('click',click);
+ viewport.addEventListener('pointerdown',down);viewport.addEventListener('pointermove',move);viewport.addEventListener('pointerup',up);viewport.addEventListener('pointercancel',cancel);viewport.addEventListener('lostpointercapture',lostCapture);viewport.addEventListener('click',click);
  const observer=typeof win.ResizeObserver==='function'?new win.ResizeObserver(resize):null;if(observer)observer.observe(viewport);else win.addEventListener('resize',resize);
  media?.addEventListener?.('change',resize);measure();place(0,false);
- return{goTo,next:()=>goTo(index+1),prev:()=>goTo(index-1),refresh:resize,get index(){return index;},destroy(){destroyed=true;if(frame)win.cancelAnimationFrame(frame);observer?.disconnect();win.removeEventListener('resize',resize);media?.removeEventListener?.('change',resize);for(const [name,handler] of [['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',cancel],['lostpointercapture',cancel],['click',click]])viewport.removeEventListener(name,handler);drag=null;}};
+ return{goTo,next:()=>goTo(index+1),prev:()=>goTo(index-1),refresh:resize,get index(){return index;},destroy(){destroyed=true;if(frame)win.cancelAnimationFrame(frame);observer?.disconnect();win.removeEventListener('resize',resize);media?.removeEventListener?.('change',resize);for(const [name,handler] of [['pointerdown',down],['pointermove',move],['pointerup',up],['pointercancel',cancel],['lostpointercapture',lostCapture],['click',click]])viewport.removeEventListener(name,handler);drag=null;}};
 }

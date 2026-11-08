@@ -21,6 +21,12 @@ Pilihan disimpan berdasarkan ID buku, termasuk saat refresh, reload dan koleksi 
 
 Pemeriksaan ini tidak memakai HP fisik atau Safari. Perubahan web saja; tidak membangun APK, mengganti rilis stable 1.2.0 atau menerbitkan backend/situs.
 
+### Koreksi swipe sentuh
+
+Uji awal mouse dan pointer sintetis melewatkan implicit pointer capture pada tombol sampul. Dalam Chromium mobile, sentuhan menangkap pointer di tombol. Ketika drag memindahkannya ke viewport, `lostpointercapture` dari tombol menggelembung ke viewport dan keliru membatalkan swipe. Kejadian ini berhasil direproduksi: buku pilihan tidak berubah setelah swipe.
+
+Controller sekarang hanya membatalkan drag karena `lostpointercapture` bila target kejadiannya viewport itu sendiri. Swipe pelan juga diterima setelah melewati 20% jarak antarbuku, dibatasi 24–60 px; gerakan kecil tetap kembali ke posisi semula. Tiga tes regresi memeriksa perpindahan capture dari anak, kehilangan capture viewport dan swipe pelan; seluruh sepuluh tes controller lulus. Input sentuh melalui CDP Chromium memeriksa swipe kiri/kanan pada 2, 5 dan 12 buku, cancel, posisi sampul di tengah dan ketukan untuk membuka reader. Ini emulasi sentuh browser, belum pengujian HP fisik. [Hasil](generated/shelf-touch-fix-web.json).
+
 ## Uji pemilik
 
 1. Coba rak berisi 1, 2–4 dan 5+ buku, termasuk menambah/menghapus EPUB lewat Advanced hingga melintasi batas 4 ↔ 5.

@@ -1,0 +1,44 @@
+{
+  "scope": "Chromium mobile touch input through CDP (implicit pointer capture enabled), mocked catalog/episodes",
+  "physicalDeviceTested": false,
+  "results": [
+    {
+      "count": 2,
+      "mode": "covers",
+      "swipeRight": "fixture-1",
+      "swipeLeft": "fixture-1",
+      "cancelRestoresSelection": true,
+      "centerError": 0
+    },
+    {
+      "count": 5,
+      "mode": "rack",
+      "swipeRight": "fixture-2",
+      "swipeLeft": "fixture-3",
+      "cancelRestoresSelection": true,
+      "centerError": 0
+    },
+    {
+      "count": 12,
+      "mode": "rack",
+      "swipeRight": "fixture-9",
+      "swipeLeft": "fixture-3",
+      "cancelRestoresSelection": true,
+      "centerError": 0
+    }
+  ],
+  "tapOpensReader": true,
+  "pageErrors": [],
+  "beforeFix": {
+    "reproduced": true,
+    "initialBook": "fixture-0",
+    "bookAfterSwipe": "fixture-0",
+    "cause": "Bubbling lostpointercapture from the cover button cancelled the drag during transfer to the viewport."
+  },
+  "checks": {
+    "syntaxAndRuntimeModules": "passed",
+    "controllerTestsPassed": 10,
+    "controllerTestsFailed": 0
+  },
+  "apkBuilt": false
+}

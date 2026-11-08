@@ -21,6 +21,12 @@ test('a tap selects an inactive book and a second tap opens the selected book',(
 test('cancelled dragging restores the original book and suppresses its trailing click',()=>{
  const f=fixture(5);try{f.pointer('pointerdown',200);f.pointer('pointermove',80);f.pointer('pointercancel',80);assert.equal(f.carousel.index,0);f.viewport.querySelector('[data-book-id=b0] button').click();assert.equal(f.opens,0);assert.equal(f.viewport.classList.contains('is-dragging'),false);}finally{f.destroy();}
 });
+test('touch capture transferring from a cover to the viewport preserves the swipe',()=>{
+ const f=fixture(5);try{const button=f.viewport.querySelector('[data-book-id=b0] button');f.pointer('pointerdown',200);f.pointer('pointermove',180);const lost=new f.w.Event('lostpointercapture',{bubbles:true});Object.assign(lost,{pointerId:1});button.dispatchEvent(lost);assert.equal(f.viewport.classList.contains('is-dragging'),true);f.pointer('pointermove',100);f.pointer('pointerup',100);assert.notEqual(f.carousel.index,0);button.click();assert.equal(f.opens,0);}finally{f.destroy();}
+});
+test('losing the viewport capture still cancels a swipe',()=>{
+ const f=fixture(5);try{f.pointer('pointerdown',200);f.pointer('pointermove',100);f.pointer('lostpointercapture',100);f.pointer('pointerup',100);assert.equal(f.carousel.index,0);assert.equal(f.viewport.classList.contains('is-dragging'),false);f.viewport.querySelector('[data-book-id=b0] button').click();assert.equal(f.opens,0);}finally{f.destroy();}
+});
 test('a touch cancelled before dragging does not open a book',()=>{
  const f=fixture(5);try{f.pointer('pointerdown',200);f.pointer('pointercancel',200);f.viewport.querySelector('[data-book-id=b0] button').click();assert.equal(f.opens,0);assert.equal(f.carousel.index,0);}finally{f.destroy();}
 });
@@ -29,4 +35,7 @@ test('vertical movement and a second touch do not activate a book',()=>{
 });
 test('horizontal swipes advance a bounded number of books and clean up on destroy',()=>{
  const f=fixture(12);try{f.pointer('pointerdown',200);f.pointer('pointermove',80);f.pointer('pointerup',80);assert.ok(f.carousel.index>=1&&f.carousel.index<=3);const index=f.carousel.index;f.carousel.destroy();f.pointer('pointerdown',200);f.pointer('pointermove',80);f.pointer('pointerup',80);assert.equal(f.carousel.index,index);}finally{f.destroy();}
+});
+test('a deliberate slow swipe changes covers while a small drag snaps back',()=>{
+ const f=fixture(2);try{let now=0;f.w.performance.now=()=>now;f.pointer('pointerdown',200);now=500;f.pointer('pointermove',190);now=700;f.pointer('pointerup',190);assert.equal(f.carousel.index,0);f.pointer('pointerdown',200);now=1500;f.pointer('pointermove',110);now=1700;f.pointer('pointerup',110);assert.equal(f.carousel.index,1);}finally{f.destroy();}
 });
