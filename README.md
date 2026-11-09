@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.0">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.1">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,22 +24,21 @@
 
 ## Pasang di Android
 
-**Rilis stable terbaru: [1.2.0](https://github.com/arisynn/katakecil/releases/tag/v1.2.0)**, sesuai persetujuan pemilik. Memuat perbaikan EPUB pribadi, pengelolaan cover/buku lokal, serta mode fokus RSVP. [Catatan rilis](docs/releases/v1.2.0.md).
+**Rilis stable terbaru: [1.2.1](https://github.com/arisynn/katakecil/releases/tag/v1.2.1)**, sesuai persetujuan pemilik. Memuat carousel melingkar, respons tekan, tinggi buku seragam dan glow warna sampul, dengan loading wordmark KataKecil yang tetap dipertahankan. [Catatan rilis](docs/releases/v1.2.1.md).
 
 **Status Play Protect:** pemilik mengonfirmasi pada 9 November 2026 bahwa blokir sudah teratasi pada pengujiannya. Status ini berasal dari laporan pemilik; tidak ada uji ulang HP atau keputusan Google yang diperiksa pada sesi ini. [Riwayat pemeriksaan](docs/play-protect-review.md).
 
-Source kandidat **1.2.1 (build 9)** memuat carousel melingkar, respons tekan, skeleton shimmer dan glow warna sampul. APK kandidat belum diterbitkan; penandatanganan menunggu arsip kunci Karisyono yang tidak tersedia di workspace baru. [Catatan kandidat](docs/releases/v1.2.1.md).
 
 | Kebutuhan | Keterangan |
 | --- | --- |
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 4,9 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.0` · build `8` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.1` · build `9` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Status terbaru:** 1.2.0 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
+**Status terbaru:** 1.2.1 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
 
 ## Yang bisa dilakukan
 
@@ -148,7 +147,7 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android stable terbaru](docs/releases/v1.2.0.md)
+- [Catatan rilis Android stable terbaru](docs/releases/v1.2.1.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)

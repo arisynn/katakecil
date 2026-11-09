@@ -4,7 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
-| Kandidat 1.2.1: efek tekan, shimmer dan glow carousel | [Kandidat Android 1.2.1](releases/v1.2.1.md) |
+| Rilis stable 1.2.1: efek tekan, loading lama dan glow carousel | [Android 1.2.1](releases/v1.2.1.md) |
 | Carousel sampul/rak melingkar dan daftar uji web | [Carousel Library](shelf-carousel-web.md) |
 | Rilis stable 1.2.0 dan pengelolaan EPUB pribadi | [Android 1.2.0](releases/v1.2.0.md) |
 | Mode fokus RSVP layar penuh dan huruf penanda | [Mode fokus web](focus-reading-web.md) |

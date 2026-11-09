@@ -11,23 +11,6 @@ body :is(.settings-link,.reading-tool-list>button,.tool-grid button,.upload-zone
 .library-shell .book-carousel .shelf-book{box-shadow:0 0 0 0 transparent;transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 300ms ease,box-shadow 220ms ease}
 .library-shell .book-carousel .shelf-book.is-current{box-shadow:0 0 0 1px rgba(var(--cover-rgb,110,130,118),.25),0 0 14px 3px rgba(var(--cover-rgb,110,130,118),.14)}
 .library-shell .book-carousel .shelf-book.is-recycling,.library-shell .book-carousel.is-dragging .shelf-book{transition:none}
-.skeleton-block{display:block;position:relative;overflow:hidden;flex:none;border-radius:5px;background:rgba(var(--accent-rgb),.1)}
-.skeleton-block::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.35) 48%,transparent 76%);transform:translateX(-100%);animation:skeleton-shimmer 1500ms ease-in-out infinite}
-body[data-theme=dark] .skeleton-block::after{background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.06) 48%,transparent 76%)}
-.library-shell .library-loading.skeleton-library{display:grid;grid-template-rows:minmax(0,1fr) 40px 67px;gap:4px;padding:0;margin-top:4px;width:100%;--placeholder-width:min(68vw,285px,37dvh)}
-.skeleton-art{display:flex;align-items:flex-end;justify-content:center;gap:6px;min-height:0;height:100%;width:100%;padding:0 0 12px;overflow:hidden}
-.skeleton-art.skeleton-rack{--placeholder-width:min(56vw,250px,37dvh)}
-.skeleton-block.skeleton-book{width:var(--placeholder-width);height:calc(var(--placeholder-width)*1.5);max-height:100%;animation:none;border-radius:4px}
-.skeleton-spine{width:31px;height:calc(var(--placeholder-width)*1.5);max-height:100%;border-radius:3px}
-.skeleton-navigation{display:flex;align-items:center;justify-content:center;gap:14px}
-.skeleton-dot{width:5px;height:5px;border-radius:50%}
-.skeleton-footer{display:flex;align-items:center;flex-direction:column;gap:10px}
-.skeleton-caption{width:76px;height:8px}.skeleton-action{width:185px;height:41px;border-radius:12px}
-.reader-skeleton{display:flex;flex-direction:column;gap:18px;width:min(720px,calc(100% - 48px));height:calc(100% - 96px);max-height:900px;overflow:hidden;padding-top:28px}
-.skeleton-heading{width:58%;height:24px;margin:0 auto 32px}.skeleton-line{height:13px;width:100%}.skeleton-line.short{width:72%;margin-bottom:12px}
-@keyframes skeleton-shimmer{to{transform:translateX(100%)}}
-@media(orientation:landscape) and (max-height:480px){.library-shell .library-loading.skeleton-library{--placeholder-width:min(34dvh,185px);grid-template-rows:minmax(0,1fr) 30px 50px}.skeleton-art.skeleton-rack{--placeholder-width:min(34dvh,185px)}.skeleton-action{height:34px}.skeleton-footer{gap:5px}}
 @media(prefers-reduced-motion:reduce){
  body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot),.library-shell .book-carousel .cover-button{transition:none!important;scale:1!important}
- .skeleton-block::after{animation:none;display:none}
 }
