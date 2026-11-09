@@ -7,10 +7,10 @@
 .shelf-measure{position:absolute;width:var(--cover-width);height:var(--cover-max);visibility:hidden;pointer-events:none;top:0;left:0}
 .library-shell .book-carousel .shelf-book{
  position:absolute;left:0;bottom:12px;display:block;flex:none;width:var(--shelf-item-width);height:var(--shelf-item-height);max-height:none;min-height:0;min-width:0;
- opacity:.58;transform:translateX(var(--shelf-x,0px)) scale(.94);transform-origin:center bottom;
+ opacity:.58;transform:translateX(var(--shelf-x,0px));transform-origin:center bottom;
  transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 300ms ease;
 }
-.library-shell .book-carousel .shelf-book.is-current{opacity:1;transform:translateX(var(--shelf-x,0px)) scale(1)}
+.library-shell .book-carousel .shelf-book.is-current{opacity:1;transform:translateX(var(--shelf-x,0px))}
 .library-shell .book-carousel .shelf-book[hidden],.library-shell .shelf-navigation[hidden],.library-shell .shelf-dot[hidden],.shelf-position[hidden]{display:none}
 .library-shell .book-carousel .shelf-book.is-recycling,.library-shell .book-carousel.is-dragging .shelf-book{transition:none}
 .library-shell .book-carousel .shelf-book.is-wrapping{opacity:0}

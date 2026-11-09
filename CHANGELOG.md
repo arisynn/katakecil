@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Kandidat 1.2.1 — Efek tekan, shimmer dan rak seragam (9 November 2026)
+
+- Siapkan versi 1.2.1, versionCode 9; APK belum diterbitkan karena arsip signing belum tersedia di workspace baru.
+- Tambahkan respons tekan pada tombol/kartu dan skeleton shimmer untuk Library serta pembukaan/pagination reader, dengan dukungan reduced motion.
+- Samakan tinggi sampul/punggung buku, pertahankan carousel datar yang halus, dan tambahkan glow tepi tipis dari warna dominan sampul.
+- Probe warna dipisahkan dari gambar tampilan, dengan cache terbatas, timeout, dan fallback bila CORS/pembacaan piksel tidak tersedia.
+- Catat laporan pemilik bahwa blokir Play Protect telah teratasi pada 9 November 2026. [Catatan kandidat dan pemeriksaan](docs/releases/v1.2.1.md).
+
 ## Pengembangan web — Carousel datar dan halus (8 November 2026)
 
 - Sederhanakan animasi menjadi geser, perubahan lebar dan fade; lepas perspektif, engsel, kemiringan serta angkat sampul.

@@ -12,7 +12,7 @@
 <p align="center">
   <img alt="Android 7 atau lebih baru" src="https://img.shields.io/badge/Android-7%2B-54756c">
   <img alt="Android System WebView 113 atau lebih baru" src="https://img.shields.io/badge/WebView-113%2B-4269a5">
-  <img alt="Status Android dalam peninjauan" src="https://img.shields.io/badge/Android-Dalam_peninjauan-a0782f">
+  <img alt="Play Protect dilaporkan beres oleh pemilik" src="https://img.shields.io/badge/Play_Protect-Dilaporkan_beres-54756c">
 </p>
 
 <p align="center">
@@ -26,7 +26,9 @@
 
 **Rilis stable terbaru: [1.2.0](https://github.com/arisynn/katakecil/releases/tag/v1.2.0)**, sesuai persetujuan pemilik. Memuat perbaikan EPUB pribadi, pengelolaan cover/buku lokal, serta mode fokus RSVP. [Catatan rilis](docs/releases/v1.2.0.md).
 
-**Status Play Protect belum terselesaikan:** versi 1.1.1 dan 1.1.2-rc.1 sebelumnya dilaporkan diblokir. Klasifikasi Google untuk 1.2.0 belum diverifikasi; rilis ini tidak diklaim memperbaiki blokir tersebut. Jika Play Protect memblokir, hentikan pemasangan dan jangan menonaktifkan atau melewati pemindaian. [Status pemeriksaan](docs/play-protect-review.md).
+**Status Play Protect:** pemilik mengonfirmasi pada 9 November 2026 bahwa blokir sudah teratasi pada pengujiannya. Status ini berasal dari laporan pemilik; tidak ada uji ulang HP atau keputusan Google yang diperiksa pada sesi ini. [Riwayat pemeriksaan](docs/play-protect-review.md).
+
+Source kandidat **1.2.1 (build 9)** memuat carousel melingkar, respons tekan, skeleton shimmer dan glow warna sampul. APK kandidat belum diterbitkan; penandatanganan menunggu arsip kunci Karisyono yang tidak tersedia di workspace baru. [Catatan kandidat](docs/releases/v1.2.1.md).
 
 | Kebutuhan | Keterangan |
 | --- | --- |

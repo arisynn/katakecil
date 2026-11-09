@@ -1,0 +1,46 @@
+{
+  "version": "1.2.1",
+  "versionCode": 9,
+  "status": "candidate-awaiting-existing-signing-archive",
+  "apkBuilt": false,
+  "apkPublished": false,
+  "checks": {
+    "webHelperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 23,
+    "nodeFailures": 0
+  },
+  "browser": {
+    "scope": "Quick mobile Chromium with mocked catalog/episodes",
+    "physicalDeviceTested": false,
+    "apkBuilt": false,
+    "rackHeights": [
+      327.578125,
+      327.578125,
+      327.578125,
+      327.578125,
+      327.578125
+    ],
+    "coverGlow": "rgba(169, 94, 107, 0.25) 0px 0px 0px 1px, rgba(169, 94, 107, 0.14) 0px 0px 14px 3px",
+    "buttonPressedScale": 0.970724,
+    "cardPressedScale": 0.985362,
+    "touchSwipe": true,
+    "coverHeights": [
+      397.78125,
+      397.78125
+    ],
+    "readerSkeleton": true,
+    "settingsCard": true,
+    "reducedMotion": true,
+    "portraitLandscape": true,
+    "darkTheme": true,
+    "pageErrors": []
+  },
+  "playProtect": {
+    "status": "owner-reported-resolved",
+    "reportedOn": "2026-11-09",
+    "independentDeviceRetest": false,
+    "googleVerdictReviewed": false
+  }
+}

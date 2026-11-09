@@ -1,6 +1,10 @@
 # Play Protect report — 2026-11-05
 
-Status: unresolved. A user reported the “Harmful app blocked” dialog while updating KataKecil. The owner confirmed that the blocked target was version 1.1.1. The screenshot does not identify the malware category or offending component. This is not sufficient evidence to call the warning a false positive or to attribute it to sideloading or the updater permission.
+**Current status — 2026-11-09:** the owner confirmed that the Play Protect block has been resolved in their testing. This is an owner-reported outcome; the exact tested APK, Google's classification decision and an independent device retest were not supplied in this session. Earlier findings below describe the historical incident and do not override this update.
+
+## Historical report — unresolved at the time of inspection
+
+A user reported the “Harmful app blocked” dialog while updating KataKecil. The owner confirmed that the blocked target was version 1.1.1. The screenshot does not identify the malware category or offending component. This is not sufficient evidence to call the warning a false positive or to attribute it to sideloading or the updater permission.
 
 Follow-up: the owner also reported the same block for **1.1.2-rc.1**, opened from a GitHub browser download. Changing only the visual assets did not resolve the warning. No further APK has been published as a speculative fix.
 
