@@ -2,6 +2,24 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {installGlassTabs} from '../dist/glass-tabs.js';
+import {installPressFeedback} from '../dist/press-feedback.js';
+test('press feedback updates liquid glass specular spot coordinates without capturing pointers',()=>{
+ const w=new JSDOM('<body><div class="shelf-action"><button class="primary read-button">Read</button></div></body>',{pretendToBeVisual:true}).window;
+ const btn=w.document.querySelector('.read-button');
+ btn.getBoundingClientRect=()=>({left:100,top:200,width:200,height:50});
+ installPressFeedback(w.document);
+ const down=new w.MouseEvent('pointerdown',{bubbles:true,cancelable:true,button:0,clientX:150,clientY:225});
+ Object.defineProperty(down,'pointerId',{value:1});Object.defineProperty(down,'isPrimary',{value:true});
+ btn.dispatchEvent(down);
+ assert.equal(down.defaultPrevented,false);
+ assert.equal(btn.dataset.pressing,'true');
+ assert.equal(btn.style.getPropertyValue('--spot-x'),'25%');
+ assert.equal(btn.style.getPropertyValue('--spot-y'),'50%');
+ const up=new w.MouseEvent('pointerup',{bubbles:true,cancelable:true,button:0});
+ w.document.dispatchEvent(up);
+ assert.equal(btn.dataset.pressing,undefined);
+ w.close();
+});
 test('one noninteractive lens tracks existing tabs through state, locale and resize changes',async()=>{
  const w=new JSDOM('<body><nav class="appearance-tabs"><button class="active" aria-selected="true">Text</button><button aria-selected="false">Layout</button><button aria-selected="false">Theme</button></nav></body>',{pretendToBeVisual:true}).window;
  const callbacks=[];w.requestAnimationFrame=fn=>{callbacks.push(fn);return callbacks.length;};w.cancelAnimationFrame=()=>{};let resize;w.ResizeObserver=class{constructor(callback){resize=callback;}observe(){}unobserve(){}disconnect(){}};

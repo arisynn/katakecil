@@ -1,4 +1,4 @@
-import {installPressFeedback} from './press-feedback.js?v=1';
+import {installPressFeedback} from './press-feedback.js?v=2';
 import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=6';
 import {createLocalBooks} from './local-books.js?v=1';
 import {createSpeedReading} from './speed-reading.js?v=4';

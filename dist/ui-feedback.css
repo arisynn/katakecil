@@ -1,12 +1,20 @@
 /* Individual scale leaves layout/position transforms and slider capture intact. */
 body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot){
- transition:scale 160ms cubic-bezier(.2,.8,.2,1),background-color 160ms ease,color 160ms ease,opacity 160ms ease;
+ transition:scale 190ms cubic-bezier(.34,1.56,.64,1),box-shadow 180ms ease,background-color 160ms ease,color 160ms ease,opacity 160ms ease;
 }
-body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){scale:.97}
+body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){scale:.965;transition-duration:90ms}
 body .primary:active,body .secondary:active,body .reader-tool-actions>button:active{transform:none}
 body :is(.settings-link,.reading-tool-list>button,.tool-grid button,.upload-zone):not(:disabled):is(:active,[data-pressing=true]){background-color:rgba(var(--accent-rgb),.1)}
-.library-shell .book-carousel .cover-button{transition:scale 160ms cubic-bezier(.2,.8,.2,1);transform-origin:center center}
-.library-shell .book-carousel .cover-button:is(:active,[data-pressing=true]){scale:.98}
+/* Liquid specular bloom on glass controls when pressed. */
+body :is(.secondary,.header-back,.app-select-trigger,.app-color-trigger,.tool-grid button,.library-header .icon-button,.dialog-heading .icon-button,.app-picker-heading .icon-button):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){
+ background-color:rgba(var(--accent-rgb),.11);
+ box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top,#ffffffcc),inset 0 0 12px rgba(var(--accent-rgb),.14);
+}
+body :is(.dialog .primary,.tts-player .primary):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){
+ box-shadow:inset 0 1.5px 1px -.5px #ffffffcc,inset 0 0 14px #ffffff2e,0 6px 16px -8px var(--g-shadow);
+}
+.library-shell .book-carousel .cover-button{transition:scale 190ms cubic-bezier(.34,1.56,.64,1);transform-origin:center center}
+.library-shell .book-carousel .cover-button:is(:active,[data-pressing=true]){scale:.98;transition-duration:100ms}
 .library-shell .book-carousel.is-dragging .cover-button{scale:1;transition:none}
 .library-shell .book-carousel .shelf-book{box-shadow:none;transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 320ms ease,filter 320ms ease}
 .library-shell .book-carousel .shelf-book.is-current{box-shadow:none}
