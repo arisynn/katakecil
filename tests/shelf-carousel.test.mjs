@@ -39,3 +39,16 @@ test('horizontal swipes advance a bounded number of books and clean up on destro
 test('a deliberate slow swipe changes covers while a small drag snaps back',()=>{
  const f=fixture(2);try{let now=0;f.w.performance.now=()=>now;f.pointer('pointerdown',200);now=500;f.pointer('pointermove',190);now=700;f.pointer('pointerup',190);assert.equal(f.carousel.index,0);f.pointer('pointerdown',200);now=1500;f.pointer('pointermove',110);now=1700;f.pointer('pointerup',110);assert.equal(f.carousel.index,1);}finally{f.destroy();}
 });
+test('layered covers preserve full cover width and apply depth scale to side neighbors',()=>{
+ for(const count of [3,6]){
+  const f=fixture(count);
+  try{
+   const current=f.viewport.querySelector('[data-book-id=b0]'),neighbor=f.viewport.querySelector('[data-book-id=b1]');
+   assert.equal(current.style.getPropertyValue('--shelf-item-width'),neighbor.style.getPropertyValue('--shelf-item-width'));
+   assert.equal(parseFloat(current.style.getPropertyValue('--shelf-scale')),1);
+   assert.ok(parseFloat(neighbor.style.getPropertyValue('--shelf-scale'))<1);
+   assert.equal(neighbor.classList.contains('is-neighbor'),true);
+  }finally{f.destroy();}
+ }
+});
+

@@ -1,5 +1,5 @@
 import {installPressFeedback} from './press-feedback.js?v=1';
-import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=5';
+import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=6';
 import {createLocalBooks} from './local-books.js?v=1';
 import {createSpeedReading} from './speed-reading.js?v=4';
 import {createPublisher} from './publisher.js?v=3';
@@ -106,7 +106,7 @@ function libraryBody(){
  return `<section class="shelf" data-shelf-mode="${shelfMode(books.length)}" aria-label="Koleksi buku"><div class="book-carousel" id="book-carousel" tabindex="0" role="region" aria-roledescription="carousel" aria-label="${tr('Choose a book. Use the left and right arrow keys.','Pilih buku. Gunakan tombol panah kiri dan kanan.')}"><span class="shelf-measure" data-shelf-measure aria-hidden="true"></span>${books.map(bookCard).join('')}</div><div class="shelf-navigation" ${books.length===1?'hidden':''}><button class="icon-button" data-action="carousel-prev" aria-label="Buku sebelumnya">${icon('left')}</button><div class="shelf-dots" role="group" aria-label="Pilih buku">${books.map((b,i)=>`<button data-action="select-book" data-id="${escapeHTML(b.id)}" aria-label="Buku ${i+1}: ${escapeHTML(b.title)}" aria-pressed="${b.id===activeLibraryId}" class="shelf-dot ${b.id===activeLibraryId?'active':''}" ${visible.includes(i)?'':'hidden'}><span></span></button>`).join('')}</div><span class="shelf-position" role="status" aria-live="polite" ${books.length<5?'hidden':''}>${index+1} / ${books.length}</span><button class="icon-button" data-action="carousel-next" aria-label="Buku selanjutnya">${icon('chevron')}</button></div><div class="shelf-action" id="shelf-action">${shelfAction()}</div>${catalogOffline?'<p class="offline-label">Menampilkan koleksi tersimpan · <button data-action="refresh">Coba lagi</button></p>':''}</section>`;
 }
 
-function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.progress[b.id];return `<p class="reading-status">${saved?percentage(b.id)===100?'Selesai dibaca':`${percentage(b.id)}% dibaca`:'Belum dibaca'}</p><button class="primary read-button" data-action="open" data-id="${escapeHTML(b.id)}">${saved?'Lanjutkan membaca':'Baca buku'} ${icon('arrow')}</button>`;}
+function shelfAction(){const b=selectedBook();if(!b)return '';const saved=Store.progress[b.id],pct=saved?percentage(b.id):0,state=saved?pct===100?'done':'reading':'unread';return `<p class="reading-status" data-status="${state}" style="--reading-progress:${pct}%">${saved?pct===100?'Selesai dibaca':`${pct}% dibaca`:'Belum dibaca'}</p><button class="primary read-button" data-action="open" data-id="${escapeHTML(b.id)}">${saved?'Lanjutkan membaca':'Baca buku'} ${icon('arrow')}</button>`;}
 function renderLibrary(){
  disconnectCarousel();view='library';currentBook=null;document.body.classList.remove('is-reading');document.body.classList.add('is-library');document.title='Library · KataKecil';
  if(catalogState!=='loading'&&!books.some(b=>b.id===activeLibraryId)){activeLibraryId=books[Math.max(0,Math.min(lastLibraryIndex,books.length-1))]?.id||'';Store.writeLocal('lumina_selected_book',activeLibraryId);}
@@ -122,7 +122,7 @@ function connectCarousel(){
 }
 function selectBook(id,scroll=true){
  const index=books.findIndex(b=>b.id===id);if(index<0)return;activeLibraryId=id;lastLibraryIndex=index;Store.writeLocal('lumina_selected_book',id);
- $$('.shelf-book').forEach((card,i)=>{const active=card.dataset.bookId===id;card.classList.toggle('is-current',active);const button=card.querySelector('.cover-button'),book=books[i];if(button&&book)button.setAttribute('aria-label',tr(active?'Read ':'Select ',active?'Baca ':'Pilih ')+book.title);});
+ $$('.shelf-book').forEach((card,i)=>{const active=card.dataset.bookId===id;card.classList.toggle('is-current',active);if(active){const rgb=card.style.getPropertyValue('--cover-rgb')?.trim();if(rgb)$('.library-shell')?.style.setProperty('--active-cover-rgb',rgb);}const button=card.querySelector('.cover-button'),book=books[i];if(button&&book)button.setAttribute('aria-label',tr(active?'Read ':'Select ',active?'Baca ':'Pilih ')+book.title);});
  const visible=shelfDots(books.length,index);
  $$('.shelf-dot').forEach((dot,i)=>{dot.classList.toggle('active',dot.dataset.id===id);dot.setAttribute('aria-pressed',String(dot.dataset.id===id));dot.hidden=!visible.includes(i);dot.style.order=String(visible.indexOf(i));});
  const position=$('.shelf-position');if(position){position.textContent=`${index+1} / ${books.length}`;position.setAttribute('aria-label',tr('Book ','Buku ')+(index+1)+tr(' of ',' dari ')+books.length);}

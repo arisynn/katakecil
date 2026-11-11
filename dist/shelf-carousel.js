@@ -1,6 +1,6 @@
 // Adapted from the user's rak-logic.js: ring positions keep the active cover centered.
 // One canonical element per book; recycled edge items never travel across the cover.
-import {createCoverTints} from './cover-colors.js?v=1';
+import {createCoverTints} from './cover-colors.js?v=2';
 export const shelfMode=count=>count<2?'single':count<5?'covers':'rack';
 export const wrapIndex=(index,count)=>count>0?((Math.trunc(index)%count)+count)%count:-1;
 export function shelfDots(count,index,limit=5){
@@ -10,25 +10,36 @@ export function shelfDots(count,index,limit=5){
 export function createShelfCarousel({viewport,items=[...viewport.querySelectorAll('.shelf-book')],start=0,onChange=()=>{},onOpen=()=>{}}){
  const win=viewport.ownerDocument.defaultView,n=items.length,mode=shelfMode(n),media=win.matchMedia?.('(prefers-reduced-motion: reduce)');
  const tints=createCoverTints(viewport);
- let index=n?wrapIndex(start,n):-1,direction=-1,drag=null,blocked=false,lastDrag=-Infinity,frame=0,dragFrame=0,destroyed=false,metrics={cover:0,height:0,spine:34,gap:6},positions=new Map();
+ let index=n?wrapIndex(start,n):-1,direction=-1,drag=null,blocked=false,lastDrag=-Infinity,frame=0,dragFrame=0,destroyed=false,metrics={cover:0,height:0,step:96,gap:96},positions=new Map();
  const reduced=()=>!!media?.matches;
  const relative=k=>{let r=wrapIndex(k-index,n);if(r>n/2||(n%2===0&&r===n/2&&direction>0))r-=n;return r;};
+ function offsetFor(f,step){
+  const abs=Math.abs(f),sign=Math.sign(f);
+  return abs<=1?f*step:sign*step*(1+(abs-1)*.62);
+ }
  function measure(){
-  const probe=viewport.querySelector('[data-shelf-measure]'),style=win.getComputedStyle(viewport),width=viewport.clientWidth,height=viewport.clientHeight;
-  const desired=probe?.getBoundingClientRect().width||Math.min(width*.68,285),maximum=probe?.getBoundingClientRect().height||height-24;
+  const probe=viewport.querySelector('[data-shelf-measure]'),width=viewport.clientWidth,height=viewport.clientHeight;
+  const desired=probe?.getBoundingClientRect().width||Math.min(width*.64,285),maximum=probe?.getBoundingClientRect().height||height-24;
   const h=Math.max(1,Math.min(maximum,height-24,desired*1.5)),cover=Math.max(1,Math.min(desired,h/1.5));
-  metrics={cover,height:h,spine:parseFloat(style.getPropertyValue('--spine-width'))||34,gap:parseFloat(style.getPropertyValue(mode==='rack'?'--spine-gap':'--cover-gap'))||(mode==='rack'?6:36)};
+  const step=Math.max(52,Math.round(Math.min(cover*.6,Math.max(cover*.45,(width-cover*.82)*.46))));
+  metrics={cover,height:h,step,gap:step};
   viewport.style.setProperty('--shelf-open-width',cover+'px');
  }
  function place(extra=0,animate=true){
   if(destroyed||!n)return;
-  const center=viewport.clientWidth/2,{cover,height,spine,gap}=metrics,slots=mode==='rack'?3:2;
+  const center=viewport.clientWidth/2,{cover,height,step}=metrics,slots=n>=5?2:n>=3?2:1,shift=step?extra/step:0;
   tints.request(items[index]);
+  const activeRgb=items[index]?.style.getPropertyValue('--cover-rgb')?.trim();
+  if(activeRgb)viewport.closest?.('.library-shell')?.style.setProperty('--active-cover-rgb',activeRgb);
   for(const [k,item] of items.entries()){
-   const r=relative(k),active=k===index,w=mode==='rack'&&!active?spine:cover,old=positions.get(item),recycled=old!==undefined&&Math.abs(old-r)>Math.max(1,n/2),hidden=Math.abs(r)>slots;
-   const x=mode==='rack'?(r===0?center-cover/2:r>0?center+cover/2+gap+(r-1)*(spine+gap):center-cover/2-gap-spine+(r+1)*(spine+gap)):center-cover/2+r*(cover+gap);
-   item.classList.toggle('is-current',active);item.classList.toggle('is-recycling',!animate||reduced()||recycled);item.classList.toggle('is-wrapping',animate&&!reduced()&&recycled);item.hidden=hidden;item.setAttribute('aria-current',String(active));
-   item.style.setProperty('--shelf-x',x+extra+'px');item.style.setProperty('--shelf-item-width',w+'px');item.style.setProperty('--shelf-item-height',height+'px');item.style.zIndex=active?'3':String(Math.max(0,2-Math.abs(r)));if(!hidden)tints.request(item);
+   const r=relative(k),active=k===index,f=r+shift,d=Math.abs(f),old=positions.get(item),recycled=old!==undefined&&Math.abs(old-r)>Math.max(1,n/2),hidden=Math.abs(r)>slots;
+   const x=center-cover/2+offsetFor(f,step);
+   const scale=d<=1?1-d*.16:d<=2?.84-(d-1)*.12:Math.max(.64,.72-(d-2)*.08);
+   const y=Math.min(16,d*7);
+   const opacity=hidden?0:d<=1?1-d*.28:d<=2?.72-(d-1)*.34:Math.max(0,.38-(d-2)*.3);
+   const z=active&&d<.5?6:Math.max(1,5-Math.round(d));
+   item.classList.toggle('is-current',active);item.classList.toggle('is-neighbor',!active&&Math.abs(r)===1);item.classList.toggle('is-far',!active&&Math.abs(r)>=2);item.classList.toggle('is-recycling',!animate||reduced()||recycled);item.classList.toggle('is-wrapping',animate&&!reduced()&&recycled);item.hidden=hidden;item.setAttribute('aria-current',String(active));
+   item.style.setProperty('--shelf-x',x+'px');item.style.setProperty('--shelf-y',y.toFixed(2)+'px');item.style.setProperty('--shelf-scale',scale.toFixed(4));item.style.setProperty('--shelf-opacity',opacity.toFixed(3));item.style.setProperty('--shelf-item-width',cover+'px');item.style.setProperty('--shelf-item-height',height+'px');item.style.zIndex=String(z);if(!hidden)tints.request(item);
    const button=item.querySelector('button');if(button)button.tabIndex=active?0:-1;
    positions.set(item,r);
   }
@@ -42,7 +53,7 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
   // With two covers the other item can be placed on either side before its entrance.
   if(n===2&&animate&&!reduced()){
    const target=items[next],side=value>index?1:-1;
-   target.classList.add('is-recycling');target.style.setProperty('--shelf-x',(viewport.clientWidth/2-metrics.cover/2+side*(metrics.cover+metrics.gap))+'px');void target.offsetWidth;target.classList.remove('is-recycling');
+   target.classList.add('is-recycling');target.style.setProperty('--shelf-x',(viewport.clientWidth/2-metrics.cover/2+side*metrics.step)+'px');void target.offsetWidth;target.classList.remove('is-recycling');
   }
   index=next;place(0,animate);onChange(index,previous);
  }
@@ -64,7 +75,7 @@ export function createShelfCarousel({viewport,items=[...viewport.querySelectorAl
   const state=drag;drag=null;if(dragFrame){win.cancelAnimationFrame(dragFrame);dragFrame=0;}viewport.classList.remove('is-dragging');try{viewport.releasePointerCapture(state.id);}catch{}
   if(cancelled||state.moving)lastDrag=win.performance.now();if(!state.moving)return;
   if(cancelled){place();return;}
-  const velocity=lastDrag-state.time>90?0:state.velocity,unit=mode==='rack'?metrics.spine+metrics.gap:metrics.cover+metrics.gap;
+  const velocity=lastDrag-state.time>90?0:state.velocity,unit=metrics.step||96;
   const threshold=Math.max(24,Math.min(60,unit*.2));
   const wanted=Math.round(-(state.dx+velocity*120)/unit)||(Math.abs(state.dx)>=threshold?-Math.sign(state.dx):0);
   // Never wrap so far in one fling that the shortest visible route reverses.

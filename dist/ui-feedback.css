@@ -5,11 +5,11 @@ body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-selec
 body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){scale:.97}
 body .primary:active,body .secondary:active,body .reader-tool-actions>button:active{transform:none}
 body :is(.settings-link,.reading-tool-list>button,.tool-grid button,.upload-zone):not(:disabled):is(:active,[data-pressing=true]){background-color:rgba(var(--accent-rgb),.1)}
-.library-shell .book-carousel .cover-button{transition:scale 160ms cubic-bezier(.2,.8,.2,1);transform-origin:center bottom}
-.library-shell .book-carousel .cover-button:is(:active,[data-pressing=true]){scale:.985}
+.library-shell .book-carousel .cover-button{transition:scale 160ms cubic-bezier(.2,.8,.2,1);transform-origin:center center}
+.library-shell .book-carousel .cover-button:is(:active,[data-pressing=true]){scale:.98}
 .library-shell .book-carousel.is-dragging .cover-button{scale:1;transition:none}
-.library-shell .book-carousel .shelf-book{box-shadow:0 0 0 0 transparent;transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 300ms ease,box-shadow 220ms ease}
-.library-shell .book-carousel .shelf-book.is-current{box-shadow:0 0 0 1px rgba(var(--cover-rgb,110,130,118),.25),0 0 14px 3px rgba(var(--cover-rgb,110,130,118),.14)}
+.library-shell .book-carousel .shelf-book{box-shadow:none;transition:transform var(--shelf-duration) var(--shelf-ease),width var(--shelf-duration) var(--shelf-ease),height var(--shelf-duration) var(--shelf-ease),opacity 320ms ease,filter 320ms ease}
+.library-shell .book-carousel .shelf-book.is-current{box-shadow:none}
 .library-shell .book-carousel .shelf-book.is-recycling,.library-shell .book-carousel.is-dragging .shelf-book{transition:none}
 @media(prefers-reduced-motion:reduce){
  body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot),.library-shell .book-carousel .cover-button{transition:none!important;scale:1!important}

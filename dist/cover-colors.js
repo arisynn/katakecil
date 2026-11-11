@@ -12,7 +12,7 @@ export function dominantCoverColor(pixels){
 }
 export function createCoverTints(viewport){
  const doc=viewport.ownerDocument,win=doc.defaultView,queue=[],pending=new Set();let closed=false,running=0;
- const apply=(card,rgb)=>{if(!closed&&rgb)card.style.setProperty('--cover-rgb',rgb.join(','));};
+ const apply=(card,rgb)=>{if(!closed&&rgb){const value=rgb.join(',');card.style.setProperty('--cover-rgb',value);if(card.classList?.contains('is-current'))viewport.closest?.('.library-shell')?.style.setProperty('--active-cover-rgb',value);}};
  function pump(){
   while(!closed&&running<2&&queue.length){
    const {card,src}=queue.shift();if(cache.has(src)){apply(card,cache.get(src));continue;}
