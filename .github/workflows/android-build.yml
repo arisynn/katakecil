@@ -17,13 +17,18 @@ on:
         required: false
         default: true
         type: boolean
+      publish_release:
+        description: 'Otomatis terbitkan GitHub Release (agar bisa update langsung di app) jika build bertanda tangan'
+        required: false
+        default: true
+        type: boolean
 
 concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -148,3 +153,42 @@ jobs:
             artifacts/*.json
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish GitHub Release (signed APK for in-app update)
+        if: ${{ inputs.publish_release != false }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./app-version.json').version")"
+          TAG="v${VERSION}"
+          APK_FILE="artifacts/KataKecil-${VERSION}-Karisyono.apk"
+          SHA_FILE="${APK_FILE}.sha256"
+          INFO_FILE="artifacts/KataKecil-release-info.json"
+
+          if [ ! -f "$APK_FILE" ]; then
+            echo "::notice::Build menghasilkan Debug APK (signing secret belum diatur). GitHub Release untuk in-app update dilewati karena membutuhkan APK bertanda tangan Karisyono ($APK_FILE)."
+            exit 0
+          fi
+
+          NOTES_FILE="docs/releases/${TAG}.md"
+          if [ ! -f "$NOTES_FILE" ]; then
+            NOTES_FILE=""
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Updating existing release $TAG..."
+            gh release upload "$TAG" "$APK_FILE" "$SHA_FILE" "$INFO_FILE" --clobber
+          else
+            echo "Creating new release $TAG..."
+            if [ -n "$NOTES_FILE" ]; then
+              gh release create "$TAG" "$APK_FILE" "$SHA_FILE" "$INFO_FILE" \
+                --title "${TAG} Stable" \
+                --notes-file "$NOTES_FILE"
+            else
+              gh release create "$TAG" "$APK_FILE" "$SHA_FILE" "$INFO_FILE" \
+                --title "${TAG} Stable" \
+                --generate-notes
+            fi
+          fi
+

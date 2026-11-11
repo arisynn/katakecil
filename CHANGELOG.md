@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.2 Stable — Liquid Glass, karusel sampul berlapis, dan panggung desktop (11 November 2026)
+
+- Rilis versionCode 10 dengan package `id.karisyono.katakecil` dan signer Karisyono yang sama agar mendukung update langsung di dalam aplikasi.
+- Perbarui Beranda dengan karusel sampul utuh berlapis kedalaman (*scale*, *offset*, *opacity*) serta panggung *split-stage* 2 kolom pada layar desktop.
+- Tambahkan sistem optik **Liquid Glass**: kurva kaca cembung (*meniscus bevel*), *prismatic specular rim* pada kapsul mengambang Reader, bias warna sampul aktif (`--active-cover-rgb`), tombol baca *Tinted Liquid Gel*, serta pantulan cahaya interaktif (`--spot-x`, `--spot-y`) dan *specular bloom* saat ditekan.
+- Pertahankan ketajaman halaman baca (`.reading-page`) dan dukungan `prefers-reduced-motion`. [Rincian rilis 1.2.2](docs/releases/v1.2.2.md).
+
 ## 1.2.1 Stable — Efek tekan dan rak seragam (9 November 2026)
 
 - Rilis versionCode 9 dengan package dan signer Karisyono yang sama.
