@@ -1,0 +1,151 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dist/**'
+      - 'src/**'
+      - 'android/**'
+      - 'scripts/build-android.mjs'
+      - 'scripts/build-reader.mjs'
+      - 'app-version.json'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Mode build APK (auto = release jika secret signing tersedia, selain itu debug)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - release
+          - debug
+      skip_qa:
+        description: 'Lewati testReleaseUnitTest & lintRelease agar build lebih cepat'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build KataKecil APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Platform 36 & Build Tools 36.0.0
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Verify web bundle & checks
+        run: |
+          npm run build
+          npm run typecheck
+          npm run check
+
+      - name: Prepare signing credentials & build APK
+        env:
+          INPUT_BUILD_TYPE: ${{ inputs.build_type || 'auto' }}
+          INPUT_SKIP_QA: ${{ inputs.skip_qa != false }}
+          KEYSTORE_BASE64: ${{ secrets.KATAKECIL_KEYSTORE_BASE64 }}
+          SIGNING_JSON: ${{ secrets.KATAKECIL_SIGNING_JSON }}
+          STORE_PASSWORD: ${{ secrets.KATAKECIL_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KATAKECIL_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KATAKECIL_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          MODE="$INPUT_BUILD_TYPE"
+          HAS_SIGNING="false"
+
+          if [ -n "$KEYSTORE_BASE64" ] && { [ -n "$SIGNING_JSON" ] || [ -n "$STORE_PASSWORD" ]; }; then
+            HAS_SIGNING="true"
+          fi
+
+          if [ "$MODE" = "auto" ]; then
+            if [ "$HAS_SIGNING" = "true" ]; then
+              MODE="release"
+            else
+              MODE="debug"
+            fi
+          fi
+
+          if [ "$MODE" = "release" ]; then
+            if [ "$HAS_SIGNING" != "true" ]; then
+              echo "::error::Secret KATAKECIL_KEYSTORE_BASE64 dan KATAKECIL_SIGNING_JSON (atau KATAKECIL_STORE_PASSWORD) belum diatur di GitHub Secrets."
+              exit 1
+            fi
+            SIGN_DIR="$RUNNER_TEMP/katakecil-signing"
+            mkdir -p "$SIGN_DIR"
+            chmod 700 "$SIGN_DIR"
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$SIGN_DIR/karisyono-katakecil.p12"
+            chmod 600 "$SIGN_DIR/karisyono-katakecil.p12"
+
+            if [ -n "$SIGNING_JSON" ]; then
+              printf '%s\n' "$SIGNING_JSON" > "$SIGN_DIR/signing.json"
+            else
+              ALIAS_VAL="${KEY_ALIAS:-karisyono}"
+              KEY_PASS_VAL="${KEY_PASSWORD:-$STORE_PASSWORD}"
+              node -e '
+                const fs = require("node:fs");
+                fs.writeFileSync(process.argv[1], JSON.stringify({
+                  storeFile: "karisyono-katakecil.p12",
+                  alias: process.argv[2],
+                  storePassword: process.argv[3],
+                  keyPassword: process.argv[4],
+                  subject: "CN=Karisyono"
+                }, null, 2) + "\n", { mode: 0o600 });
+              ' "$SIGN_DIR/signing.json" "$ALIAS_VAL" "$STORE_PASSWORD" "$KEY_PASS_VAL"
+            fi
+
+            EXTRA_ARGS=""
+            if [ "$INPUT_SKIP_QA" = "true" ]; then
+              EXTRA_ARGS="--skip-qa"
+            fi
+            KATAKECIL_SIGNING_DIR="$SIGN_DIR" node scripts/build-android.mjs $EXTRA_ARGS
+            rm -rf "$SIGN_DIR"
+          else
+            echo "Building debug APK (signing secrets not configured or debug selected)..."
+            node scripts/build-android.mjs --debug
+          fi
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: KataKecil-Android-APK
+          path: |
+            artifacts/*.apk
+            artifacts/*.sha256
+            artifacts/*.json
+          if-no-files-found: error
+          retention-days: 30
