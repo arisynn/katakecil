@@ -3,6 +3,10 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Pilih satu tema untuk aplikasi dan reader.':'Choose one theme for the app and reader.',
+ 'Mode tampilan':'Display mode','Palet tambahan':'More palettes','Teks dan latar':'Text and background',
+ 'Spasi dan paragraf':'Spacing and paragraphs','Margin dan kolom':'Margins and column','Layar':'Screen',
+ 'Alat bantu':'Reading aids','Navigasi':'Navigation','Preferensi membaca':'Reading preferences','Pembaruan & tentang':'Updates & about',
  'Pratinjau ambient dan kaca':'Live ambient and glass preview','Kuat':'Strong','Mati':'Off',
  'Kebeningan':'Clarity','Pekat':'Opaque','Bening':'Clear','Tajam':'Sharp','Buram':'Soft','Kembalikan default':'Restore defaults',
  'Pratinjau kaca langsung di atas latar berwarna':'Live glass preview over a colored background',

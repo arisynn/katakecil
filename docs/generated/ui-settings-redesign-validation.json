@@ -1,0 +1,209 @@
+{
+  "scope": "Web settings/reader UI layout redesign on 1.2.4/build12",
+  "status": "passed-targeted-review",
+  "apkBuilt": false,
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "checks": {
+    "helperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 37,
+    "nodeFailures": 0,
+    "testFiles": [
+      "reader.test.mjs",
+      "reader-controls.test.mjs",
+      "glass-preferences.test.mjs",
+      "glass-tabs.test.mjs",
+      "i18n.test.mjs",
+      "app-popups.test.mjs"
+    ],
+    "fullSuiteRun": false
+  },
+  "staticReview": {
+    "existingStaticActionsRemoved": [],
+    "versionAndDefaultsUnchanged": true,
+    "parserPaginationStoreAndEnginesUnchanged": true,
+    "androidUpdateGuardPreserved": true,
+    "themeEntryPointsShareRenderer": true,
+    "loadingAndGlobalToastPreserved": true
+  },
+  "browser": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "errors": [],
+    "unexpectedNetwork": [],
+    "layouts": [
+      {
+        "width": 320,
+        "height": 568,
+        "main": {
+          "documentOverflow": false,
+          "contentOverflow": false,
+          "scroller": "auto",
+          "headerHeight": 83.046875
+        },
+        "theme": {
+          "width": 300,
+          "height": 383,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        },
+        "readerText": {
+          "width": 300,
+          "height": 407,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": [
+            "dialog-body"
+          ]
+        },
+        "tools": {
+          "width": 300,
+          "height": 429.171875,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "main": {
+          "documentOverflow": false,
+          "contentOverflow": false,
+          "scroller": "auto",
+          "headerHeight": 83.046875
+        }
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "main": {
+          "documentOverflow": false,
+          "contentOverflow": false,
+          "scroller": "auto",
+          "headerHeight": 83.046875
+        },
+        "theme": {
+          "width": 460,
+          "height": 264,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        },
+        "readerText": {
+          "width": 460,
+          "height": 309,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": [
+            "dialog-body"
+          ]
+        },
+        "tools": {
+          "width": 440,
+          "height": 311.171875,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        }
+      },
+      {
+        "width": 1280,
+        "height": 800,
+        "main": {
+          "documentOverflow": false,
+          "contentOverflow": false,
+          "scroller": "auto",
+          "headerHeight": 83.046875
+        },
+        "theme": {
+          "width": 460,
+          "height": 411.375,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        },
+        "readerText": {
+          "width": 460,
+          "height": 539.5625,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        },
+        "tools": {
+          "width": 440,
+          "height": 429.171875,
+          "horizontalOverflow": false,
+          "bodyHorizontalOverflow": false,
+          "scrollers": []
+        }
+      }
+    ],
+    "mainGroups": true,
+    "bothLanguages": true,
+    "themeGroupingAndPersistence": true,
+    "customContrastAndReturn": true,
+    "glassDefaultsUnchanged": true,
+    "advancedPublisherAndSharedToast": true,
+    "readerControlsInventoried": true,
+    "tabNodeAndLensPreserved": true,
+    "rangePreviewAndPosition": true,
+    "sharedThemeFromReader": true,
+    "toolEntryPointsReachable": true,
+    "result": "passed"
+  },
+  "followup": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "errors": [],
+    "unexpectedNetwork": [],
+    "layouts": [],
+    "actualAccentPicker": true,
+    "actualThemePickerAndContrast": true,
+    "escapeReturnsToSettings": true,
+    "result": "passed"
+  },
+  "resolvedFindings": [
+    {
+      "owner": "app_settings",
+      "selector": "#settings-reading-heading / #settings-app-heading",
+      "problem": "New headings stayed English after changing to Indonesian on the existing Settings page.",
+      "fix": "Use stable Indonesian source labels with the existing dictionary.",
+      "verified": "English\u2192Indonesian\u2192English on the same heading node in browser."
+    },
+    {
+      "owner": "app_settings",
+      "selector": ".settings-overview .custom-accent",
+      "problem": "Custom accent control displayed a clipped half-swatch beside the plus icon.",
+      "fix": "Full-size overlay app-control, circular swatch and centered noninteractive plus.",
+      "verified": "Stable screenshot after applying a custom accent with the actual app picker."
+    }
+  ],
+  "localScreenshotDirectory": "/workspace/scratch",
+  "localScreenshots": [
+    "katakecil-ui-settings-stable-main-custom-accent-390.png",
+    "katakecil-ui-settings-stable-main-dark-390.png",
+    "katakecil-ui-settings-stable-reader-layout-390.png",
+    "katakecil-ui-settings-stable-reader-text-390.png",
+    "katakecil-ui-settings-stable-reader-theme-390.png",
+    "katakecil-ui-settings-stable-reader-tools-390.png",
+    "katakecil-ui-settings-stable-theme-dark-320.png",
+    "katakecil-ui-settings-stable-theme-dark-390.png",
+    "katakecil-ui-settings-stable-theme-dark-667.png",
+    "katakecil-ui-settings-stable-theme-light-320.png"
+  ],
+  "limitations": [
+    "Browser uses local catalog/episode fixtures; no live authentication, production publishing or backend mutation.",
+    "TTS and RSVP browser coverage checks entry points; native audio and device fullscreen were not retested.",
+    "Android update control condition was checked in source; this is not a WebView or physical-device run.",
+    "Viewport coverage is targeted: all four for main Settings; short portrait/landscape/desktop for theme, text and tools; layout and reader theme also captured at390x844.",
+    "No APK build, release, full suite or device QA performed in this UI stage."
+  ]
+}

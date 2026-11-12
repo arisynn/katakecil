@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Pengelompokan Pengaturan dan reader (12 November 2026)
+
+- Tata Pengaturan menjadi lima kelompok sejajar; Pembaruan & tentang keluar dari Advanced, sementara Publisher dan pengelolaan EPUB tetap di Advanced.
+- Kelompokkan tujuh pilihan tema bersama menjadi Mode tampilan, Palet tambahan dan Kustom, tetap memakai satu preferensi tema global.
+- Rapikan subkelompok Teks/Tata letak reader serta Alat bantu/Navigasi, memakai kontrol dan alur yang sudah ada.
+- Pertahankan default, posisi baca, kaca/ambient, loading dan toast; versi aplikasi tetap 1.2.4/build 12 pada tahap web ini. [Catatan pemeriksaan](docs/ui-settings-redesign.md).
+
 ## 1.2.4 Stable — Publisher dan toast kaca (12 November 2026)
 
 - Hubungkan panel login, daftar buku, editor dan pemulihan kata sandi Publisher ke preferensi kaca/ambient global; rapikan input, judul bagian dan tombol HP.

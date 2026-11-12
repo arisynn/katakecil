@@ -1,0 +1,52 @@
+/* Group existing controls without creating a second scroller or glass layer. */
+.appearance-panel .reader-control-group{min-width:0}
+.appearance-panel .reader-control-group+.reader-control-group{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.reader-control-group>h3,.theme-option-group>h3,.reader-tools-group>h3{margin:0 0 10px;font-size:11px;font-weight:650;line-height:1.4;color:var(--muted)}
+.reader-control-group .appearance-top-row{margin-bottom:12px}
+.reader-control-group .appearance-grid{margin:10px 0 0;gap:12px 18px}
+.reader-control-group .appearance-grid-wide{grid-template-columns:minmax(0,1fr)}
+.reader-control-group>.reader-setting{display:block;margin-top:13px;font-size:11px}
+.reader-control-group>.reader-setting>span{display:block;margin-bottom:6px}
+.reader-control-group .appearance-more{margin-top:12px;padding-top:8px}
+.reader-control-group .appearance-more .appearance-grid{margin-top:10px}
+.reader-control-group .appearance-select-grid{gap:12px}
+.reader-control-group .app-select-trigger{min-height:40px}
+
+/* All seven options still select one global themeMode. */
+.theme-options{display:grid;gap:15px;min-width:0;padding-bottom:4px}
+.theme-options>.theme-global-caption{margin:0;font-size:11px;line-height:1.6}
+.theme-option-group{min-width:0}
+.theme-option-group>h3{margin-bottom:8px}
+.theme-options .global-theme-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.theme-options .global-theme-chip{position:relative;flex-direction:column;justify-content:center;align-items:center;gap:7px;min-width:0;min-height:70px;padding:9px 5px;font-size:11px;text-align:center;color:var(--text)}
+.theme-options .global-theme-chip i{width:28px;height:28px;border-radius:8px}
+.theme-options .theme-option-label{min-width:0;line-height:1.35;overflow-wrap:anywhere}
+.theme-options .theme-choice-check{position:absolute;right:6px;top:6px;width:13px;margin:0}
+.theme-options .theme-choice-check svg{width:13px;height:13px}
+.theme-options .global-theme-chip.active{color:var(--g-active-ink,var(--accent));border-color:var(--g-active-ink,var(--accent));background:rgba(var(--accent-rgb),.07)}
+.theme-options .global-theme-custom{flex-direction:row;justify-content:flex-start;gap:11px;min-height:54px;padding:10px 12px;text-align:left}
+.theme-options .global-theme-custom .theme-option-label{flex:1}
+.theme-options .global-theme-custom small{display:block;margin-top:3px;font-size:10px;font-weight:400;color:var(--muted)}
+.theme-options .global-theme-custom .theme-choice-check{position:static;margin-left:auto;width:16px}
+
+.reading-tools .reader-tools-group{display:grid;gap:8px;min-width:0}
+.reading-tools .reader-tools-group>h3{margin:0;font-size:11px}
+.reading-tools .reading-tool-list>button{background:transparent;min-height:44px}
+.reading-tools .reading-statistics{flex-wrap:wrap;row-gap:4px}
+
+@media(max-width:350px){
+ .reader-control-group .appearance-grid{column-gap:12px}
+ .reader-control-group .appearance-top-row{gap:8px}
+ .theme-options{gap:12px}.theme-options .global-theme-grid{gap:6px}
+ .theme-options .global-theme-chip{font-size:10px;min-height:65px}
+ .theme-options .global-theme-custom{min-height:54px}
+}
+@media(orientation:landscape) and (max-height:480px){
+ .theme-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+ .theme-options>.theme-global-caption,.theme-options>.global-theme-custom{grid-column:1/-1}
+ .theme-options .global-theme-chip{min-height:60px;padding:7px 4px;gap:5px}
+ .theme-options .global-theme-custom{min-height:48px;padding:8px 12px}
+ .appearance-panel .reader-control-group+.reader-control-group{margin-top:12px;padding-top:12px}
+ .reading-tools .reader-tools-group{gap:6px}
+ .reading-tools .reading-tool-list>button{min-height:60px}
+}

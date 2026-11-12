@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Pengelompokan Pengaturan, tema dan reader terbaru di web | [Penataan UI Pengaturan dan reader](ui-settings-redesign.md) |
 | Rilis stable 1.2.4: Publisher dan toast kaca | [Android 1.2.4](releases/v1.2.4.md) |
 | Rilis stable 1.2.3: pengaturan kaca dan ambient glow | [Android 1.2.3](releases/v1.2.3.md) |
 | Kebeningan, blur dan ambient Liquid Glass, pratinjau dan backup | [Pengaturan Liquid Glass](liquid-glass-settings.md) |
