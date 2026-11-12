@@ -1,0 +1,79 @@
+{
+  "scope": "Web ambient glow on main 5421463; app version stays 1.2.2/build 10",
+  "defaults": {
+    "glassTransparency": 75,
+    "glassBlur": 20,
+    "ambientIntensity": 60
+  },
+  "apkBuilt": false,
+  "workflowDispatched": false,
+  "physicalDeviceTested": false,
+  "checks": {
+    "helperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 31,
+    "nodeFailures": 0,
+    "backupTestsRerunAfterComfortResetAssertion": 3
+  },
+  "browser": {
+    "scope": "Quick Chromium with mocked catalog and episodes",
+    "physicalDeviceTested": false,
+    "apkBuilt": false,
+    "initial": {
+      "--bg": "#eef2f6",
+      "--paper": "#faf9f5",
+      "--text": "#25313b",
+      "--g-fill-alpha": "0.32",
+      "--g-blur": "12px",
+      "--ambient-primary-alpha": "0.132",
+      "--ambient-secondary-alpha": "0.06",
+      "--ambient-panel-alpha": "0.054"
+    },
+    "sliderDrag": 40,
+    "layouts": [
+      {
+        "width": 320,
+        "height": 568,
+        "dialogWidth": 300,
+        "scroll": false,
+        "allControlsVisible": true
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "dialogWidth": 617,
+        "scroll": false,
+        "allControlsVisible": true
+      },
+      {
+        "width": 1280,
+        "height": 800,
+        "dialogWidth": 420,
+        "scroll": false,
+        "allControlsVisible": true
+      }
+    ],
+    "ambientOffAndMaximum": true,
+    "resetAndReload": true,
+    "accentColorFollows": true,
+    "carouselTouchSwipe": true,
+    "crossTabAndPosition": true,
+    "readingPaper": {
+      "light": {
+        "background": "rgb(250, 249, 245)",
+        "image": "none",
+        "color": "rgb(40, 48, 43)",
+        "opacity": "1"
+      },
+      "dark": {
+        "background": "rgb(25, 29, 27)",
+        "image": "none",
+        "color": "rgb(221, 220, 212)",
+        "opacity": "1"
+      }
+    },
+    "darkAndReducedMotion": true,
+    "pageErrors": []
+  }
+}

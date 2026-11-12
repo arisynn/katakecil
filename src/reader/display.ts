@@ -5,8 +5,10 @@ export const readerDefaults = {
   tapNavigation: true, wakeLock: false, orientation: 'auto', customTextColor: '#28302b',
   customBackgroundColor: '#faf9f5', ttsRate: 1, ttsVoice: '', ttsLanguage: '', speedWpm:250,
 };
-export const palettes: Record<string, {background: string; text: string}> = {
-  light: {background: '#faf9f5', text: '#28302b'}, dark: {background: '#191d1b', text: '#dddcd4'},
+export type AppPalette = {background: string; text: string; readingBackground?: string; readingText?: string};
+export const palettes: Record<string, AppPalette> = {
+  light: {background: '#eef2f6', text: '#25313b', readingBackground: '#faf9f5', readingText: '#28302b'},
+  dark: {background: '#11161c', text: '#e6edf3', readingBackground: '#191d1b', readingText: '#dddcd4'},
   sepia: {background: '#eee2c8', text: '#4c3b2a'}, paper: {background: '#f1f0e9', text: '#353b36'},
   green: {background: '#dce8d9', text: '#293d30'},
 };
@@ -66,11 +68,12 @@ export function globalPalette(preferences: Record<string, unknown>, systemDark =
   const mode = String(preferences.themeMode || 'light');
   const key = mode === 'system' || mode === 'auto-sensor' ? systemDark ? 'dark' : 'light' : mode;
   const d = readerSettings(preferences);
-  let palette = palettes[key] || (key === 'custom' ? {text: d.customTextColor, background: d.customBackgroundColor} : palettes.light);
+  let palette: AppPalette = palettes[key] || (key === 'custom' ? {text: d.customTextColor, background: d.customBackgroundColor} : palettes.light);
   if (contrast(palette.text, palette.background) < 4.5) palette = palettes.light;
   const rgb = (hex: string) => [1,3,5].map(i => parseInt(hex.slice(i,i+2),16));
   const background = rgb(palette.background), text = rgb(palette.text);
   const mix = (amount: number) => '#' + background.map((v,i) => Math.round(v * (1-amount) + text[i] * amount).toString(16).padStart(2,'0')).join('');
   const dark = background.reduce((s,v,i) => s + v * [.2126,.7152,.0722][i],0) < 110;
-  return {key, ...palette, dark, variables: {'--bg':palette.background,'--paper':palette.background,'--text':palette.text,'--surface':mix(.035),'--muted':mix(.64),'--line':mix(.14),'--glass':background.join(',')}};
+  const readingBackground=palette.readingBackground||palette.background,readingText=palette.readingText||palette.text;
+  return {key, ...palette, readingBackground, readingText, dark, variables: {'--bg':palette.background,'--paper':readingBackground,'--text':palette.text,'--surface':mix(.035),'--muted':mix(.64),'--line':mix(.14),'--glass':background.join(',')}};
 }

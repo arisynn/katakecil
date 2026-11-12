@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Ambient glow dan palet kaca (12 November 2026)
+
+- Tambahkan dua gradasi ambient statis yang mengikuti aksen UI dan slider Ambient glow 0–100%, default 60%; nilai 0 mematikan ambient. Glow lokal sampul tetap mengikuti warna buku.
+- Gunakan Pearl pada UI terang dan charcoal pada UI gelap, sambil mempertahankan warna kertas/teks buku sebelumnya. Naskah tetap polos dan opak.
+- Satukan pratinjau, simpan antarsesi/antartab dan backup dengan pengaturan kaca; reset mengembalikan kebeningan 75%, blur 20 px dan ambient 60%.
+- Padatkan sheet tiga slider pada layar pendek/landscape. Uji cepat 31 tes terarah dan Chromium lulus; perubahan ini tidak membangun APK atau menjalankan workflow release.
+- [Pengaturan dan daftar uji](docs/liquid-glass-settings.md) · [Hasil pemeriksaan](docs/generated/ambient-glow-web.json).
+
 ## Pengembangan web — Pengaturan Liquid Glass (12 November 2026)
 
 - Tambahkan dua slider global: Kebeningan 0–100% (default 75%) dan Blur 0–40 px (default 20 px), dengan pratinjau langsung dan reset khusus kaca.

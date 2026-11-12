@@ -1,0 +1,18 @@
+/* One stationary accent wash behind the UI. No full-screen blur or animation. */
+body{
+ min-height:100dvh;isolation:isolate;
+ --ambient-primary-alpha:.132;--ambient-secondary-alpha:.06;--ambient-panel-alpha:.054;
+ --ambient-wash:radial-gradient(ellipse at 10% 8%,rgba(var(--accent-rgb),var(--ambient-primary-alpha)),transparent 62%),radial-gradient(ellipse at 90% 92%,rgba(var(--accent-rgb),var(--ambient-secondary-alpha)),transparent 60%);
+}
+body[data-theme=dark]{--ambient-primary-alpha:.108;--ambient-secondary-alpha:.048;--ambient-panel-alpha:.042}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--ambient-wash)}
+body .library-shell,body .settings-shell,body .reader-shell,body .reader-shell[data-mode=controls]{background:transparent}
+/* Reader paper stays opaque. Color is added inside floating UI surfaces only. */
+body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-navigation).glass,
+body .dialog,body .app-picker{
+ background:radial-gradient(ellipse at 12% 0%,rgba(var(--accent-rgb),var(--ambient-panel-alpha)),transparent 72%),linear-gradient(180deg,#ffffff08,transparent 40%),var(--g-panel);
+}
+.glass-preview{background:var(--ambient-wash),var(--bg)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-navigation).glass{background:var(--surface);color:var(--text)}
+}

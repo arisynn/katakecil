@@ -5,7 +5,7 @@ import {indexedDB} from 'fake-indexeddb';
 const w=new JSDOM('',{url:'https://local.example/'}).window;
 Object.assign(globalThis,{window:w,localStorage:w.localStorage,indexedDB});
 Object.defineProperty(globalThis,'BroadcastChannel',{value:undefined,configurable:true});
-const store=await import('../dist/store.js?v=21');
+const store=await import('../dist/store.js?v=22');
 test('local cover changes are durable and cannot change a server book',async()=>{
  await store.dbPut('books',{id:'local-one',source:'local',title:'Local',chapters:[{text:'Kept text.'}],epubBuffer:new Uint8Array([1,2,3]).buffer});
  await store.dbPut('books',{id:'server-one',source:'supabase',title:'Server'});

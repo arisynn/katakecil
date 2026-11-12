@@ -1,6 +1,6 @@
 import {transitionContent} from './motion.js?v=1';
 import {layoutDialog} from './panel-layout.js?v=5';
-import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=16';
+import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=17';
 import {escapeHTML as esc,icon,$,$$} from './ui.js?v=12';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
@@ -35,7 +35,7 @@ export function createReaderExperience(ctx){
   const s=document.documentElement.style,d=pref();
   const font={Lora:"'Lora',Georgia,serif",'Plus Jakarta Sans':"'Plus Jakarta Sans',system-ui,sans-serif",'DM Sans':'system-ui,sans-serif',Georgia:'Georgia,serif',system:'system-ui,sans-serif',monospace:'ui-monospace,monospace'}[ctx.prefs().fontFamily]||"'Lora',Georgia,serif";
   const palette=globalPalette(ctx.prefs(),document.body.dataset.theme==='dark');
-  for(const [name,value] of Object.entries({'reader-font':font,'reader-size':d.fontSize+'px','reader-line':d.lineHeight,'reader-weight':d.fontWeight,'paragraph-space':d.paragraphSpacing+'px','letter-space':d.letterSpacing+'px','paragraph-indent':d.paragraphIndent+'em','reader-align':d.textAlign,'reader-inset-x':d.marginHorizontal+'px','reader-inset-y':Math.min(d.marginVertical,Math.max(8,(innerHeight-220)/2))+'px','reader-width':d.readerWidth+'px','reader-paper':palette.background,'reader-ink':palette.text,'reader-brightness':(100-d.brightness)/100,'content-position':d.contentPosition==='center'?'center':'flex-start'}))s.setProperty('--'+name,String(value));
+  for(const [name,value] of Object.entries({'reader-font':font,'reader-size':d.fontSize+'px','reader-line':d.lineHeight,'reader-weight':d.fontWeight,'paragraph-space':d.paragraphSpacing+'px','letter-space':d.letterSpacing+'px','paragraph-indent':d.paragraphIndent+'em','reader-align':d.textAlign,'reader-inset-x':d.marginHorizontal+'px','reader-inset-y':Math.min(d.marginVertical,Math.max(8,(innerHeight-220)/2))+'px','reader-width':d.readerWidth+'px','reader-paper':palette.readingBackground,'reader-ink':palette.readingText,'reader-brightness':(100-d.brightness)/100,'content-position':d.contentPosition==='center'?'center':'flex-start'}))s.setProperty('--'+name,String(value));
   const shell=$('.reader-shell');if(shell){shell.dataset.readingMode=mode();shell.dataset.spread=String(spread());shell.dataset.animation=ctx.prefs().pageAnimation||'slide';}
  }
  function enter(){arcOpen.clear();panel='';scrollPosition=null;pendingSpeechPosition=null;lastSpeechSave=0;filters={episode:'all',color:'all'};activeTab='contents';search={query:'',chapterIndex:0,matches:[],total:0,index:-1};apply();void wake.set(!!ctx.prefs().wakeLock).catch(()=>{});if(ctx.setOrientation)void ctx.setOrientation(ctx.prefs().orientation||'auto').catch(()=>{});}
@@ -140,7 +140,7 @@ export function createReaderExperience(ctx){
  function themeControls(){
   const d=pref(),selected=ctx.prefs().themeMode||'light';draftInk=d.customTextColor;draftPaper=d.customBackgroundColor;
   const glyph={light:'sun',dark:'moon',system:'device',sepia:'sepia',paper:'paper',green:'leaf',custom:'palette'};
-  return `<div class="global-theme-grid">${['light','dark','system','sepia','paper','green','custom'].map(key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(90deg,#faf9f5 50%,#191d1b 50%)':d.customBackgroundColor,text:d.customTextColor};return `<button class="global-theme-chip ${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span>${themeName(key)}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;}).join('')}</div>`;
+  return `<div class="global-theme-grid">${['light','dark','system','sepia','paper','green','custom'].map(key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(90deg,#eef2f6 50%,#11161c 50%)':d.customBackgroundColor,text:d.customTextColor};return `<button class="global-theme-chip ${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span>${themeName(key)}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;}).join('')}</div>`;
  }
  function customThemeDialog(){
   if(panel!=='custom-theme')themeReturn=panel==='appearance'?'appearance':'global-theme';

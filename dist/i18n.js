@@ -3,6 +3,7 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Pratinjau ambient dan kaca':'Live ambient and glass preview','Kuat':'Strong','Mati':'Off',
  'Kebeningan':'Clarity','Pekat':'Opaque','Bening':'Clear','Tajam':'Sharp','Buram':'Soft','Kembalikan default':'Restore defaults',
  'Pratinjau kaca langsung di atas latar berwarna':'Live glass preview over a colored background',
  'Tampilan dan bahasa':'Appearance & language','Data dan penyimpanan':'Data & storage','Tentang aplikasi':'About app',

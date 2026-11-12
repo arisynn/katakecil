@@ -1,5 +1,5 @@
-import {readerDefaults,migrateReaderPreferences} from './advanced-reader.js?v=16';
-import {GLASS_DEFAULTS,normalizeGlassPreferences} from './glass-preferences.js?v=1';
+import {readerDefaults,migrateReaderPreferences} from './advanced-reader.js?v=17';
+import {GLASS_DEFAULTS,normalizeGlassPreferences} from './glass-preferences.js?v=2';
 export const DEFAULTS = { ...readerDefaults, ...GLASS_DEFAULTS, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.6, margin:52, spreadMode:'single', pageAnimation:'fade', accentColor:'#54756c', uiLanguage:'en' };
 const safeRead = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 export let storageHealthy = true;

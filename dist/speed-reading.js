@@ -1,4 +1,4 @@
-import {SpeedReader,focusParts,contrast} from './advanced-reader.js?v=16';
+import {SpeedReader,focusParts,contrast} from './advanced-reader.js?v=17';
 import {icon} from './ui.js?v=12';
 
 export function createSpeedReading(ctx){
