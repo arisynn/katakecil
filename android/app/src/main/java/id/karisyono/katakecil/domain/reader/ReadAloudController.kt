@@ -25,10 +25,6 @@ class ReadAloudController(
     private val onParagraphChanged: (chapterIndex: Int, charOffset: Int) -> Unit = { _, _ -> },
     private val onEpisodeCompleted: (chapterIndex: Int) -> Unit = {}
 ) {
-    companion object {
-        const val MAX_TTS_CHUNK_CHARS = 4_000
-    }
-
     data class TtsVoiceInfo(
         val id: String,
         val name: String,
@@ -312,6 +308,8 @@ class ReadAloudController(
     }
 
     companion object UtteranceBuilder {
+        const val MAX_TTS_CHUNK_CHARS = 4_000
+
         fun buildUtterancesForText(text: String): List<ParagraphUtterance> {
             if (text.isBlank()) return emptyList()
             val result = mutableListOf<ParagraphUtterance>()

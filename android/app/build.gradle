@@ -18,7 +18,7 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "id.karisyono.katakecil"
+        applicationId "id.karisyono.katakecil.nativeapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersion.versionCode as Integer

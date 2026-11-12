@@ -31,7 +31,7 @@ await run(java,['-version']);
 const tasks=debug?['assembleDebug']:process.argv.includes('--skip-qa')?['assembleRelease']:['testReleaseUnitTest','assembleRelease','lintRelease'];
 await run('./gradlew',['--no-daemon','--max-workers=2',...tasks],join(root,'android'));
 await mkdir(output,{recursive:true});
-const name=`KataKecil-${version.version}-${debug?'debug':'Karisyono'}.apk`,artifact=join(output,name);
+const name=debug?'KataKecil-debug.apk':'KataKecil.apk',artifact=join(output,name);
 if(debug)await copyFile(join(root,'android/app/build/outputs/apk/debug/app-debug.apk'),artifact);
 else{
  let sdk=env.ANDROID_HOME||env.ANDROID_SDK_ROOT;
@@ -46,5 +46,5 @@ else{
 }
 const bytes=await readFile(artifact),checksum=createHash('sha256').update(bytes).digest('hex');
 await writeFile(artifact+'.sha256',checksum+'  '+name+'\n');
-if(!debug)await writeFile(join(output,'KataKecil-release-info.json'),JSON.stringify({schemaVersion:1,applicationId:'id.karisyono.katakecil',version:version.version,versionCode:version.versionCode,releaseTag:'v'+version.version,releaseStatus:version.version.includes('-')?'prerelease':'stable',signedApk:{file:name,bytes:bytes.length,sha256:checksum}},null,2)+'\n');
+if(!debug)await writeFile(join(output,'KataKecil-native-release-info.json'),JSON.stringify({schemaVersion:1,applicationId:'id.karisyono.katakecil.nativeapp',variant:'native',version:version.version,versionCode:version.versionCode,releaseTag:'v'+version.version,releaseStatus:'prerelease',signedApk:{file:name,bytes:bytes.length,sha256:checksum}},null,2)+'\n');
 console.log('APK: '+artifact+' ('+bytes.length+' bytes)');

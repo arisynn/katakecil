@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun handleIncomingIntent(incoming: Intent?) {
         if (incoming == null) return
         val action = incoming.action ?: return
-        val uri: Uri? = when (action) {
+        val uri: Uri = when (action) {
             Intent.ACTION_VIEW -> incoming.data
             Intent.ACTION_SEND -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

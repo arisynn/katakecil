@@ -1,0 +1,27 @@
+{
+  "branch": "native-android",
+  "version": "1.2.3",
+  "versionCode": 11,
+  "applicationId": "id.karisyono.katakecil.nativeapp",
+  "launcherLabel": "KataKecil",
+  "apk": {
+    "file": "KataKecil.apk",
+    "bytes": 9738059,
+    "sha256": "2691bf54dad4621d63a489c96ba470e54a90b40acc8c08292ffad5f1d2795eb1"
+  },
+  "signerSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+  "coinstallation": {
+    "capacitorPackage": "id.karisyono.katakecil",
+    "providerAuthority": "id.karisyono.katakecil.nativeapp.fileprovider",
+    "nativeAsset": "KataKecil.apk",
+    "capacitorUpdaterIgnoresNativeAsset": true
+  },
+  "capacitorClassesPackaged": false,
+  "webUiAssetsPackaged": false,
+  "qaPerformed": false,
+  "buildTasks": [
+    "assembleRelease"
+  ],
+  "releaseTag": "v1.2.3",
+  "nativeStatus": "prerelease"
+}
