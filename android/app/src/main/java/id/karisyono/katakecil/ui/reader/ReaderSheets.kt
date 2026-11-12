@@ -1,5 +1,7 @@
 package id.karisyono.katakecil.ui.reader
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,7 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import id.karisyono.katakecil.ui.components.WebDialog as Dialog
 import androidx.compose.ui.window.DialogProperties
 import id.karisyono.katakecil.core.i18n.I18n
 import id.karisyono.katakecil.core.model.AnnotationItem
@@ -110,7 +112,7 @@ fun ThisBookSheetDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.42f))
+                .background(Color.Transparent)
                 .clickable(onClick = onDismiss),
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -121,7 +123,7 @@ fun ThisBookSheetDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.84f)
-                    .clickable(enabled = false) {}
+                    .pointerInput(Unit) { detectTapGestures(onTap = {}) }
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     Row(
@@ -133,14 +135,14 @@ fun ThisBookSheetDialog(
                             Text(
                                 text = I18n.t("Buku Ini", "This Book", lang),
                                 color = palette.textPrimary,
-                                fontFamily = KataKecilFonts.Fraunces,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 20.sp
                             )
                             Text(
                                 text = bookTitle,
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 12.5.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -193,7 +195,7 @@ fun ThisBookSheetDialog(
                                             Text(
                                                 text = arc,
                                                 color = palette.accent,
-                                                fontFamily = KataKecilFonts.DmSans,
+                                                fontFamily = KataKecilFonts.Ui,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 12.5.sp
                                             )
@@ -235,7 +237,7 @@ fun ThisBookSheetDialog(
                                                     Text(
                                                         text = ch.chapterLabel,
                                                         color = if (isCurrent) palette.accent else palette.textMuted,
-                                                        fontFamily = KataKecilFonts.DmSans,
+                                                        fontFamily = KataKecilFonts.Ui,
                                                         fontWeight = FontWeight.SemiBold,
                                                         fontSize = 11.5.sp
                                                     )
@@ -243,7 +245,7 @@ fun ThisBookSheetDialog(
                                                 Text(
                                                     text = ch.title,
                                                     color = palette.textPrimary,
-                                                    fontFamily = KataKecilFonts.Fraunces,
+                                                    fontFamily = KataKecilFonts.Ui,
                                                     fontWeight = if (isCurrent) FontWeight.SemiBold else FontWeight.Normal,
                                                     fontSize = 15.sp
                                                 )
@@ -290,7 +292,7 @@ fun ThisBookSheetDialog(
                                     Text(
                                         text = epFilterLabel,
                                         color = palette.textPrimary,
-                                        fontFamily = KataKecilFonts.DmSans,
+                                        fontFamily = KataKecilFonts.Ui,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium
                                     )
@@ -363,7 +365,7 @@ fun ThisBookSheetDialog(
                                         lang
                                     ),
                                     color = palette.textMuted,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 14.sp
                                 )
                             }
@@ -458,7 +460,7 @@ private fun AnnotationCardItem(
                 Text(
                     text = chapterTitle,
                     color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 12.sp
                 )
@@ -472,7 +474,7 @@ private fun AnnotationCardItem(
                         Text(
                             text = I18n.t("Perlu ditinjau", "Needs review", lang),
                             color = Color(0xFFE76F51),
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -516,7 +518,7 @@ private fun AnnotationCardItem(
             Text(
                 text = item.noteText,
                 color = palette.textPrimary,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontSize = 13.5.sp
             )
         } else if (item.type == "bookmark" && !item.label.isNullOrBlank()) {
@@ -524,7 +526,7 @@ private fun AnnotationCardItem(
             Text(
                 text = item.label,
                 color = palette.textPrimary,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontWeight = FontWeight.Medium,
                 fontSize = 13.5.sp
             )
@@ -574,7 +576,7 @@ fun ReadingAppearanceSheetDialog(
                         Text(
                             text = activeSliderSummary,
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp
                         )
@@ -590,7 +592,7 @@ fun ReadingAppearanceSheetDialog(
                     .fillMaxWidth()
                     .heightIn(max = 560.dp)
                     .alpha(if (isDraggingSlider) 0.14f else 1f)
-                    .clickable(enabled = false) {}
+                    .pointerInput(Unit) { detectTapGestures(onTap = {}) }
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -601,7 +603,7 @@ fun ReadingAppearanceSheetDialog(
                         Text(
                             text = I18n.t("Tampilan Baca", "Reading Appearance", lang),
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Fraunces,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 19.sp
                         )
@@ -638,7 +640,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Jenis huruf", "Font family", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -735,7 +737,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Perataan teks", "Text alignment", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -759,7 +761,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Mode baca", "Reading mode", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -781,7 +783,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Bentangan halaman", "Page spread", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -803,7 +805,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Animasi halaman", "Page animation", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -878,7 +880,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Orientasi layar", "Screen orientation", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -901,7 +903,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Tema halaman baca", "Reading page theme", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -932,7 +934,7 @@ fun ReadingAppearanceSheetDialog(
                                 Text(
                                     text = I18n.t("Warna aksen", "Accent color", lang),
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 13.sp
                                 )
@@ -983,7 +985,7 @@ fun ReadingAppearanceSheetDialog(
                                         Text(
                                             text = I18n.t("Pratinjau Kertas Kustom", "Custom Paper Preview", lang),
                                             color = customInk,
-                                            fontFamily = KataKecilFonts.Fraunces,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 16.sp
                                         )
@@ -992,7 +994,7 @@ fun ReadingAppearanceSheetDialog(
                                             text = "${I18n.t("Rasio kontras", "Contrast ratio", lang)}: ${String.format("%.2f:1", contrast)} " +
                                                 if (passesWcag) "✓ WCAG AA" else "⚠️ < 4.5:1",
                                             color = customInk.copy(alpha = 0.8f),
-                                            fontFamily = KataKecilFonts.DmSans,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontSize = 12.5.sp
                                         )
                                     }
@@ -1097,7 +1099,7 @@ fun ReadingToolsSheetDialog(
                     Text(
                         text = I18n.t("Alat Baca", "Reading Tools", lang),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp
                     )
@@ -1124,14 +1126,14 @@ fun ReadingToolsSheetDialog(
                         Text(
                             text = chapter?.navigationTitle ?: "",
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.5.sp
                         )
                         Text(
                             text = "$wordsCount ${I18n.t("kata", "words", lang)} · ~$estMinutes ${I18n.t("mnt baca", "min read", lang)}",
                             color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 12.sp
                         )
                     }
@@ -1242,7 +1244,7 @@ fun EpisodeSearchDialog(
                     Text(
                         text = I18n.t("Cari di Episode", "Search in Episode", lang),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp
                     )
@@ -1273,7 +1275,7 @@ fun EpisodeSearchDialog(
                 Text(
                     text = "${matches.size} ${I18n.t("hasil ditemukan", "matches found", lang)}",
                     color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -1300,7 +1302,7 @@ fun EpisodeSearchDialog(
                             Text(
                                 text = "${I18n.t("Halaman", "Page", lang)} ${match.pageIndex + 1}",
                                 color = palette.accent,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.5.sp
                             )
@@ -1416,14 +1418,14 @@ fun SpeedReadingDialog(
                                 Text(
                                     text = I18n.t("Baca Cepat (RSVP)", "Speed Reading (RSVP)", lang),
                                     color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.Fraunces,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 18.sp
                                 )
                                 Text(
                                     text = chapterTitle,
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 12.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -1532,7 +1534,7 @@ fun SpeedReadingDialog(
                             Text(
                                 text = "${currentIndex + 1} / ${tokens.size.coerceAtLeast(1)} · $wpm KPM",
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -1635,7 +1637,7 @@ fun ReadAloudSheetDialog(
                     Text(
                         text = I18n.t("Baca Nyaring (TTS)", "Read Aloud (TTS)", lang),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp
                     )
@@ -1711,7 +1713,7 @@ fun ReadAloudSheetDialog(
                 Text(
                     text = I18n.t("Pilih bahasa & suara", "Select language & voice", lang),
                     color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp
                 )
@@ -1759,14 +1761,14 @@ fun ReadAloudSheetDialog(
                                 Text(
                                     text = voice.name,
                                     color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 12.5.sp,
                                     modifier = Modifier.weight(1f)
                                 )
                                 Text(
                                     text = if (voice.isLocal) I18n.t("Lokal", "Local", lang) else "Online",
                                     color = if (voice.isLocal) palette.accent else palette.textMuted,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -1866,7 +1868,7 @@ fun WordToolsDialog(
                     Text(
                         text = I18n.t("Alat Kata", "Word Tools", uiLanguage),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp
                     )
@@ -1936,13 +1938,13 @@ fun WordToolsDialog(
                         dictLoading -> Text(
                             text = I18n.t("Mencari arti kata…", "Looking up definition…", uiLanguage),
                             color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 13.sp
                         )
                         dictError != null -> Text(
                             text = dictError ?: "",
                             color = Color(0xFFE76F51),
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 13.sp
                         )
                         dictResult != null -> {
@@ -1960,7 +1962,7 @@ fun WordToolsDialog(
                                         if (res.phonetic.isNotBlank()) append("  ${res.phonetic}")
                                     },
                                     color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.Fraunces,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 17.sp
                                 )
@@ -1968,7 +1970,7 @@ fun WordToolsDialog(
                                     Text(
                                         text = meaning.partOfSpeech,
                                         color = palette.accent,
-                                        fontFamily = KataKecilFonts.DmSans,
+                                        fontFamily = KataKecilFonts.Ui,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 12.sp
                                     )
@@ -1976,7 +1978,7 @@ fun WordToolsDialog(
                                         Text(
                                             text = "${idx + 1}. ${def.definition}",
                                             color = palette.textPrimary,
-                                            fontFamily = KataKecilFonts.DmSans,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontSize = 13.5.sp
                                         )
                                         if (def.example.isNotBlank()) {
@@ -1993,7 +1995,7 @@ fun WordToolsDialog(
                                 Text(
                                     text = "${res.sourceLabel} · ${res.licenseLabel}",
                                     color = palette.textMuted,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 11.sp
                                 )
                             }
@@ -2049,13 +2051,13 @@ fun WordToolsDialog(
                         transLoading -> Text(
                             text = I18n.t("Menerjemahkan…", "Translating…", uiLanguage),
                             color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 13.sp
                         )
                         transError != null -> Text(
                             text = transError ?: "",
                             color = Color(0xFFE76F51),
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 13.sp
                         )
                         transResult != null -> {
@@ -2076,7 +2078,7 @@ fun WordToolsDialog(
                                 Text(
                                     text = "Diterjemahkan oleh ${transResult!!.providerLabel}",
                                     color = palette.textMuted,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 11.sp
                                 )
                             }
@@ -2118,7 +2120,7 @@ fun NoteEditorDialog(
                 Text(
                     text = I18n.t("Catatan & Sorotan", "Note & Highlight", lang),
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Fraunces,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp
                 )
@@ -2201,14 +2203,14 @@ fun LabeledLiveSlider(
             Text(
                 text = label,
                 color = palette.textPrimary,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = valueText,
                 color = palette.accent,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2241,7 +2243,7 @@ fun SettingToggleRow(
         Text(
             text = title,
             color = palette.textPrimary,
-            fontFamily = KataKecilFonts.DmSans,
+            fontFamily = KataKecilFonts.Ui,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)

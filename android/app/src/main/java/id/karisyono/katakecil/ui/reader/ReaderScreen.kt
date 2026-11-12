@@ -613,7 +613,7 @@ fun ReaderScreen(
                                         Text(
                                             text = chapter.navigationTitle,
                                             color = palette.readingMuted,
-                                            fontFamily = KataKecilFonts.DmSans,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontSize = 11.5.sp,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
@@ -622,7 +622,7 @@ fun ReaderScreen(
                                         Text(
                                             text = "${pageIdx + 1} / ${pages.size}",
                                             color = palette.readingMuted,
-                                            fontFamily = KataKecilFonts.DmSans,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Medium
                                         )
@@ -802,7 +802,7 @@ fun ReaderScreen(
                             Text(
                                 text = "\"$searchQuery\" · ${activeSearchMatchIndex + 1}/${searchMatches.size}",
                                 color = palette.textPrimary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -857,7 +857,7 @@ fun ReaderScreen(
                                     lang
                                 ),
                                 color = palette.textPrimary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -931,7 +931,7 @@ fun ReaderScreen(
                             Text(
                                 text = book.title,
                                 color = palette.textPrimary,
-                                fontFamily = KataKecilFonts.Fraunces,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 14.5.sp,
                                 maxLines = 1,
@@ -940,7 +940,7 @@ fun ReaderScreen(
                             Text(
                                 text = chapter?.navigationTitle ?: "",
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 11.5.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -1005,7 +1005,7 @@ fun ReaderScreen(
                                 Text(
                                     text = "${displayedPageIndex + 1}",
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -1031,7 +1031,7 @@ fun ReaderScreen(
                                 Text(
                                     text = "${pages.size}",
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -1072,7 +1072,7 @@ fun ReaderScreen(
                                     lang
                                 ),
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -1158,7 +1158,7 @@ private fun ChapterHeadingBlock(chapter: Chapter) {
             Text(
                 text = chapter.arc.uppercase(),
                 color = palette.accent,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontWeight = FontWeight.Bold,
                 fontSize = 11.sp,
                 letterSpacing = 1.4.sp
@@ -1171,7 +1171,7 @@ private fun ChapterHeadingBlock(chapter: Chapter) {
             Text(
                 text = chapter.chapterLabel,
                 color = palette.readingMuted,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 12.5.sp
             )
@@ -1180,7 +1180,7 @@ private fun ChapterHeadingBlock(chapter: Chapter) {
         Text(
             text = chapter.title,
             color = palette.readingText,
-            fontFamily = KataKecilFonts.Fraunces,
+            fontFamily = KataKecilFonts.Ui,
             fontWeight = FontWeight.SemiBold,
             fontSize = 22.sp,
             lineHeight = 28.sp

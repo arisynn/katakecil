@@ -1,5 +1,6 @@
 package id.karisyono.katakecil.ui.settings
 
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -46,7 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import id.karisyono.katakecil.ui.components.WebDialog as Dialog
 import id.karisyono.katakecil.BuildConfig
 import id.karisyono.katakecil.core.i18n.I18n
 import id.karisyono.katakecil.core.model.AnnotationItem
@@ -80,6 +82,7 @@ import kotlin.math.roundToInt
  * Complete Settings Screen & Dialogs (port of Settings in dist/app.js, dist/glass-settings.js,
  * dist/local-books.js, dist/loading-previews.js, and dist/app-updates.js).
  */
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     settings: DeviceSettings,
@@ -103,6 +106,13 @@ fun SettingsScreen(
     val palette = LocalKataKecilPalette.current
     val lang = settings.uiLanguage
 
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAccentDialog by remember { mutableStateOf(false) }
+    var advancedExpanded by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val advancedRequester = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+    LaunchedEffect(advancedExpanded) {
+        if (advancedExpanded) { androidx.compose.runtime.withFrameNanos { }; advancedRequester.bringIntoView() }
+    }
     var showGlobalThemeDialog by remember { mutableStateOf(false) }
     var showLiquidGlassDialog by remember { mutableStateOf(false) }
     var showPersonalEpubsDialog by remember { mutableStateOf(false) }
@@ -112,188 +122,71 @@ fun SettingsScreen(
     var showAppUpdatesDialog by remember { mutableStateOf(false) }
 
     AmbientBackground {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    GlassIconButton(
-                        iconName = "back",
-                        contentDescription = I18n.t("Kembali", "Back", lang),
-                        onClick = onBack
-                    )
-                    Text(
-                        text = I18n.t("Pengaturan", "Settings", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 22.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Section 1: Appearance & Language
-                SettingsSectionCard(
-                    title = I18n.t("Tampilan & Bahasa", "Appearance & Language", lang)
-                ) {
-                    SettingsActionRow(
-                        iconName = "palette",
-                        title = I18n.t("Tema Global", "Global Theme", lang),
-                        subtitle = "${settings.themeMode.replaceFirstChar { it.uppercase() }} · ${settings.accentColor}",
-                        onClick = { showGlobalThemeDialog = true }
-                    )
-                    SettingsActionRow(
-                        iconName = "sparkle",
-                        title = "Liquid Glass",
-                        subtitle = "${settings.glassTransparency}% · ${settings.glassBlur}px · Ambient ${settings.ambientIntensity}%",
-                        onClick = { showLiquidGlassDialog = true }
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            KataKecilIcon(name = "globe", size = 20.dp, tint = palette.accent)
-                            Text(
-                                text = I18n.t("Bahasa Antarmuka", "Interface Language", lang),
-                                color = palette.textPrimary,
-                                fontFamily = KataKecilFonts.DmSans,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 14.5.sp
-                            )
+        Column(Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 24.dp, vertical = 8.dp)) {
+            id.karisyono.katakecil.ui.components.WebPageHeading(I18n.t("Pengaturan", "Settings", lang), "Library", onBack)
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                SettingsSectionCard(I18n.t("Tampilan dan bahasa", "Appearance & language", lang)) {
+                    SettingsActionRow("globe", I18n.t("Bahasa aplikasi", "App language", lang), if (lang == "en") "English" else "Bahasa Indonesia", { showLanguageDialog = true })
+                    SettingsActionRow("appearance", I18n.t("Tema", "Theme", lang), settings.themeMode.replaceFirstChar { it.uppercase() }, { showGlobalThemeDialog = true })
+                    SettingsActionRow("sliders", "Liquid Glass", "${settings.glassTransparency}% · ${settings.glassBlur} px", { showLiquidGlassDialog = true })
+                    Text(I18n.t("Warna aksen", "Accent color", lang), color = palette.textPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 14.dp, bottom = 10.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(9.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                        id.karisyono.katakecil.core.theme.KataKecilThemeTokens.AccentPresets.forEach { preset ->
+                            Box(Modifier.size(32.dp).clip(CircleShape).background(preset.color)
+                                .border(if (settings.accentColor == preset.hex) 2.dp else 0.dp, palette.textPrimary.copy(alpha = .55f), CircleShape)
+                                .clickable { onUpdateSettings { it.copy(accentColor = preset.hex) } }, contentAlignment = Alignment.Center) {
+                                if (settings.accentColor == preset.hex) KataKecilIcon("check", tint = Color.White, size = 18.dp)
+                            }
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            GlassPillButton(
-                                text = "ID",
-                                primary = settings.uiLanguage != "en",
-                                onClick = {
-                                    onUpdateSettings {
-                                        it.copy(uiLanguage = "id", uiLanguageChosen = true)
-                                    }
-                                }
-                            )
-                            GlassPillButton(
-                                text = "EN",
-                                primary = settings.uiLanguage == "en",
-                                onClick = {
-                                    onUpdateSettings {
-                                        it.copy(uiLanguage = "en", uiLanguageChosen = true)
-                                    }
-                                }
-                            )
+                        GlassIconButton("plus", I18n.t("Warna aksen kustom", "Custom accent color", lang), { showAccentDialog = true }, size = 32.dp)
+                    }
+                }
+                SettingsSectionCard(I18n.t("Membaca", "Reading", lang)) {
+                    Text(I18n.t("Huruf", "Font", lang), color = palette.textPrimary, fontSize = 13.sp)
+                    id.karisyono.katakecil.ui.components.LiquidGlassTabs(listOf("Lora" to "Serif", "Plus Jakarta Sans" to "Sans"), settings.fontFamily,
+                        { font -> onUpdateSettings { it.copy(fontFamily = font) } })
+                    LabeledLiveSlider(I18n.t("Ukuran teks", "Text size", lang), settings.fontSize.toString(), settings.fontSize.toFloat(), 14f..32f, { value -> onUpdateSettings { it.copy(fontSize = value.toInt()) } }, {})
+                }
+                SettingsSectionCard(I18n.t("Data dan penyimpanan", "Data & storage", lang)) {
+                    SettingsActionRow("download", I18n.t("Simpan backup", "Save backup", lang), "", onSaveBackupClick)
+                    SettingsActionRow("upload", I18n.t("Pulihkan backup", "Restore backup", lang), "", onRestoreBackupClick)
+                    SettingsActionRow("notes", I18n.t("Ekspor catatan", "Export notes", lang), "", onExportNotesClick)
+                    SettingsActionRow("device", I18n.t("Penyimpanan perangkat", "Device storage", lang), "", { showStorageDialog = true })
+                }
+                Column(Modifier.fillMaxWidth().then(Modifier.bringIntoViewRequester(advancedRequester))) {
+                    Row(Modifier.fillMaxWidth().clickable { advancedExpanded = !advancedExpanded }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        KataKecilIcon("sliders", tint = palette.accent, size = 18.dp)
+                        Text(I18n.t("Lanjutan", "Advanced", lang), Modifier.weight(1f).padding(horizontal = 10.dp), color = palette.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        KataKecilIcon(if (advancedExpanded) "collapse" else "chevron", tint = palette.textMuted, size = 16.dp)
+                    }
+                    if (advancedExpanded) GlassSurface(cornerRadius = 20.dp, contentPadding = PaddingValues(16.dp), modifier = Modifier.fillMaxWidth()) {
+                        Column {
+                            SettingsActionRow("edit", "Publisher", "", onOpenPublisherStudio)
+                            SettingsActionRow("upload", I18n.t("Impor EPUB dari perangkat", "Import EPUB", lang), "", onImportEpubClick)
+                            SettingsActionRow("bookOpen", I18n.t("Kelola EPUB pribadi", "Manage personal EPUBs", lang), "", { showPersonalEpubsDialog = true })
+                            SettingsActionRow("sparkle", I18n.t("Pratinjau loading", "Loading preview", lang), "", { showLoadingPreviewDialog = true })
+                            SettingsActionRow("bookOpen", I18n.t("Tentang aplikasi", "About app", lang), BuildConfig.VERSION_NAME, { showAboutLicensesDialog = true })
+                            SettingsActionRow("download", I18n.t("Pembaruan aplikasi", "App updates", lang), "", { showAppUpdatesDialog = true })
                         }
                     }
                 }
-
-                // Section 2: Device Backup & Notes
-                SettingsSectionCard(
-                    title = I18n.t("Cadangan Perangkat", "Device Backup", lang)
-                ) {
-                    SettingsActionRow(
-                        iconName = "download",
-                        title = I18n.t("Simpan cadangan", "Save backup", lang),
-                        subtitle = I18n.t(
-                            "Simpan progres baca, sorotan, catatan & pengaturan (katakecil-backup.json)",
-                            "Save reading progress, highlights, notes & settings (katakecil-backup.json)",
-                            lang
-                        ),
-                        onClick = onSaveBackupClick
-                    )
-                    SettingsActionRow(
-                        iconName = "upload",
-                        title = I18n.t("Pulihkan cadangan", "Restore backup", lang),
-                        subtitle = I18n.t(
-                            "Gabungkan file cadangan JSON ke perangkat ini",
-                            "Merge a backup JSON file into this device",
-                            lang
-                        ),
-                        onClick = onRestoreBackupClick
-                    )
-                    SettingsActionRow(
-                        iconName = "notes",
-                        title = I18n.t("Ekspor catatan", "Export notes", lang),
-                        subtitle = "${annotations.size} ${I18n.t("item tersimpan", "saved items", lang)}",
-                        onClick = onExportNotesClick
-                    )
-                }
-
-                // Section 3: App Updates
-                SettingsSectionCard(
-                    title = I18n.t("Pembaruan Aplikasi", "App Updates", lang)
-                ) {
-                    SettingsActionRow(
-                        iconName = "cloud",
-                        title = I18n.t("Periksa pembaruan", "Check for updates", lang),
-                        subtitle = "KataKecil v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
-                        onClick = { showAppUpdatesDialog = true }
-                    )
-                }
-
-                // Section 4: Advanced & Publisher
-                SettingsSectionCard(
-                    title = I18n.t("Lanjutan", "Advanced", lang)
-                ) {
-                    SettingsActionRow(
-                        iconName = "book",
-                        title = I18n.t("EPUB Pribadi", "Personal EPUBs", lang),
-                        subtitle = "${localBooks.size} ${I18n.t("buku lokal di perangkat", "local books on device", lang)}",
-                        onClick = { showPersonalEpubsDialog = true }
-                    )
-                    SettingsActionRow(
-                        iconName = "device",
-                        title = I18n.t("Penyimpanan perangkat", "Device storage", lang),
-                        subtitle = formatBytes(storageBytesUsed),
-                        onClick = { showStorageDialog = true }
-                    )
-                    SettingsActionRow(
-                        iconName = "sparkle",
-                        title = I18n.t("Pratinjau muat", "Loading preview", lang),
-                        subtitle = I18n.t("Animasi gelombang wordmark KataKecil", "KataKecil wordmark wave animation", lang),
-                        onClick = { showLoadingPreviewDialog = true }
-                    )
-                    SettingsActionRow(
-                        iconName = "shield",
-                        title = "Publisher Studio",
-                        subtitle = I18n.t("Kelola buku & jadwal episode terbitan", "Manage published books & episode schedules", lang),
-                        onClick = onOpenPublisherStudio
-                    )
-                    SettingsActionRow(
-                        iconName = "info",
-                        title = I18n.t("Tentang & Lisensi", "About & Licenses", lang),
-                        subtitle = I18n.t("Atribusi sumber terbuka & lisensi font", "Open-source attributions & font licenses", lang),
-                        onClick = { showAboutLicensesDialog = true }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
+    if (showLanguageDialog) Dialog(onDismissRequest = { showLanguageDialog = false }) {
+        GlassSurface(contentPadding = PaddingValues(20.dp), modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Column {
+                listOf("id" to "Bahasa Indonesia", "en" to "English").forEach { (code, label) ->
+                    SettingsActionRow("globe", label, if (settings.uiLanguage == code) "✓" else "", {
+                        onUpdateSettings { it.copy(uiLanguage = code, uiLanguageChosen = true) }; showLanguageDialog = false
+                    })
+                }
+            }
+        }
+    }
+    if (showAccentDialog) ColorWheelPickerDialog(I18n.t("Warna aksen kustom", "Custom accent color", lang), settings.accentColor,
+        { showAccentDialog = false }, { hex -> onUpdateSettings { it.copy(accentColor = hex) }; showAccentDialog = false })
 
     if (showGlobalThemeDialog) {
         GlobalThemeDialog(
@@ -357,7 +250,7 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     LoadingWordmark(
-                        caption = I18n.t("Memuat pustaka…", "Loading library…", lang)
+                        caption = ""
                     )
                     Spacer(modifier = Modifier.height(22.dp))
                     GlassPillButton(
@@ -391,24 +284,10 @@ private fun SettingsSectionCard(
     content: @Composable () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-    GlassSurface(
-        cornerRadius = 24.dp,
-        contentPadding = PaddingValues(18.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = title,
-                color = palette.accent,
-                fontFamily = KataKecilFonts.DmSans,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                letterSpacing = 0.8.sp
-            )
-            content()
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(title, color = palette.textMuted, fontFamily = KataKecilFonts.Ui, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 8.dp))
+        GlassSurface(cornerRadius = 20.dp, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth()) { content() }
         }
     }
 }
@@ -421,48 +300,11 @@ private fun SettingsActionRow(
     onClick: () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(palette.accent.copy(alpha = 0.14f)),
-                contentAlignment = Alignment.Center
-            ) {
-                KataKecilIcon(name = iconName, size = 19.dp, tint = palette.accent)
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.5.sp
-                )
-                Text(
-                    text = subtitle,
-                    color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
-                    fontSize = 12.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-        KataKecilIcon(name = "chevron", size = 18.dp, tint = palette.textMuted)
+    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = onClick).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        KataKecilIcon(iconName, tint = palette.accent, size = 18.dp)
+        Text(title, Modifier.weight(1f).padding(horizontal = 12.dp), color = palette.textPrimary, fontFamily = KataKecilFonts.Ui, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        if (subtitle.isNotBlank()) Text(subtitle, color = palette.textMuted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 115.dp))
+        KataKecilIcon("chevron", tint = palette.textMuted, size = 16.dp)
     }
 }
 
@@ -475,112 +317,19 @@ private fun GlobalThemeDialog(
     onDismiss: () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-    var showColorWheel by remember { mutableStateOf(false) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Tema Global", "Global Theme", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        Triple("light", "sun", I18n.t("Terang (Pearl)", "Light (Pearl)", lang)),
-                        Triple("dark", "moon", I18n.t("Gelap (Charcoal)", "Dark (Charcoal)", lang)),
-                        Triple("system", "device", I18n.t("Ikuti perangkat", "Follow device", lang)),
-                        Triple("sepia", "sepia", "Sepia"),
-                        Triple("paper", "paper", I18n.t("Kertas", "Paper", lang)),
-                        Triple("green", "leaf", I18n.t("Hijau", "Green", lang)),
-                        Triple("custom", "palette", I18n.t("Kustom", "Custom", lang))
-                    ).forEach { (modeKey, iconName, label) ->
-                        GlassPillButton(
-                            text = label,
-                            leadingIcon = iconName,
-                            primary = settings.themeMode == modeKey,
-                            onClick = { onUpdateSettings { it.copy(themeMode = modeKey) } }
-                        )
-                    }
-                }
-
-                Text(
-                    text = I18n.t("Warna Aksen", "Accent Color", lang),
-                    color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                )
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    KataKecilThemeTokens.AccentPresets.forEach { preset ->
-                        val isSelected = settings.accentColor.equals(preset.hex, ignoreCase = true)
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(preset.color)
-                                .border(
-                                    width = if (isSelected) 3.dp else 1.dp,
-                                    color = if (isSelected) Color.White else palette.border,
-                                    shape = CircleShape
-                                )
-                                .clickable {
-                                    onUpdateSettings { it.copy(accentColor = preset.hex) }
-                                }
-                        )
-                    }
-                    GlassPillButton(
-                        text = I18n.t("Roda Warna", "Color Wheel", lang),
-                        leadingIcon = "palette",
-                        onClick = { showColorWheel = true }
-                    )
-                }
+    var showCustom by remember { mutableStateOf(false) }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Tema", "Theme", lang), onDismiss) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(Triple("light", "sun", I18n.t("Terang", "Light", lang)), Triple("dark", "moon", I18n.t("Gelap", "Dark", lang)),
+                Triple("system", "device", I18n.t("Sistem", "System", lang)), Triple("sepia", "sepia", "Sepia"),
+                Triple("paper", "paper", I18n.t("Kertas", "Paper", lang)), Triple("green", "leaf", I18n.t("Hijau", "Green", lang)),
+                Triple("custom", "palette", I18n.t("Kustom", "Custom", lang))).forEach { (mode, icon, label) ->
+                GlassPillButton(label, { if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode) } }, leadingIcon = icon, primary = settings.themeMode == mode)
             }
         }
     }
-
-    if (showColorWheel) {
-        ColorWheelPickerDialog(
-            title = I18n.t("Pilih Warna Aksen", "Pick Accent Color", lang),
-            initialHex = settings.accentColor,
-            onDismiss = { showColorWheel = false },
-            onColorSelected = { hex ->
-                onUpdateSettings { it.copy(accentColor = hex) }
-                showColorWheel = false
-            }
-        )
-    }
+    if (showCustom) ColorWheelPickerDialog(I18n.t("Tema kustom", "Custom theme", lang), settings.customBackgroundColor,
+        { showCustom = false }, { color -> onUpdateSettings { it.copy(themeMode = "custom", customBackgroundColor = color) }; showCustom = false })
 }
 
 /**
@@ -594,133 +343,24 @@ private fun LiquidGlassSettingsDialog(
     onDismiss: () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Liquid Glass",
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
-
-                // Live Preview Stage
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                ) {
-                    AmbientBackground {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            GlassSurface(
-                                cornerRadius = 18.dp,
-                                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    KataKecilIcon(name = "sparkle", size = 18.dp, tint = palette.accent)
-                                    Text(
-                                        text = I18n.t("Pratinjau Kaca Langsung", "Live Glass Preview", lang),
-                                        color = palette.textPrimary,
-                                        fontFamily = KataKecilFonts.DmSans,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 13.5.sp
-                                    )
-                                }
-                            }
-                        }
+    id.karisyono.katakecil.ui.components.WebBottomSheet("Liquid Glass", onDismiss) {
+        Box(Modifier.fillMaxWidth().height(112.dp).clip(RoundedCornerShape(17.dp))) {
+            AmbientBackground {
+                GlassSurface(contentPadding = PaddingValues(16.dp), modifier = Modifier.align(Alignment.Center).fillMaxWidth(.88f)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("KataKecil", color = palette.textPrimary, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                        GlassPillButton(I18n.t("Baca", "Read", lang), {}, primary = true)
                     }
-                }
-
-                LabeledLiveSlider(
-                    label = I18n.t("Transparansi kaca", "Glass transparency", lang),
-                    valueText = "${settings.glassTransparency}%",
-                    value = settings.glassTransparency.toFloat(),
-                    valueRange = 0f..100f,
-                    onValueChange = { v ->
-                        onUpdateSettings { it.copy(glassTransparency = v.roundToInt().coerceIn(0, 100)) }
-                    },
-                    onValueChangeFinished = {}
-                )
-
-                LabeledLiveSlider(
-                    label = I18n.t("Blur kaca", "Glass blur", lang),
-                    valueText = "${settings.glassBlur} px",
-                    value = settings.glassBlur.toFloat(),
-                    valueRange = 0f..40f,
-                    onValueChange = { v ->
-                        onUpdateSettings { it.copy(glassBlur = v.roundToInt().coerceIn(0, 40)) }
-                    },
-                    onValueChangeFinished = {}
-                )
-
-                LabeledLiveSlider(
-                    label = I18n.t("Pendaran ambient", "Ambient glow", lang),
-                    valueText = "${settings.ambientIntensity}%",
-                    value = settings.ambientIntensity.toFloat(),
-                    valueRange = 0f..100f,
-                    onValueChange = { v ->
-                        onUpdateSettings { it.copy(ambientIntensity = v.roundToInt().coerceIn(0, 100)) }
-                    },
-                    onValueChangeFinished = {}
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    GlassPillButton(
-                        text = I18n.t("Kembalikan ke awal", "Reset to default", lang),
-                        leadingIcon = "refresh",
-                        onClick = {
-                            onUpdateSettings {
-                                it.copy(
-                                    glassTransparency = 75,
-                                    glassBlur = 20,
-                                    ambientIntensity = 60
-                                )
-                            }
-                        }
-                    )
-                    GlassPillButton(
-                        text = I18n.t("Selesai", "Done", lang),
-                        primary = true,
-                        onClick = onDismiss
-                    )
                 }
             }
         }
+        LabeledLiveSlider(I18n.t("Kebeningan", "Clarity", lang), "${settings.glassTransparency}%", settings.glassTransparency.toFloat(), 0f..100f,
+            { value -> onUpdateSettings { it.copy(glassTransparency = value.roundToInt()) } }, {})
+        LabeledLiveSlider("Blur", "${settings.glassBlur} px", settings.glassBlur.toFloat(), 0f..40f,
+            { value -> onUpdateSettings { it.copy(glassBlur = value.roundToInt()) } }, {})
+        LabeledLiveSlider("Ambient glow", "${settings.ambientIntensity}%", settings.ambientIntensity.toFloat(), 0f..100f,
+            { value -> onUpdateSettings { it.copy(ambientIntensity = value.roundToInt()) } }, {})
+        GlassPillButton(I18n.t("Kembalikan default", "Restore defaults", lang), { onUpdateSettings { it.copy(glassTransparency = 75, glassBlur = 20, ambientIntensity = 60) } }, leadingIcon = "refresh")
     }
 }
 
@@ -758,7 +398,7 @@ private fun PersonalEpubsDialog(
                     Text(
                         text = I18n.t("EPUB Pribadi", "Personal EPUBs", lang),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp
                     )
@@ -788,7 +428,7 @@ private fun PersonalEpubsDialog(
                             lang
                         ),
                         color = palette.textSecondary,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 13.5.sp
                     )
                 } else {
@@ -825,7 +465,7 @@ private fun PersonalEpubsDialog(
                                     Text(
                                         text = book.title,
                                         color = palette.textPrimary,
-                                        fontFamily = KataKecilFonts.Fraunces,
+                                        fontFamily = KataKecilFonts.Ui,
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 15.sp,
                                         maxLines = 2,
@@ -834,7 +474,7 @@ private fun PersonalEpubsDialog(
                                     Text(
                                         text = "${book.author} · ${book.chapterCount} ep · ${formatBytes(book.sizeBytes)}",
                                         color = palette.textSecondary,
-                                        fontFamily = KataKecilFonts.DmSans,
+                                        fontFamily = KataKecilFonts.Ui,
                                         fontSize = 11.5.sp
                                     )
                                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -891,7 +531,7 @@ private fun DeviceStorageDialog(
                 Text(
                     text = I18n.t("Penyimpanan Perangkat", "Device Storage", lang),
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Fraunces,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 19.sp
                 )
@@ -904,25 +544,25 @@ private fun DeviceStorageDialog(
                 Text(
                     text = "• ${I18n.t("Total ruang terpakai", "Total space used", lang)}: ${formatBytes(storageBytesUsed)}",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 13.5.sp
                 )
                 Text(
                     text = "• ${I18n.t("EPUB pribadi", "Personal EPUBs", lang)}: $localBookCount",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 13.5.sp
                 )
                 Text(
                     text = "• ${I18n.t("Progres buku", "Book progress records", lang)}: $progressCount",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 13.5.sp
                 )
                 Text(
                     text = "• ${I18n.t("Sorotan, catatan & markah", "Highlights, notes & bookmarks", lang)}: $annotationCount",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 13.5.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -979,14 +619,14 @@ private fun AboutLicensesDialog(
                         Text(
                             text = "KataKecil v${BuildConfig.VERSION_NAME}",
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Fraunces,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 19.sp
                         )
                         Text(
                             text = "Native Kotlin + Jetpack Compose · Karisyono",
                             color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 12.sp
                         )
                     }
@@ -1009,7 +649,7 @@ private fun AboutLicensesDialog(
                     Text(
                         text = attributionsText,
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 12.5.sp,
                         lineHeight = 18.sp
                     )
@@ -1076,7 +716,7 @@ private fun AppUpdatesDialog(
                     Text(
                         text = I18n.t("Pembaruan Aplikasi", "App Updates", lang),
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 19.sp
                     )
@@ -1092,7 +732,7 @@ private fun AppUpdatesDialog(
                 Text(
                     text = "${I18n.t("Versi terpasang", "Installed version", lang)}: v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                     color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 13.sp
                 )
 
@@ -1106,13 +746,13 @@ private fun AppUpdatesDialog(
                     isChecking -> Text(
                         text = I18n.t("Memeriksa rilis GitHub…", "Checking GitHub releases…", lang),
                         color = palette.textSecondary,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 13.5.sp
                     )
                     errorMessage != null -> Text(
                         text = errorMessage ?: "",
                         color = Color(0xFFE76F51),
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 13.sp
                     )
                     releaseInfo != null -> {
@@ -1133,7 +773,7 @@ private fun AppUpdatesDialog(
                         Text(
                             text = statusText,
                             color = if (info.status == "update-available") palette.accent else palette.textPrimary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.5.sp
                         )
@@ -1151,7 +791,7 @@ private fun AppUpdatesDialog(
                                 Text(
                                     text = info.releaseNotes,
                                     color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontSize = 12.5.sp
                                 )
                             }
@@ -1166,7 +806,7 @@ private fun AppUpdatesDialog(
                             Text(
                                 text = "${I18n.t("Mengunduh & memverifikasi SHA-256", "Downloading & verifying SHA-256", lang)} ($downloadProgress%)",
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 12.sp
                             )
                         }
@@ -1255,20 +895,20 @@ fun RestoreBackupPreviewDialog(
                 Text(
                     text = I18n.t("Pulihkan Cadangan", "Restore Backup", lang),
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Fraunces,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 19.sp
                 )
                 Text(
                     text = "• ${I18n.t("Sorotan, catatan & markah", "Highlights, notes & bookmarks", lang)}: ${preview.annotationCount}",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "• ${I18n.t("Progres buku", "Book progress items", lang)}: ${preview.progressCount}",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 14.sp
                 )
 
@@ -1286,7 +926,7 @@ fun RestoreBackupPreviewDialog(
                         Text(
                             text = I18n.t("Pulihkan pengaturan tampilan", "Restore appearance settings", lang),
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontSize = 13.5.sp
                         )
                     }
@@ -1340,7 +980,7 @@ fun ImportEpubPreviewDialog(
                 Text(
                     text = I18n.t("Pratinjau Impor EPUB", "EPUB Import Preview", lang),
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Fraunces,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 19.sp
                 )
@@ -1358,7 +998,7 @@ fun ImportEpubPreviewDialog(
                 Text(
                     text = meta.title,
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Fraunces,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 17.sp,
                     maxLines = 2,
@@ -1368,7 +1008,7 @@ fun ImportEpubPreviewDialog(
                 Text(
                     text = "${meta.author} · ${meta.chapterCount} episode · ${formatBytes(preview.sizeBytes)}",
                     color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 12.5.sp
                 )
 
@@ -1380,7 +1020,7 @@ fun ImportEpubPreviewDialog(
                             lang
                         ),
                         color = palette.accent,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 12.sp
                     )
                 }

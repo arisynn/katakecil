@@ -106,41 +106,12 @@ fun LibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
         ) {
-            // Top bar with KataKecil Wordmark + Import + Settings
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(
-                        if (palette.isDark) R.drawable.katakecil_wordmark_cream else R.drawable.katakecil_wordmark
-                    ),
-                    contentDescription = "KataKecil",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.height(34.dp)
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    GlassIconButton(
-                        iconName = "plus",
-                        contentDescription = I18n.t("Impor EPUB", "Import EPUB", lang),
-                        onClick = onImportEpubClick
-                    )
-                    GlassIconButton(
-                        iconName = "sliders",
-                        contentDescription = I18n.t("Pengaturan", "Settings", lang),
-                        onClick = onOpenSettingsClick
-                    )
-                }
+            id.karisyono.katakecil.ui.components.WebPageHeading("Library") {
+                GlassIconButton("refresh", I18n.t("Segarkan koleksi", "Refresh library", lang), onRefreshCatalog)
+                GlassIconButton("sliders", I18n.t("Pengaturan", "Settings", lang), onOpenSettingsClick)
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
 
             when {
                 isLoading && books.isEmpty() -> {
@@ -149,60 +120,20 @@ fun LibraryScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         LoadingWordmark(
-                            caption = I18n.t("Memuat pustaka…", "Loading library…", lang)
+                            caption = ""
                         )
                     }
                 }
 
                 books.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        GlassSurface(
-                            cornerRadius = 26.dp,
-                            elevated = true,
-                            contentPadding = PaddingValues(28.dp),
-                            modifier = Modifier.width(360.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = I18n.t("Pustaka Belum Tersedia", "Library Unavailable", lang),
-                                    color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.Fraunces,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 20.sp,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = errorMessage ?: I18n.t(
-                                        "Periksa sambungan internet untuk memuat katalog terbitan, atau impor file EPUB pribadi Anda.",
-                                        "Check your connection to load the published catalog, or import a personal EPUB file.",
-                                        lang
-                                    ),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
-                                    fontSize = 14.sp,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(20.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    GlassPillButton(
-                                        text = I18n.t("Muat Ulang", "Retry", lang),
-                                        leadingIcon = "refresh",
-                                        onClick = onRefreshCatalog
-                                    )
-                                    GlassPillButton(
-                                        text = I18n.t("Impor EPUB", "Import EPUB", lang),
-                                        leadingIcon = "plus",
-                                        primary = true,
-                                        onClick = onImportEpubClick
-                                    )
-                                }
-                            }
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                            id.karisyono.katakecil.ui.components.KataKecilIcon("bookOpen", size = 30.dp, tint = palette.textMuted)
+                            Text(if (errorMessage != null) I18n.t("Rak belum bisa dibuka", "Unable to load your library", lang) else I18n.t("Rak masih kosong", "Your library is empty", lang),
+                                color = palette.textPrimary, fontSize = 21.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+                            Text(errorMessage ?: I18n.t("Impor EPUB untuk mulai membaca.", "Import an EPUB to start reading.", lang),
+                                color = palette.textMuted, fontSize = 13.sp, textAlign = TextAlign.Center)
+                            GlassPillButton(I18n.t("Coba lagi", "Try again", lang), onRefreshCatalog)
                         }
                     }
                 }
@@ -326,7 +257,7 @@ private fun ShelfCarouselStage(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(340.dp)
+            .fillMaxHeight()
             .pointerInput(count, selectedIndex) {
                 var dragAccum = 0f
                 val stepPx = 140.dp.toPx()
@@ -366,7 +297,7 @@ private fun ShelfCarouselStage(
             },
         contentAlignment = Alignment.Center
     ) {
-        val coverWidth = min(maxWidth.value * 0.52f, 206f).dp
+        val coverWidth = min(min(maxWidth.value * 0.68f, 285f), maxHeight.value / 1.5f).dp
         val coverHeight = coverWidth * 1.48f
         val stepPx = (coverWidth.value * 0.56f).dp
 
@@ -378,7 +309,7 @@ private fun ShelfCarouselStage(
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        activeCoverColor.copy(alpha = 0.36f),
+                        activeCoverColor.copy(alpha = 0.10f),
                         Color.Transparent
                     ),
                     center = Offset(size.width / 2f, size.height / 2f),
@@ -422,11 +353,6 @@ private fun ShelfCarouselStage(
                             this.alpha = alpha
                         }
                         .size(coverWidth, coverHeight)
-                        .shadow(
-                            elevation = if (absD < 0.4f) 24.dp else 10.dp,
-                            shape = RoundedCornerShape(18.dp),
-                            spotColor = activeCoverColor.copy(alpha = 0.45f)
-                        )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
@@ -442,7 +368,7 @@ private fun ShelfCarouselStage(
                         title = book.title,
                         author = book.author,
                         coverUrl = book.effectiveCover,
-                        cornerRadius = 18.dp,
+                        cornerRadius = 4.dp,
                         modifier = Modifier.fillMaxSize(),
                         onDominantColorExtracted = { col ->
                             onCoverColorResolved(book.id, col)
@@ -505,7 +431,7 @@ private fun ActiveBookDetailStage(
                     Text(
                         text = "${selectedIndex + 1} / $totalBooks",
                         color = palette.textMuted,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -513,52 +439,6 @@ private fun ActiveBookDetailStage(
             }
             Spacer(modifier = Modifier.height(12.dp))
         }
-
-        if (book.source == "local") {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(palette.accent.copy(alpha = 0.15f))
-                    .padding(horizontal = 10.dp, vertical = 3.dp)
-            ) {
-                Text(
-                    text = I18n.t("EPUB Pribadi", "Personal EPUB", lang),
-                    color = palette.accent,
-                    fontFamily = KataKecilFonts.DmSans,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-        }
-
-        Text(
-            text = book.title,
-            color = palette.textPrimary,
-            fontFamily = KataKecilFonts.Fraunces,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,
-            lineHeight = 30.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = book.author,
-            color = palette.textSecondary,
-            fontFamily = KataKecilFonts.DmSans,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
 
         // Reading status pill with glowing indicator dot
         GlassSurface(
@@ -582,8 +462,8 @@ private fun ActiveBookDetailStage(
                 Text(
                     text = statusLabel,
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
-                    fontSize = 12.5.sp,
+                    fontFamily = KataKecilFonts.Ui,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -593,7 +473,7 @@ private fun ActiveBookDetailStage(
 
         GlassPillButton(
             text = actionLabel,
-            leadingIcon = "bookOpen",
+            leadingIcon = "arrow",
             primary = true,
             onClick = onOpenBook,
             modifier = Modifier.width(230.dp)

@@ -20,6 +20,8 @@ import kotlin.math.min
 import kotlin.math.pow
 
 object KataKecilFonts {
+    val Ui = FontFamily.Default
+
     val DmSans = FontFamily(
         Font(R.font.dm_sans_regular, FontWeight.Normal),
         Font(R.font.dm_sans_medium, FontWeight.Medium),
@@ -167,7 +169,7 @@ object KataKecilThemeTokens {
     ): KataKecilPalette {
         val accent = parseHexColor(settings.accentColor, Color(0xFF54756C))
         val transparency = settings.glassTransparency.coerceIn(0, 100)
-        val glassFillAlpha = ((100f - transparency) / 100f).coerceIn(0.08f, 0.96f)
+        val glassFillAlpha = ((100f - transparency) / 100f).coerceIn(0f, 1f)
         val glassBlurDp = settings.glassBlur.coerceIn(0, 40).toFloat()
         val ambientIntensity = (settings.ambientIntensity.coerceIn(0, 100) / 100f)
 
@@ -267,16 +269,16 @@ object KataKecilThemeTokens {
             id = effectiveGlobalMode,
             isDark = isDarkGlobal,
             background = bg,
-            surface = surface,
-            surfaceElevated = if (isDarkGlobal) Color(0xFF202A35) else Color(0xFFFFFFFF),
+            surface = androidx.compose.ui.graphics.lerp(bg, textPrimary, .035f),
+            surfaceElevated = androidx.compose.ui.graphics.lerp(bg, textPrimary, .035f),
             textPrimary = textPrimary,
-            textSecondary = textPrimary.copy(alpha = 0.76f),
-            textMuted = textPrimary.copy(alpha = 0.56f),
+            textSecondary = androidx.compose.ui.graphics.lerp(bg, textPrimary, .64f),
+            textMuted = androidx.compose.ui.graphics.lerp(bg, textPrimary, .64f),
             readingPaper = readingPaper,
             readingText = readingInk,
             readingMuted = readingInk.copy(alpha = 0.62f),
             accent = accent,
-            border = if (isDarkGlobal) Color.White.copy(alpha = 0.14f) else Color.Black.copy(alpha = 0.09f),
+            border = androidx.compose.ui.graphics.lerp(bg, textPrimary, .14f),
             glassFillAlpha = glassFillAlpha,
             glassBlurDp = glassBlurDp,
             ambientIntensity = ambientIntensity
@@ -329,6 +331,10 @@ fun KataKecilTheme(
     CompositionLocalProvider(LocalKataKecilPalette provides palette) {
         MaterialTheme(
             colorScheme = colorScheme,
+            typography = androidx.compose.material3.Typography().let { t ->
+                val ui = androidx.compose.ui.text.TextStyle(fontFamily = KataKecilFonts.Ui, platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false))
+                t.copy(bodyLarge = ui, bodyMedium = ui, bodySmall = ui, titleLarge = ui, titleMedium = ui, titleSmall = ui, labelLarge = ui, labelMedium = ui, labelSmall = ui)
+            },
             content = content
         )
     }

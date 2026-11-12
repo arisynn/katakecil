@@ -191,7 +191,7 @@ fun PublisherScreen(
                         Text(
                             text = "Publisher Studio",
                             color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Fraunces,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 21.sp
                         )
@@ -199,7 +199,7 @@ fun PublisherScreen(
                             Text(
                                 text = publisherClient.currentUserEmail,
                                 color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.DmSans,
+                                fontFamily = KataKecilFonts.Ui,
                                 fontSize = 12.sp
                             )
                         }
@@ -241,7 +241,7 @@ fun PublisherScreen(
                     Text(
                         text = errorMessage ?: "",
                         color = Color(0xFFE76F51),
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 13.sp
                     )
                 }
@@ -465,7 +465,7 @@ fun PublisherScreen(
                                     Text(
                                         text = "${importedParts.size} Bab Siap Dipublikasikan",
                                         color = palette.accent,
-                                        fontFamily = KataKecilFonts.DmSans,
+                                        fontFamily = KataKecilFonts.Ui,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.5.sp
                                     )
@@ -507,14 +507,14 @@ fun PublisherScreen(
                                                 Text(
                                                     text = part.title,
                                                     color = palette.textPrimary,
-                                                    fontFamily = KataKecilFonts.DmSans,
+                                                    fontFamily = KataKecilFonts.Ui,
                                                     fontWeight = FontWeight.SemiBold,
                                                     fontSize = 13.5.sp
                                                 )
                                                 Text(
                                                     text = "Target: ${part.target}",
                                                     color = palette.textSecondary,
-                                                    fontFamily = KataKecilFonts.DmSans,
+                                                    fontFamily = KataKecilFonts.Ui,
                                                     fontSize = 11.5.sp
                                                 )
                                             }
@@ -577,7 +577,7 @@ fun PublisherScreen(
                                 Text(
                                     text = "${detail.sections.size} Bagian Terdaftar",
                                     color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.DmSans,
+                                    fontFamily = KataKecilFonts.Ui,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp
                                 )
@@ -595,7 +595,7 @@ fun PublisherScreen(
                                             Text(
                                                 text = "${idx + 1}. ${sec.title}",
                                                 color = palette.textPrimary,
-                                                fontFamily = KataKecilFonts.DmSans,
+                                                fontFamily = KataKecilFonts.Ui,
                                                 fontWeight = FontWeight.Medium,
                                                 fontSize = 13.5.sp
                                             )
@@ -603,7 +603,7 @@ fun PublisherScreen(
                                                 Text(
                                                     text = "Rilis: ${sec.release_at.take(16).replace('T', ' ')}",
                                                     color = palette.textMuted,
-                                                    fontFamily = KataKecilFonts.DmSans,
+                                                    fontFamily = KataKecilFonts.Ui,
                                                     fontSize = 11.sp
                                                 )
                                             }
@@ -624,7 +624,7 @@ fun PublisherScreen(
                         Text(
                             text = "${books.size} Buku di Katalog Publisher",
                             color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.DmSans,
+                            fontFamily = KataKecilFonts.Ui,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.5.sp
                         )
@@ -683,7 +683,7 @@ fun PublisherScreen(
                                         Text(
                                             text = item.title,
                                             color = palette.textPrimary,
-                                            fontFamily = KataKecilFonts.Fraunces,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 16.sp,
                                             maxLines = 2,
@@ -692,7 +692,7 @@ fun PublisherScreen(
                                         Text(
                                             text = "${item.author} · ${item.status.uppercase()}",
                                             color = palette.textSecondary,
-                                            fontFamily = KataKecilFonts.DmSans,
+                                            fontFamily = KataKecilFonts.Ui,
                                             fontSize = 12.5.sp
                                         )
                                     }

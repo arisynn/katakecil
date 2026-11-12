@@ -1,0 +1,6 @@
+<resources>
+    <style name="WebPanelAnimation">
+        <item name="android:windowEnterAnimation">@anim/web_panel_enter</item>
+        <item name="android:windowExitAnimation">@anim/web_panel_exit</item>
+    </style>
+</resources>

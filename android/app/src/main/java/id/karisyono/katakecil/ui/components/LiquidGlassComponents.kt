@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -79,7 +80,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import id.karisyono.katakecil.ui.components.WebDialog as Dialog
 import id.karisyono.katakecil.R
 import id.karisyono.katakecil.core.theme.CoverColors
 import id.karisyono.katakecil.core.theme.KataKecilFonts
@@ -124,8 +125,8 @@ fun AmbientBackground(
                 val h = size.height
                 val radius1 = maxOf(w, h) * 0.68f
                 val radius2 = maxOf(w, h) * 0.62f
-                val alpha1 = (if (palette.isDark) 0.24f else 0.18f) * intensity
-                val alpha2 = (if (palette.isDark) 0.18f else 0.14f) * intensity
+                val alpha1 = (if (palette.isDark) 0.18f else 0.22f) * intensity
+                val alpha2 = (if (palette.isDark) 0.08f else 0.10f) * intensity
 
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -164,16 +165,12 @@ fun GlassSurface(
 ) {
     val palette = LocalKataKecilPalette.current
     val shape = RoundedCornerShape(cornerRadius)
-    val baseAlpha = if (elevated) {
-        (palette.glassFillAlpha + 0.14f).coerceIn(0.18f, 0.96f)
-    } else {
-        palette.glassFillAlpha.coerceIn(0.12f, 0.94f)
-    }
-    val baseSurface = if (elevated) palette.surfaceElevated else palette.surface
+    val baseAlpha = palette.glassFillAlpha
+    val baseSurface = palette.background
     val topSpecular = if (palette.isDark) {
         Color.White.copy(alpha = 0.22f)
     } else {
-        Color.White.copy(alpha = 0.72f)
+        Color.White.copy(alpha = 0.22f)
     }
     val bottomRim = if (palette.isDark) {
         Color.White.copy(alpha = 0.07f)
@@ -184,7 +181,7 @@ fun GlassSurface(
     Box(
         modifier = modifier
             .shadow(
-                elevation = if (elevated) 14.dp else 6.dp,
+                elevation = if (elevated) 8.dp else 3.dp,
                 shape = shape,
                 ambientColor = Color.Black.copy(alpha = 0.16f),
                 spotColor = Color.Black.copy(alpha = 0.18f)
@@ -203,9 +200,12 @@ fun GlassSurface(
                 brush = Brush.verticalGradient(listOf(topSpecular, bottomRim)),
                 shape = shape
             )
-            .padding(contentPadding),
-        content = content
-    )
+            .pointerInput(Unit) { detectTapGestures(onTap = {}) }
+    ) {
+        GlassBackdrop(Modifier.matchParentSize())
+        Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(baseSurface.copy(alpha = baseAlpha), baseSurface.copy(alpha = baseAlpha)))))
+        Box(Modifier.padding(contentPadding), content = content)
+    }
 }
 
 @Composable
@@ -223,35 +223,18 @@ fun GlassIconButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
+        targetValue = if (isPressed) 0.965f else 1f,
         animationSpec = spring(dampingRatio = 0.65f, stiffness = 600f),
         label = "iconPressScale"
     )
-    val effectiveTint = tint ?: if (active) Color.White else palette.textPrimary
+    val effectiveTint = tint ?: if (active) palette.accent else palette.textPrimary
 
     Box(
         modifier = modifier
             .size(size)
             .scale(scale)
             .clip(CircleShape)
-            .background(
-                if (active) {
-                    palette.accent
-                } else {
-                    palette.surfaceElevated.copy(alpha = (palette.glassFillAlpha + 0.12f).coerceIn(0.22f, 0.92f))
-                }
-            )
-            .border(
-                width = 1.dp,
-                color = if (active) {
-                    Color.White.copy(alpha = 0.32f)
-                } else if (palette.isDark) {
-                    Color.White.copy(alpha = 0.16f)
-                } else {
-                    Color.White.copy(alpha = 0.68f)
-                },
-                shape = CircleShape
-            )
+            .background(if (active) palette.accent.copy(alpha = .10f) else Color.Transparent)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -284,7 +267,7 @@ fun GlassPillButton(
         animationSpec = spring(dampingRatio = 0.7f, stiffness = 600f),
         label = "pillScale"
     )
-    val shape = RoundedCornerShape(999.dp)
+    val shape = RoundedCornerShape(12.dp)
     val bgBrush = if (primary) {
         Brush.verticalGradient(
             listOf(
@@ -293,7 +276,7 @@ fun GlassPillButton(
             )
         )
     } else {
-        val fillAlpha = (palette.glassFillAlpha + 0.15f).coerceIn(0.24f, 0.92f)
+        val fillAlpha = 0f
         Brush.verticalGradient(
             listOf(
                 palette.surfaceElevated.copy(alpha = fillAlpha),
@@ -330,7 +313,7 @@ fun GlassPillButton(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 18.dp, vertical = 11.dp),
+            .heightIn(min = 44.dp).padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -345,9 +328,9 @@ fun GlassPillButton(
         Text(
             text = text,
             color = contentColor,
-            fontFamily = KataKecilFonts.DmSans,
+            fontFamily = KataKecilFonts.Ui,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
+            fontSize = 12.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -475,7 +458,7 @@ fun <T> LiquidGlassTabs(
                     Text(
                         text = label,
                         color = if (isSelected) Color.White else palette.textSecondary,
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                         fontSize = 13.sp,
                         maxLines = 1,
@@ -580,7 +563,7 @@ fun LoadingWordmark(
             Text(
                 text = caption,
                 color = palette.textSecondary,
-                fontFamily = KataKecilFonts.DmSans,
+                fontFamily = KataKecilFonts.Ui,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -661,7 +644,7 @@ fun BookCoverView(
     author: String,
     coverUrl: String,
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 18.dp,
+    cornerRadius: Dp = 4.dp,
     onDominantColorExtracted: (Color) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -681,14 +664,14 @@ fun BookCoverView(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        palette.accent.copy(alpha = 0.88f),
-                        Color(0xFF283845)
+                        if (bitmap == null) palette.accent.copy(alpha = .88f) else Color.Transparent,
+                        if (bitmap == null) Color(0xFF283845) else Color.Transparent
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.24f),
+                color = Color.Transparent,
                 shape = shape
             )
     ) {
@@ -697,7 +680,7 @@ fun BookCoverView(
             Image(
                 bitmap = currentBitmap.asImageBitmap(),
                 contentDescription = title,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
@@ -711,7 +694,7 @@ fun BookCoverView(
                 Text(
                     text = "KATAKECIL",
                     color = Color.White.copy(alpha = 0.65f),
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
@@ -720,7 +703,7 @@ fun BookCoverView(
                     Text(
                         text = title,
                         color = Color.White,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp,
                         lineHeight = 23.sp,
@@ -731,7 +714,7 @@ fun BookCoverView(
                     Text(
                         text = author,
                         color = Color.White.copy(alpha = 0.8f),
-                        fontFamily = KataKecilFonts.DmSans,
+                        fontFamily = KataKecilFonts.Ui,
                         fontSize = 12.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -794,7 +777,7 @@ fun ColorWheelPickerDialog(
                     Text(
                         text = title,
                         color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Fraunces,
+                        fontFamily = KataKecilFonts.Ui,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp
                     )
@@ -980,7 +963,7 @@ fun GlassToastOverlay(
                 Text(
                     text = message ?: "",
                     color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.DmSans,
+                    fontFamily = KataKecilFonts.Ui,
                     fontWeight = FontWeight.Medium,
                     fontSize = 13.5.sp,
                     textAlign = TextAlign.Center
