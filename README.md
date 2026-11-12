@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.4">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.5">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-**Rilis stable terbaru: [1.2.4](https://github.com/arisynn/katakecil/releases/tag/v1.2.4)**, sesuai persetujuan pemilik. Memuat Publisher dan toast bergaya kaca yang mengikuti pengaturan kebeningan, blur, ambient dan tema global. Halaman buku tetap polos dan loading wordmark KataKecil dipertahankan. [Catatan rilis](docs/releases/v1.2.4.md).
+**Rilis stable terbaru: [1.2.5](https://github.com/arisynn/katakecil/releases/tag/v1.2.5)**, sesuai persetujuan pemilik. Memuat ikon antarmuka rounded, tema Sistem yang diperhalus, serta penataan Pengaturan dan reader terbaru. Halaman buku tetap polos dan loading wordmark KataKecil dipertahankan. [Catatan rilis](docs/releases/v1.2.5.md).
 
 **Status Play Protect:** pemilik mengonfirmasi pada 9 November 2026 bahwa blokir sudah teratasi pada pengujiannya. Status ini berasal dari laporan pemilik; tidak ada uji ulang HP atau keputusan Google yang diperiksa pada sesi ini. [Riwayat pemeriksaan](docs/play-protect-review.md).
 
@@ -34,11 +34,11 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 4,9 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.4` · build `12` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.5` · build `13` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Status terbaru:** 1.2.4 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
+**Status terbaru:** 1.2.5 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
 
 ## Yang bisa dilakukan
 
@@ -147,7 +147,7 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android stable terbaru](docs/releases/v1.2.4.md)
+- [Catatan rilis Android stable terbaru](docs/releases/v1.2.5.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
 - [Hasil pemeriksaan APK](docs/generated/android-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)

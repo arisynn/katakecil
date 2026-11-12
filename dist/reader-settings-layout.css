@@ -19,7 +19,9 @@
 .theme-option-group>h3{margin-bottom:8px}
 .theme-options .global-theme-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .theme-options .global-theme-chip{position:relative;flex-direction:column;justify-content:center;align-items:center;gap:7px;min-width:0;min-height:70px;padding:9px 5px;font-size:11px;text-align:center;color:var(--text)}
-.theme-options .global-theme-chip i{width:28px;height:28px;border-radius:8px}
+.theme-options .global-theme-chip i{width:34px;height:34px;border-radius:11px;box-shadow:inset 0 1px 0 #ffffff24}
+.theme-options .global-theme-chip i>svg{width:22px;height:22px}
+.theme-options .global-theme-chip[data-value=system] i{border:1px solid var(--g-edge)}
 .theme-options .theme-option-label{min-width:0;line-height:1.35;overflow-wrap:anywhere}
 .theme-options .theme-choice-check{position:absolute;right:6px;top:6px;width:13px;margin:0}
 .theme-options .theme-choice-check svg{width:13px;height:13px}
@@ -45,6 +47,8 @@
  .theme-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
  .theme-options>.theme-global-caption,.theme-options>.global-theme-custom{grid-column:1/-1}
  .theme-options .global-theme-chip{min-height:60px;padding:7px 4px;gap:5px}
+ .theme-options .global-theme-chip i{width:30px;height:30px;border-radius:10px}
+ .theme-options .global-theme-chip i>svg{width:20px;height:20px}
  .theme-options .global-theme-custom{min-height:48px;padding:8px 12px}
  .appearance-panel .reader-control-group+.reader-control-group{margin-top:12px;padding-top:12px}
  .reading-tools .reader-tools-group{gap:6px}

@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.5 Stable — Ikon rounded dan tema Sistem (12 November 2026)
+
+- Perbarui keluarga ikon antarmuka agar rounded, konsisten dan jelas pada ukuran kecil; samakan ikon khusus Publisher dengan helper bersama.
+- Perbaiki simbol dan tile tema Sistem, tetap mengikuti mode terang/gelap perangkat.
+- Sertakan penataan Pengaturan, tema dan reader yang sebelumnya tersedia di web.
+- Rilis APK versionCode 13 dengan signer yang sama; [catatan dan daftar uji HP](docs/releases/v1.2.5.md).
+
 ## Pengembangan web — Pengelompokan Pengaturan dan reader (12 November 2026)
 
 - Tata Pengaturan menjadi lima kelompok sejajar; Pembaruan & tentang keluar dari Advanced, sementara Publisher dan pengelolaan EPUB tetap di Advanced.

@@ -1,0 +1,227 @@
+{
+  "version": "1.2.5",
+  "versionCode": 13,
+  "scope": "Quick rounded UI icon review",
+  "status": "passed-targeted-review",
+  "checks": {
+    "webHelperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModuleGraph": "passed",
+    "targetedNodeTests": 17,
+    "nodeFailures": 0,
+    "testFiles": [
+      "reader-controls.test.mjs",
+      "i18n.test.mjs",
+      "publisher.test.mjs"
+    ],
+    "fullSuiteRun": false
+  },
+  "browser": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "errors": [],
+    "unexpectedNetwork": [],
+    "layouts": [],
+    "systemFollowsMediaLightAndDark": true,
+    "singleThemeActive": true,
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 320,
+        "height": 568
+      },
+      {
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "publisherPasswordToggle": true,
+    "mainEntryPoints": true,
+    "inUseStyle": {
+      "stroke": "1.85px",
+      "cap": "round",
+      "join": "round"
+    },
+    "iconCount": 52,
+    "iconBoundsAndRoundness": true,
+    "iconNames": [
+      "sun",
+      "moon",
+      "leaf",
+      "paper",
+      "sepia",
+      "speaker",
+      "play",
+      "pause",
+      "globe",
+      "refresh",
+      "collapse",
+      "palette",
+      "type",
+      "textSize",
+      "device",
+      "systemTheme",
+      "book",
+      "bookOpen",
+      "grid",
+      "notes",
+      "appearance",
+      "plus",
+      "search",
+      "chevron",
+      "left",
+      "arrow",
+      "close",
+      "check",
+      "shield",
+      "cloud",
+      "upload",
+      "bookmark",
+      "quote",
+      "sparkle",
+      "list",
+      "lock",
+      "more",
+      "download",
+      "expand",
+      "edit",
+      "trash",
+      "info",
+      "back",
+      "sliders",
+      "clock",
+      "single",
+      "double",
+      "folder",
+      "mail",
+      "eye",
+      "eyeOff",
+      "logout"
+    ],
+    "result": "passed"
+  },
+  "localScreenshotDirectory": "/workspace/scratch",
+  "localScreenshots": [
+    "katakecil-icons-1.2.5-contact-sheet.png",
+    "katakecil-icons-1.2.5-library-390.png",
+    "katakecil-icons-1.2.5-publisher-390.png",
+    "katakecil-icons-1.2.5-reader-controls-390.png",
+    "katakecil-icons-1.2.5-reader-theme-390.png",
+    "katakecil-icons-1.2.5-reader-tools-390.png",
+    "katakecil-icons-1.2.5-settings-390.png",
+    "katakecil-icons-1.2.5-system-dark-320.png",
+    "katakecil-icons-1.2.5-system-dark-667.png",
+    "katakecil-icons-1.2.5-system-light-320.png",
+    "katakecil-icons-1.2.5-system-light-390.png"
+  ],
+  "limitations": [
+    "Local catalog/episode fixtures; no production publishing or account changes.",
+    "Three targeted viewport sizes, not an exhaustive device audit.",
+    "Browser icon/entry point checks do not establish physical Android device, native audio or Play Protect QA.",
+    "Launcher brand/logo stays outside this UI icon family update.",
+    "At320x568 the theme body has49px normal vertical overflow; Custom is fully reachable after scrolling and opens correctly in both themes."
+  ],
+  "openFindings": [],
+  "shortPhoneCustomThemeAccess": {
+    "result": "passed",
+    "checks": [
+      {
+        "colorScheme": "light",
+        "before": {
+          "dialog": {
+            "top": 210,
+            "bottom": 558,
+            "height": 348
+          },
+          "body": {
+            "top": 269,
+            "bottom": 553,
+            "height": 284,
+            "clientHeight": 284,
+            "scrollHeight": 333,
+            "scrollTop": 0,
+            "overflowY": "auto"
+          },
+          "custom": {
+            "top": 530.375,
+            "bottom": 586.375,
+            "height": 56
+          }
+        },
+        "after": {
+          "dialog": {
+            "top": 210,
+            "bottom": 558,
+            "height": 348
+          },
+          "body": {
+            "top": 269,
+            "bottom": 553,
+            "height": 284,
+            "clientHeight": 284,
+            "scrollHeight": 333,
+            "scrollTop": 45,
+            "overflowY": "auto"
+          },
+          "custom": {
+            "top": 485.375,
+            "bottom": 541.375,
+            "height": 56
+          }
+        },
+        "customOpens": true
+      },
+      {
+        "colorScheme": "dark",
+        "before": {
+          "dialog": {
+            "top": 210,
+            "bottom": 558,
+            "height": 348
+          },
+          "body": {
+            "top": 269,
+            "bottom": 553,
+            "height": 284,
+            "clientHeight": 284,
+            "scrollHeight": 333,
+            "scrollTop": 0,
+            "overflowY": "auto"
+          },
+          "custom": {
+            "top": 530.375,
+            "bottom": 586.375,
+            "height": 56
+          }
+        },
+        "after": {
+          "dialog": {
+            "top": 210,
+            "bottom": 558,
+            "height": 348
+          },
+          "body": {
+            "top": 269,
+            "bottom": 553,
+            "height": 284,
+            "clientHeight": 284,
+            "scrollHeight": 333,
+            "scrollTop": 45,
+            "overflowY": "auto"
+          },
+          "custom": {
+            "top": 485.375,
+            "bottom": 541.375,
+            "height": 56
+          }
+        },
+        "customOpens": true
+      }
+    ]
+  }
+}

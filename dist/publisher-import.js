@@ -1,6 +1,6 @@
 import {parseEpub,chapterLabelOf} from './epub.js?v=10';
 import {marked} from './vendor/marked.js?v=1';
-import {escapeHTML as esc} from './ui.js?v=12';
+import {escapeHTML as esc} from './ui.js?v=13';
 
 const MAX=18000000;
 export const normalizedTitle=value=>String(value||'').replace(/^(?:bab|chapter|episode)\s*(?:\d+|[ivxlcdm]+)[\s.:—–-]*/i,'').normalize('NFKC').replace(/\s+/g,' ').trim().toLocaleLowerCase();

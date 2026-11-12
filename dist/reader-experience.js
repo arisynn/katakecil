@@ -1,7 +1,7 @@
 import {transitionContent} from './motion.js?v=1';
 import {layoutDialog} from './panel-layout.js?v=5';
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=17';
-import {escapeHTML as esc,icon,$,$$} from './ui.js?v=12';
+import {escapeHTML as esc,icon,$,$$} from './ui.js?v=13';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
 
@@ -139,8 +139,8 @@ export function createReaderExperience(ctx){
  function themeName(key){return({light:tr('Light','Terang'),dark:tr('Dark','Gelap'),system:tr('System','Sistem'),sepia:'Sepia',paper:tr('Paper','Kertas'),green:tr('Green','Hijau'),custom:tr('Custom','Kustom')})[key]||tr('Light','Terang');}
  function themeControls(){
   const d=pref(),selected=ctx.prefs().themeMode||'light';draftInk=d.customTextColor;draftPaper=d.customBackgroundColor;
-  const glyph={light:'sun',dark:'moon',system:'device',sepia:'sepia',paper:'paper',green:'leaf',custom:'palette'};
-  const chip=key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(90deg,#eef2f6 50%,#11161c 50%)':d.customBackgroundColor,text:d.customTextColor};return `<button class="global-theme-chip ${key==='custom'?'global-theme-custom ':''}${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span class="theme-option-label">${themeName(key)}${key==='custom'?`<small>${tr('Text and background','Teks dan latar')}</small>`:''}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;};
+  const glyph={light:'sun',dark:'moon',system:'systemTheme',sepia:'sepia',paper:'paper',green:'leaf',custom:'palette'};
+  const chip=key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(145deg,rgba(var(--accent-rgb),.18),rgba(var(--glass),.18))':d.customBackgroundColor,text:key==='system'?'var(--text)':d.customTextColor};return `<button class="global-theme-chip ${key==='custom'?'global-theme-custom ':''}${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span class="theme-option-label">${themeName(key)}${key==='custom'?`<small>${tr('Text and background','Teks dan latar')}</small>`:''}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;};
   const group=(id,title,keys)=>`<section class="theme-option-group" role="group" aria-labelledby="${id}"><h3 id="${id}">${title}</h3><div class="global-theme-grid">${keys.map(chip).join('')}</div></section>`;
   return `<div class="theme-options"><p class="theme-global-caption">${tr('Choose one theme for the app and reader.','Pilih satu tema untuk aplikasi dan reader.')}</p>${group('theme-display-heading',tr('Display mode','Mode tampilan'),['light','dark','system'])}${group('theme-palette-heading',tr('More palettes','Palet tambahan'),['sepia','paper','green'])}${chip('custom')}</div>`;
  }
