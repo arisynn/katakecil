@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.1">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.3">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-**Rilis stable terbaru: [1.2.1](https://github.com/arisynn/katakecil/releases/tag/v1.2.1)**, sesuai persetujuan pemilik. Memuat carousel melingkar, respons tekan, tinggi buku seragam dan glow warna sampul, dengan loading wordmark KataKecil yang tetap dipertahankan. [Catatan rilis](docs/releases/v1.2.1.md).
+**Rilis stable terbaru: [1.2.3](https://github.com/arisynn/katakecil/releases/tag/v1.2.3)**, sesuai persetujuan pemilik. Memuat karusel sampul berlapis, pengaturan kebeningan/blur/ambient, serta palet Pearl dan charcoal. Halaman buku tetap polos dan loading wordmark KataKecil dipertahankan. [Catatan rilis](docs/releases/v1.2.3.md).
 
 **Status Play Protect:** pemilik mengonfirmasi pada 9 November 2026 bahwa blokir sudah teratasi pada pengujiannya. Status ini berasal dari laporan pemilik; tidak ada uji ulang HP atau keputusan Google yang diperiksa pada sesi ini. [Riwayat pemeriksaan](docs/play-protect-review.md).
 
@@ -34,11 +34,11 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 4,9 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.1` · build `9` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.3` · build `11` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Status terbaru:** 1.2.1 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
+**Status terbaru:** 1.2.3 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
 
 ## Yang bisa dilakukan
 

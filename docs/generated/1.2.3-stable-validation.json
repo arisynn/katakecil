@@ -1,0 +1,41 @@
+{
+  "version": "1.2.3",
+  "versionCode": 11,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.3",
+  "checks": {
+    "webHelperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 12,
+    "nodeFailures": 0,
+    "fullSuiteRerun": false,
+    "androidUnitTestsRerun": false,
+    "androidLintReleaseRun": false
+  },
+  "priorWebValidation": {
+    "sourceRevision": "3b6a032565907dae76481882c4fee627983ca27f",
+    "report": "docs/generated/ambient-glow-web.json",
+    "targetedNodeTests": 31,
+    "quickChromium": "passed; mocked catalog/episodes"
+  },
+  "artifact": {
+    "version": "1.2.3",
+    "versionCode": 11,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.3-Karisyono.apk",
+    "apkBytes": 4933990,
+    "apkSha256": "2d4d88c909991293f550d8369770bf4c3bbba8acee0c9a055f2fead01f0b9308",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 108,
+    "skeletonRemoved": true,
+    "classicLoadingLogoPackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false
+  },
+  "physicalDeviceTested": false
+}

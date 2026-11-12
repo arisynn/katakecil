@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.3 Stable — Pengaturan kaca dan ambient glow (12 November 2026)
+
+- Rilis APK versionCode 11 dengan package dan sertifikat Karisyono yang sama.
+- Sertakan pembaruan Library 1.2.2, pengaturan kebeningan/blur/ambient, palet Pearl/charcoal dan pelestarian warna kertas baca.
+- Default kaca 75%, blur 20 px dan ambient 60%; pratinjau, reset, persistensi dan backup tersedia dalam APK.
+- Build singkat `--skip-qa` dengan verifikasi signature, alignment, metadata, checksum dan aset web. [Catatan rilis serta daftar uji HP](docs/releases/v1.2.3.md).
+
 ## Pengembangan web — Ambient glow dan palet kaca (12 November 2026)
 
 - Tambahkan dua gradasi ambient statis yang mengikuti aksen UI dan slider Ambient glow 0–100%, default 60%; nilai 0 mematikan ambient. Glow lokal sampul tetap mengikuti warna buku.
