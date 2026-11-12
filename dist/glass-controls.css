@@ -1,0 +1,26 @@
+/* The panel owns the blur; its small controls do not add another white pane. */
+body .settings-surface .secondary,body .dialog .secondary,body .app-picker .secondary,body .glass .secondary{background-color:transparent}
+body .glass-settings-dialog{width:min(420px,100%)}
+.glass-settings{display:grid;gap:20px}.glass-settings .dialog-actions{margin-top:0}
+.glass-preview{position:relative;min-height:144px;overflow:hidden;border-radius:17px;background:var(--bg);isolation:isolate}
+.glass-preview-orb{position:absolute;width:125px;height:125px;border-radius:50%;background:var(--accent);opacity:.55;left:-12px;top:-22px}
+.glass-preview-orb.second{background:#d09a69;left:auto;right:-6px;top:58px;width:154px;height:154px}
+body .glass-preview-panel{position:absolute;inset:26px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-radius:15px;backdrop-filter:blur(var(--g-blur));-webkit-backdrop-filter:blur(var(--g-blur))}
+.glass-preview-panel strong{display:block;font-size:17px}.glass-preview-panel small{display:block;font-size:11px;margin-top:4px}
+body .glass-preview-action{background:rgba(var(--accent-rgb),var(--g-fill-alpha));color:var(--g-action-ink);min-height:36px;padding:8px 16px;font-size:12px}
+.glass-range label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:12px}
+.glass-range output,#glass-summary{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.glass-range input{display:block;width:100%;height:6px;margin:12px 0;touch-action:pan-y}
+.glass-range-hints{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:10px}
+@media(min-width:900px) and (min-height:540px){
+ .library-shell .shelf-action{background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .library-shell .shelf-action .reading-status{background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+@media(orientation:landscape) and (max-height:480px){
+ body .glass-settings-dialog{width:min(620px,100%)}.glass-settings{grid-template-columns:1fr 1fr;gap:14px 22px}.glass-preview{display:none}.glass-settings .dialog-actions{grid-column:1/-1}.glass-range label{margin-bottom:8px}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ body :is(.glass,.settings-surface,.dialog,.app-picker,.read-button,.primary,.library-header-actions,.shelf-navigation,.reading-status){background:var(--surface)!important;color:var(--text)!important}
+ body .reader-peek-control::before{background:var(--surface)!important}
+ body .library-shell .shelf{background:var(--surface)}
+}

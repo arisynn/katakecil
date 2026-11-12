@@ -1,0 +1,69 @@
+{
+  "scope": "Web Liquid Glass controls based on main df7b0eb",
+  "defaults": {
+    "glassTransparency": 75,
+    "glassBlur": 20
+  },
+  "apkBuilt": false,
+  "workflowDispatched": false,
+  "physicalDeviceTested": false,
+  "checks": {
+    "helperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 27,
+    "nodeFailures": 0
+  },
+  "browser": {
+    "scope": "Quick Chromium with mock catalog and episode content",
+    "sliderDrag": 19,
+    "defaultsAndReset": true,
+    "extremes": true,
+    "reloadAndCommitOnClose": true,
+    "actionDefault": {
+      "color": "rgb(21, 25, 24)",
+      "background": "rgba(84, 117, 108, 0.25)",
+      "blur": "blur(20px) saturate(1.6)"
+    },
+    "carouselTouchSwipe": true,
+    "crossTabAndReaderPosition": true,
+    "viewports": [
+      {
+        "width": 320,
+        "height": 568,
+        "scroll": false,
+        "dialogWidth": 300,
+        "visible": true
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "scroll": false,
+        "dialogWidth": 617,
+        "visible": true
+      },
+      {
+        "width": 1280,
+        "height": 800,
+        "scroll": false,
+        "dialogWidth": 420,
+        "visible": true
+      }
+    ],
+    "darkAndReducedMotion": true,
+    "pageErrors": []
+  },
+  "customAndFallback": {
+    "customPalette": {
+      "background": "rgba(18, 48, 71, 0.25)",
+      "blur": "blur(20px) saturate(1.8)",
+      "opacity": "1"
+    },
+    "fallbackCssBranchForced": true,
+    "fallback": {
+      "background": "rgb(32, 36, 33)",
+      "color": "rgb(221, 220, 212)"
+    },
+    "pageErrors": []
+  }
+}

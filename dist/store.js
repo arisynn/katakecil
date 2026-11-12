@@ -1,11 +1,13 @@
 import {readerDefaults,migrateReaderPreferences} from './advanced-reader.js?v=16';
-export const DEFAULTS = { ...readerDefaults, glassBlur:20, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.6, margin:52, spreadMode:'single', pageAnimation:'fade', accentColor:'#54756c', uiLanguage:'en' };
+import {GLASS_DEFAULTS,normalizeGlassPreferences} from './glass-preferences.js?v=1';
+export const DEFAULTS = { ...readerDefaults, ...GLASS_DEFAULTS, glassOpacity:.68, themeMode:'light', ambientLuxThreshold:45, lux:250, fontFamily:'Lora', fontSize:19, lineHeight:1.6, margin:52, spreadMode:'single', pageAnimation:'fade', accentColor:'#54756c', uiLanguage:'en' };
 const safeRead = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 export let storageHealthy = true;
 export function writeLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { storageHealthy = false; return false; } }
 let settings = safeRead('lumina_device_settings', {});
 export const deviceId = settings.deviceId || crypto.randomUUID();
 export let preferences = { ...DEFAULTS, ...settings, ...migrateReaderPreferences(settings), deviceId };
+preferences={...preferences,...normalizeGlassPreferences(preferences)};
 if(preferences.schemaVersion!==2){preferences={...preferences,schemaVersion:2,spreadMode:'single',themeMode:preferences.themeMode==='auto-sensor'?'system':preferences.themeMode};}
 if(!/^#[0-9a-f]{6}$/i.test(preferences.accentColor))preferences.accentColor=DEFAULTS.accentColor;
 // Upgrade the previous automatic Indonesian default once; later user choices remain explicit.
@@ -62,7 +64,7 @@ try { broadcast = new BroadcastChannel('lumina-local-sync'); } catch { /* The st
 const callbacks = new Set();
 export const onSync = (callback) => callbacks.add(callback);
 function receive({kind, payload}) {
-  if (kind === 'preferences') preferences = payload;
+  if (kind === 'preferences') preferences = {...payload,...normalizeGlassPreferences(payload)};
   if (kind === 'progress') progress = {...progress, [payload.bookId]:payload};
   if (kind === 'annotation') {removedAnnotations.delete(payload.id);annotations=mergeAnnotations(annotations,[payload]);}
   if (kind === 'delete-annotation') {removedAnnotations.add(payload);annotations = annotations.filter(a => a.id !== payload);}
@@ -76,7 +78,7 @@ window.addEventListener('storage', event => {
 });
 function storageFailure(){window.dispatchEvent(new window.CustomEvent('katakecil-storage-failure'));}
 function emit(kind,payload) { try { broadcast?.postMessage({kind,payload}); } catch {} }
-export function updatePreferences(change) { preferences={...preferences,...change};writeLocal('lumina_device_settings',preferences);emit('preferences',preferences); }
+export function updatePreferences(change) { preferences={...preferences,...change,...normalizeGlassPreferences({...preferences,...change})};writeLocal('lumina_device_settings',preferences);emit('preferences',preferences); }
 // Only controls exposed by the Text and Layout reader tabs belong to comfort reset.
 export function resetReadingPreferences(){
  const keys=['fontFamily','fontSize','fontWeight','lineHeight','paragraphSpacing','letterSpacing','paragraphIndent','textAlign','readingMode','spreadMode','pageAnimation','contentPosition','marginHorizontal','marginVertical','readerWidth','brightness','orientation','tapNavigation','wakeLock'];
@@ -141,7 +143,7 @@ export async function restoreBackup(backup,{restorePreferences=false}={}) {
  for(const row of writes){removedAnnotations.delete(row.id);emit('annotation',row);}
  for(const row of progressWrites)emit('progress',row);
  if(restorePreferences){
-  const next={...preferences,...backup.preferences,deviceId};
+  const merged={...preferences,...backup.preferences},next={...merged,...normalizeGlassPreferences(merged),deviceId};
   if(!writeLocal('lumina_device_settings',next))throw Error('Reading data was imported, but settings could not be saved.');
   preferences=next;emit('preferences',preferences);
  }

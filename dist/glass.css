@@ -1,31 +1,31 @@
 /* Adapted from the user-provided kaca.css. One surface per panel; global app palettes. */
-body{--g-ink:var(--text);--g-accent:var(--accent);--g-fill:rgba(var(--glass),.58);--g-panel:rgba(var(--glass),.86);--g-edge:rgba(var(--glass),.68);--g-hi:#ffffffb8;--g-shadow:#193c2e24;--g-blur:18px;--g-lens-top:#ffffff61;--g-lens-bot:#ffffff14}
-body[data-theme=dark]{--g-fill:rgba(var(--glass),.68);--g-panel:rgba(var(--glass),.93);--g-edge:#ffffff24;--g-hi:#ffffff38;--g-shadow:#0007;--g-lens-top:#ffffff1c;--g-lens-bot:#ffffff06}
+body{--g-ink:var(--text);--g-accent:var(--accent);--g-fill:rgba(var(--glass),var(--g-fill-alpha,.25));--g-panel:rgba(var(--glass),var(--g-panel-alpha,.25));--g-edge:rgba(var(--glass),var(--g-fill-alpha,.25));--g-hi:#ffffffb8;--g-shadow:#193c2e18;--g-blur:20px;--g-lens-top:#ffffff16;--g-lens-bot:#ffffff06}
+body[data-theme=dark]{--g-fill:rgba(var(--glass),var(--g-fill-alpha,.25));--g-panel:rgba(var(--glass),var(--g-panel-alpha,.25));--g-edge:#ffffff24;--g-hi:#ffffff38;--g-shadow:#0007;--g-lens-top:#ffffff1c;--g-lens-bot:#ffffff06}
 /* Shared panels replace the older conflicting glass declarations. */
 body .glass,body .settings-surface,body .dialog,body .app-picker{background:linear-gradient(145deg,#ffffff0c,transparent 65%),var(--g-fill);border:1px solid var(--g-edge);backdrop-filter:blur(var(--g-blur)) saturate(1.6);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.6);box-shadow:inset 0 1px 0 var(--g-hi),0 12px 30px -12px var(--g-shadow);color:var(--g-ink);isolation:isolate}
 body .glass::before{content:none}
-body .dialog,body .app-picker{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel);--g-blur:22px}
-body .settings-surface{--g-blur:16px}
-body[data-palette=custom]{--g-panel:var(--paper)}
+body .dialog,body .app-picker{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel)}
+
+
 body :is(.overlay-backdrop,.app-picker-backdrop){backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(16,28,23,.18)}
 /* Small controls share their parent's tint instead of blurring it a second time. */
-body :is(.app-select-trigger,.app-color-trigger,.secondary,.header-back,.comfort-reset,.tool-grid button,.text-input,.page-jump input){background:rgba(var(--glass),.34);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff24;backdrop-filter:none;-webkit-backdrop-filter:none}
-body :is(.library-header .icon-button,.reader-toolbar .icon-button,.dialog-heading .icon-button,.app-picker-heading .icon-button){background:rgba(var(--glass),.35);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38}
-body .read-button,body .dialog .primary,body .tts-player .primary{background:linear-gradient(155deg,#ffffff16,transparent 70%),var(--accent);box-shadow:inset 0 1px 0 #ffffff40,0 8px 22px -12px var(--g-shadow);border:1px solid #ffffff24}
+body :is(.app-select-trigger,.app-color-trigger,.secondary,.header-back,.comfort-reset,.tool-grid button,.text-input,.page-jump input){background:transparent;border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff24;backdrop-filter:none;-webkit-backdrop-filter:none}
+body :is(.library-header .icon-button,.reader-toolbar .icon-button,.dialog-heading .icon-button,.app-picker-heading .icon-button){background:transparent;border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38}
+body .read-button,body .dialog .primary,body .tts-player .primary{background:linear-gradient(155deg,#ffffff08,transparent 70%),rgba(var(--accent-rgb),var(--g-fill-alpha,.25));color:var(--g-action-ink,var(--text));box-shadow:inset 0 1px 0 #ffffff40,0 8px 22px -12px var(--g-shadow);border:1px solid #ffffff24}
 /* A bar and lens are siblings. Interactive labels exist only once, above both. */
 body .liquid-tabs{position:relative;isolation:isolate;background:transparent;border:0;border-radius:17px;padding:4px;gap:4px;overflow:visible;--lens-x:4px;--lens-y:4px;--lens-w:0px;--lens-h:35px}
-.liquid-tabs::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(var(--glass),.15);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38;pointer-events:none;z-index:-2}
-.glass-tab-lens{position:absolute;left:0;top:0;width:var(--lens-w);height:var(--lens-h);transform:translate(var(--lens-x),var(--lens-y));border-radius:13px;pointer-events:none;z-index:-1;background:linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),.09);border:1px solid var(--g-edge);box-shadow:inset 0 1px 1px var(--g-hi),inset 0 -5px 10px rgba(var(--accent-rgb),.07),0 4px 14px -8px var(--g-shadow);transition:transform .24s cubic-bezier(.25,.85,.25,1),width .24s cubic-bezier(.25,.85,.25,1),height .24s cubic-bezier(.25,.85,.25,1)}
+.liquid-tabs::before{content:"";position:absolute;inset:0;border-radius:inherit;background:transparent;border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 #ffffff38;pointer-events:none;z-index:-2}
+.glass-tab-lens{position:absolute;left:0;top:0;width:var(--lens-w);height:var(--lens-h);transform:translate(var(--lens-x),var(--lens-y));border-radius:13px;pointer-events:none;z-index:-1;background:linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),var(--g-fill-alpha,.25));border:1px solid var(--g-edge);box-shadow:inset 0 1px 1px var(--g-hi),inset 0 -5px 10px rgba(var(--accent-rgb),.07),0 4px 14px -8px var(--g-shadow);transition:transform .24s cubic-bezier(.25,.85,.25,1),width .24s cubic-bezier(.25,.85,.25,1),height .24s cubic-bezier(.25,.85,.25,1)}
 .glass-tab-lens::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from 200deg,#ffffffa6,rgba(var(--accent-rgb),.25),#f5addc40,#b0edf54d,#ffffff9e 55%,#ffffff38,#ffffffa6);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
 body .liquid-tabs>button{position:relative;min-width:0;z-index:1;border-radius:12px}
-body .liquid-tabs>button.active{background:transparent;box-shadow:none;color:var(--g-active-ink,var(--accent))}
+body .liquid-tabs>button.active{background:transparent;box-shadow:none;color:var(--g-action-ink,var(--text))}
 body .liquid-tabs>button.active::after{display:none}
 .liquid-tabs[data-lens-ready=false] .glass-tab-lens{transition:none}
 body .dialog .reader-tabs.liquid-tabs{padding:4px;gap:3px;margin-bottom:12px}
 body .segmented.liquid-tabs{padding:3px}
 /* Preserve slider capture/coordinates and the single expanded preview surface. */
 body .appearance-peeking>.dialog{background:transparent!important;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-body .reader-peek-control::before{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 var(--g-hi),0 12px 30px -12px var(--g-shadow);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6)}
+body .reader-peek-control::before{background:linear-gradient(145deg,#ffffff0a,transparent 65%),var(--g-panel);border:1px solid var(--g-edge);box-shadow:inset 0 1px 0 var(--g-hi),0 12px 30px -12px var(--g-shadow);backdrop-filter:blur(var(--g-blur)) saturate(1.6);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.6)}
 body .appearance-peeking{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .update-summary{font-size:11px;color:var(--muted);margin-left:auto;padding-inline:8px;text-align:right}
 .update-version{font-size:12px;color:var(--muted);margin:10px 0}.update-state{line-height:1.7;margin:12px 0}.update-notes{white-space:pre-wrap;font:inherit;font-size:12px;line-height:1.7;max-height:24dvh;overflow:auto;padding:12px;background:rgba(var(--glass),.16);border-radius:12px}.update-download{width:100%;accent-color:var(--accent)}.update-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.update-actions>button{flex:1}.update-privacy{font-size:11px;line-height:1.6;color:var(--muted);margin-top:16px}
@@ -45,31 +45,31 @@ body[data-theme] .reader-toolbar .icon-button:hover{background:rgba(var(--accent
 @media(prefers-reduced-motion:reduce){.glass-tab-lens{scale:1;transition:none!important}}
 
 /* ---------------------------------------------------------------------------
-   Liquid Glass optics. Surfaces read as thick, curved glass: a meniscus bevel
+   Liquid Glass optics. Light surfaces retain a thin meniscus bevel
    (bright upper lip, soft lower reflection, depth at the edges), a caustic spot
    that follows the pointer (--spot-x/--spot-y from press-feedback.js) and a thin
    specular rim. The reading canvas (.reading-page/.page-text) is never touched.
    Tints that follow the active cover are resolved per element, not on body.
    --------------------------------------------------------------------------- */
-body{--lg-specular-top:#ffffffe6;--lg-specular-bottom:#ffffff5c;--lg-caustic:#ffffff3d;--lg-inner-glow:#ffffff24;--lg-depth:#1023190f;--lg-rim-hi:#fffffff0;--lg-rim-lo:#ffffffa1;--lg-rim-tint:.3;--lg-edge-soft:rgba(var(--glass),.4);--lg-shadow-near:#1023190d}
-body[data-theme=dark]{--lg-specular-top:#ffffff4a;--lg-specular-bottom:#ffffff14;--lg-caustic:#ffffff12;--lg-inner-glow:#ffffff08;--lg-depth:#0000004d;--lg-rim-hi:#ffffff5c;--lg-rim-lo:#ffffff21;--lg-rim-tint:.4;--lg-edge-soft:#ffffff12;--lg-shadow-near:#00000038}
-body[data-theme=sepia]{--lg-specular-top:#fffaf0e6;--lg-caustic:#fff6e43d;--lg-rim-hi:#fffaf0f0;--lg-depth:#4e463b12}
-/* Custom palettes keep their solid, contrast-checked panels; only the bevel stays. */
+body{--lg-specular-top:#ffffff38;--lg-specular-bottom:#ffffff10;--lg-caustic:#ffffff0c;--lg-inner-glow:#ffffff05;--lg-depth:#1023190f;--lg-rim-hi:#ffffff66;--lg-rim-lo:#ffffff29;--lg-rim-tint:.18;--lg-edge-soft:rgba(var(--glass),.22);--lg-shadow-near:#1023190d}
+body[data-theme=dark]{--lg-specular-top:#ffffff1f;--lg-specular-bottom:#ffffff09;--lg-caustic:#ffffff06;--lg-inner-glow:#ffffff03;--lg-depth:#0000004d;--lg-rim-hi:#ffffff2e;--lg-rim-lo:#ffffff14;--lg-rim-tint:.22;--lg-edge-soft:#ffffff12;--lg-shadow-near:#00000038}
+body[data-theme=sepia]{--lg-specular-top:#fffaf038;--lg-caustic:#fff6e40c;--lg-rim-hi:#fffaf066;--lg-depth:#4e463b12}
+/* Custom palettes keep their chosen colors with the shared transparency. */
 body[data-palette=custom]{--lg-caustic:transparent;--lg-inner-glow:transparent}
 
 body .glass,body .settings-surface{
  background:radial-gradient(130% 90% at var(--spot-x,22%) var(--spot-y,-28%),var(--lg-caustic),transparent 60%),linear-gradient(180deg,#ffffff0d,transparent 42%),var(--g-fill);
  border-color:var(--lg-edge-soft);
  backdrop-filter:blur(var(--g-blur)) saturate(1.8) brightness(1.03);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.8) brightness(1.03);
- box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -1px 1px -.5px var(--lg-specular-bottom),inset 0 -12px 20px -16px var(--lg-depth),inset 0 0 16px var(--lg-inner-glow),0 1px 2px var(--lg-shadow-near),0 14px 34px -14px var(--g-shadow);
+ box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -1px 0 var(--lg-specular-bottom),inset 0 -12px 20px -16px var(--lg-depth),inset 0 0 16px var(--lg-inner-glow),0 1px 2px var(--lg-shadow-near),0 14px 34px -14px var(--g-shadow);
 }
 body .dialog,body .app-picker{
  background:radial-gradient(120% 70% at var(--spot-x,20%) var(--spot-y,-20%),var(--lg-caustic),transparent 58%),linear-gradient(180deg,#ffffff0b,transparent 36%),var(--g-panel);
  border-color:var(--lg-edge-soft);
  backdrop-filter:blur(var(--g-blur)) saturate(1.8);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.8);
- box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -1px 1px -.5px var(--lg-specular-bottom),inset 0 0 22px var(--lg-inner-glow),0 1px 2px var(--lg-shadow-near),0 22px 48px -18px var(--g-shadow);
+ box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -1px 0 var(--lg-specular-bottom),inset 0 0 22px var(--lg-inner-glow),0 1px 2px var(--lg-shadow-near),0 12px 28px -18px var(--g-shadow);
 }
-body .reader-peek-control::before{box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -1px 1px -.5px var(--lg-specular-bottom),inset 0 0 22px var(--lg-inner-glow),0 22px 48px -18px var(--g-shadow)}
+body .reader-peek-control::before{box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -1px 0 var(--lg-specular-bottom),inset 0 0 22px var(--lg-inner-glow),0 12px 28px -18px var(--g-shadow)}
 
 /* Floating reader pills get the prismatic rim. They float over the page and never scroll. */
 body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-navigation).glass::after{
@@ -77,16 +77,16 @@ body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-n
  background:linear-gradient(160deg,var(--lg-rim-hi),transparent 32%,transparent 62%,rgba(var(--accent-rgb),var(--lg-rim-tint)) 84%,var(--lg-rim-lo));
  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
 }
-body :is(.reader-toolbar,.reader-controls).glass{box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -1px 1px -.5px var(--lg-specular-bottom),inset 0 -12px 20px -16px var(--lg-depth),inset 0 0 16px var(--lg-inner-glow),0 2px 6px var(--lg-shadow-near),0 18px 40px -16px var(--g-shadow)}
+body :is(.reader-toolbar,.reader-controls).glass{box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -1px 0 var(--lg-specular-bottom),inset 0 -12px 20px -16px var(--lg-depth),inset 0 0 16px var(--lg-inner-glow),0 2px 6px var(--lg-shadow-near),0 18px 40px -16px var(--g-shadow)}
 
 /* Tab lens behaves like a droplet: bright crown, darker belly, chromatic lip. */
 .glass-tab-lens{
- background:radial-gradient(90% 70% at 50% 0%,var(--lg-specular-top),transparent 62%),linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),.1);
+ background:radial-gradient(90% 70% at 50% 0%,var(--lg-specular-top),transparent 62%),linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),var(--g-fill-alpha,.25));
  border-color:var(--lg-edge-soft);
- box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -2px 4px -1px var(--lg-specular-bottom),inset 0 -6px 12px -4px rgba(var(--accent-rgb),.1),0 1px 2px var(--lg-shadow-near),0 6px 16px -8px var(--g-shadow);
+ box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -2px 4px -1px var(--lg-specular-bottom),inset 0 -6px 12px -4px rgba(var(--accent-rgb),.1),0 1px 2px var(--lg-shadow-near),0 6px 16px -8px var(--g-shadow);
 }
-body[data-theme=dark] .glass-tab-lens{background:radial-gradient(90% 70% at 50% 0%,#ffffff1f,transparent 62%),linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),.14)}
-.liquid-tabs[data-lens-dragging=true] .glass-tab-lens{box-shadow:inset 0 1.5px 1px -.5px var(--lg-specular-top),inset 0 -2px 4px -1px var(--lg-specular-bottom),inset 0 -6px 12px -4px rgba(var(--accent-rgb),.14),0 2px 4px var(--lg-shadow-near),0 10px 22px -8px var(--g-shadow)}
+body[data-theme=dark] .glass-tab-lens{background:radial-gradient(90% 70% at 50% 0%,#ffffff1f,transparent 62%),linear-gradient(180deg,var(--g-lens-top),var(--g-lens-bot)),rgba(var(--accent-rgb),var(--g-fill-alpha,.25))}
+.liquid-tabs[data-lens-dragging=true] .glass-tab-lens{box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -2px 4px -1px var(--lg-specular-bottom),inset 0 -6px 12px -4px rgba(var(--accent-rgb),.14),0 2px 4px var(--lg-shadow-near),0 10px 22px -8px var(--g-shadow)}
 
 @supports not ((mask-composite:exclude) or (-webkit-mask-composite:xor)){body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-navigation).glass::after{display:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body .glass,body .settings-surface,body .dialog,body .app-picker{background:var(--surface)}}

@@ -2,6 +2,14 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Pengaturan Liquid Glass (12 November 2026)
+
+- Tambahkan dua slider global: Kebeningan 0–100% (default 75%) dan Blur 0–40 px (default 20 px), dengan pratinjau langsung dan reset khusus kaca.
+- Hubungkan panel, kapsul Library/Reader, tab dan tombol Baca ke token bersama; tipiskan pantulan serta kurangi lapisan latar yang bertumpuk. Teks tombol memilih warna kontras secara otomatis.
+- Simpan pengaturan antarsesi/antartab dan dalam backup; perubahan kaca tidak mengubah pagination, posisi baca atau reset kenyamanan teks.
+- Pertahankan desain Library terbaru, warna sampul dan loading lama. Uji cepat 27 tes terarah serta Chromium; tidak membangun APK atau menjalankan workflow release.
+- [Pengaturan, kompatibilitas dan daftar uji](docs/liquid-glass-settings.md).
+
 ## 1.2.2 Stable — Liquid Glass, karusel sampul berlapis, dan panggung desktop (11 November 2026)
 
 - Rilis versionCode 10 dengan package `id.karisyono.katakecil` dan signer Karisyono yang sama agar mendukung update langsung di dalam aplikasi.

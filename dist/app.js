@@ -1,3 +1,5 @@
+import {createGlassSettings} from './glass-settings.js?v=1';
+import {applyGlassAppearance} from './glass-preferences.js?v=1';
 import {installPressFeedback} from './press-feedback.js?v=2';
 import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=6';
 import {createLocalBooks} from './local-books.js?v=1';
@@ -18,13 +20,13 @@ import {relocateAnchor} from './anchors.js?v=5';
 import {paginateToFit} from './pagination.js?v=8';
 import {CATALOG_URL,CATALOG_CACHE_KEY} from './config.js?v=8';
 import {$,$$,escapeHTML,icon,actionButton,brandMark} from './ui.js?v=12';
-import * as Store from './store.js?v=20';
-import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=12';
+import * as Store from './store.js?v=21';
+import {setUiLanguage,startUiTranslations,translatePhrase} from './i18n.js?v=13';
 import {createTextSelection,wordBounds} from './text-selection.js?v=8';
 import {normalizePublishedCatalog,PublishedReader,findPage,makeAnchor,prepareChapters,globalPalette,contrast} from './advanced-reader.js?v=16';
 import {createReaderExperience} from './reader-experience.js?v=29';
 import {isNativeApp,systemDark,initializeNativeTheme,rememberLaunchAppearance,finishNativeLaunch,nativeUpdates,nativeSpeechDriver,createNativeWakeLock,saveJSON,saveFile,toggleNativeFullscreen,nativeFullscreen,resetNativeScreen,setReaderOrientation,updateSystemTheme,listenNativeLifecycle,installBackNavigation,listenIncomingEpub} from './platform.js?v=6';
-import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=2';
+import {createBackup,parseBackup,BACKUP_MAX_BYTES} from './device-backup.js?v=3';
 const app=$('#app'),overlay=$('#overlay-root');
 const ACTIVE_READER_KEY='katakecil_active_reader';
 const rememberReader=id=>Store.writeLocal(ACTIVE_READER_KEY,id?{bookId:id}:null);
@@ -71,6 +73,7 @@ const publisher=createPublisher({language:()=>p().uiLanguage,active:()=>view==='
  mount:html=>{disconnectCarousel();currentBook=null;document.body.classList.remove('is-reading','is-library');document.title='Publisher · KataKecil';app.innerHTML=shell(html,'publisher');},
  show:showOverlay,close:closeOverlay,heading:dialogHeading,toast,saveFile,updated:()=>{void loadCatalog();}
 });
+const glassSettings=createGlassSettings({document,prefs:p,language:()=>p().uiLanguage,save:Store.updatePreferences,show:showOverlay,heading:dialogHeading,apply:applyPreferences,paint:value=>applyGlassAppearance(document.body,{...p(),...value},globalPalette(p(),systemDark()))});
 let publicationCheck=null;
 const selectedBook=()=>books.find(b=>b.id===activeLibraryId)||books[0];
 function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3000);}
@@ -84,6 +87,7 @@ function applyPreferences(){
  s.setProperty('--accent-ink',luminance>.35?'#151918':'#ffffff');
  s.setProperty('--reader-font',['DM Sans','Plus Jakarta Sans'].includes(p().fontFamily)?'system-ui,sans-serif':"'Lora',Georgia,serif");
  s.setProperty('--reader-size',`${Math.max(14,Math.min(32,p().fontSize))}px`);s.setProperty('--reader-line',String(Math.max(1.4,Math.min(2,p().lineHeight))));
+ applyGlassAppearance(document.body,{...p(),...glassSettings.value()},palette);
  $('meta[name="theme-color"]').content=palette.background;
  features.apply();void updateSystemTheme(palette.dark).catch(()=>{});void rememberLaunchAppearance(p().themeMode||'light',palette.background,accent,palette.dark).catch(()=>{});
 }
@@ -135,6 +139,7 @@ function renderSettings(){
  <section class="settings-group"><h2>${icon('appearance')} Tampilan dan bahasa</h2><div class="settings-surface">
  <div class="setting-row"><label class="setting-label" for="app-language">${icon('globe')}Bahasa aplikasi</label><select id="app-language" class="language-select" aria-label="Bahasa aplikasi"><option value="id" ${p().uiLanguage!=='en'?'selected':''}>Bahasa Indonesia</option><option value="en" ${p().uiLanguage==='en'?'selected':''}>English</option></select></div>
  <button class="settings-link global-theme-link" data-action="global-theme"><span class="setting-label">${icon('appearance')}Tema</span><span id="global-theme-summary">${({light:'Terang',dark:'Gelap',system:'Sistem',sepia:'Sepia',paper:'Kertas',green:'Hijau',custom:'Kustom'})[p().themeMode]||'Terang'}</span>${icon('chevron')}</button>
+ <button class="settings-link" data-action="glass-settings"><span class="setting-label">${icon('sliders')}Liquid Glass</span><span class="settings-value" id="glass-summary">${p().glassTransparency}% · ${p().glassBlur} px</span>${icon('chevron')}</button>
  <div class="setting-row accent-row"><span class="setting-label">${icon('palette')}Warna aksen</span><div class="accent-options">${accents.map(([color,name])=>`<button class="accent-swatch ${p().accentColor===color?'selected':''}" style="--swatch:${color}" data-action="accent" data-value="${color}" aria-label="Aksen ${name}" aria-pressed="${p().accentColor===color}">${icon('check')}</button>`).join('')}<label class="custom-accent" title="Pilih warna sendiri">${icon('plus')}<input type="color" id="accent-custom" aria-label="Warna aksen pilihan" value="${p().accentColor}"></label></div></div></div></section>
  <section class="settings-group"><h2>${icon('bookOpen')} Membaca</h2><div class="settings-surface"><div class="setting-row"><span class="setting-label">${icon('type')}Huruf</span><div class="segmented">${[['Lora','Serif'],['Plus Jakarta Sans','Sans']].map(([v,l])=>`<button data-action="font" data-value="${v}" class="${p().fontFamily===v?'active':''}">${icon('type')}<span>${l}</span></button>`).join('')}</div></div><div class="setting-row font-range"><label for="settings-font-size"><span class="setting-label">${icon('textSize')}Ukuran teks</span><output id="font-size-output">${p().fontSize}</output></label><input type="range" id="settings-font-size" min="14" max="32" step="1" value="${p().fontSize}" aria-label="Ukuran teks"></div></div></section>
  <section class="settings-group"><h2>${icon('shield')} Data dan penyimpanan</h2><div class="settings-surface">
@@ -305,6 +310,7 @@ function goToPage(index,source='user'){if(!currentBook||reflowing||!Number.isInt
 function setReaderMode(mode){if(!currentBook)return;if(mode!=='reading')readerZoom.reset();setTimeout(()=>features.paintSpeech(),340);readerMode=mode;const shell=$('.reader-shell');shell.dataset.mode=mode;const page=$('#reading-page'),bar=$('.reader-toolbar'),controls=$('.reader-controls');if(mode==='controls'&&page&&bar&&controls){const height=page.offsetHeight||innerHeight,top=(bar.offsetTop||12)+(bar.offsetHeight||50)+14,bottom=(controls.offsetTop||height-145)-14,scale=Math.min(.9,Math.max(.3,(bottom-top)/height));shell.style.setProperty('--preview-scale',String(scale));shell.style.setProperty('--preview-offset',((top+bottom)/2-height/2)+'px');}$$('.reader-toolbar,.reader-controls').forEach(el=>{el.inert=mode==='reading';el.setAttribute('aria-hidden',String(mode==='reading'));});if(mode==='reading'&&document.activeElement?.closest('.reader-controls,.reader-toolbar'))document.activeElement.blur();}
 function toggleBookmark(){const page=pages[pageIndex];if(!page)return;const existing=bookmarked(page);if(existing){Store.deleteAnnotation(existing.id);toast('Bookmark dihapus.');}else{Store.saveAnnotation({id:crypto.randomUUID(),bookId:currentBook.id,type:'bookmark',chapterIndex:features.position().chapterIndex,pageIndex,charOffset:features.position().start,anchor:features.anchorMetadata(features.position().chapterIndex,features.position().start,Math.min(currentBook.chapters[features.position().chapterIndex].text.length,features.position().start+80)),label:'',color:'sapphire',createdAt:new Date().toISOString()});toast('Halaman ditandai.');}updatePage();}
 function showOverlay(html){
+ glassSettings.close();
  popups.close(false,true);
  if(!overlay.firstChild)previousFocus=document.activeElement;
  overlay.innerHTML=`<div class="overlay-backdrop" data-backdrop="true"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">${html}</section></div>`;
@@ -313,11 +319,12 @@ function showOverlay(html){
  document.body.classList.add('sheet-open');requestAnimationFrame(()=>{if(dialog?.isConnected&&!dialog.contains(document.activeElement))dialog.focus({preventScroll:true});});
 }
 function closeOverlay(immediate=false){
+ glassSettings.close();
  popups.close(false,immediate);speed.close();features.closePanel();importGeneration++;pendingImport=null;finishImportPreview?.();finishImportPreview=null;const layer=overlay.firstChild,focus=previousFocus;
  const cleanup=()=>{if(layer&&overlay.firstChild!==layer){layer.remove();return;}overlay.innerHTML='';document.body.classList.remove('sheet-open');focus?.focus?.({preventScroll:true});previousFocus=null;editingAnnotation=null;noteDraftRange=null;pendingBackup=null;if(deferredEditorReflow){deferredEditorReflow=false;if(currentBook)void reflow().catch(e=>toast(e.message));}};
  return leaveSheet(layer,cleanup,immediate);
 }
-function dialogHeading(title){const symbol=/reset/i.test(title)?'refresh':/catatan|notes/i.test(title)?'edit':/bookmark/i.test(title)?'bookmark':/tampilan|appearance|theme|tema/i.test(title)?'appearance':/baca nyaring|read aloud/i.test(title)?'speaker':/pencarian|search/i.test(title)?'search':/alat kata|word tools/i.test(title)?'globe':/alat baca|reading tools/i.test(title)?'sliders':/impor|import/i.test(title)?'upload':/perangkat|device|tentang|about/i.test(title)?'device':'bookOpen';return `<div class="dialog-heading"><h2 id="dialog-title">${icon(symbol)}${title}</h2>${actionButton('close','close','Tutup')}</div>`;}
+function dialogHeading(title){const symbol=/reset/i.test(title)?'refresh':/catatan|notes/i.test(title)?'edit':/bookmark/i.test(title)?'bookmark':/tampilan|appearance|theme|tema/i.test(title)?'appearance':/baca nyaring|read aloud/i.test(title)?'speaker':/pencarian|search/i.test(title)?'search':/alat kata|word tools/i.test(title)?'globe':/alat baca|reading tools|liquid glass/i.test(title)?'sliders':/impor|import/i.test(title)?'upload':/perangkat|device|tentang|about/i.test(title)?'device':'bookOpen';return `<div class="dialog-heading"><h2 id="dialog-title">${icon(symbol)}${title}</h2>${actionButton('close','close','Tutup')}</div>`;}
 function removeSelection(){customSelection?.clear();selectedRange=null;$('.selection-popover')?.remove();window.getSelection()?.removeAllRanges();}
 function showSelectionToolbar(rect){
  $('.selection-popover')?.remove();const el=document.createElement('div');el.className='selection-popover glass';el.setAttribute('role','toolbar');el.setAttribute('aria-label','Highlight pilihan teks');
@@ -404,6 +411,7 @@ function navigateLibrary(){scrubber.finish();rememberReader(null);persistPositio
 async function handleAction(button,event){
  if(!button.closest('.liquid-tabs'))animateIcon(button.querySelector('svg'));
  if(speed.action(button))return;
+ if(glassSettings.action(button))return;
  if(button.dataset.action.startsWith('local-')){await localBooks.action(button);return;}
  if(publisher.action(button))return;
  if(features.action(button))return;
@@ -463,12 +471,12 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('pointerdown',event=>{if(event.pointerType!=='touch')pointerStart={x:event.clientX,y:event.clientY,at:performance.now()};else pointerStart=null;});
 document.addEventListener('input',event=>{
- if(speed.input(event.target))return;
+ if(speed.input(event.target)||glassSettings.input(event.target))return;
  const el=event.target;if(features.input(el))return;if(el.id==='accent-custom')setAccent(el.value);
  if(el.id==='settings-font-size'){Store.updatePreferences({fontSize:Number(el.value)});if($('#font-size-output'))$('#font-size-output').textContent=el.value;if(!currentBook)applyPreferences();}
 
 });
-document.addEventListener('change',event=>{const el=event.target;if(publisher.change(el)||features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='local-cover-input'&&el.files[0])localBooks.change(el.files[0]);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
+document.addEventListener('change',event=>{const el=event.target;if(glassSettings.change(el))return;if(publisher.change(el)||features.change(el))return;if(el.id==='app-language'&&['id','en'].includes(el.value)){Store.updatePreferences({uiLanguage:el.value,uiLanguageChosen:true});applyPreferences();}if(el.id==='settings-font-size'){applyPreferences();if(currentBook)reflow().catch(e=>toast(e.message));}if(el.id==='local-cover-input'&&el.files[0])localBooks.change(el.files[0]);if(el.id==='epub-input'&&el.files[0])importFile(el.files[0]);if(el.id==='backup-input'&&el.files[0])void previewBackup(el.files[0]);});
 // Keep HTML constraints intact, but present validation feedback in the app's glass toast.
 document.addEventListener('invalid',event=>{
  const field=event.target;if(!field.closest?.('.dialog,.app-picker'))return;
@@ -543,7 +551,7 @@ window.addEventListener('orientationchange',scheduleReadingResize);
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyPreferences);
 let lastTextPreferences=features.signature();
 Store.onSync((kind,payload)=>{
- if(kind==='preferences'){const signature=features.signature(),textChanged=signature!==lastTextPreferences;applyPreferences();if(currentBook&&textChanged){features.stopSpeech();reflow().catch(e=>toast(e.message));}if(view==='settings'&&!overlay.firstChild)renderSettings();}
+ if(kind==='preferences'){glassSettings.sync();const signature=features.signature(),textChanged=signature!==lastTextPreferences;applyPreferences();if(currentBook&&textChanged){features.stopSpeech();reflow().catch(e=>toast(e.message));}if(view==='settings'&&!overlay.firstChild)renderSettings();}
  else if(kind==='progress'&&currentBook&&(!payload||payload.bookId===currentBook.id)){if(customSelection.active||overlay.firstChild)return;const saved=payload||Store.progress[currentBook.id];if(saved){const i=pages.findIndex(pg=>pg.chapterIndex===saved.chapterIndex&&(saved.charOffset||0)>=pg.start&&(saved.charOffset||0)<pg.end);if(i>=0){pageIndex=i;features.setPosition({chapterIndex:saved.chapterIndex,start:saved.charOffset||0});updatePage();}}}
  else if(kind.includes('annotation')&&currentBook){if(!readerSelection()&&!editingDialog())updatePage();if($('#drawer-content'))$('#drawer-content').innerHTML=contentsBody();}
  else if(view==='library'&&$('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();
@@ -554,7 +562,7 @@ startUiTranslations(syncAppTitle);
 let appActive=document.visibilityState!=='hidden';
 function appActivity(active){
  if(appActive===active)return;appActive=active;
- if(!active){speed.pause();persistPosition();features.pauseSpeech();void Store.flush();}
+ if(!active){glassSettings.commit();speed.pause();persistPosition();features.pauseSpeech();void Store.flush();}
  else {void validatePublication();if(currentBook){void features.resumeScreen().catch(()=>{});void reflow().catch(e=>toast(e.message));}}
 }
 function canGoBack(){return !!($('.app-picker-backdrop:not([data-sheet-closing])')||overlay.firstChild||selectedRange||view!=='library');}
@@ -572,7 +580,7 @@ const navigation=installBackNavigation({window,canGoBack,back:appBack,native:isN
 new window.MutationObserver(()=>navigation.sync()).observe(app.parentElement||document.body,{childList:true,subtree:true});
 void listenNativeLifecycle({back:()=>{if(!canGoBack())return false;navigation.back();return true;},active:appActivity}).catch(e=>toast(e.message));
 document.addEventListener('visibilitychange',()=>appActivity(document.visibilityState==='visible'));
-window.addEventListener('pagehide',()=>{persistPosition();void Store.flush();});
+window.addEventListener('pagehide',()=>{glassSettings.commit();persistPosition();void Store.flush();});
 function syncVisibleViewport(){const viewport=window.visualViewport;if(!viewport)return;const style=document.documentElement.style;style.setProperty('--app-visible-height',viewport.height+'px');style.setProperty('--app-visible-top',viewport.offsetTop+'px');scheduleSheetFit(document);}
 window.visualViewport?.addEventListener('resize',syncVisibleViewport);
 window.visualViewport?.addEventListener('scroll',syncVisibleViewport);

@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Kebeningan dan blur Liquid Glass, pratinjau dan backup | [Pengaturan Liquid Glass](liquid-glass-settings.md) |
 | Rilis stable 1.2.1: efek tekan, loading lama dan glow carousel | [Android 1.2.1](releases/v1.2.1.md) |
 | Carousel sampul/rak melingkar dan daftar uji web | [Carousel Library](shelf-carousel-web.md) |
 | Rilis stable 1.2.0 dan pengelolaan EPUB pribadi | [Android 1.2.0](releases/v1.2.0.md) |
