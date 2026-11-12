@@ -27,9 +27,7 @@ if(env.HTTPS_PROXY||env.https_proxy){
  env.GRADLE_OPTS=[env.GRADLE_OPTS,...options].filter(Boolean).join(' ');
 }
 await run(java,['-version']);
-await run('npm',['run','build']);
-await run('npx',['cap','sync','android']);
-// Explicit release option for a user who takes responsibility for further QA.
+// Pure Kotlin Native + Jetpack Compose build (no Capacitor or WebView copy step).
 const tasks=debug?['assembleDebug']:process.argv.includes('--skip-qa')?['assembleRelease']:['testReleaseUnitTest','assembleRelease','lintRelease'];
 await run('./gradlew',['--no-daemon','--max-workers=2',...tasks],join(root,'android'));
 await mkdir(output,{recursive:true});
