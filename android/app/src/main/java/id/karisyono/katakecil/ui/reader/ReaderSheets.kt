@@ -28,7 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
+import id.karisyono.katakecil.ui.components.WebSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -122,10 +122,10 @@ fun ThisBookSheetDialog(
                 contentPadding = PaddingValues(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.84f)
+                    .heightIn(max = id.karisyono.katakecil.ui.components.webPanelHeight(168.dp))
                     .pointerInput(Unit) { detectTapGestures(onTap = {}) }
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -165,14 +165,15 @@ fun ThisBookSheetDialog(
                             "bookmarks" to I18n.t("Markah", "Bookmarks", lang)
                         ),
                         selectedTab = activeTab,
-                        onTabSelected = { activeTab = it }
+                        onTabSelected = { activeTab = it },
+                        iconNames = listOf("list", "quote", "notes", "bookmark"), vertical = true
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
                     if (activeTab == "contents") {
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth().heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             var lastArc = ""
@@ -186,7 +187,7 @@ fun ThisBookSheetDialog(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clip(RoundedCornerShape(14.dp))
-                                                .background(palette.accent.copy(alpha = 0.12f))
+                                                .background(Color.Transparent)
                                                 .clickable { collapsedArcs[arc] = !isCollapsed }
                                                 .padding(horizontal = 14.dp, vertical = 10.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -355,7 +356,7 @@ fun ThisBookSheetDialog(
 
                         if (filtered.isEmpty()) {
                             Box(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxWidth().heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -371,7 +372,7 @@ fun ThisBookSheetDialog(
                             }
                         } else {
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxWidth().heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 items(filtered, key = { it.id }) { item ->
@@ -544,521 +545,97 @@ fun ReadingAppearanceSheetDialog(
     onUpdateSettings: ((DeviceSettings) -> DeviceSettings) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val palette = LocalKataKecilPalette.current
     val lang = settings.uiLanguage
+    val palette = LocalKataKecilPalette.current
     var activeTab by remember { mutableStateOf("text") }
-    var isDraggingSlider by remember { mutableStateOf(false) }
-    var activeSliderSummary by remember { mutableStateOf("") }
-    var colorPickerMode by remember { mutableStateOf<String?>(null) } // "accent", "text", "bg"
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = if (isDraggingSlider) 0.02f else 0.35f))
-                .clickable(onClick = onDismiss),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            if (isDraggingSlider && activeSliderSummary.isNotBlank()) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 48.dp)
-                ) {
-                    GlassSurface(
-                        cornerRadius = 999.dp,
-                        elevated = true,
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp)
-                    ) {
-                        Text(
-                            text = activeSliderSummary,
-                            color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
+    var activeSlider by remember { mutableStateOf<String?>(null) }
+    var showFonts by remember { mutableStateOf(false) }
+    var showCustom by remember { mutableStateOf(false) }
+    var showReset by remember { mutableStateOf(false) }
+    @Composable fun Range(label: String, display: String, value: Float, range: ClosedFloatingPointRange<Float>, update: (DeviceSettings, Float) -> DeviceSettings) {
+        LabeledLiveSlider(label, display, value, range, { v -> activeSlider = label; onUpdateSettings { update(it, v) } }, { activeSlider = null })
+    }
+    @Composable fun PairOf(first: @Composable () -> Unit, second: @Composable () -> Unit) {
+        Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            Column(Modifier.weight(1f)) { first() }
+            Column(Modifier.weight(1f)) { second() }
+        }
+    }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Tampilan baca", "Reading appearance", lang), onDismiss,
+        closeLabel = I18n.t("Tutup", "Close", lang), previewLabel = activeSlider,
+        headerContent = {
+            LiquidGlassTabs(listOf("text" to I18n.t("Teks", "Text", lang), "layout" to I18n.t("Tata letak", "Layout", lang), "theme" to I18n.t("Tema", "Theme", lang)), activeTab,
+                { activeTab = it }, iconNames = listOf("type", "sliders", "palette"))
+            Spacer(Modifier.height(12.dp))
+        }) {
+        when (activeTab) {
+            "text" -> {
+                Row(Modifier.alpha(if (activeSlider == null) 1f else .05f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GlassPillButton(settings.fontFamily, { showFonts = true }, Modifier.weight(1f), leadingIcon = "type")
+                    GlassPillButton(I18n.t("Default nyaman", "Comfort defaults", lang), { showReset = true }, leadingIcon = "refresh")
+                }
+                PairOf(
+                    { Range(I18n.t("Ukuran", "Size", lang), settings.fontSize.toString(), settings.fontSize.toFloat(), 14f..32f) { p, v -> p.copy(fontSize = v.roundToInt()) } },
+                    { Range(I18n.t("Tinggi baris", "Line height", lang), String.format("%.1f", settings.lineHeight), settings.lineHeight, 1.2f..2.4f) { p, v -> p.copy(lineHeight = (v * 10).roundToInt() / 10f) } })
+                PairOf(
+                    { Range(I18n.t("Ketebalan", "Weight", lang), settings.fontWeight.toString(), settings.fontWeight.toFloat(), 400f..700f) { p, v -> p.copy(fontWeight = (v / 100).roundToInt() * 100) } },
+                    { Range(I18n.t("Jarak paragraf", "Paragraph gap", lang), settings.paragraphSpacing.toString(), settings.paragraphSpacing.toFloat(), 0f..32f) { p, v -> p.copy(paragraphSpacing = v.roundToInt()) } })
+                PairOf(
+                    { Range(I18n.t("Jarak huruf", "Letter spacing", lang), String.format("%.1f", settings.letterSpacing), settings.letterSpacing, -.5f..3f) { p, v -> p.copy(letterSpacing = (v * 10).roundToInt() / 10f) } },
+                    { Range(I18n.t("Indentasi", "First-line indent", lang), String.format("%.2f", settings.paragraphIndent), settings.paragraphIndent, 0f..3f) { p, v -> p.copy(paragraphIndent = (v * 4).roundToInt() / 4f) } })
+                FlowRow(Modifier.alpha(if (activeSlider == null) 1f else .05f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("left" to I18n.t("Kiri", "Left", lang), "justify" to I18n.t("Rata kanan kiri", "Justified", lang), "center" to I18n.t("Tengah", "Center", lang), "right" to I18n.t("Kanan", "Right", lang)).forEach { (key, label) ->
+                        GlassPillButton(label, { onUpdateSettings { it.copy(textAlign = key) } }, primary = settings.textAlign == key)
                     }
                 }
             }
-
-            GlassSurface(
-                cornerRadius = 28.dp,
-                elevated = true,
-                contentPadding = PaddingValues(20.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 560.dp)
-                    .alpha(if (isDraggingSlider) 0.14f else 1f)
-                    .pointerInput(Unit) { detectTapGestures(onTap = {}) }
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = I18n.t("Tampilan Baca", "Reading Appearance", lang),
-                            color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 19.sp
-                        )
-                        GlassIconButton(
-                            iconName = "close",
-                            contentDescription = I18n.t("Tutup", "Close", lang),
-                            onClick = onDismiss
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LiquidGlassTabs(
-                        tabs = listOf(
-                            "text" to I18n.t("Teks", "Text", lang),
-                            "layout" to I18n.t("Tata Letak", "Layout", lang),
-                            "theme" to I18n.t("Tema", "Theme", lang),
-                            "custom" to I18n.t("Kustom", "Custom", lang)
-                        ),
-                        selectedTab = activeTab,
-                        onTabSelected = { activeTab = it }
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        when (activeTab) {
-                            "text" -> {
-                                Text(
-                                    text = I18n.t("Jenis huruf", "Font family", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf(
-                                        "Lora" to "Lora",
-                                        "Plus Jakarta Sans" to "Plus Jakarta",
-                                        "DM Sans" to "DM Sans",
-                                        "Georgia" to "Merriweather",
-                                        "system" to "System Sans",
-                                        "monospace" to "JetBrains Mono"
-                                    ).forEach { (fontKey, fontLabel) ->
-                                        GlassPillButton(
-                                            text = fontLabel,
-                                            primary = settings.fontFamily == fontKey,
-                                            onClick = { onUpdateSettings { it.copy(fontFamily = fontKey) } }
-                                        )
-                                    }
-                                }
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Ukuran huruf", "Font size", lang),
-                                    valueText = "${settings.fontSize} px",
-                                    value = settings.fontSize.toFloat(),
-                                    valueRange = 14f..28f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val px = v.roundToInt().coerceIn(14, 28)
-                                        activeSliderSummary = "${I18n.t("Ukuran huruf", "Font size", lang)}: $px px"
-                                        onUpdateSettings { it.copy(fontSize = px) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Tinggi baris", "Line height", lang),
-                                    valueText = String.format("%.2f", settings.lineHeight),
-                                    value = settings.lineHeight,
-                                    valueRange = 1.2f..2.2f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val rounded = ((v * 20f).roundToInt() / 20f).coerceIn(1.2f, 2.2f)
-                                        activeSliderSummary = "${I18n.t("Tinggi baris", "Line height", lang)}: ${String.format("%.2f", rounded)}"
-                                        onUpdateSettings { it.copy(lineHeight = rounded) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Ketebalan huruf", "Font weight", lang),
-                                    valueText = "${settings.fontWeight}",
-                                    value = settings.fontWeight.toFloat(),
-                                    valueRange = 400f..700f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val w = ((v / 100f).roundToInt() * 100).coerceIn(400, 700)
-                                        activeSliderSummary = "${I18n.t("Ketebalan huruf", "Font weight", lang)}: $w"
-                                        onUpdateSettings { it.copy(fontWeight = w) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Jarak paragraf", "Paragraph spacing", lang),
-                                    valueText = "${settings.paragraphSpacing} px",
-                                    value = settings.paragraphSpacing.toFloat(),
-                                    valueRange = 0f..28f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val sp = v.roundToInt().coerceIn(0, 28)
-                                        activeSliderSummary = "${I18n.t("Jarak paragraf", "Paragraph spacing", lang)}: $sp px"
-                                        onUpdateSettings { it.copy(paragraphSpacing = sp) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Indentasi baris pertama", "First-line indent", lang),
-                                    valueText = String.format("%.1f em", settings.paragraphIndent),
-                                    value = settings.paragraphIndent,
-                                    valueRange = 0f..3f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val ind = ((v * 4f).roundToInt() / 4f).coerceIn(0f, 3f)
-                                        activeSliderSummary = "${I18n.t("Indentasi", "Indent", lang)}: ${String.format("%.1f em", ind)}"
-                                        onUpdateSettings { it.copy(paragraphIndent = ind) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                Text(
-                                    text = I18n.t("Perataan teks", "Text alignment", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    listOf(
-                                        "justify" to I18n.t("Rata kiri-kanan", "Justify", lang),
-                                        "left" to I18n.t("Rata kiri", "Left", lang),
-                                        "center" to I18n.t("Tengah", "Center", lang),
-                                        "right" to I18n.t("Rata kanan", "Right", lang)
-                                    ).forEach { (alignKey, alignLabel) ->
-                                        GlassPillButton(
-                                            text = alignLabel,
-                                            primary = settings.textAlign == alignKey,
-                                            onClick = { onUpdateSettings { it.copy(textAlign = alignKey) } }
-                                        )
-                                    }
-                                }
-                            }
-
-                            "layout" -> {
-                                Text(
-                                    text = I18n.t("Mode baca", "Reading mode", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    GlassPillButton(
-                                        text = I18n.t("Halaman", "Pages", lang),
-                                        leadingIcon = "bookOpen",
-                                        primary = settings.readingMode == "pages",
-                                        onClick = { onUpdateSettings { it.copy(readingMode = "pages") } }
-                                    )
-                                    GlassPillButton(
-                                        text = I18n.t("Gulir", "Scroll", lang),
-                                        leadingIcon = "paper",
-                                        primary = settings.readingMode == "scroll",
-                                        onClick = { onUpdateSettings { it.copy(readingMode = "scroll") } }
-                                    )
-                                }
-
-                                Text(
-                                    text = I18n.t("Bentangan halaman", "Page spread", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    GlassPillButton(
-                                        text = I18n.t("Satu halaman", "Single page", lang),
-                                        leadingIcon = "single",
-                                        primary = settings.spreadMode == "single",
-                                        onClick = { onUpdateSettings { it.copy(spreadMode = "single") } }
-                                    )
-                                    GlassPillButton(
-                                        text = I18n.t("Dua halaman", "Two-page spread", lang),
-                                        leadingIcon = "double",
-                                        primary = settings.spreadMode == "double",
-                                        onClick = { onUpdateSettings { it.copy(spreadMode = "double") } }
-                                    )
-                                }
-
-                                Text(
-                                    text = I18n.t("Animasi halaman", "Page animation", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    listOf(
-                                        "slide" to I18n.t("Geser", "Slide", lang),
-                                        "fade" to I18n.t("Pudar", "Fade", lang),
-                                        "none" to I18n.t("Tanpa animasi", "None", lang)
-                                    ).forEach { (animKey, animLabel) ->
-                                        GlassPillButton(
-                                            text = animLabel,
-                                            primary = settings.pageAnimation == animKey,
-                                            onClick = { onUpdateSettings { it.copy(pageAnimation = animKey) } }
-                                        )
-                                    }
-                                }
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Margin samping", "Horizontal margin", lang),
-                                    valueText = "${settings.marginHorizontal} px",
-                                    value = settings.marginHorizontal.toFloat(),
-                                    valueRange = 12f..64f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val m = v.roundToInt().coerceIn(12, 64)
-                                        activeSliderSummary = "${I18n.t("Margin samping", "Horizontal margin", lang)}: $m px"
-                                        onUpdateSettings { it.copy(marginHorizontal = m) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Margin atas-bawah", "Vertical margin", lang),
-                                    valueText = "${settings.marginVertical} px",
-                                    value = settings.marginVertical.toFloat(),
-                                    valueRange = 12f..72f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val m = v.roundToInt().coerceIn(12, 72)
-                                        activeSliderSummary = "${I18n.t("Margin vertikal", "Vertical margin", lang)}: $m px"
-                                        onUpdateSettings { it.copy(marginVertical = m) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                LabeledLiveSlider(
-                                    label = I18n.t("Kecerahan baca", "Reading brightness", lang),
-                                    valueText = "${settings.brightness}%",
-                                    value = settings.brightness.toFloat(),
-                                    valueRange = 35f..100f,
-                                    onValueChange = { v ->
-                                        isDraggingSlider = true
-                                        val b = v.roundToInt().coerceIn(35, 100)
-                                        activeSliderSummary = "${I18n.t("Kecerahan baca", "Reading brightness", lang)}: $b%"
-                                        onUpdateSettings { it.copy(brightness = b) }
-                                    },
-                                    onValueChangeFinished = { isDraggingSlider = false }
-                                )
-
-                                SettingToggleRow(
-                                    title = I18n.t("Ketuk tepi untuk balik halaman", "Tap edge to turn page", lang),
-                                    checked = settings.tapNavigation,
-                                    onCheckedChange = { v -> onUpdateSettings { it.copy(tapNavigation = v) } }
-                                )
-
-                                SettingToggleRow(
-                                    title = I18n.t("Layar tetap menyala", "Keep screen awake", lang),
-                                    checked = settings.wakeLock,
-                                    onCheckedChange = { v -> onUpdateSettings { it.copy(wakeLock = v) } }
-                                )
-
-                                Text(
-                                    text = I18n.t("Orientasi layar", "Screen orientation", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    listOf(
-                                        "auto" to I18n.t("Otomatis", "Auto", lang),
-                                        "portrait" to I18n.t("Potret", "Portrait", lang),
-                                        "landscape" to I18n.t("Lanskap", "Landscape", lang)
-                                    ).forEach { (oriKey, oriLabel) ->
-                                        GlassPillButton(
-                                            text = oriLabel,
-                                            primary = settings.orientation == oriKey,
-                                            onClick = { onUpdateSettings { it.copy(orientation = oriKey) } }
-                                        )
-                                    }
-                                }
-                            }
-
-                            "theme" -> {
-                                Text(
-                                    text = I18n.t("Tema halaman baca", "Reading page theme", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf(
-                                        Triple("follow", "sparkle", I18n.t("Ikuti global", "Follow global", lang)),
-                                        Triple("light", "sun", I18n.t("Terang", "Light", lang)),
-                                        Triple("dark", "moon", I18n.t("Gelap", "Dark", lang)),
-                                        Triple("sepia", "sepia", "Sepia"),
-                                        Triple("paper", "paper", I18n.t("Kertas", "Paper", lang)),
-                                        Triple("green", "leaf", I18n.t("Hijau", "Green", lang)),
-                                        Triple("custom", "palette", I18n.t("Kustom", "Custom", lang))
-                                    ).forEach { (themeKey, iconName, label) ->
-                                        GlassPillButton(
-                                            text = label,
-                                            leadingIcon = iconName,
-                                            primary = settings.readerTheme == themeKey,
-                                            onClick = { onUpdateSettings { it.copy(readerTheme = themeKey) } }
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Text(
-                                    text = I18n.t("Warna aksen", "Accent color", lang),
-                                    color = palette.textSecondary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 13.sp
-                                )
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    KataKecilThemeTokens.AccentPresets.forEach { preset ->
-                                        val isSelected = settings.accentColor.equals(preset.hex, ignoreCase = true)
-                                        Box(
-                                            modifier = Modifier
-                                                .size(38.dp)
-                                                .clip(CircleShape)
-                                                .background(preset.color)
-                                                .border(
-                                                    width = if (isSelected) 3.dp else 1.dp,
-                                                    color = if (isSelected) Color.White else palette.border,
-                                                    shape = CircleShape
-                                                )
-                                                .clickable {
-                                                    onUpdateSettings { it.copy(accentColor = preset.hex) }
-                                                }
-                                        )
-                                    }
-                                    GlassPillButton(
-                                        text = I18n.t("Roda Warna", "Color Wheel", lang),
-                                        leadingIcon = "palette",
-                                        onClick = { colorPickerMode = "accent" }
-                                    )
-                                }
-                            }
-
-                            "custom" -> {
-                                val customInk = KataKecilThemeTokens.parseHexColor(settings.customTextColor, Color(0xFF1F2933))
-                                val customBg = KataKecilThemeTokens.parseHexColor(settings.customBackgroundColor, Color(0xFFF7F4EB))
-                                val contrast = KataKecilThemeTokens.contrastRatio(customInk, customBg)
-                                val passesWcag = contrast >= 4.5
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(18.dp))
-                                        .background(customBg)
-                                        .border(1.dp, palette.border, RoundedCornerShape(18.dp))
-                                        .padding(16.dp)
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = I18n.t("Pratinjau Kertas Kustom", "Custom Paper Preview", lang),
-                                            color = customInk,
-                                            fontFamily = KataKecilFonts.Ui,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 16.sp
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = "${I18n.t("Rasio kontras", "Contrast ratio", lang)}: ${String.format("%.2f:1", contrast)} " +
-                                                if (passesWcag) "✓ WCAG AA" else "⚠️ < 4.5:1",
-                                            color = customInk.copy(alpha = 0.8f),
-                                            fontFamily = KataKecilFonts.Ui,
-                                            fontSize = 12.5.sp
-                                        )
-                                    }
-                                }
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    GlassPillButton(
-                                        text = "${I18n.t("Warna teks", "Text color", lang)} (${settings.customTextColor})",
-                                        leadingIcon = "palette",
-                                        modifier = Modifier.weight(1f),
-                                        onClick = { colorPickerMode = "text" }
-                                    )
-                                    GlassPillButton(
-                                        text = "${I18n.t("Warna kertas", "Paper color", lang)} (${settings.customBackgroundColor})",
-                                        leadingIcon = "palette",
-                                        modifier = Modifier.weight(1f),
-                                        onClick = { colorPickerMode = "bg" }
-                                    )
-                                }
-                            }
-                        }
+            "layout" -> {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GlassPillButton(I18n.t("Halaman", "Pages", lang), { onUpdateSettings { it.copy(readingMode = "pages") } }, leadingIcon = "single", primary = settings.readingMode == "pages")
+                    GlassPillButton("Scroll", { onUpdateSettings { it.copy(readingMode = "scroll") } }, leadingIcon = "list", primary = settings.readingMode == "scroll")
+                    GlassPillButton(I18n.t("Dua halaman", "Two pages", lang), { onUpdateSettings { it.copy(spreadMode = if (it.spreadMode == "double") "single" else "double") } }, leadingIcon = "double", primary = settings.spreadMode == "double")
+                }
+                PairOf(
+                    { Range(I18n.t("Margin samping", "Side margins", lang), settings.marginHorizontal.toString(), settings.marginHorizontal.toFloat(), 12f..72f) { p, v -> p.copy(marginHorizontal = v.roundToInt()) } },
+                    { Range(I18n.t("Margin atas/bawah", "Vertical margins", lang), settings.marginVertical.toString(), settings.marginVertical.toFloat(), 8f..80f) { p, v -> p.copy(marginVertical = v.roundToInt()) } })
+                Range(I18n.t("Lebar bacaan", "Reading width", lang), settings.readerWidth.toString(), settings.readerWidth.toFloat(), 320f..1100f) { p, v -> p.copy(readerWidth = v.roundToInt()) }
+                Range(I18n.t("Kecerahan", "Brightness", lang), "${settings.brightness}%", settings.brightness.toFloat(), 50f..100f) { p, v -> p.copy(brightness = v.roundToInt()) }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("fade", "slide", "none").forEach { mode -> GlassPillButton(mode.replaceFirstChar { it.uppercase() }, { onUpdateSettings { it.copy(pageAnimation = mode) } }, primary = settings.pageAnimation == mode) }
+                }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("top", "center").forEach { mode -> GlassPillButton(I18n.t(if (mode == "top") "Atas" else "Tengah", if (mode == "top") "Top" else "Center", lang), { onUpdateSettings { it.copy(contentPosition = mode) } }, primary = settings.contentPosition == mode) }
+                    listOf("auto", "portrait", "landscape").forEach { mode -> GlassPillButton(mode.replaceFirstChar { it.uppercase() }, { onUpdateSettings { it.copy(orientation = mode) } }, primary = settings.orientation == mode) }
+                }
+                SettingToggleRow(I18n.t("Ketuk untuk navigasi", "Tap navigation", lang), settings.tapNavigation) { enabled -> onUpdateSettings { it.copy(tapNavigation = enabled) } }
+                SettingToggleRow(I18n.t("Layar tetap menyala", "Keep screen awake", lang), settings.wakeLock) { enabled -> onUpdateSettings { it.copy(wakeLock = enabled) } }
+            }
+            "theme" -> {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("light" to "sun", "dark" to "moon", "system" to "device", "sepia" to "sepia", "paper" to "paper", "green" to "leaf", "custom" to "palette").forEach { (mode, icon) ->
+                        GlassPillButton(mode.replaceFirstChar { it.uppercase() }, {
+                            if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode, readerTheme = "follow") }
+                        }, leadingIcon = icon, primary = settings.themeMode == mode)
                     }
                 }
             }
         }
     }
-
-    when (colorPickerMode) {
-        "accent" -> ColorWheelPickerDialog(
-            title = I18n.t("Warna Aksen", "Accent Color", lang),
-            initialHex = settings.accentColor,
-            onDismiss = { colorPickerMode = null },
-            onColorSelected = { hex ->
-                onUpdateSettings { it.copy(accentColor = hex) }
-                colorPickerMode = null
-            }
-        )
-        "text" -> ColorWheelPickerDialog(
-            title = I18n.t("Warna Teks Kustom", "Custom Text Color", lang),
-            initialHex = settings.customTextColor,
-            onDismiss = { colorPickerMode = null },
-            onColorSelected = { hex ->
-                onUpdateSettings { it.copy(customTextColor = hex, readerTheme = "custom") }
-                colorPickerMode = null
-            }
-        )
-        "bg" -> ColorWheelPickerDialog(
-            title = I18n.t("Warna Kertas Kustom", "Custom Paper Color", lang),
-            initialHex = settings.customBackgroundColor,
-            onDismiss = { colorPickerMode = null },
-            onColorSelected = { hex ->
-                onUpdateSettings { it.copy(customBackgroundColor = hex, readerTheme = "custom") }
-                colorPickerMode = null
-            }
-        )
+    if (showFonts) id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Huruf", "Font", lang), { showFonts = false }) {
+        listOf("Lora", "Plus Jakarta Sans", "system", "Georgia", "monospace").forEach { font -> GlassPillButton(font, { onUpdateSettings { it.copy(fontFamily = font) }; showFonts = false }, Modifier.fillMaxWidth(), primary = settings.fontFamily == font) }
+    }
+    if (showCustom) id.karisyono.katakecil.ui.components.CustomThemeEditor(settings, onUpdateSettings) { showCustom = false }
+    if (showReset) id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Default nyaman", "Comfort defaults", lang), { showReset = false }) {
+        Text(I18n.t("Kembalikan pengaturan teks dan tata letak? Tema dan data bacaan tetap.", "Restore text and layout settings? Theme and reading data are preserved.", lang), color = palette.textPrimary, fontSize = 14.sp)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            GlassPillButton(I18n.t("Batal", "Cancel", lang), { showReset = false }, Modifier.weight(1f))
+            GlassPillButton(I18n.t("Kembalikan", "Restore", lang), {
+                onUpdateSettings { it.copy(fontFamily = "Lora", fontSize = 19, lineHeight = 1.6f, fontWeight = 400, paragraphSpacing = 6, letterSpacing = 0f, paragraphIndent = 1.5f, marginHorizontal = 24, marginVertical = 22, readerWidth = 720, readingMode = "pages", spreadMode = "single", pageAnimation = "fade", contentPosition = "top", brightness = 100, orientation = "auto", tapNavigation = true, wakeLock = false) }; showReset = false
+            }, Modifier.weight(1f), primary = true)
+        }
     }
 }
 
-/**
- * 3. Reading Tools Sheet (Episode Stats, Search, RSVP Speed Reading, Read Aloud TTS, Word Tools, Go to Page)
- */
 @Composable
 fun ReadingToolsSheetDialog(
     chapter: Chapter?,
@@ -2192,10 +1769,14 @@ fun LabeledLiveSlider(
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     onValueChange: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit
+    onValueChangeFinished: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val palette = LocalKataKecilPalette.current
-    Column(modifier = Modifier.fillMaxWidth()) {
+    val active = id.karisyono.katakecil.ui.components.LocalPreviewSlider.current
+    Column(modifier = modifier.fillMaxWidth().alpha(if (active == null || active == label) 1f else .04f)
+        .background(if (active == label) palette.background.copy(alpha = .88f) else Color.Transparent, RoundedCornerShape(14.dp))
+        .padding(if (active == label) 4.dp else 4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween

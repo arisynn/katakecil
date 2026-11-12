@@ -13,6 +13,13 @@ Acuan awal: `main` pada `8185ce3c8c4a130da7c26395710eca1a27df8d57` (web 1.2.3). 
 
 QA HP oleh pemilik. Proses rilis hanya kompilasi, identitas paket, tanda tangan, alignment dan checksum; tidak menjalankan suite QA atau emulator. Umpan balik visual tetap diperlukan, terutama warna kaca pada perangkat berbeda dan font sistem nonstandar.
 
+## Preview 2 — Reader dan panel
+
+- Font, indentasi dan jarak paragraf diukur dengan annotated layout yang sama dengan rendering, tanpa mengubah karakter/offset buku. Jarak huruf memakai satuan ukuran tampilan.
+- Reflow dibatalkan ketika parameter berubah dan dikerjakan berurutan pada worker. Overlay loading tampil selama pengukuran; anchor offset tidak dipindahkan ke awal halaman saat reflow.
+- Contents memakai header/tab tetap dan konten setengah layar. Appearance menggunakan tiga tab, grid ringkas dan dialog tema kustom.
+- Slider dan tab mengikuti drag langsung; release/cancel mengakhiri pratinjau, tanpa timer. Reset teks/layout memakai konfirmasi dan tidak menyentuh tema/data.
+
 ## Berikutnya
 
-Preview 2 menyelaraskan reader, pagination, tab, slider, serta panel membaca. Preview 3 menyelesaikan Publisher, color picker, About, updater dan dialog pendukung.
+Preview 3 menyelesaikan Publisher, color picker, About, updater dan dialog pendukung.

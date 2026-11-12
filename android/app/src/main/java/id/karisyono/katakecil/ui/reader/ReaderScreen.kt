@@ -42,9 +42,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Slider
+import id.karisyono.katakecil.ui.components.WebSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.withLock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -142,6 +144,7 @@ fun ReaderScreen(
     val lang = settings.uiLanguage
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
+    val paginationLock = remember { kotlinx.coroutines.sync.Mutex() }
 
     val chapter = chapters.getOrNull(currentChapterIndex)
     val chapterText = chapter?.text ?: ""
@@ -167,11 +170,12 @@ fun ReaderScreen(
     }
     val baseTextStyle = TextStyle(
         color = palette.readingText,
+        platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
         fontFamily = readingFont,
         fontSize = settings.fontSize.sp,
         lineHeight = (settings.fontSize * settings.lineHeight).sp,
         fontWeight = FontWeight(settings.fontWeight.coerceIn(400, 700)),
-        letterSpacing = (settings.letterSpacing * settings.fontSize).sp,
+        letterSpacing = settings.letterSpacing.sp,
         textAlign = textAlign
     )
 
@@ -207,7 +211,7 @@ fun ReaderScreen(
             }
 
             // Compute paginated slices whenever text, typography, or layout changes
-            val pages: List<PageSlice> = remember(
+            val pages by androidx.compose.runtime.produceState<List<PageSlice>>(initialValue = emptyList(), keys = arrayOf(
                 currentChapterIndex,
                 chapterText,
                 contentWidthPx,
@@ -219,29 +223,21 @@ fun ReaderScreen(
                 settings.letterSpacing,
                 settings.paragraphSpacing,
                 settings.paragraphIndent,
-                settings.textAlign
-            ) {
-                if (chapterText.isEmpty()) {
-                    listOf(PageSlice(0, currentChapterIndex, 0, 0, ""))
-                } else {
-                    val headingReservePx = with(density) { 108.dp.toPx().roundToInt() }
-                    Paginator.paginateChapterToFit(
-                        chapterIndex = currentChapterIndex,
-                        text = chapterText,
-                        startPageIndex = 0,
-                        maxCharsHint = 2200
-                    ) { candidate, start, _ ->
-                        val availH = if (start == 0) {
-                            (contentHeightPx - headingReservePx).coerceAtLeast(140)
-                        } else {
-                            contentHeightPx
+                settings.textAlign, density.fontScale, density.density, textMeasurer)) {
+                value = emptyList()
+                value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                    paginationLock.withLock {
+                        val calculationContext = kotlinx.coroutines.currentCoroutineContext()
+                        if (chapterText.isEmpty()) emptyList() else {
+                            val heading = textMeasurer.measure(AnnotatedString(chapter?.title ?: ""), style = baseTextStyle.copy(fontSize = 22.sp, lineHeight = 30.sp, fontWeight = FontWeight.Medium, letterSpacing = (-.5).sp), constraints = Constraints(maxWidth = contentWidthPx))
+                            val headingReservePx = heading.size.height + with(density) { (if (chapter?.arc.isNullOrBlank()) 42.dp else 60.dp).toPx().roundToInt() }
+                            Paginator.paginateChapterToFit(currentChapterIndex, chapterText, maxCharsHint = 2200) { candidate, start, _ ->
+                                calculationContext.ensureActive()
+                                val available = if (start == 0) (contentHeightPx - headingReservePx).coerceAtLeast(80) else contentHeightPx
+                                val layout = textMeasurer.measure(readingTextLayout(candidate, chapterText, start, settings.paragraphIndent, settings.paragraphSpacing), style = baseTextStyle, constraints = Constraints(maxWidth = contentWidthPx))
+                                layout.size.height <= available
+                            }
                         }
-                        val layout = textMeasurer.measure(
-                            text = AnnotatedString(candidate),
-                            style = baseTextStyle,
-                            constraints = Constraints(maxWidth = contentWidthPx)
-                        )
-                        layout.size.height <= availH
                     }
                 }
             }
@@ -260,7 +256,7 @@ fun ReaderScreen(
                 if (scrubberPreviewPage == null && pages.isNotEmpty() && chapterText.isNotEmpty()) {
                     onPositionChanged(
                         currentChapterIndex,
-                        displayedPage.start,
+                        currentCharOffset.coerceIn(displayedPage.start, max(displayedPage.start, displayedPage.end - 1)),
                         displayedPageIndex,
                         pages.size
                     )
@@ -392,12 +388,13 @@ fun ReaderScreen(
                                 vertical = verticalMarginDp + 24.dp
                             )
                     ) {
-                        ChapterHeadingBlock(chapter = chapter)
+                        ChapterHeadingBlock(chapter = chapter, fontFamily = readingFont)
                         Spacer(modifier = Modifier.height(18.dp))
                         SelectableChapterPageText(
                             pageSlice = PageSlice(0, currentChapterIndex, 0, chapterText.length, chapterText),
                             baseTextStyle = baseTextStyle,
                             paragraphIndentEm = settings.paragraphIndent,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
                             annotations = annotations,
                             searchMatches = searchMatches,
                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -486,13 +483,14 @@ fun ReaderScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         if (firstSlice.start == 0) {
-                                            ChapterHeadingBlock(chapter = chapter)
+                                            ChapterHeadingBlock(chapter = chapter, fontFamily = readingFont)
                                             Spacer(modifier = Modifier.height(14.dp))
                                         }
                                         SelectableChapterPageText(
                                             pageSlice = firstSlice,
                                             baseTextStyle = baseTextStyle,
                                             paragraphIndentEm = settings.paragraphIndent,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
                                             annotations = annotations,
                                             searchMatches = searchMatches,
                                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -527,6 +525,7 @@ fun ReaderScreen(
                                                 pageSlice = secondSlice,
                                                 baseTextStyle = baseTextStyle,
                                                 paragraphIndentEm = settings.paragraphIndent,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
                                                 annotations = annotations,
                                                 searchMatches = searchMatches,
                                                 activeSearchMatchIndex = activeSearchMatchIndex,
@@ -566,13 +565,14 @@ fun ReaderScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f, fill = false)) {
                                         if (firstSlice.start == 0) {
-                                            ChapterHeadingBlock(chapter = chapter)
+                                            ChapterHeadingBlock(chapter = chapter, fontFamily = readingFont)
                                             Spacer(modifier = Modifier.height(14.dp))
                                         }
                                         SelectableChapterPageText(
                                             pageSlice = firstSlice,
                                             baseTextStyle = baseTextStyle,
                                             paragraphIndentEm = settings.paragraphIndent,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
                                             annotations = annotations,
                                             searchMatches = searchMatches,
                                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -933,7 +933,7 @@ fun ReaderScreen(
                                 color = palette.textPrimary,
                                 fontFamily = KataKecilFonts.Ui,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.5.sp,
+                                fontSize = 12.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -1012,6 +1012,7 @@ fun ReaderScreen(
                                 Slider(
                                     value = displayedPageIndex.toFloat(),
                                     onValueChange = { raw ->
+                                        if (scrubberPreviewPage == null) { onTtsStop(); selectionRange = null; selectedExistingHighlight = null }
                                         scrubberPreviewPage = raw.roundToInt().coerceIn(0, pages.lastIndex)
                                     },
                                     onValueChangeFinished = {
@@ -1094,6 +1095,12 @@ fun ReaderScreen(
                 }
             }
 
+            if (pages.isEmpty() && chapterText.isNotEmpty()) {
+                Box(Modifier.fillMaxSize().background(palette.readingPaper).pointerInput(Unit) { detectTapGestures(onTap = {}) }, contentAlignment = Alignment.Center) {
+                    id.karisyono.katakecil.ui.components.LoadingWordmark()
+                }
+            }
+
             // Note Editor Dialog when adding/editing a note from selection
             val activeNoteTarget = noteDraftTarget
             if (activeNoteTarget != null) {
@@ -1151,9 +1158,9 @@ private fun handlePageTap(
 }
 
 @Composable
-private fun ChapterHeadingBlock(chapter: Chapter) {
+private fun ChapterHeadingBlock(chapter: Chapter, fontFamily: androidx.compose.ui.text.font.FontFamily) {
     val palette = LocalKataKecilPalette.current
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         if (chapter.arc.isNotBlank()) {
             Text(
                 text = chapter.arc.uppercase(),
@@ -1180,10 +1187,11 @@ private fun ChapterHeadingBlock(chapter: Chapter) {
         Text(
             text = chapter.title,
             color = palette.readingText,
-            fontFamily = KataKecilFonts.Ui,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = fontFamily,
+            fontWeight = FontWeight.Medium,
             fontSize = 22.sp,
-            lineHeight = 28.sp
+            textAlign = TextAlign.Center,
+            lineHeight = 30.sp
         )
     }
 }
@@ -1197,6 +1205,8 @@ private fun SelectableChapterPageText(
     pageSlice: PageSlice,
     baseTextStyle: TextStyle,
     paragraphIndentEm: Float,
+    paragraphGap: Int,
+    sourceText: String,
     annotations: List<AnnotationItem>,
     searchMatches: List<SearchMatch>,
     activeSearchMatchIndex: Int,
@@ -1229,13 +1239,10 @@ private fun SelectableChapterPageText(
         ttsHighlightRange,
         selectionRange,
         palette.isDark,
-        paragraphIndentEm
+        paragraphIndentEm, paragraphGap, sourceText
     ) {
         buildAnnotatedString {
-            if (paragraphIndentEm > 0.01f) {
-                pushStyle(ParagraphStyle(textIndent = TextIndent(firstLine = paragraphIndentEm.em)))
-            }
-            append(sliceText)
+            append(readingTextLayout(sliceText, sourceText, sliceStart, paragraphIndentEm, paragraphGap))
 
             // 1. Saved highlights
             for (hl in pageHighlights) {

@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-**Branch native-android:** tersedia APK Android Kotlin/Jetpack Compose yang dapat dipasang berdampingan dengan Capacitor. Label aplikasinya tetap **KataKecil**, berkasnya **[KataKecil.apk](https://github.com/arisynn/katakecil/releases/download/v1.2.4-native.1/KataKecil.apk)**, dengan ID paket `id.karisyono.katakecil.nativeapp`. Ini build percobaan; data kedua aplikasi terpisah dan QA perangkat ditangani pemilik. [Panduan native](docs/native-android-release.md).
+**Branch native-android:** tersedia APK Android Kotlin/Jetpack Compose yang dapat dipasang berdampingan dengan Capacitor. Label aplikasinya tetap **KataKecil**, berkasnya **[KataKecil.apk](https://github.com/arisynn/katakecil/releases/download/v1.2.4-native.2/KataKecil.apk)**, dengan ID paket `id.karisyono.katakecil.nativeapp`. Ini build percobaan; data kedua aplikasi terpisah dan QA perangkat ditangani pemilik. [Panduan native](docs/native-android-release.md).
 
 **Rilis stable terbaru: [1.2.3](https://github.com/arisynn/katakecil/releases/tag/v1.2.3)**, sesuai persetujuan pemilik. Memuat karusel sampul berlapis, pengaturan kebeningan/blur/ambient, serta palet Pearl dan charcoal. Halaman buku tetap polos dan loading wordmark KataKecil dipertahankan. [Catatan rilis](docs/releases/v1.2.3.md).
 

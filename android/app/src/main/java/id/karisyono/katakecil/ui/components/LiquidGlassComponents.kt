@@ -17,6 +17,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,7 +47,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
+import id.karisyono.katakecil.ui.components.WebSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -161,11 +162,12 @@ fun GlassSurface(
     cornerRadius: Dp = 22.dp,
     elevated: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    transparent: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
     val shape = RoundedCornerShape(cornerRadius)
-    val baseAlpha = palette.glassFillAlpha
+    val baseAlpha = if (transparent) 0f else palette.glassFillAlpha
     val baseSurface = palette.background
     val topSpecular = if (palette.isDark) {
         Color.White.copy(alpha = 0.22f)
@@ -181,7 +183,7 @@ fun GlassSurface(
     Box(
         modifier = modifier
             .shadow(
-                elevation = if (elevated) 8.dp else 3.dp,
+                elevation = if (transparent) 0.dp else if (elevated) 8.dp else 3.dp,
                 shape = shape,
                 ambientColor = Color.Black.copy(alpha = 0.16f),
                 spotColor = Color.Black.copy(alpha = 0.18f)
@@ -190,19 +192,19 @@ fun GlassSurface(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        baseSurface.copy(alpha = (baseAlpha + 0.06f).coerceAtMost(0.98f)),
+                        baseSurface.copy(alpha = if (transparent) 0f else (baseAlpha + 0.03f).coerceAtMost(1f)),
                         baseSurface.copy(alpha = baseAlpha)
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(listOf(topSpecular, bottomRim)),
+                brush = Brush.verticalGradient(if (transparent) listOf(Color.Transparent, Color.Transparent) else listOf(topSpecular, bottomRim)),
                 shape = shape
             )
             .pointerInput(Unit) { detectTapGestures(onTap = {}) }
     ) {
-        GlassBackdrop(Modifier.matchParentSize())
+        if (!transparent) GlassBackdrop(Modifier.matchParentSize())
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(baseSurface.copy(alpha = baseAlpha), baseSurface.copy(alpha = baseAlpha)))))
         Box(Modifier.padding(contentPadding), content = content)
     }
@@ -285,7 +287,7 @@ fun GlassPillButton(
         )
     }
     val contentColor = if (primary) {
-        Color.White.copy(alpha = if (enabled) 1f else 0.6f)
+        (if (KataKecilThemeTokens.relativeLuminance(palette.accent) > .35) Color(0xFF151918) else Color.White).copy(alpha = if (enabled) 1f else .6f)
     } else {
         palette.textPrimary.copy(alpha = if (enabled) 1f else 0.45f)
     }
@@ -343,138 +345,52 @@ fun GlassPillButton(
  */
 @Composable
 fun <T> LiquidGlassTabs(
-    tabs: List<Pair<T, String>>,
-    selectedTab: T,
-    onTabSelected: (T) -> Unit,
-    modifier: Modifier = Modifier
+    tabs: List<Pair<T, String>>, selectedTab: T, onTabSelected: (T) -> Unit,
+    modifier: Modifier = Modifier, iconNames: List<String> = emptyList(), vertical: Boolean = false
 ) {
     if (tabs.isEmpty()) return
     val palette = LocalKataKecilPalette.current
     val selectedIndex = tabs.indexOfFirst { it.first == selectedTab }.coerceAtLeast(0)
+    val callback by androidx.compose.runtime.rememberUpdatedState(onTabSelected)
     var dragFraction by remember { mutableStateOf<Float?>(null) }
-    var dragVelocityStretch by remember { mutableFloatStateOf(0f) }
-
-    val targetFraction = dragFraction ?: selectedIndex.toFloat()
-    val animatedFraction by animateFloatAsState(
-        targetValue = targetFraction,
-        animationSpec = spring(dampingRatio = 0.72f, stiffness = 480f),
-        label = "tabLensFraction"
-    )
-    val stretchX by animateFloatAsState(
-        targetValue = 1f + min(0.14f, kotlin.math.abs(dragVelocityStretch) * 0.008f),
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
-        label = "lensStretchX"
-    )
-
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .clip(RoundedCornerShape(999.dp))
-            .background(
-                palette.surface.copy(alpha = (palette.glassFillAlpha + 0.08f).coerceIn(0.18f, 0.88f))
-            )
-            .border(
-                1.dp,
-                if (palette.isDark) Color.White.copy(alpha = 0.14f) else Color.Black.copy(alpha = 0.08f),
-                RoundedCornerShape(999.dp)
-            )
-            .padding(4.dp)
-    ) {
-        val tabCount = tabs.size
-        val slotWidth = maxWidth / tabCount
-
-        // Refractive active lens pill
-        Box(
-            modifier = Modifier
-                .offset(x = slotWidth * animatedFraction)
-                .width(slotWidth)
-                .fillMaxHeight()
-                .graphicsLayer {
-                    scaleX = stretchX
-                    scaleY = 2f - stretchX
-                }
-                .shadow(4.dp, RoundedCornerShape(999.dp))
-                .clip(RoundedCornerShape(999.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            palette.accent.copy(alpha = 0.92f),
-                            palette.accent.copy(alpha = 0.80f)
-                        )
-                    )
-                )
-                .border(1.dp, Color.White.copy(alpha = 0.34f), RoundedCornerShape(999.dp))
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(tabCount) {
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            val frac = ((offset.x / size.width) * tabCount - 0.5f)
-                                .coerceIn(0f, (tabCount - 1).toFloat())
-                            dragFraction = frac
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            dragVelocityStretch = dragAmount.x
-                            val pos = change.position.x
-                            val frac = ((pos / size.width) * tabCount - 0.5f)
-                                .coerceIn(0f, (tabCount - 1).toFloat())
-                            dragFraction = frac
-                        },
-                        onDragEnd = {
-                            val settled = (dragFraction ?: selectedIndex.toFloat())
-                                .roundToInt()
-                                .coerceIn(0, tabCount - 1)
-                            dragFraction = null
-                            dragVelocityStretch = 0f
-                            onTabSelected(tabs[settled].first)
-                        },
-                        onDragCancel = {
-                            dragFraction = null
-                            dragVelocityStretch = 0f
-                        }
-                    )
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            tabs.forEachIndexed { idx, (tabValue, label) ->
-                val isSelected = idx == (dragFraction?.roundToInt() ?: selectedIndex)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            onTabSelected(tabValue)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = label,
-                        color = if (isSelected) Color.White else palette.textSecondary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                        fontSize = 13.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+    var velocity by remember { mutableFloatStateOf(0f) }
+    val settled by animateFloatAsState(selectedIndex.toFloat(), spring(dampingRatio = .85f, stiffness = 480f), label = "webTabPosition")
+    val stretch by animateFloatAsState(1f + min(.07f, kotlin.math.abs(velocity) * .003f), spring(dampingRatio = .8f, stiffness = 600f), label = "webTabStretch")
+    val tint = if (KataKecilThemeTokens.contrastRatio(palette.accent, palette.background) >= 4.5) palette.accent else palette.textPrimary
+    BoxWithConstraints(modifier.fillMaxWidth().height(if (vertical) 72.dp else 40.dp).clip(RoundedCornerShape(16.dp))
+        .background(palette.surface.copy(alpha = .16f)).border(1.dp, palette.border.copy(alpha = .5f), RoundedCornerShape(16.dp)).padding(4.dp)) {
+        val slot = maxWidth / tabs.size
+        Box(Modifier.offset(x = slot * (dragFraction ?: settled)).width(slot).fillMaxHeight()
+            .graphicsLayer { scaleX = stretch; scaleY = 2f - stretch }
+            .clip(RoundedCornerShape(12.dp)).background(Brush.verticalGradient(listOf(Color.White.copy(alpha = if (palette.isDark) .06f else .18f), palette.accent.copy(alpha = .09f))))
+            .border(1.dp, if (palette.isDark) Color.White.copy(alpha = .18f) else Color.White.copy(alpha = .48f), RoundedCornerShape(12.dp)))
+        Row(Modifier.fillMaxSize().pointerInput(tabs) {
+            detectHorizontalDragGestures(
+                onDragStart = { dragFraction = (it.x / size.width * tabs.size - .5f).coerceIn(0f, tabs.lastIndex.toFloat()) },
+                onHorizontalDrag = { event, amount -> event.consume(); velocity = amount; dragFraction = (event.position.x / size.width * tabs.size - .5f).coerceIn(0f, tabs.lastIndex.toFloat()) },
+                onDragEnd = { val index = (dragFraction ?: selectedIndex.toFloat()).roundToInt().coerceIn(0, tabs.lastIndex); dragFraction = null; velocity = 0f; callback(tabs[index].first) },
+                onDragCancel = { dragFraction = null; velocity = 0f })
+        }) {
+            tabs.forEachIndexed { index, (key, label) ->
+                val active = index == (dragFraction?.roundToInt() ?: selectedIndex)
+                val iconScale by animateFloatAsState(if (active) 1.06f else 1f, spring(dampingRatio = .8f, stiffness = 500f), label = "tabIcon")
+                Column(Modifier.weight(1f).fillMaxHeight().clickable(remember { MutableInteractionSource() }, indication = null) { callback(key) },
+                    horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    if (vertical) {
+                        iconNames.getOrNull(index)?.let { KataKecilIcon(it, Modifier.graphicsLayer { scaleX = iconScale; scaleY = iconScale }, size = 20.dp, tint = if (active) tint else palette.textMuted) }
+                        Spacer(Modifier.height(5.dp))
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        if (!vertical) iconNames.getOrNull(index)?.let { KataKecilIcon(it, size = 15.dp, tint = if (active) tint else palette.textMuted); Spacer(Modifier.width(5.dp)) }
+                        Text(label, color = if (active) tint else palette.textMuted, fontFamily = KataKecilFonts.Ui,
+                            fontWeight = FontWeight.SemiBold, fontSize = if (vertical) 10.sp else 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * Port of dist/loading-logo.js & dist/loading-logo.css:
- *Slices the KataKecil wordmark into 9 horizontal letter strips ([0, 16, 28.5, 37, 50, 61, 73.3, 85.5, 90, 100]%)
- * with a staggered vertical wave animation (3.2s cycle, 0.13s delay step) + 3 bouncing dots.
- */
 @Composable
 fun LoadingWordmark(
     modifier: Modifier = Modifier,

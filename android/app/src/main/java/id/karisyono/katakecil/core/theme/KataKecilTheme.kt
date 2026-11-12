@@ -61,9 +61,11 @@ object KataKecilFonts {
         return when (fontFamilyName.trim()) {
             "Lora" -> Lora
             "Plus Jakarta Sans" -> PlusJakartaSans
-            "DM Sans" -> DmSans
-            "Georgia", "Merriweather" -> Merriweather
-            "monospace", "JetBrains Mono" -> JetBrainsMono
+            "DM Sans" -> Ui
+            "Georgia" -> FontFamily.Serif
+            "Merriweather" -> Merriweather
+            "monospace" -> FontFamily.Monospace
+            "JetBrains Mono" -> JetBrainsMono
             "system" -> FontFamily.SansSerif
             else -> Lora
         }
