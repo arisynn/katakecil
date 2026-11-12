@@ -1,0 +1,12 @@
+/* Transient messages keep a readable backing even at maximum clarity. */
+body #toast{
+ --toast-fill:calc(.7 + var(--g-panel-alpha,.25)*.3);
+ width:max-content;max-width:min(420px,calc(100% - 32px));
+ padding:12px 18px;border-radius:18px;border:1px solid var(--g-edge);
+ background:radial-gradient(ellipse at 12% 0%,rgba(var(--accent-rgb),var(--ambient-panel-alpha)),transparent 72%),linear-gradient(180deg,#ffffff0b,transparent 55%),rgba(var(--glass),var(--toast-fill));
+ color:var(--text);font-size:12px;font-weight:600;line-height:1.6;overflow-wrap:anywhere;
+ backdrop-filter:blur(var(--g-blur)) saturate(1.6);-webkit-backdrop-filter:blur(var(--g-blur)) saturate(1.6);
+ box-shadow:inset 0 1px 0 var(--lg-specular-top),0 8px 28px -12px var(--g-shadow);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){body #toast{background:var(--surface)}}
+@media(prefers-reduced-motion:reduce){body #toast{transition:none}}

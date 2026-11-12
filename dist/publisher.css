@@ -52,3 +52,33 @@
 @media(max-width:520px){.publisher-book-row{align-items:stretch;flex-direction:column;gap:10px}.publisher-book-actions{align-self:flex-end}.publisher-auth-card{padding:20px;gap:16px}}
 @media(max-width:360px){.publisher-content{padding-inline:16px}.publisher-auth-card{padding:17px}.publisher-field-heading .publisher-text-button{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.publisher-input,.publisher-key-access>summary svg:last-child{transition:none}}
+
+/* Publisher shares the app's glass surfaces; fields sit directly inside them. */
+.publisher-card h2{display:flex;align-items:center;gap:9px;overflow-wrap:anywhere}
+.publisher-card h2>svg{width:18px;height:18px;color:var(--accent)}
+.publisher-fields>h2{grid-column:1/-1;margin-bottom:0}
+body .publisher-content .primary{
+ background:linear-gradient(155deg,#ffffff08,transparent 70%),rgba(var(--accent-rgb),var(--g-fill-alpha,.25));
+ color:var(--g-action-ink,var(--text));border:1px solid var(--g-edge);
+ box-shadow:inset 0 1px 0 var(--lg-specular-top),0 8px 22px -12px var(--g-shadow);
+}
+body .publisher-content :is(.publisher-input,input:not([type=checkbox]),.app-select-trigger){background:transparent;border-color:var(--line);box-shadow:inset 0 1px 0 #ffffff12}
+body .publisher-content .publisher-input input{border:0;box-shadow:none}
+body .publisher-content :is(input:not([type=checkbox]),.app-select-trigger){min-height:44px}
+body .publisher-content .publisher-input:focus-within{border-color:var(--g-active-ink);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.12)}
+body .publisher-content :is(.secondary,.publisher-download,.publisher-toolbar .icon-button){background:transparent;border:1px solid var(--g-edge);color:var(--text);box-shadow:inset 0 1px 0 #ffffff18;min-height:44px}
+body .publisher-content :is(.publisher-text-button,.publisher-status-badge[data-status=completed]){color:var(--g-active-ink,var(--accent))}
+body .publisher-content .publisher-password-toggle{width:44px;min-height:44px}
+body .publisher-content .publisher-text-button{min-height:44px}
+body .publisher-content .publisher-auth-card input:-webkit-autofill{-webkit-text-fill-color:var(--text);-webkit-box-shadow:0 0 0 1000px var(--bg) inset}
+body .publisher-content :is(.publisher-download,.publisher-toolbar .icon-button):not(:disabled):is(:active,[data-pressing=true]){background-color:rgba(var(--accent-rgb),.11);box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 0 12px rgba(var(--accent-rgb),.14)}
+.publisher-content .publisher-parts>p{margin-top:16px;font-size:12px;line-height:1.7;color:var(--muted)}
+.publisher-content .publisher-part:last-child{border-bottom:0;padding-bottom:0}
+.publisher-content .publisher-part label{min-width:0}
+.publisher-content #publisher-plan-form>.publisher-inline{justify-content:space-between;padding-block:2px 8px}
+.publisher-content #publisher-plan-form>.publisher-inline>button{flex:1}
+@media(max-width:430px){.publisher-content #publisher-plan-form>.publisher-inline{gap:8px}.publisher-content #publisher-plan-form>.publisher-inline>button{font-size:12px;padding-inline:12px}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ body .publisher-content .glass{background:var(--surface)!important;color:var(--text)!important}
+ body .publisher-content .primary{background:var(--surface);color:var(--text)}
+}

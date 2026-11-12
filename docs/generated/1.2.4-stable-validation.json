@@ -1,0 +1,98 @@
+{
+  "version": "1.2.4",
+  "versionCode": 12,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.4",
+  "checks": {
+    "webHelperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "targetedNodeTests": 18,
+    "nodeFailures": 0,
+    "fullSuiteRerun": false,
+    "androidUnitTestsRerun": false,
+    "androidLintReleaseRun": false
+  },
+  "browser": {
+    "scope": "Quick Chromium with local Publisher/auth/API fixtures",
+    "liveAuthTested": false,
+    "productionPublications": false,
+    "physicalDeviceTested": false,
+    "initial": {
+      "background": "rgba(238, 242, 246, 0.25)",
+      "blur": "blur(20px) saturate(1.8) brightness(1.03)",
+      "color": "rgb(37, 49, 59)"
+    },
+    "layouts": [
+      {
+        "width": 320,
+        "height": 568,
+        "overflow": false,
+        "scroller": "auto"
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "overflow": false,
+        "scroller": "auto"
+      },
+      {
+        "width": 1280,
+        "height": 800,
+        "overflow": false,
+        "scroller": "auto"
+      }
+    ],
+    "sharedGlassExtremes": true,
+    "crossTabPreservesForm": true,
+    "loginPasswordKeyAndRecovery": true,
+    "ongoingIdsAndDatesPreserved": true,
+    "newCompletedEpubReview": true,
+    "publishOnlyAfterConfirmation": true,
+    "downloadFilesVerified": [
+      "fixture-existing.epub"
+    ],
+    "toast": {
+      "light": {
+        "background": "rgba(238, 242, 246, 0.776)",
+        "blur": "blur(20px) saturate(1.6)",
+        "color": "rgb(37, 49, 59)"
+      },
+      "dark": {
+        "background": "rgba(17, 22, 28, 0.776)",
+        "blur": "blur(20px) saturate(1.6)",
+        "color": "rgb(230, 237, 243)"
+      }
+    },
+    "fallbackCssBranchForced": true,
+    "reducedMotion": true,
+    "pageErrors": []
+  },
+  "toastSourceAudit": {
+    "sharedRenderer": "dist/app.js toast() -> #toast",
+    "sharedStyles": "dist/toast.css",
+    "allApplicationToastsUseSharedRenderer": true,
+    "parallelNativeToastFound": false,
+    "statusRoleAndLiveRegionPreserved": true,
+    "timerMilliseconds": 3000
+  },
+  "artifact": {
+    "version": "1.2.4",
+    "versionCode": 12,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.4-Karisyono.apk",
+    "apkBytes": 4934059,
+    "apkSha256": "bdf99d6c1440c6819d00e913e732c7225b4e5399dc79c22f831a342460398935",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 109,
+    "skeletonRemoved": true,
+    "classicLoadingLogoPackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false
+  },
+  "physicalDeviceTested": false
+}

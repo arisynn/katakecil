@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Rilis stable 1.2.4: Publisher dan toast kaca | [Android 1.2.4](releases/v1.2.4.md) |
 | Rilis stable 1.2.3: pengaturan kaca dan ambient glow | [Android 1.2.3](releases/v1.2.3.md) |
 | Kebeningan, blur dan ambient Liquid Glass, pratinjau dan backup | [Pengaturan Liquid Glass](liquid-glass-settings.md) |
 | Rilis stable 1.2.1: efek tekan, loading lama dan glow carousel | [Android 1.2.1](releases/v1.2.1.md) |

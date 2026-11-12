@@ -1,8 +1,8 @@
 /* Individual scale leaves layout/position transforms and slider capture intact. */
-body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot){
+body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot,.publisher-download,.publisher-password-toggle,.publisher-text-button){
  transition:scale 190ms cubic-bezier(.34,1.56,.64,1),box-shadow 180ms ease,background-color 160ms ease,color 160ms ease,opacity 160ms ease;
 }
-body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){scale:.965;transition-duration:90ms}
+body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot,.publisher-download,.publisher-password-toggle,.publisher-text-button):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true]){scale:.965;transition-duration:90ms}
 body .primary:active,body .secondary:active,body .reader-tool-actions>button:active{transform:none}
 body :is(.settings-link,.reading-tool-list>button,.tool-grid button,.upload-zone):not(:disabled):is(:active,[data-pressing=true]){background-color:rgba(var(--accent-rgb),.1)}
 /* Liquid specular bloom on glass controls when pressed. */
@@ -20,5 +20,5 @@ body :is(.dialog .primary,.tts-player .primary):not(:disabled):not([aria-disable
 .library-shell .book-carousel .shelf-book.is-current{box-shadow:none}
 .library-shell .book-carousel .shelf-book.is-recycling,.library-shell .book-carousel.is-dragging .shelf-book{transition:none}
 @media(prefers-reduced-motion:reduce){
- body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot),.library-shell .book-carousel .cover-button{transition:none!important;scale:1!important}
+ body :is(.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot,.publisher-download,.publisher-password-toggle,.publisher-text-button),.library-shell .book-carousel .cover-button{transition:none!important;scale:1!important}
 }

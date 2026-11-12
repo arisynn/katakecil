@@ -1,7 +1,7 @@
 // Delegated feedback also covers touch browsers that defer the :active pseudo-class.
 // Never prevent input or capture pointers: the carousel/reader own their gestures.
 export function installPressFeedback(doc){
- const supported='.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot,.cover-button';
+ const supported='.primary,.secondary,.icon-button,.header-back,.settings-link,.app-select-trigger,.app-color-trigger,.toc-item,.tab,.segmented button,.tool-grid button,.reading-tool-list>button,.reader-tool-actions>button,.upload-zone,.shelf-dot,.cover-button,.publisher-download,.publisher-password-toggle,.publisher-text-button';
  const glassSurface='.read-button,.library-header-actions,.shelf-navigation,.reading-status,.shelf-action,.glass,.settings-surface,.dialog,.app-picker';
  const win=doc.defaultView;
  const reducedMotion=()=>win?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;

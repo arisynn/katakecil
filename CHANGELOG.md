@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.4 Stable — Publisher dan toast kaca (12 November 2026)
+
+- Hubungkan panel login, daftar buku, editor dan pemulihan kata sandi Publisher ke preferensi kaca/ambient global; rapikan input, judul bagian dan tombol HP.
+- Samakan respons tekan tombol Publisher dan pertahankan judul halaman saat sinkronisasi preferensi.
+- Perbarui toast termasuk “Backup saved” dengan kaca sesuai tema dan lapisan dasar yang menjaga keterbacaan.
+- Rilis APK versionCode 12 dengan package/signer yang sama. [Catatan rilis serta daftar uji HP](docs/releases/v1.2.4.md).
+
 ## 1.2.3 Stable — Pengaturan kaca dan ambient glow (12 November 2026)
 
 - Rilis APK versionCode 11 dengan package dan sertifikat Karisyono yang sama.

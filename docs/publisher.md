@@ -1,5 +1,15 @@
 # Publisher dan ekspor file
 
+## Tampilan 1.2.4
+
+Panel login, pemulihan kata sandi, daftar buku dan editor memakai kelas permukaan kaca bersama; kebeningan, blur, tema dan ambient mengikuti Pengaturan → Liquid Glass. Kolom input dan kontrol kecil tidak menambahkan blur kedua. Judul bagian jadwal/bab, tombol responsif dan respons tekan mengikuti gaya aplikasi; preferensi yang disinkronkan tidak mengganti form atau menghapus teks yang sedang diisi.
+
+Toast aplikasi, termasuk “Backup saved”, mengikuti tema dan ambient dengan backing 70–100% untuk keterbacaan. Pengaturan blur tetap dipakai; timer dan role status/aria-live yang sudah ada dipertahankan. Fallback tanpa backdrop blur memakai latar solid.
+
+[Rilis 1.2.4 dan daftar uji HP](releases/v1.2.4.md) · [Bukti pemeriksaan](generated/1.2.4-stable-validation.json). Uji UI memakai auth dan API fixture lokal; tidak mengubah akun, buku atau jadwal produksi. Riwayat implementasi fungsional berikut dipertahankan.
+
+## Alur publikasi
+
 Buka Settings → Advanced → Publisher. Akun Auth belum dibuat oleh agent: pemilik membuat akun/password melalui Create account, memverifikasi email, lalu masuk. Email pemilik yang disetujui disimpan sebagai hash di server; hanya akun tersebut dengan email terverifikasi dapat memperoleh membership publisher otomatis. Auth mailer confirmation aktif; URL callback sudah diperbarui pengguna dan diverifikasi mengarah ke app. Publisher key lama tetap didukung dan tidak disimpan ke localStorage.
 
 Unggah EPUB untuk buku baru. Pilih Completed untuk menerbitkan seluruh isi sekaligus, atau Ongoing untuk menentukan berapa episode baru yang terbit sekarang dan jarak rilis berikutnya. EPUB satu file yang berisi beberapa bab dipecah agar bab dapat dijadwalkan terpisah. Struktur arc, penekanan teks, gambar tertanam dan cover diproses menggunakan parser EPUB/JSZip yang ada. File asli juga diarsipkan private.

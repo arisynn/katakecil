@@ -1,17 +1,17 @@
 import {createGlassSettings} from './glass-settings.js?v=2';
 import {applyGlassAppearance} from './glass-preferences.js?v=2';
-import {installPressFeedback} from './press-feedback.js?v=2';
+import {installPressFeedback} from './press-feedback.js?v=3';
 import {createShelfCarousel,shelfMode,shelfDots} from './shelf-carousel.js?v=6';
 import {createLocalBooks} from './local-books.js?v=1';
 import {createSpeedReading} from './speed-reading.js?v=4';
-import {createPublisher} from './publisher.js?v=3';
+import {createPublisher} from './publisher.js?v=4';
 import {loadingPreviews} from './loading-previews.js?v=4';
 import {loadingLogo} from './loading-logo.js?v=3';
 import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
 import {layoutDialog,installAccordionReveal,scheduleSheetFit} from './panel-layout.js?v=5';
-import {APP_INFO} from './app-info.js?v=8';
+import {APP_INFO} from './app-info.js?v=9';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=5';
 import {installAppPopups} from './app-popups.js?v=15';
@@ -92,7 +92,7 @@ function applyPreferences(){
  features.apply();void updateSystemTheme(palette.dark).catch(()=>{});void rememberLaunchAppearance(p().themeMode||'light',palette.background,accent,palette.dark).catch(()=>{});
 }
 function shell(content,page='library'){
- return `<main class="personal-shell ${page==='library'?'library-shell':'settings-shell'}">${content}</main>`;
+ return `<main class="personal-shell ${page==='library'?'library-shell':'settings-shell'}${page==='publisher'?' publisher-shell':''}">${content}</main>`;
 }
 function genericCover(title,author=''){
  const words=title.slice(0,70).split(' '),lines=[''];for(const word of words){if((lines.at(-1)+' '+word).length>17)lines.push(word);else lines[lines.length-1]+=(lines.at(-1)?' ':'')+word;}
@@ -557,7 +557,7 @@ Store.onSync((kind,payload)=>{
  else if(view==='library'&&$('#shelf-action'))$('#shelf-action').innerHTML=shelfAction();
 });
 try{const channel=new BroadcastChannel('lumina-library');channel.onmessage=async()=>{const stored=await Store.dbGetAll('books');books=[...books.filter(b=>b.source!=='local'),...stored.filter(b=>b.source==='local')];if(currentBook?.source==='local'&&!books.some(b=>b.id===currentBook.id)){navigateLibrary();return;}if(view==='library')renderLibrary();};}catch{}
-function syncAppTitle(){const title=view==='settings'?translatePhrase('Pengaturan'):view==='loading'?translatePhrase('Membuka buku…'):view==='reader'&&currentBook?currentBook.title:'Library';const next=title+' · KataKecil';if(document.title!==next)document.title=next;}
+function syncAppTitle(){const title=view==='settings'?translatePhrase('Pengaturan'):view==='publisher'?'Publisher':view==='loading'?translatePhrase('Membuka buku…'):view==='reader'&&currentBook?currentBook.title:'Library';const next=title+' · KataKecil';if(document.title!==next)document.title=next;}
 startUiTranslations(syncAppTitle);
 let appActive=document.visibilityState!=='hidden';
 function appActivity(active){
