@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
+import id.karisyono.katakecil.ui.components.WebTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,6 +80,7 @@ fun PublisherScreen(
     var authTab by remember { mutableStateOf("login") }
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var publisherKeyInput by remember { mutableStateOf("") }
 
     var isBusy by remember { mutableStateOf(false) }
@@ -163,72 +164,19 @@ fun PublisherScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
         ) {
-            // Top bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    GlassIconButton(
-                        iconName = "back",
-                        contentDescription = I18n.t("Kembali", "Back", lang),
-                        onClick = {
-                            if (activeBookDetail != null) {
-                                activeBookDetail = null
-                                importedParts = emptyList()
-                            } else {
-                                onBack()
-                            }
-                        }
-                    )
-                    Column {
-                        Text(
-                            text = "Publisher Studio",
-                            color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 21.sp
-                        )
-                        if (isSignedIn) {
-                            Text(
-                                text = publisherClient.currentUserEmail,
-                                color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.Ui,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-
-                if (isSignedIn) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        GlassIconButton(
-                            iconName = "refresh",
-                            contentDescription = "Muat ulang",
-                            onClick = ::loadBooksList
-                        )
-                        GlassPillButton(
-                            text = I18n.t("Keluar", "Sign out", lang),
-                            onClick = {
-                                scope.launch {
-                                    publisherClient.logout()
-                                    isSignedIn = false
-                                    activeBookDetail = null
-                                    books = emptyList()
-                                }
-                            }
-                        )
-                    }
+            id.karisyono.katakecil.ui.components.WebPageHeading("Publisher",
+                if (activeBookDetail == null) I18n.t("Pengaturan", "Settings", lang) else I18n.t("Buku", "Books", lang), {
+                    if (activeBookDetail != null) { activeBookDetail = null; importedParts = emptyList() } else onBack()
+                })
+            if (isSignedIn && activeBookDetail == null) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    GlassPillButton(I18n.t("Unggah EPUB", "Upload EPUB", lang), { activeBookDetail = null; chapterFilePicker.launch(arrayOf("application/epub+zip", "application/octet-stream")) }, Modifier.weight(1f), leadingIcon = "upload", primary = true, enabled = !isBusy)
+                    GlassIconButton("refresh", I18n.t("Segarkan", "Refresh", lang), { if (!isBusy) loadBooksList() })
+                    GlassIconButton("back", I18n.t("Keluar", "Sign out", lang), { if (!isBusy) scope.launch { publisherClient.logout(); isSignedIn = false; activeBookDetail = null; books = emptyList() } })
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             if (errorMessage != null) {
                 GlassSurface(
@@ -253,7 +201,7 @@ fun PublisherScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        LoadingWordmark(caption = "Memproses Publisher…")
+                        LoadingWordmark()
                     }
                 }
 
@@ -262,10 +210,10 @@ fun PublisherScreen(
                         cornerRadius = 26.dp,
                         elevated = true,
                         contentPadding = PaddingValues(22.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                             LiquidGlassTabs(
@@ -322,7 +270,8 @@ fun PublisherScreen(
                                         value = passwordInput,
                                         onValueChange = { passwordInput = it },
                                         singleLine = true,
-                                        visualTransformation = PasswordVisualTransformation(),
+                                        visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                                        trailingIcon = { GlassIconButton(if (passwordVisible) "eyeOff" else "eye", I18n.t("Tampilkan/sembunyikan kata sandi", "Show/hide password", lang), { passwordVisible = !passwordVisible }, size = 36.dp, iconSize = 18.dp) },
                                         label = { Text(I18n.t("Kata sandi", "Password", lang)) },
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -616,85 +565,24 @@ fun PublisherScreen(
                 }
 
                 else -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "${books.size} Buku di Katalog Publisher",
-                            color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.5.sp
-                        )
-                        GlassPillButton(
-                            text = I18n.t("Buku Baru (EPUB)", "New Book (EPUB)", lang),
-                            leadingIcon = "plus",
-                            primary = true,
-                            onClick = {
-                                activeBookDetail = null
-                                chapterFilePicker.launch(arrayOf("application/epub+zip", "application/octet-stream", "*/*"))
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(books, key = { it.id }) { item ->
-                            GlassSurface(
-                                cornerRadius = 20.dp,
-                                contentPadding = PaddingValues(14.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        scope.launch {
-                                            isBusy = true
-                                            errorMessage = null
-                                            runCatching {
-                                                publisherClient.fetchBookDetail(item.id)
-                                            }.onSuccess {
-                                                activeBookDetail = it
-                                            }.onFailure {
-                                                errorMessage = it.message
-                                            }
-                                            isBusy = false
+                    GlassSurface(cornerRadius = 20.dp, contentPadding = PaddingValues(14.dp), modifier = Modifier.fillMaxWidth()) {
+                        LazyColumn(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                            items(books, key = { it.id }) { item ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    BookCoverView(item.title, item.author, item.cover_url, Modifier.width(48.dp).height(74.dp), cornerRadius = 4.dp)
+                                    Column(Modifier.weight(1f)) {
+                                        Text(item.title, color = palette.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                        Text(item.status.replaceFirstChar { it.uppercase() }, color = palette.textMuted, fontSize = 11.sp)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            GlassPillButton(I18n.t("Perbarui", "Update", lang), {
+                                                scope.launch { isBusy = true; errorMessage = null
+                                                    runCatching { publisherClient.fetchBookDetail(item.id) }.onSuccess { activeBookDetail = it }.onFailure { errorMessage = it.message }; isBusy = false }
+                                            }, leadingIcon = "edit")
+                                            GlassPillButton("EPUB", {
+                                                scope.launch { isBusy = true; errorMessage = null
+                                                    runCatching { publisherClient.downloadPublisherEpub(item.id) }.onSuccess { onExportPublisherEpub("${item.title}.epub", it) }.onFailure { errorMessage = it.message }; isBusy = false }
+                                            }, leadingIcon = "download")
                                         }
-                                    }
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                                ) {
-                                    BookCoverView(
-                                        title = item.title,
-                                        author = item.author,
-                                        coverUrl = item.cover_url,
-                                        cornerRadius = 10.dp,
-                                        modifier = Modifier
-                                            .width(54.dp)
-                                            .height(80.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = item.title,
-                                            color = palette.textPrimary,
-                                            fontFamily = KataKecilFonts.Ui,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 16.sp,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = "${item.author} · ${item.status.uppercase()}",
-                                            color = palette.textSecondary,
-                                            fontFamily = KataKecilFonts.Ui,
-                                            fontSize = 12.5.sp
-                                        )
                                     }
                                 }
                             }

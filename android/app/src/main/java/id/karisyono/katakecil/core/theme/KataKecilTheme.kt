@@ -110,6 +110,11 @@ object KataKecilThemeTokens {
         AccentPreset("graphite", "Graphite", "Graphite", "#58616e", Color(0xFF58616E))
     )
 
+    fun webMix(background: Color, ink: Color, amount: Float): Color {
+        fun channel(a: Float, b: Float) = kotlin.math.round((a * (1 - amount) + b * amount) * 255).toInt().coerceIn(0, 255)
+        return Color(channel(background.red, ink.red), channel(background.green, ink.green), channel(background.blue, ink.blue))
+    }
+
     fun highlightColor(name: String, isDark: Boolean): Color {
         return when (name.lowercase()) {
             "emerald" -> if (isDark) Color(0x66589E72) else Color(0x99A4C9AE)
@@ -218,7 +223,7 @@ object KataKecilThemeTokens {
                 val customInk = parseHexColor(settings.customTextColor, Color(0xFF1F2933))
                 val customBg = parseHexColor(settings.customBackgroundColor, Color(0xFFF7F4EB))
                 if (contrastRatio(customInk, customBg) >= 4.5) {
-                    val dark = relativeLuminance(customBg) < 0.28
+                    val dark = (customBg.red * .2126f + customBg.green * .7152f + customBg.blue * .0722f) * 255 < 110
                     PaletteBase(
                         bg = customBg,
                         surface = customBg,
@@ -271,16 +276,16 @@ object KataKecilThemeTokens {
             id = effectiveGlobalMode,
             isDark = isDarkGlobal,
             background = bg,
-            surface = androidx.compose.ui.graphics.lerp(bg, textPrimary, .035f),
-            surfaceElevated = androidx.compose.ui.graphics.lerp(bg, textPrimary, .035f),
+            surface = webMix(bg, textPrimary, .035f),
+            surfaceElevated = webMix(bg, textPrimary, .035f),
             textPrimary = textPrimary,
-            textSecondary = androidx.compose.ui.graphics.lerp(bg, textPrimary, .64f),
-            textMuted = androidx.compose.ui.graphics.lerp(bg, textPrimary, .64f),
+            textSecondary = webMix(bg, textPrimary, .64f),
+            textMuted = webMix(bg, textPrimary, .64f),
             readingPaper = readingPaper,
             readingText = readingInk,
             readingMuted = readingInk.copy(alpha = 0.62f),
             accent = accent,
-            border = androidx.compose.ui.graphics.lerp(bg, textPrimary, .14f),
+            border = webMix(bg, textPrimary, .14f),
             glassFillAlpha = glassFillAlpha,
             glassBlurDp = glassBlurDp,
             ambientIntensity = ambientIntensity
@@ -296,6 +301,8 @@ object KataKecilThemeTokens {
         val ink: Color
     )
 }
+
+val LocalUiLanguage = staticCompositionLocalOf { "en" }
 
 val LocalKataKecilPalette = staticCompositionLocalOf {
     KataKecilThemeTokens.resolvePalette(DeviceSettings(), systemDark = false)
@@ -330,7 +337,7 @@ fun KataKecilTheme(
         )
     }
 
-    CompositionLocalProvider(LocalKataKecilPalette provides palette) {
+    CompositionLocalProvider(LocalKataKecilPalette provides palette, LocalUiLanguage provides settings.uiLanguage) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = androidx.compose.material3.Typography().let { t ->

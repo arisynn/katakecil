@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "id.karisyono.katakecil.nativeapp",
+  "variant": "native",
+  "version": "1.2.4-native.3",
+  "versionCode": 14,
+  "releaseTag": "v1.2.4-native.3",
+  "releaseStatus": "prerelease",
+  "signedApk": {
+    "file": "KataKecil.apk",
+    "bytes": 9754556,
+    "sha256": "b3cd3e43bdbc79b99201b979681c7f3e9a3331690714b3f237eb1e7c702bf75b"
+  },
+  "qaPerformed": false,
+  "webReference": "8185ce3c8c4a130da7c26395710eca1a27df8d57",
+  "buildTasks": [
+    "assembleRelease"
+  ],
+  "signatureAndAlignmentVerified": true
+}

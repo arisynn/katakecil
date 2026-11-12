@@ -20,6 +20,12 @@ QA HP oleh pemilik. Proses rilis hanya kompilasi, identitas paket, tanda tangan,
 - Contents memakai header/tab tetap dan konten setengah layar. Appearance menggunakan tiga tab, grid ringkas dan dialog tema kustom.
 - Slider dan tab mengikuti drag langsung; release/cancel mengakhiri pratinjau, tanpa timer. Reset teks/layout memakai konfirmasi dan tidak menyentuh tema/data.
 
-## Berikutnya
+## Preview 3 — Publisher dan dialog pendukung
 
-Preview 3 menyelesaikan Publisher, color picker, About, updater dan dialog pendukung.
+- Publisher memakai padding, header, input dan daftar buku yang seragam dengan UI lainnya; login memiliki kontrol visibilitas kata sandi.
+- Color picker memakai hue ring dan kotak saturasi/kecerahan, ukuran adaptif dan input HEX tanpa autofocus. Pemilih tema memakai tile; tema kustom tetap berupa dialog.
+- About menampilkan wordmark asli. Impor, backup, penyimpanan, notes dan reading tools menggunakan sheet bersama. Hapus EPUB pribadi meminta konfirmasi.
+- Updater menjaga aksi di atas changelog yang bergulir, memisahkan unduh dari pemasangan, dan menghormati opsi preview. Animasi pergantian halaman mengikuti pengaturan.
+- Warna campuran menggunakan interpolasi kanal sRGB seperti CSS; bahasa tombol tutup mengikuti bahasa UI.
+
+Ketiga tahap diimplementasikan dan diterbitkan sebagai prerelease native terpisah. Tidak ada QA visual/perangkat dalam sesi ini; pemilik menilai tampilan dan interaksi di Android. Build release dan pemeriksaan artefak tidak membuktikan semua interaksi benar pada semua perangkat.

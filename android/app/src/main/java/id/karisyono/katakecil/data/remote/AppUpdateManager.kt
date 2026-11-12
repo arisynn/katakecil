@@ -36,7 +36,7 @@ class AppUpdateManager(private val context: Context) {
         const val MAX_APK_BYTES = 150L * 1024L * 1024L // 150 MB
     }
 
-    suspend fun checkForUpdates(includePreview: Boolean = false): UpdateReleaseInfo =
+    suspend fun checkForUpdates(includePreview: Boolean = BuildConfig.VERSION_NAME.contains("-")): UpdateReleaseInfo =
         withContext(Dispatchers.IO) {
             val conn = (URL(RELEASES_URL).openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"

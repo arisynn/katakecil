@@ -46,7 +46,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.OutlinedTextField
+import id.karisyono.katakecil.ui.components.WebTextField as OutlinedTextField
 import id.karisyono.katakecil.ui.components.WebSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -645,209 +645,79 @@ fun BookCoverView(
  * Interactive HSV Color Wheel + Brightness + Hex Input dialog (port of dist/app-popups.js).
  */
 @Composable
-fun ColorWheelPickerDialog(
-    title: String,
-    initialHex: String,
-    onDismiss: () -> Unit,
-    onColorSelected: (String) -> Unit
-) {
+fun ColorWheelPickerDialog(title: String, initialHex: String, onDismiss: () -> Unit, onColorSelected: (String) -> Unit) {
     val palette = LocalKataKecilPalette.current
-    val initialColor = KataKecilThemeTokens.parseHexColor(initialHex, palette.accent)
-    val hsv = remember(initialHex) {
-        val arr = FloatArray(3)
-        android.graphics.Color.RGBToHSV(
-            (initialColor.red * 255).toInt(),
-            (initialColor.green * 255).toInt(),
-            (initialColor.blue * 255).toInt(),
-            arr
-        )
-        arr
+    val lang = id.karisyono.katakecil.core.theme.LocalUiLanguage.current
+    val initial = remember(initialHex) {
+        FloatArray(3).also { hsv -> android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(KataKecilThemeTokens.colorToHex(KataKecilThemeTokens.parseHexColor(initialHex, palette.accent))), hsv) }
     }
-    var hue by remember { mutableFloatStateOf(hsv[0]) }
-    var saturation by remember { mutableFloatStateOf(hsv[1]) }
-    var value by remember { mutableFloatStateOf(hsv[2].coerceAtLeast(0.15f)) }
-    var hexInput by remember { mutableStateOf(initialHex) }
-
-    fun updateFromHsv(h: Float, s: Float, v: Float) {
-        val argb = android.graphics.Color.HSVToColor(floatArrayOf(h, s, v))
-        val c = Color(argb)
-        hexInput = KataKecilThemeTokens.colorToHex(c)
+    var hue by remember { mutableFloatStateOf(initial[0]) }
+    var saturation by remember { mutableFloatStateOf(initial[1]) }
+    var brightness by remember { mutableFloatStateOf(initial[2]) }
+    var hex by remember { mutableStateOf(initialHex) }
+    fun sync() { hex = String.format("#%06x", android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, brightness)) and 0xffffff) }
+    val normalized = hex.trim().let { if (it.startsWith("#")) it else "#$it" }
+    val valid = normalized.matches(Regex("#[a-fA-F0-9]{6}"))
+    @Composable fun Wheel(side: Dp) {
+        Box(Modifier.size(side), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures { pos -> hue = ((atan2(pos.y - size.height / 2f, pos.x - size.width / 2f) * 180f / PI.toFloat()) + 360) % 360; sync() }
+            }.pointerInput(Unit) {
+                detectDragGestures { event, _ -> event.consume(); hue = ((atan2(event.position.y - size.height / 2f, event.position.x - size.width / 2f) * 180f / PI.toFloat()) + 360) % 360; sync() }
+            }) {
+                val center = Offset(size.width / 2, size.height / 2)
+                val ringWidth = size.minDimension * .09f
+                val radius = size.minDimension / 2 - ringWidth / 2 - 2.dp.toPx()
+                drawCircle(Brush.sweepGradient(listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red), center), radius, center, style = Stroke(ringWidth))
+                val angle = hue * PI.toFloat() / 180
+                val point = Offset(center.x + cos(angle) * radius, center.y + sin(angle) * radius)
+                drawCircle(Color.Black.copy(alpha = .25f), 8.dp.toPx(), point)
+                drawCircle(Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 1f, 1f))), 6.dp.toPx(), point)
+                drawCircle(Color.White, 6.dp.toPx(), point, style = Stroke(2.dp.toPx()))
+            }
+            Canvas(Modifier.size(side * .57f).pointerInput(Unit) {
+                detectTapGestures { pos -> saturation = (pos.x / size.width).coerceIn(0f, 1f); brightness = (1 - pos.y / size.height).coerceIn(0f, 1f); sync() }
+            }.pointerInput(Unit) {
+                detectDragGestures { event, _ -> event.consume(); saturation = (event.position.x / size.width).coerceIn(0f, 1f); brightness = (1 - event.position.y / size.height).coerceIn(0f, 1f); sync() }
+            }) {
+                drawRect(Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 1f, 1f))))
+                drawRect(Brush.horizontalGradient(listOf(Color.White, Color.Transparent)))
+                drawRect(Brush.verticalGradient(listOf(Color.Transparent, Color.Black)))
+                val point = Offset(saturation * size.width, (1 - brightness) * size.height)
+                drawCircle(Color.Black.copy(alpha = .5f), 7.dp.toPx(), point)
+                drawCircle(Color.White, 5.dp.toPx(), point, style = Stroke(2.dp.toPx()))
+            }
+        }
     }
-
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
+    @Composable fun HexField() {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(38.dp).clip(RoundedCornerShape(10.dp)).background(Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, brightness)))))
+            OutlinedTextField(hex, { text ->
+                if (text.length <= 7) hex = text
+                val value = text.trim().let { if (it.startsWith("#")) it else "#$it" }
+                if (value.matches(Regex("#[a-fA-F0-9]{6}"))) {
+                    val hsv = FloatArray(3); android.graphics.Color.colorToHSV(android.graphics.Color.parseColor(value), hsv)
+                    hue = hsv[0]; saturation = hsv[1]; brightness = hsv[2]
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // HSV Color Wheel Canvas
-                Box(
-                    modifier = Modifier.size(190.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                detectTapGestures { pos ->
-                                    val cx = size.width / 2f
-                                    val cy = size.height / 2f
-                                    val dx = pos.x - cx
-                                    val dy = pos.y - cy
-                                    val r = min(cx, cy)
-                                    val dist = min(1f, hypot(dx, dy) / r)
-                                    val deg = ((atan2(dy, dx) * 180f / PI.toFloat()) + 360f) % 360f
-                                    hue = deg
-                                    saturation = dist
-                                    updateFromHsv(hue, saturation, value)
-                                }
-                            }
-                            .pointerInput(Unit) {
-                                detectDragGestures { change, _ ->
-                                    change.consume()
-                                    val cx = size.width / 2f
-                                    val cy = size.height / 2f
-                                    val dx = change.position.x - cx
-                                    val dy = change.position.y - cy
-                                    val r = min(cx, cy)
-                                    val dist = min(1f, hypot(dx, dy) / r)
-                                    val deg = ((atan2(dy, dx) * 180f / PI.toFloat()) + 360f) % 360f
-                                    hue = deg
-                                    saturation = dist
-                                    updateFromHsv(hue, saturation, value)
-                                }
-                            }
-                    ) {
-                        val radius = size.minDimension / 2f
-                        val center = Offset(size.width / 2f, size.height / 2f)
-                        val sweepColors = listOf(
-                            Color.Red, Color.Yellow, Color.Green,
-                            Color.Cyan, Color.Blue, Color.Magenta, Color.Red
-                        )
-                        drawCircle(
-                            brush = Brush.sweepGradient(sweepColors, center),
-                            radius = radius,
-                            center = center
-                        )
-                        drawCircle(
-                            brush = Brush.radialGradient(
-                                listOf(Color.White, Color.Transparent),
-                                center = center,
-                                radius = radius
-                            ),
-                            radius = radius,
-                            center = center
-                        )
-
-                        val rad = (hue * PI / 180.0).toFloat()
-                        val thumbX = center.x + cos(rad) * saturation * radius
-                        val thumbY = center.y + sin(rad) * saturation * radius
-                        val currentColor = KataKecilThemeTokens.parseHexColor(hexInput, palette.accent)
-                        drawCircle(
-                            color = currentColor,
-                            radius = 11.dp.toPx(),
-                            center = Offset(thumbX, thumbY)
-                        )
-                        drawCircle(
-                            color = Color.White,
-                            radius = 11.dp.toPx(),
-                            center = Offset(thumbX, thumbY),
-                            style = Stroke(width = 2.5.dp.toPx())
-                        )
-                    }
+            }, Modifier.weight(1f), singleLine = true, label = { Text("Hex color") }, isError = !valid)
+        }
+    }
+    WebBottomSheet(title, onDismiss, footer = {
+        Spacer(Modifier.height(12.dp))
+        GlassPillButton(id.karisyono.katakecil.core.i18n.I18n.t("Terapkan", "Apply", lang), { if (valid) onColorSelected(normalized.lowercase()) }, Modifier.fillMaxWidth(), primary = true, enabled = valid)
+    }) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val body = webPanelBodyHeight()
+            val availableWidth = maxWidth
+            if (body < 230.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Wheel(minOf(availableWidth * .38f, body - 8.dp).coerceAtLeast(64.dp))
+                    Column(Modifier.weight(1f)) { HexField() }
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Value / Brightness slider
-                Slider(
-                    value = value,
-                    onValueChange = {
-                        value = it
-                        updateFromHsv(hue, saturation, value)
-                    },
-                    valueRange = 0.08f..1f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = palette.accent,
-                        activeTrackColor = palette.accent
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    val previewColor = KataKecilThemeTokens.parseHexColor(hexInput, palette.accent)
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(previewColor)
-                            .border(1.dp, palette.border, RoundedCornerShape(12.dp))
-                    )
-                    OutlinedTextField(
-                        value = hexInput,
-                        onValueChange = { next ->
-                            hexInput = next
-                        },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        label = { Text("HEX (#RRGGBB)") }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    GlassPillButton(
-                        text = "Batal",
-                        onClick = onDismiss
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    GlassPillButton(
-                        text = "Simpan",
-                        primary = true,
-                        onClick = {
-                            val normalized = if (hexInput.startsWith("#")) hexInput else "#$hexInput"
-                            val validColor = KataKecilThemeTokens.parseHexColor(normalized, initialColor)
-                            onColorSelected(KataKecilThemeTokens.colorToHex(validColor))
-                        }
-                    )
+            } else {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Wheel(minOf(availableWidth, body - 88.dp, 280.dp).coerceAtLeast(96.dp))
+                    Spacer(Modifier.height(8.dp)); HexField()
                 }
             }
         }

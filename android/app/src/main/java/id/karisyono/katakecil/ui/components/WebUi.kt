@@ -189,6 +189,7 @@ fun WebBottomSheet(
     previewLabel: String? = null,
     headerContent: @Composable ColumnScope.() -> Unit = {},
     footer: @Composable ColumnScope.() -> Unit = {},
+    scrollable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
@@ -200,11 +201,11 @@ fun WebBottomSheet(
             Column(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).alpha(if (previewLabel == null) 1f else .04f), verticalAlignment = Alignment.CenterVertically) {
                     Text(title, Modifier.weight(1f), color = palette.textPrimary, fontFamily = KataKecilFonts.Ui, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
-                    GlassIconButton("close", closeLabel, onDismiss)
+                    GlassIconButton("close", if (closeLabel == "Close") id.karisyono.katakecil.core.i18n.I18n.t("Tutup", "Close", id.karisyono.katakecil.core.theme.LocalUiLanguage.current) else closeLabel, onDismiss)
                 }
                 Column(Modifier.alpha(if (previewLabel == null) 1f else .04f), content = headerContent)
                 CompositionLocalProvider(LocalPreviewSlider provides previewLabel) {
-                    Column(Modifier.fillMaxWidth().heightIn(max = webPanelBodyHeight()).verticalScroll(rememberScrollState()),
+                    Column(Modifier.fillMaxWidth().heightIn(max = webPanelBodyHeight()).then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier),
                         verticalArrangement = Arrangement.spacedBy(14.dp), content = content)
                 }
                 footer()

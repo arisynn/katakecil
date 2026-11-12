@@ -1,10 +1,17 @@
 package id.karisyono.katakecil.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.karisyono.katakecil.core.i18n.I18n
@@ -12,6 +19,37 @@ import id.karisyono.katakecil.core.model.DeviceSettings
 import id.karisyono.katakecil.core.theme.KataKecilFonts
 import id.karisyono.katakecil.core.theme.KataKecilThemeTokens
 import id.karisyono.katakecil.core.theme.LocalKataKecilPalette
+
+@Composable
+fun WebThemeChoices(settings: DeviceSettings, onSelected: (String) -> Unit) {
+    val palette = LocalKataKecilPalette.current
+    val lang = settings.uiLanguage
+    val options = listOf("light", "dark", "system", "sepia", "paper", "green", "custom")
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.chunked(4).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { mode ->
+                    val sample = KataKecilThemeTokens.resolvePalette(settings.copy(themeMode = mode), palette.isDark)
+                    val label = when (mode) {
+                        "light" -> I18n.t("Terang", "Light", lang); "dark" -> I18n.t("Gelap", "Dark", lang)
+                        "system" -> I18n.t("Sistem", "System", lang); "paper" -> I18n.t("Kertas", "Paper", lang)
+                        "green" -> I18n.t("Hijau", "Green", lang); "custom" -> I18n.t("Kustom", "Custom", lang); else -> "Sepia"
+                    }
+                    Column(Modifier.weight(1f).border(1.dp, if (settings.themeMode == mode) palette.accent else palette.border, RoundedCornerShape(13.dp))
+                        .background(if (settings.themeMode == mode) palette.accent.copy(alpha = .06f) else Color.Transparent, RoundedCornerShape(13.dp))
+                        .clickable { onSelected(mode) }.padding(horizontal = 4.dp, vertical = 9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(Modifier.size(37.dp, 31.dp).background(if (mode == "system") Brush.horizontalGradient(0f to Color(0xFFFAF9F5), .49f to Color(0xFFFAF9F5), .5f to Color(0xFF191D1B), 1f to Color(0xFF191D1B)) else Brush.linearGradient(listOf(sample.readingPaper, sample.readingPaper)), RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                            Text("Aa", color = sample.readingText, fontFamily = KataKecilFonts.Lora, fontSize = 18.sp)
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text(label, color = if (settings.themeMode == mode) palette.accent else palette.textPrimary, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+                repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
 
 @Composable
 fun CustomThemeEditor(settings: DeviceSettings, onUpdateSettings: ((DeviceSettings) -> DeviceSettings) -> Unit, onDismiss: () -> Unit) {

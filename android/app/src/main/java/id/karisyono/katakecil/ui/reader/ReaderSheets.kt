@@ -27,7 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
+import id.karisyono.katakecil.ui.components.WebTextField as OutlinedTextField
 import id.karisyono.katakecil.ui.components.WebSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -611,12 +611,8 @@ fun ReadingAppearanceSheetDialog(
                 SettingToggleRow(I18n.t("Layar tetap menyala", "Keep screen awake", lang), settings.wakeLock) { enabled -> onUpdateSettings { it.copy(wakeLock = enabled) } }
             }
             "theme" -> {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("light" to "sun", "dark" to "moon", "system" to "device", "sepia" to "sepia", "paper" to "paper", "green" to "leaf", "custom" to "palette").forEach { (mode, icon) ->
-                        GlassPillButton(mode.replaceFirstChar { it.uppercase() }, {
-                            if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode, readerTheme = "follow") }
-                        }, leadingIcon = icon, primary = settings.themeMode == mode)
-                    }
+                id.karisyono.katakecil.ui.components.WebThemeChoices(settings) { mode ->
+                    if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode, readerTheme = "follow") }
                 }
             }
         }
@@ -657,37 +653,8 @@ fun ReadingToolsSheetDialog(
     val estMinutes = ceil(wordsCount / 220.0).toInt().coerceAtLeast(1)
     var pageInput by remember { mutableStateOf("${currentPageIndex + 1}") }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Alat Baca", "Reading Tools", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Alat baca", "Reading tools", lang), onDismiss) {
+
 
                 // Episode Stats Banner
                 Row(
@@ -783,8 +750,7 @@ fun ReadingToolsSheetDialog(
                         )
                     }
                 }
-            }
-        }
+
     }
 }
 
@@ -803,36 +769,8 @@ fun EpisodeSearchDialog(
     val palette = LocalKataKecilPalette.current
     var query by remember { mutableStateOf(initialQuery) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 520.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Cari di Episode", "Search in Episode", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Cari di episode", "Search episode", lang), onDismiss) {
+
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -860,7 +798,7 @@ fun EpisodeSearchDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyColumn(
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier.heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()).weight(1f, fill = false),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(matches, key = { it.index }) { match ->
@@ -895,8 +833,7 @@ fun EpisodeSearchDialog(
                         }
                     }
                 }
-            }
-        }
+
     }
 }
 
@@ -1193,39 +1130,8 @@ fun ReadAloudSheetDialog(
 ) {
     val palette = LocalKataKecilPalette.current
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 540.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Baca Nyaring (TTS)", "Read Aloud (TTS)", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Baca lantang", "Read aloud", lang), onDismiss) {
+
 
                 if (ttsState.currentParagraphPreview.isNotBlank()) {
                     Text(
@@ -1317,7 +1223,7 @@ fun ReadAloudSheetDialog(
 
                 if (filteredVoices.isNotEmpty()) {
                     LazyColumn(
-                        modifier = Modifier.heightIn(max = 160.dp),
+                        modifier = Modifier.heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()).heightIn(max = 160.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         items(filteredVoices, key = { it.id }) { voice ->
@@ -1353,8 +1259,7 @@ fun ReadAloudSheetDialog(
                         }
                     }
                 }
-            }
-        }
+
     }
 }
 
@@ -1424,39 +1329,8 @@ fun WordToolsDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 560.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Alat Kata", "Word Tools", uiLanguage),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Alat kata", "Word tools", uiLanguage), onDismiss) {
+
 
                 LiquidGlassTabs(
                     tabs = listOf(
@@ -1530,7 +1404,7 @@ fun WordToolsDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f, fill = false)
-                                    .verticalScroll(rememberScrollState()),
+                                    ,
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
@@ -1662,8 +1536,7 @@ fun WordToolsDialog(
                         }
                     }
                 }
-            }
-        }
+
     }
 }
 
@@ -1683,82 +1556,22 @@ fun NoteEditorDialog(
     var noteText by remember { mutableStateOf(initialNote) }
     var color by remember { mutableStateOf(initialColor) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = I18n.t("Catatan & Sorotan", "Note & Highlight", lang),
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp
-                )
-
-                if (selectedText.isNotBlank()) {
-                    Text(
-                        text = "“$selectedText”",
-                        color = palette.textSecondary,
-                        fontFamily = KataKecilFonts.Lora,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 13.5.sp,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    listOf("amber", "emerald", "sapphire", "rose").forEach { c ->
-                        val swatch = KataKecilThemeTokens.highlightSwatchColor(c)
-                        val selected = color == c
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .background(swatch)
-                                .border(
-                                    width = if (selected) 2.5.dp else 1.dp,
-                                    color = if (selected) palette.accent else Color.White,
-                                    shape = CircleShape
-                                )
-                                .clickable { color = c }
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = noteText,
-                    onValueChange = { noteText = it },
-                    minLines = 3,
-                    maxLines = 6,
-                    label = { Text(I18n.t("Tulis catatan Anda…", "Write your note…", lang)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    GlassPillButton(
-                        text = I18n.t("Batal", "Cancel", lang),
-                        onClick = onDismiss
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    GlassPillButton(
-                        text = I18n.t("Simpan", "Save", lang),
-                        primary = true,
-                        onClick = { onSave(color, noteText.trim()) }
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Catatan", "Note", lang), onDismiss,
+        footer = {
+            Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GlassPillButton(I18n.t("Batal", "Cancel", lang), onDismiss, Modifier.weight(1f))
+                GlassPillButton(I18n.t("Simpan", "Save", lang), { onSave(color, noteText.trim()) }, Modifier.weight(1f), primary = true)
+            }
+        }) {
+        if (selectedText.isNotBlank()) Text(selectedText, color = palette.textMuted, fontFamily = KataKecilFonts.Lora, fontSize = 13.sp, maxLines = 3, overflow = TextOverflow.Ellipsis)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            listOf("amber", "emerald", "sapphire", "rose").forEach { name ->
+                Box(Modifier.size(32.dp).clip(CircleShape).background(KataKecilThemeTokens.highlightSwatchColor(name))
+                    .border(if (color == name) 2.dp else 0.dp, palette.accent, CircleShape).clickable { color = name })
             }
         }
+        OutlinedTextField(noteText, { noteText = it }, Modifier.fillMaxWidth(), minLines = 3, maxLines = 6,
+            label = { Text(I18n.t("Catatan", "Note", lang)) })
     }
 }
 

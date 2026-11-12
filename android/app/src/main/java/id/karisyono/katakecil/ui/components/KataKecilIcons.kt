@@ -18,6 +18,8 @@ import id.karisyono.katakecil.core.theme.LocalKataKecilPalette
 
 object KataKecilIcons {
     val Paths = mapOf(
+        "eye" to "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0",
+        "eyeOff" to "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z M3 3l18 18",
         "sun" to "M12 3v1 M12 20v1 M3 12h1 M20 12h1 m-3.6-6.4-.7.7 M6.3 17.7l-.7.7 m0-12.8.7.7 m11.4 11.4.7.7 M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
         "moon" to "M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10",
         "leaf" to "M20 4c0 8-2 15-10 15a6 6 0 0 1-6-6C4 5 12 4 20 4Z M4 20l11-11",

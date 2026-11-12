@@ -319,17 +319,11 @@ private fun GlobalThemeDialog(
     val palette = LocalKataKecilPalette.current
     var showCustom by remember { mutableStateOf(false) }
     id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Tema", "Theme", lang), onDismiss) {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(Triple("light", "sun", I18n.t("Terang", "Light", lang)), Triple("dark", "moon", I18n.t("Gelap", "Dark", lang)),
-                Triple("system", "device", I18n.t("Sistem", "System", lang)), Triple("sepia", "sepia", "Sepia"),
-                Triple("paper", "paper", I18n.t("Kertas", "Paper", lang)), Triple("green", "leaf", I18n.t("Hijau", "Green", lang)),
-                Triple("custom", "palette", I18n.t("Kustom", "Custom", lang))).forEach { (mode, icon, label) ->
-                GlassPillButton(label, { if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode) } }, leadingIcon = icon, primary = settings.themeMode == mode)
-            }
+        id.karisyono.katakecil.ui.components.WebThemeChoices(settings) { mode ->
+            if (mode == "custom") showCustom = true else onUpdateSettings { it.copy(themeMode = mode, readerTheme = "follow") }
         }
     }
-    if (showCustom) ColorWheelPickerDialog(I18n.t("Tema kustom", "Custom theme", lang), settings.customBackgroundColor,
-        { showCustom = false }, { color -> onUpdateSettings { it.copy(themeMode = "custom", customBackgroundColor = color) }; showCustom = false })
+    if (showCustom) id.karisyono.katakecil.ui.components.CustomThemeEditor(settings, onUpdateSettings) { showCustom = false }
 }
 
 /**
@@ -376,134 +370,34 @@ private fun PersonalEpubsDialog(
     onDismiss: () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 560.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("EPUB Pribadi", "Personal EPUBs", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        GlassIconButton(
-                            iconName = "plus",
-                            contentDescription = "Impor EPUB",
-                            size = 34.dp,
-                            iconSize = 16.dp,
-                            onClick = onImportClick
-                        )
-                        GlassIconButton(
-                            iconName = "close",
-                            contentDescription = "Tutup",
-                            size = 34.dp,
-                            iconSize = 16.dp,
-                            onClick = onDismiss
-                        )
-                    }
-                }
-
-                if (localBooks.isEmpty()) {
-                    Text(
-                        text = I18n.t(
-                            "Belum ada EPUB pribadi yang diimpor ke perangkat ini.",
-                            "No personal EPUBs imported on this device yet.",
-                            lang
-                        ),
-                        color = palette.textSecondary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontSize = 13.5.sp
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.weight(1f, fill = false),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(localBooks, key = { it.id }) { book ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(palette.surface.copy(alpha = 0.65f))
-                                    .border(1.dp, palette.border, RoundedCornerShape(16.dp))
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                BookCoverView(
-                                    title = book.title,
-                                    author = book.author,
-                                    coverUrl = book.effectiveCover,
-                                    cornerRadius = 10.dp,
-                                    modifier = Modifier
-                                        .width(56.dp)
-                                        .height(82.dp)
-                                        .clickable { onOpenBook(book) }
-                                )
-
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = book.title,
-                                        color = palette.textPrimary,
-                                        fontFamily = KataKecilFonts.Ui,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 15.sp,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "${book.author} · ${book.chapterCount} ep · ${formatBytes(book.sizeBytes)}",
-                                        color = palette.textSecondary,
-                                        fontFamily = KataKecilFonts.Ui,
-                                        fontSize = 11.5.sp
-                                    )
-                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        GlassPillButton(
-                                            text = I18n.t("Sampul", "Cover", lang),
-                                            onClick = { onReplaceCover(book) }
-                                        )
-                                        if (book.customCoverDataUrl.isNotBlank()) {
-                                            GlassPillButton(
-                                                text = I18n.t("Reset", "Reset", lang),
-                                                onClick = { onResetCover(book) }
-                                            )
-                                        }
-                                        GlassIconButton(
-                                            iconName = "trash",
-                                            contentDescription = "Hapus",
-                                            size = 32.dp,
-                                            iconSize = 15.dp,
-                                            onClick = { onDeleteBook(book) }
-                                        )
-                                    }
-                                }
-                            }
+    var pendingDelete by remember { mutableStateOf<BookMeta?>(null) }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("EPUB pribadi", "Personal EPUBs", lang), onDismiss, scrollable = false,
+        headerContent = { GlassPillButton(I18n.t("Impor EPUB", "Import EPUB", lang), onImportClick, leadingIcon = "upload"); Spacer(Modifier.height(8.dp)) }) {
+        if (localBooks.isEmpty()) Text(I18n.t("Belum ada EPUB pribadi.", "No personal EPUBs yet.", lang), color = palette.textMuted, fontSize = 13.sp)
+        LazyColumn(Modifier.fillMaxWidth().heightIn(max = id.karisyono.katakecil.ui.components.webPanelBodyHeight()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            items(localBooks, key = { it.id }) { book ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    BookCoverView(book.title, book.author, book.effectiveCover, Modifier.width(42.dp).height(64.dp), cornerRadius = 4.dp)
+                    Column(Modifier.weight(1f)) {
+                        Text(book.title, color = palette.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            GlassIconButton("bookOpen", I18n.t("Baca", "Read", lang), { onOpenBook(book) }, size = 34.dp, iconSize = 17.dp)
+                            GlassIconButton("palette", I18n.t("Ganti sampul", "Replace cover", lang), { onReplaceCover(book) }, size = 34.dp, iconSize = 17.dp)
+                            GlassIconButton("refresh", I18n.t("Pulihkan sampul", "Reset cover", lang), { onResetCover(book) }, size = 34.dp, iconSize = 17.dp)
+                            GlassIconButton("trash", I18n.t("Hapus buku", "Delete book", lang), { pendingDelete = book }, size = 34.dp, iconSize = 17.dp)
                         }
                     }
                 }
             }
         }
     }
+    pendingDelete?.let { book ->
+        id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Hapus EPUB pribadi?", "Delete personal EPUB?", lang), { pendingDelete = null }) {
+            Text(book.title, color = palette.textPrimary, fontSize = 14.sp)
+            GlassPillButton(I18n.t("Hapus buku", "Delete book", lang), { onDeleteBook(book); pendingDelete = null }, primary = true)
+        }
+    }
+
 }
 
 @Composable
@@ -517,65 +411,14 @@ private fun DeviceStorageDialog(
     onDismiss: () -> Unit
 ) {
     val palette = LocalKataKecilPalette.current
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = I18n.t("Penyimpanan Perangkat", "Device Storage", lang),
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 19.sp
-                )
-                Text(
-                    text = "ID Perangkat: ${settings.deviceId}",
-                    color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.JetBrainsMono,
-                    fontSize = 11.5.sp
-                )
-                Text(
-                    text = "• ${I18n.t("Total ruang terpakai", "Total space used", lang)}: ${formatBytes(storageBytesUsed)}",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 13.5.sp
-                )
-                Text(
-                    text = "• ${I18n.t("EPUB pribadi", "Personal EPUBs", lang)}: $localBookCount",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 13.5.sp
-                )
-                Text(
-                    text = "• ${I18n.t("Progres buku", "Book progress records", lang)}: $progressCount",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 13.5.sp
-                )
-                Text(
-                    text = "• ${I18n.t("Sorotan, catatan & markah", "Highlights, notes & bookmarks", lang)}: $annotationCount",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 13.5.sp
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    GlassPillButton(
-                        text = I18n.t("Tutup", "Close", lang),
-                        primary = true,
-                        onClick = onDismiss
-                    )
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Penyimpanan perangkat", "Device storage", lang), onDismiss) {
+        listOf(I18n.t("EPUB pribadi", "Personal EPUBs", lang) to localBookCount.toString(),
+            I18n.t("Progres tersimpan", "Saved progress", lang) to progressCount.toString(),
+            I18n.t("Catatan dan sorotan", "Notes & highlights", lang) to annotationCount.toString(),
+            I18n.t("Penyimpanan lokal", "Local storage", lang) to formatBytes(storageBytesUsed)).forEach { (label, value) ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(label, color = palette.textPrimary, fontSize = 13.sp)
+                Text(value, color = palette.textMuted, fontSize = 13.sp)
             }
         }
     }
@@ -600,62 +443,17 @@ private fun AboutLicensesDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.82f)
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "KataKecil v${BuildConfig.VERSION_NAME}",
-                            color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 19.sp
-                        )
-                        Text(
-                            text = "Native Kotlin + Jetpack Compose · Karisyono",
-                            color = palette.textSecondary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontSize = 12.sp
-                        )
-                    }
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Text(
-                        text = attributionsText,
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontSize = 12.5.sp,
-                        lineHeight = 18.sp
-                    )
-                }
-            }
-        }
+    var showLicenses by remember { mutableStateOf(false) }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Tentang aplikasi", "About app", lang), onDismiss) {
+        androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (palette.isDark) id.karisyono.katakecil.R.drawable.katakecil_wordmark_cream else id.karisyono.katakecil.R.drawable.katakecil_wordmark), "KataKecil",
+            Modifier.fillMaxWidth().height(70.dp).padding(horizontal = 20.dp), contentScale = androidx.compose.ui.layout.ContentScale.Fit)
+        Text(I18n.t("Ruang tenang untuk cerita berikutnya.", "A quieter place for your next chapter.", lang), color = palette.textPrimary, fontSize = 14.sp)
+        Text("${BuildConfig.VERSION_NAME} · Android", color = palette.textMuted, fontSize = 12.sp)
+        GlassPillButton(I18n.t("Lisensi open source", "Open-source licenses", lang), { showLicenses = true }, leadingIcon = "notes")
+        GlassPillButton("GitHub", { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/arisynn/katakecil"))) }, leadingIcon = "globe")
+    }
+    if (showLicenses) id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Lisensi", "Licenses", lang), { showLicenses = false }) {
+        Text(attributionsText, color = palette.textPrimary, fontSize = 12.sp, lineHeight = 18.sp)
     }
 }
 
@@ -670,7 +468,7 @@ private fun AppUpdatesDialog(
     val scope = rememberCoroutineScope()
     val updater = remember { AppUpdateManager(context) }
 
-    var includePreview by remember { mutableStateOf(false) }
+    var includePreview by remember { mutableStateOf(BuildConfig.VERSION_NAME.contains("-")) }
     var isChecking by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableIntStateOf(0) }
@@ -682,6 +480,8 @@ private fun AppUpdatesDialog(
         scope.launch {
             isChecking = true
             errorMessage = null
+            releaseInfo = null
+            downloadedState = null
             runCatching {
                 updater.checkForUpdates(includePreview)
             }.onSuccess {
@@ -697,174 +497,34 @@ private fun AppUpdatesDialog(
         checkNow()
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = I18n.t("Pembaruan Aplikasi", "App Updates", lang),
-                        color = palette.textPrimary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 19.sp
-                    )
-                    GlassIconButton(
-                        iconName = "close",
-                        contentDescription = "Tutup",
-                        size = 34.dp,
-                        iconSize = 16.dp,
-                        onClick = onDismiss
-                    )
-                }
-
-                Text(
-                    text = "${I18n.t("Versi terpasang", "Installed version", lang)}: v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                    color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 13.sp
-                )
-
-                SettingToggleRow(
-                    title = I18n.t("Sertakan rilis pratinjau", "Include preview releases", lang),
-                    checked = includePreview,
-                    onCheckedChange = { includePreview = it }
-                )
-
-                when {
-                    isChecking -> Text(
-                        text = I18n.t("Memeriksa rilis GitHub…", "Checking GitHub releases…", lang),
-                        color = palette.textSecondary,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontSize = 13.5.sp
-                    )
-                    errorMessage != null -> Text(
-                        text = errorMessage ?: "",
-                        color = Color(0xFFE76F51),
-                        fontFamily = KataKecilFonts.Ui,
-                        fontSize = 13.sp
-                    )
-                    releaseInfo != null -> {
-                        val info = releaseInfo!!
-                        val statusText = when (info.status) {
-                            "update-available" -> I18n.t(
-                                "Pembaruan tersedia: v${info.latestVersion}",
-                                "Update available: v${info.latestVersion}",
-                                lang
-                            )
-                            "ahead" -> I18n.t(
-                                "Versi lokal lebih baru dari rilis publik (v${info.latestVersion})",
-                                "Local build is ahead of public release (v${info.latestVersion})",
-                                lang
-                            )
-                            else -> I18n.t("Sudah versi terbaru", "Up to date", lang)
-                        }
-                        Text(
-                            text = statusText,
-                            color = if (info.status == "update-available") palette.accent else palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.5.sp
-                        )
-
-                        if (info.releaseNotes.isNotBlank()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = 160.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(palette.surface.copy(alpha = 0.6f))
-                                    .padding(12.dp)
-                                    .verticalScroll(rememberScrollState())
-                            ) {
-                                Text(
-                                    text = info.releaseNotes,
-                                    color = palette.textPrimary,
-                                    fontFamily = KataKecilFonts.Ui,
-                                    fontSize = 12.5.sp
-                                )
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Pembaruan aplikasi", "App updates", lang), onDismiss,
+        headerContent = {
+            Text("${I18n.t("Terpasang", "Installed", lang)}: ${BuildConfig.VERSION_NAME}", color = palette.textMuted, fontSize = 11.sp)
+            SettingToggleRow(I18n.t("Sertakan preview", "Include previews", lang), includePreview) { includePreview = it }
+            if (isChecking) Text(I18n.t("Memeriksa GitHub…", "Checking GitHub…", lang), color = palette.textMuted, fontSize = 12.sp)
+            errorMessage?.let { Text(it, color = palette.textPrimary, fontSize = 12.sp) }
+            GlassPillButton(I18n.t("Periksa ulang", "Recheck", lang), ::checkNow, enabled = !isDownloading && !isChecking, leadingIcon = "refresh")
+            releaseInfo?.let { info ->
+                Text(if (info.status == "update-available") "${I18n.t("Pembaruan", "Update", lang)} ${info.latestVersion}" else I18n.t("Tidak ada pembaruan yang lebih baru.", "No newer update available.", lang), color = palette.textPrimary, fontSize = 13.sp)
+                if (isDownloading) LinearProgressIndicator(progress = { downloadProgress / 100f }, modifier = Modifier.fillMaxWidth(), color = palette.accent)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 10.dp)) {
+                    if (info.status == "update-available") GlassPillButton(
+                        if (downloadedState == null) I18n.t("Unduh APK", "Download APK", lang) else I18n.t("Pasang pembaruan", "Install update", lang), {
+                            val ready = downloadedState
+                            if (ready != null) runCatching { updater.launchInstallOrPermission(ready) }.onFailure { errorMessage = it.message }
+                            else scope.launch {
+                                isDownloading = true; errorMessage = null
+                                runCatching { updater.downloadUpdate(info) { downloadProgress = it } }
+                                    .onSuccess { downloadedState = it }
+                                    .onFailure { errorMessage = it.message }
+                                isDownloading = false
                             }
-                        }
-
-                        if (isDownloading) {
-                            LinearProgressIndicator(
-                                progress = { downloadProgress / 100f },
-                                modifier = Modifier.fillMaxWidth(),
-                                color = palette.accent
-                            )
-                            Text(
-                                text = "${I18n.t("Mengunduh & memverifikasi SHA-256", "Downloading & verifying SHA-256", lang)} ($downloadProgress%)",
-                                color = palette.textSecondary,
-                                fontFamily = KataKecilFonts.Ui,
-                                fontSize = 12.sp
-                            )
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            GlassPillButton(
-                                text = I18n.t("Periksa ulang", "Recheck", lang),
-                                leadingIcon = "refresh",
-                                onClick = ::checkNow
-                            )
-                            if (info.status == "update-available") {
-                                Spacer(modifier = Modifier.width(8.dp))
-                                val dl = downloadedState
-                                if (dl != null) {
-                                    GlassPillButton(
-                                        text = I18n.t("Pasang pembaruan", "Install update", lang),
-                                        leadingIcon = "download",
-                                        primary = true,
-                                        onClick = {
-                                            runCatching { updater.launchInstallOrPermission(dl) }
-                                                .onFailure { onShowToast(it.message ?: "Gagal membuka installer.") }
-                                        }
-                                    )
-                                } else {
-                                    GlassPillButton(
-                                        text = I18n.t("Unduh & pasang", "Download & install", lang),
-                                        leadingIcon = "download",
-                                        primary = true,
-                                        enabled = !isDownloading,
-                                        onClick = {
-                                            scope.launch {
-                                                isDownloading = true
-                                                downloadProgress = 0
-                                                errorMessage = null
-                                                runCatching {
-                                                    updater.downloadUpdate(info) { pct ->
-                                                        downloadProgress = pct
-                                                    }
-                                                }.onSuccess { state ->
-                                                    downloadedState = state
-                                                    updater.launchInstallOrPermission(state)
-                                                }.onFailure { err ->
-                                                    errorMessage = err.message ?: "Gagal mengunduh pembaruan."
-                                                }
-                                                isDownloading = false
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
+                        }, primary = true, enabled = !isDownloading && !isChecking, leadingIcon = "download")
                 }
             }
-        }
+        }) {
+        val notes = releaseInfo?.releaseNotes.orEmpty()
+        if (notes.isNotBlank()) Text(notes, color = palette.textPrimary, fontSize = 12.sp, lineHeight = 18.sp)
     }
 }
 
@@ -881,80 +541,14 @@ fun RestoreBackupPreviewDialog(
     val palette = LocalKataKecilPalette.current
     var restoreAppearance by remember { mutableStateOf(preview.hasPreferences) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = I18n.t("Pulihkan Cadangan", "Restore Backup", lang),
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 19.sp
-                )
-                Text(
-                    text = "• ${I18n.t("Sorotan, catatan & markah", "Highlights, notes & bookmarks", lang)}: ${preview.annotationCount}",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "• ${I18n.t("Progres buku", "Book progress items", lang)}: ${preview.progressCount}",
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 14.sp
-                )
-
-                if (preview.hasPreferences) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { restoreAppearance = !restoreAppearance }
-                    ) {
-                        Checkbox(
-                            checked = restoreAppearance,
-                            onCheckedChange = { restoreAppearance = it }
-                        )
-                        Text(
-                            text = I18n.t("Pulihkan pengaturan tampilan", "Restore appearance settings", lang),
-                            color = palette.textPrimary,
-                            fontFamily = KataKecilFonts.Ui,
-                            fontSize = 13.5.sp
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    GlassPillButton(
-                        text = I18n.t("Batal", "Cancel", lang),
-                        onClick = onDismiss
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    GlassPillButton(
-                        text = I18n.t("Pulihkan", "Restore", lang),
-                        primary = true,
-                        onClick = { onConfirmRestore(restoreAppearance) }
-                    )
-                }
-            }
-        }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Pulihkan backup", "Restore backup", lang), onDismiss,
+        footer = { GlassPillButton(I18n.t("Pulihkan", "Restore", lang), { onConfirmRestore(restoreAppearance) }, Modifier.fillMaxWidth(), primary = true) }) {
+        Text("${preview.progressCount} ${I18n.t("progres", "progress records", lang)} · ${preview.annotationCount} ${I18n.t("catatan/sorotan", "notes/highlights", lang)}", color = palette.textPrimary, fontSize = 14.sp)
+        Text(I18n.t("Data digabung dengan data perangkat ini; data yang lebih baru dipertahankan.", "Data is merged with this device; newer records are preserved.", lang), color = palette.textMuted, fontSize = 12.sp)
+        if (preview.hasPreferences) SettingToggleRow(I18n.t("Pulihkan pengaturan", "Restore settings", lang), restoreAppearance) { restoreAppearance = it }
     }
 }
 
-/**
- * Import EPUB Preview Dialog (shown before importing a local .epub from file picker or Android Intent)
- */
 @Composable
 fun ImportEpubPreviewDialog(
     preview: ImportEpubPreview,
@@ -965,88 +559,22 @@ fun ImportEpubPreviewDialog(
     val palette = LocalKataKecilPalette.current
     val meta = preview.record.meta
 
-    Dialog(onDismissRequest = onDismiss) {
-        GlassSurface(
-            cornerRadius = 26.dp,
-            elevated = true,
-            contentPadding = PaddingValues(20.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = I18n.t("Pratinjau Impor EPUB", "EPUB Import Preview", lang),
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 19.sp
-                )
-
-                BookCoverView(
-                    title = meta.title,
-                    author = meta.author,
-                    coverUrl = meta.effectiveCover,
-                    cornerRadius = 14.dp,
-                    modifier = Modifier
-                        .width(112.dp)
-                        .height(164.dp)
-                )
-
-                Text(
-                    text = meta.title,
-                    color = palette.textPrimary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 17.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "${meta.author} · ${meta.chapterCount} episode · ${formatBytes(preview.sizeBytes)}",
-                    color = palette.textSecondary,
-                    fontFamily = KataKecilFonts.Ui,
-                    fontSize = 12.5.sp
-                )
-
-                if (preview.alreadyExists) {
-                    Text(
-                        text = I18n.t(
-                            "Buku ini sudah ada di pustaka. Mengimpor ulang akan memperbarui salinan lokal tanpa menghapus catatan Anda.",
-                            "This book is already in your library. Re-importing updates the local copy while keeping your notes.",
-                            lang
-                        ),
-                        color = palette.accent,
-                        fontFamily = KataKecilFonts.Ui,
-                        fontSize = 12.sp
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    GlassPillButton(
-                        text = I18n.t("Batal", "Cancel", lang),
-                        onClick = onDismiss
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        GlassPillButton(
-                            text = I18n.t("Simpan", "Save", lang),
-                            onClick = { onConfirmImport(false) }
-                        )
-                        GlassPillButton(
-                            text = I18n.t("Baca", "Read", lang),
-                            primary = true,
-                            onClick = { onConfirmImport(true) }
-                        )
-                    }
-                }
+    id.karisyono.katakecil.ui.components.WebBottomSheet(I18n.t("Impor EPUB", "Import EPUB", lang), onDismiss,
+        footer = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                GlassPillButton(I18n.t("Impor", "Import", lang), { onConfirmImport(false) }, Modifier.weight(1f), leadingIcon = "upload")
+                GlassPillButton(I18n.t("Impor dan baca", "Import and read", lang), { onConfirmImport(true) }, Modifier.weight(1f), primary = true)
+            }
+        }) {
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            BookCoverView(meta.title, meta.author, meta.effectiveCover, Modifier.width(64.dp).height(96.dp), cornerRadius = 4.dp)
+            Column(Modifier.weight(1f)) {
+                Text(meta.title, color = palette.textPrimary, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                Text(meta.author, color = palette.textMuted, fontSize = 12.sp)
+                Text("${preview.record.chapters.size} ${I18n.t("bab", "chapters", lang)} · ${formatBytes(preview.sizeBytes)}", color = palette.textMuted, fontSize = 12.sp)
             }
         }
+        if (preview.alreadyExists) Text(I18n.t("Buku ini sudah ada di perangkat.", "This book is already on this device.", lang), color = palette.textPrimary, fontSize = 12.sp)
     }
 }
 

@@ -1,6 +1,7 @@
 package id.karisyono.katakecil.ui.reader
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -394,7 +395,7 @@ fun ReaderScreen(
                             pageSlice = PageSlice(0, currentChapterIndex, 0, chapterText.length, chapterText),
                             baseTextStyle = baseTextStyle,
                             paragraphIndentEm = settings.paragraphIndent,
-                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText, animation = if (settings.readingMode == "pages") settings.pageAnimation else "none",
                             annotations = annotations,
                             searchMatches = searchMatches,
                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -490,7 +491,7 @@ fun ReaderScreen(
                                             pageSlice = firstSlice,
                                             baseTextStyle = baseTextStyle,
                                             paragraphIndentEm = settings.paragraphIndent,
-                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText, animation = if (settings.readingMode == "pages") settings.pageAnimation else "none",
                                             annotations = annotations,
                                             searchMatches = searchMatches,
                                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -525,7 +526,7 @@ fun ReaderScreen(
                                                 pageSlice = secondSlice,
                                                 baseTextStyle = baseTextStyle,
                                                 paragraphIndentEm = settings.paragraphIndent,
-                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText, animation = if (settings.readingMode == "pages") settings.pageAnimation else "none",
                                                 annotations = annotations,
                                                 searchMatches = searchMatches,
                                                 activeSearchMatchIndex = activeSearchMatchIndex,
@@ -572,7 +573,7 @@ fun ReaderScreen(
                                             pageSlice = firstSlice,
                                             baseTextStyle = baseTextStyle,
                                             paragraphIndentEm = settings.paragraphIndent,
-                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText,
+                            paragraphGap = settings.paragraphSpacing, sourceText = chapterText, animation = if (settings.readingMode == "pages") settings.pageAnimation else "none",
                                             annotations = annotations,
                                             searchMatches = searchMatches,
                                             activeSearchMatchIndex = activeSearchMatchIndex,
@@ -1202,6 +1203,33 @@ private fun ChapterHeadingBlock(chapter: Chapter, fontFamily: androidx.compose.u
  */
 @Composable
 private fun SelectableChapterPageText(
+    pageSlice: PageSlice,
+    baseTextStyle: TextStyle,
+    paragraphIndentEm: Float,
+    paragraphGap: Int,
+    sourceText: String,
+    annotations: List<AnnotationItem>,
+    searchMatches: List<SearchMatch>,
+    activeSearchMatchIndex: Int,
+    ttsHighlightRange: IntRange?,
+    selectionRange: IntRange?,
+    onSelectionChanged: (IntRange?, AnnotationItem?) -> Unit,
+    onTapZone: (Float) -> Unit,
+    animation: String = "none"
+) {
+    androidx.compose.animation.AnimatedContent(targetState = pageSlice, contentKey = { it.pageIndex }, label = "readingPage", transitionSpec = {
+        when (animation) {
+            "fade" -> androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(180)) togetherWith androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(120))
+            "slide" -> (androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(180)) { if (targetState.pageIndex > initialState.pageIndex) it / 12 else -it / 12 } + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(180))) togetherWith androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(120))
+            else -> androidx.compose.animation.EnterTransition.None togetherWith androidx.compose.animation.ExitTransition.None
+        }
+    }) { slice ->
+        DrawChapterPageText(slice, baseTextStyle, paragraphIndentEm, paragraphGap, sourceText, annotations, searchMatches, activeSearchMatchIndex, ttsHighlightRange, selectionRange, onSelectionChanged, onTapZone)
+    }
+}
+
+@Composable
+private fun DrawChapterPageText(
     pageSlice: PageSlice,
     baseTextStyle: TextStyle,
     paragraphIndentEm: Float,

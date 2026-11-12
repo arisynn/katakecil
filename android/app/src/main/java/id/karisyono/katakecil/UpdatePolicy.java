@@ -72,7 +72,7 @@ public final class UpdatePolicy {
             org.json.JSONObject release = releases.optJSONObject(i);
             if (release == null || release.optBoolean("draft", true) || release.isNull("published_at")) continue;
             String tag = release.optString("tag_name");
-            if (!validVersion(tag) || (!includePreview && !installed.contains("-") && (release.optBoolean("prerelease", true) || tag.contains("-")))) continue;
+            if (!validVersion(tag) || (!includePreview && (release.optBoolean("prerelease", true) || tag.contains("-")))) continue;
             org.json.JSONArray assets = release.optJSONArray("assets"); if (assets == null) continue;
             String expectedName = "KataKecil.apk";
             org.json.JSONObject apk = null; String checksum = "";
