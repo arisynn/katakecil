@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 import {createVisualSettings} from '../dist/loading-previews.js';
-import {icon,applyIconPack} from '../dist/ui.js?v=16';
-import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=7';
+import {icon,applyIconPack} from '../dist/ui.js?v=17';
+import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=8';
 import {createBackup,parseBackup} from '../dist/device-backup.js';
 
 function fixture(initial={}){
@@ -77,12 +77,12 @@ test('visual preferences survive reload, old backup restore, comfort reset and c
  Object.assign(globalThis,{window:w,localStorage:w.localStorage,indexedDB,BroadcastChannel:class{constructor(){channels.push(this);}postMessage(){}close(){}}});
  w.localStorage.setItem('lumina_device_settings',JSON.stringify({fontSize:24,uiLanguageChosen:true}));
  try{
-  const store=await import('../dist/store.js?visual-settings-persist');assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'wordmark');
+  const store=await import('../dist/store.js?visual-settings-persist');assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'pulse');
   assert.equal(store.preferences.readerAmbientGlow,false);store.updatePreferences({iconPack:'lucide',loadingStyle:'dots',readerAmbientGlow:true});assert.equal(JSON.parse(w.localStorage.getItem('lumina_device_settings')).iconPack,'lucide');
   const reload=await import('../dist/store.js?visual-settings-reload');assert.equal(reload.preferences.iconPack,'lucide');assert.equal(reload.preferences.loadingStyle,'dots');assert.equal(reload.preferences.readerAmbientGlow,true);
   store.resetReadingPreferences();assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'dots');assert.equal(store.preferences.fontSize,store.DEFAULTS.fontSize);assert.equal(store.preferences.readerAmbientGlow,true);
   await store.restoreBackup({annotations:[],progress:[],preferences:{fontSize:22}},{restorePreferences:true});assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'dots');
-  channels[0].onmessage({data:{kind:'preferences',payload:{...store.preferences,iconPack:'untrusted',loadingStyle:17,readerAmbientGlow:'true'}}});assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'wordmark');assert.equal(store.preferences.readerAmbientGlow,false);
+  channels[0].onmessage({data:{kind:'preferences',payload:{...store.preferences,iconPack:'untrusted',loadingStyle:17,readerAmbientGlow:'true'}}});assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'pulse');assert.equal(store.preferences.readerAmbientGlow,false);
   const incoming={...store.preferences,iconPack:'lucide',loadingStyle:'pulse',readerAmbientGlow:true};w.localStorage.setItem('lumina_device_settings',JSON.stringify(incoming));w.dispatchEvent(new w.StorageEvent('storage',{key:'lumina_device_settings',newValue:JSON.stringify(incoming)}));assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'pulse');assert.equal(store.preferences.readerAmbientGlow,true);
  }finally{w.close();for(const [key,descriptor] of Object.entries(previous)){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}
 });

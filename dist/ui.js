@@ -1,4 +1,4 @@
-import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=2';
+import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=3';
 import {KATAKECIL_ICONS} from './katakecil-icons.js?v=1';
 import {LUCIDE_ICONS} from './vendor/lucide-icons.js?v=1';
 export const $ = (selector, root=document) => root.querySelector(selector);

@@ -17,6 +17,19 @@ test('visual preferences safely upgrade legacy or blocked storage and reject unk
  assert.deepEqual(readVisualPreferences({getItem:()=>'{"iconPack":"lucide","loadingStyle":"pulse"}'}),{iconPack:'lucide',loadingStyle:'pulse',readerAmbientGlow:false});
 });
 
+test('Turning pages is the default before Store initializes and saved loading choices remain explicit',async()=>{
+ assert.equal(VISUAL_DEFAULTS.loadingStyle,'pulse');
+ assert.equal(readVisualPreferences({getItem:()=>null}).loadingStyle,'pulse');
+ for(const loadingStyle of ['wordmark','pulse','dots'])assert.equal(normalizeVisualPreferences({loadingStyle}).loadingStyle,loadingStyle);
+ const original=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+ try{
+  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null}});
+  const fresh=await import('../dist/loading-logo.js?new-default-pulse');
+  const doc=new JSDOM(fresh.loadingLogo()).window.document;
+  assert.equal(doc.querySelector('.loading-brand').dataset.loadingStyle,'pulse');assert.equal(doc.querySelectorAll('.loading-turning-page').length,3);doc.defaultView.close();
+ }finally{if(original)Object.defineProperty(globalThis,'localStorage',original);else delete globalThis.localStorage;}
+});
+
 test('Lucide glyphs come from the pinned official SVGs and cover the complete app vocabulary',async()=>{
  const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
  assert.equal(pkg.devDependencies['lucide-static'],LUCIDE_VERSION);assert.equal(Object.keys(LUCIDE_ICONS).length,52);
@@ -43,7 +56,7 @@ test('switching icon packs preserves live SVG identity, attributes and listeners
  }finally{applyIconPack('katakecil');dom.window.close();}
 });
 
-test('loader switching preserves its live container and default artwork, never replacing explicit previews',()=>{
+test('loader switching preserves its live container and classic artwork, never replacing explicit previews',()=>{
  applyLoadingStyle('wordmark');
  const dom=new JSDOM('<body><div class="active">'+loadingLogo()+'</div>'+loadingLogo('wordmark')+loadingLogo('pulse')+loadingLogo('dots')+'</body>'),doc=dom.window.document;
  try{
@@ -76,7 +89,7 @@ test('reader ambient is opt-in and all classic glyphs have independent filled ar
  }
 });
 
-test('optional loading motions have distinct silhouettes while default artwork and cuts stay unchanged',()=>{
+test('optional loading motions have distinct silhouettes while classic artwork and cuts stay unchanged',()=>{
  const dom=new JSDOM('<body>'+loadingLogo('wordmark')+loadingLogo('pulse')+loadingLogo('dots')+'</body>'),doc=dom.window.document;
  try{
   const base=doc.querySelector('[data-loading-style=wordmark]'),pages=doc.querySelector('[data-loading-style=pulse]'),ink=doc.querySelector('[data-loading-style=dots]');

@@ -2,6 +2,11 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Default Turning pages (14 November 2026)
+
+- Jadikan Turning pages default loading untuk perangkat/preferensi yang belum memiliki pilihan valid, termasuk fallback startup. Pilihan tersimpan tetap digunakan.
+- Check module graph dan 15 tes terarah lulus; tanpa build APK.
+
 ## Pengembangan web — Turning pages dari HTML pengguna (14 November 2026)
 
 - Terapkan versi yang dikirim pengguna: tiga lembar 3D, bayangan/buku melayang dan wordmark katakecil per huruf dalam satu siklus 3 detik.

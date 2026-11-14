@@ -1,17 +1,23 @@
 # Motion loading — web
 
-Dua loading opsional pada **Pengaturan → Lanjutan → Ikon & Loading → Loading** diganti dengan bentuk dan gerak baru:
+Dua motion loading pada **Pengaturan → Lanjutan → Ikon & Loading → Loading** diganti dengan bentuk dan gerak baru:
 
 | Pilihan | Motion | Key tersimpan |
 | --- | --- | --- |
 | Lembar buku / Turning pages | Versi HTML pengguna: tiga lembar 3D berputar, buku melayang dan tulisan katakecil berurutan; satu siklus 3 detik | `pulse` |
 | Alur tinta / Ink flow | Tiga goresan diagonal berbeda panjang, mengalir secara berurutan; siklus 1,8 detik | `dots` |
 
-Keduanya memakai area motion buku/goresan 104×64 px yang stabil dan warna tema/aksen. Turning pages menambahkan teks katakecil di bawah buku serta animasi CSS 3D, opacity dan pencahayaan; Ink flow memakai transform/opacity. Tidak memakai tiga titik lama sebagai loading opsional, persentase progress, shimmer atau delay loading buatan. Garis cahaya di bawah tulisan Turning pages hanya dekorasi berulang. **Wordmark lama tetap persis dan menjadi default.** Key `pulse`/`dots` dipertahankan agar preferensi dan backup sebelumnya otomatis memakai motion baru.
+Keduanya memakai area motion buku/goresan 104×64 px yang stabil dan warna tema/aksen. Turning pages menambahkan teks katakecil di bawah buku serta animasi CSS 3D, opacity dan pencahayaan; Ink flow memakai transform/opacity. Tidak memakai tiga titik lama sebagai loading opsional, persentase progress, shimmer atau delay loading buatan. Garis cahaya di bawah tulisan Turning pages hanya dekorasi berulang. **Turning pages menjadi default; Wordmark lama tetap tersedia.** Key `pulse`/`dots` dipertahankan agar preferensi dan backup sebelumnya otomatis memakai motion baru.
 
 Preview menampilkan kandidat; **Coba** memulai ulang sampel, **Gunakan** menyimpan pilihan. Menutup tanpa Gunakan membuang kandidat. Helper yang sama dipakai Library, reader dan launch; container loader tetap ketika pilihan diterapkan. Dua motion dekoratif memakai `aria-hidden`, sementara nama/status loading tetap disediakan host. Reduced motion menampilkan buku/goresan statis; seluruh animasi baru, termasuk pseudo-element, berhenti saat reader loader tersembunyi.
 
 [Skill motion](../.agents/skills/katakecil-loading-motion/SKILL.md) mengatur tiga worker: desain read-only, implementasi empat file renderer/CSS/picker/terjemahan, lalu QA tes/browser. Integrasi cache, dokumentasi dan push dikerjakan koordinator. Tidak ada perubahan ikon, glow naskah, default teks, backend, versi atau build APK.
+
+## Default terbaru
+
+Sesuai permintaan pengguna, `VISUAL_DEFAULTS.loadingStyle` dan fallback normalisasi memakai `pulse` (Turning pages). Berlaku untuk perangkat tanpa pilihan tersimpan, preferensi lama tanpa field loading, nilai tidak dikenal dan storage yang rusak/terblokir, termasuk renderer sebelum Store siap. Pilihan valid yang sudah tersimpan tetap dipakai; untuk perangkat yang menyimpan Classic wordmark, pilih Turning pages lalu Gunakan sekali.
+
+Check sintaks/module graph dan **15 tes renderer/controller** lulus pada pembaruan default, termasuk startup sebelum Store, pemulihan pilihan tersimpan dan backup. Tidak mengulang browser animasi atau build APK karena hanya default/preferensi dan cache yang berubah.
 
 ## Versi HTML pengguna
 

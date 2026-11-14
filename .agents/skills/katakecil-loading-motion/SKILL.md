@@ -1,6 +1,6 @@
 ---
 name: katakecil-loading-motion
-description: Rancang dan implementasikan dua motion loading KataKecil yang berbeda dari soft pulse/dots lama, sambil mempertahankan wordmark default, preferensi, preview dan aksesibilitas.
+description: Rancang dan implementasikan dua motion loading KataKecil yang berbeda dari soft pulse/dots lama, sambil mempertahankan wordmark klasik, preferensi, preview dan aksesibilitas.
 ---
 
 # Motion loading KataKecil
@@ -10,7 +10,7 @@ Gunakan untuk pekerjaan loading saat ini. Pengguna telah meminta pembuatan skill
 ## Hasil yang diminta
 
 - Ganti visual Soft pulse (`pulse`) dan Dots (`dots`) dengan dua motion baru yang jelas berbeda satu sama lain maupun dari animasi lama. Bukan sekadar ubah kecepatan/warna atau menambah glow.
-- Pertahankan loading Wordmark lama (`wordmark`) secara persis dan sebagai default. Pertahankan key tersimpan `pulse`/`dots` agar preferensi dan backup lama tetap bekerja; nama tampilan baru boleh disesuaikan ID/EN.
+- Pertahankan loading Wordmark lama (`wordmark`) secara persis sebagai pilihan. Sesuai permintaan terbaru, default kini Turning pages (`pulse`); preferensi valid yang telah tersimpan tetap dihormati. Pertahankan key tersimpan `pulse`/`dots` agar preferensi dan backup lama tetap bekerja; nama tampilan baru boleh disesuaikan ID/EN.
 - Satu konsep bersumber dari lembar/buku, satu konsep dari aliran tinta/garis. Buat gerak halus dengan fase, easing dan siluet yang berbeda. Tidak ada angka progress palsu, shimmer, interval JS atau delay loading buatan.
 - Warna mengikuti tema/aksen. Ukuran stage stabil, tidak menggeser layout dan tidak ada aset jaringan baru. Gunakan CSS transform/opacity serta markup lokal yang ringan.
 - Semua pemakai helper loading (preview, Library, reader, launch) mendapat hasil sama. Preview kandidat dan Coba tidak menyimpan pilihan; Gunakan menyimpan hanya tab aktif. Pertahankan container dan explicit preview saat apply.
@@ -19,13 +19,13 @@ Gunakan untuk pekerjaan loading saat ini. Pengguna telah meminta pembuatan skill
 
 ## Pembaruan dari HTML pengguna
 
-Pengguna kemudian memberikan `katakecil-turning-pages.html` dan meminta memakainya. Untuk `pulse`, ikuti versi tersebut: tiga lembar 3D, buku melayang/bayangan, teks katakecil per huruf dan cahaya dekoratif dalam satu siklus 3 detik. Permintaan ini menggantikan batas visual 2D/transform-opacity saja untuk opsi tersebut. Default Classic wordmark dan Ink flow tetap dipertahankan. Scope seluruh CSS baru ke `pulse`; jangan mengambil aturan body/:root atau tema preview. Wordmark teks baru harus terisolasi dari kelas/artwork Classic. Hidden/reduced motion mencakup book, shadow, kedua sisi lembar, letters dan reading light. Tidak ada progres numerik atau delay buatan.
+Pengguna kemudian memberikan `katakecil-turning-pages.html` dan meminta memakainya. Untuk `pulse`, ikuti versi tersebut: tiga lembar 3D, buku melayang/bayangan, teks katakecil per huruf dan cahaya dekoratif dalam satu siklus 3 detik. Permintaan ini menggantikan batas visual 2D/transform-opacity saja untuk opsi tersebut. Classic wordmark dan Ink flow tetap tersedia; pengguna kemudian meminta Turning pages menjadi default. Scope seluruh CSS baru ke `pulse`; jangan mengambil aturan body/:root atau tema preview. Wordmark teks baru harus terisolasi dari kelas/artwork Classic. Hidden/reduced motion mencakup book, shadow, kedua sisi lembar, letters dan reading light. Tidak ada progres numerik atau delay buatan.
 
 ## Pembagian kerja
 
 1. Designer: baca renderer/CSS dan berikan brief singkat dua konsep, tahapan gerak, ukuran, reduced motion. Read-only; jangan audit aplikasi luas.
 2. Implementer: setelah brief, ubah hanya `dist/loading-logo.js`, `dist/loading-logo.css`, `dist/loading-previews.js` (nama loading) dan string terkait di `dist/i18n.js`. Tidak mengedit app entry/cache atau tests.
-3. QA: sesudah implementasi, cek dua motion benar-benar berbeda, default wordmark tetap, apply/persistence/preview tidak rusak, hidden/reduced motion. Miliki tests dan harness lokal; laporkan temuan konkret, jangan redesign di luar scope.
+3. QA: sesudah implementasi, cek dua motion benar-benar berbeda, Classic tetap dan default Turning pages, apply/persistence/preview tidak rusak, hidden/reduced motion. Miliki tests dan harness lokal; laporkan temuan konkret, jangan redesign di luar scope.
 4. Agent utama: prompt, integrasi cache version secara konsisten, dokumentasi, review visual, tes terarah dan push web berdasarkan otorisasi sesi. Jangan mengklaim worker aktif jika pemanggilan gagal. Bila kuota worker habis, lanjutkan sendiri dan jelaskan singkat.
 
 ## Verifikasi cukup

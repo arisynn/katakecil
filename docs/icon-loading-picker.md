@@ -1,6 +1,6 @@
 # Ikon & Loading — web
 
-**Pengaturan → Lanjutan → Ikon & Loading** menggantikan pintu masuk Pratinjau loading. Pilihan awal tetap **Rounded KataKecil** dan **Wordmark lama**. Dua tab menggunakan satu heading, satu lensa tab dan paling banyak satu area scroll bila layar pendek.
+**Pengaturan → Lanjutan → Ikon & Loading** menggantikan pintu masuk Pratinjau loading. Pilihan awal adalah **Rounded KataKecil** dan **Lembar buku / Turning pages**. Preferensi valid yang sudah tersimpan tetap digunakan. Dua tab menggunakan satu heading, satu lensa tab dan paling banyak satu area scroll bila layar pendek.
 
 ## Pilihan dan perilaku
 
