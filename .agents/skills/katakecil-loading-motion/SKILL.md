@@ -17,6 +17,10 @@ Gunakan untuk pekerjaan loading saat ini. Pengguna telah meminta pembuatan skill
 - Animasi berhenti ketika reader loader hidden; semua layer/pseudo-element bergerak statis pada prefers-reduced-motion. Kondisi ini harus mencakup animasi baru, bukan hanya selector loader lama.
 - Pertahankan nama/label aksesibel loading dari host, tanpa announcement setiap frame. Tidak mengubah icon pack, logo, reader glow, posisi baca, backend atau versi APK.
 
+## Pembaruan dari HTML pengguna
+
+Pengguna kemudian memberikan `katakecil-turning-pages.html` dan meminta memakainya. Untuk `pulse`, ikuti versi tersebut: tiga lembar 3D, buku melayang/bayangan, teks katakecil per huruf dan cahaya dekoratif dalam satu siklus 3 detik. Permintaan ini menggantikan batas visual 2D/transform-opacity saja untuk opsi tersebut. Default Classic wordmark dan Ink flow tetap dipertahankan. Scope seluruh CSS baru ke `pulse`; jangan mengambil aturan body/:root atau tema preview. Wordmark teks baru harus terisolasi dari kelas/artwork Classic. Hidden/reduced motion mencakup book, shadow, kedua sisi lembar, letters dan reading light. Tidak ada progres numerik atau delay buatan.
+
 ## Pembagian kerja
 
 1. Designer: baca renderer/CSS dan berikan brief singkat dua konsep, tahapan gerak, ukuran, reduced motion. Read-only; jangan audit aplikasi luas.

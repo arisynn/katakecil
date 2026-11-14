@@ -1,0 +1,82 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "actualLoaders": [
+    {
+      "style": "pulse",
+      "locations": [
+        "library",
+        "reader"
+      ],
+      "hiddenStatic": true
+    },
+    {
+      "style": "dots",
+      "locations": [
+        "library",
+        "reader"
+      ],
+      "hiddenStatic": true
+    }
+  ],
+  "defaultWordmark": true,
+  "classicAndInkScoped": true,
+  "reloadKeepsLegacyKey": true,
+  "motionCaptures": [
+    {
+      "style": "pulse",
+      "frameMotion": true,
+      "stableStage": {
+        "x": 143,
+        "y": 596,
+        "width": 104,
+        "height": 64
+      },
+      "reducedMotionStatic": true,
+      "brandBounds": {
+        "x": 143,
+        "y": 596,
+        "width": 104,
+        "height": 108
+      }
+    },
+    {
+      "style": "dots",
+      "frameMotion": true,
+      "stableStage": {
+        "x": 143,
+        "y": 618,
+        "width": 104,
+        "height": 64
+      },
+      "reducedMotionStatic": true,
+      "brandBounds": {
+        "x": 143,
+        "y": 618,
+        "width": 104,
+        "height": 64
+      }
+    }
+  ],
+  "tryNoPersistenceAndUseSaves": true,
+  "lightDark": true,
+  "result": "passed",
+  "date": "2026-11-14",
+  "baseline": "7898b7a5336325edb952b4ab44cf8b7d577b4ed1",
+  "source": "User-supplied katakecil-turning-pages.html",
+  "nodeTests": {
+    "passed": 14,
+    "failed": 0,
+    "files": [
+      "visual-renderers",
+      "visual-settings"
+    ]
+  },
+  "syntaxAndModuleGraph": "passed",
+  "apkVersionUnchanged": "1.2.5 / 13",
+  "mainVisualReview": "Turning pages v2 light/dark screenshots reviewed"
+}

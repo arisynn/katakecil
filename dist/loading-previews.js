@@ -1,5 +1,5 @@
 import {icon} from './ui.js?v=16';
-import {loadingLogo} from './loading-logo.js?v=6';
+import {loadingLogo} from './loading-logo.js?v=7';
 import {normalizeVisualPreferences} from './visual-preferences.js?v=2';
 import {scheduleSheetFit} from './panel-layout.js?v=5';
 

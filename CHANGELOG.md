@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Turning pages dari HTML pengguna (14 November 2026)
+
+- Terapkan versi yang dikirim pengguna: tiga lembar 3D, bayangan/buku melayang dan wordmark katakecil per huruf dalam satu siklus 3 detik.
+- Isolasi scene pada opsi Turning pages; Classic wordmark default, Ink flow, tema dan key preferensi tetap.
+- [Catatan dan uji web](docs/loading-motion-web.md), tanpa build APK.
+
 ## Pengembangan web — Motion loading (14 November 2026)
 
 - Ganti dua loading opsional Soft pulse/Dots dengan **Lembar buku** dan **Alur tinta**, memakai gerak serta bentuk yang berbeda.
