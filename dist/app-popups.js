@@ -1,6 +1,6 @@
 import {enterSheet,leaveSheet} from './motion.js?v=1';
 import {fitSheet,scheduleSheetFit} from './panel-layout.js?v=5';
-import {icon} from './ui.js?v=13';
+import {icon} from './ui.js?v=14';
 
 // Native controls remain as the data/event interface, while the visible picker belongs to the app.
 export function installAppPopups(doc=document,{loadWheel=()=>import('./vendor/color-wheel.js?v=1')}={}){

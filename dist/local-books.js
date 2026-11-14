@@ -1,4 +1,4 @@
-import {escapeHTML as esc,icon} from './ui.js?v=13';
+import {escapeHTML as esc,icon} from './ui.js?v=14';
 
 export function createLocalBooks(ctx){
  let selected='',busy=false;

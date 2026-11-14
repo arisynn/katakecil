@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Ikon dan kapsul header Library (14 November 2026)
+
+- Sambungkan kepala panah refresh ke jalur melingkar; rapikan knob dan track ikon pengaturan.
+- Hilangkan bingkai bertumpuk pada kapsul header; pertahankan ikon sejajar, area sentuh 44 px, respons tekan dan fokus keyboard.
+- [Pemeriksaan web](docs/library-header-icons-web.md) lulus; versi APK tetap 1.2.5/build 13 dan tidak menerbitkan APK baru pada tahap ini.
+
 ## 1.2.5 Stable — Ikon rounded dan tema Sistem (12 November 2026)
 
 - Perbarui keluarga ikon antarmuka agar rounded, konsisten dan jelas pada ukuran kecil; samakan ikon khusus Publisher dengan helper bersama.

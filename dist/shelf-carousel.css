@@ -299,3 +299,20 @@ body[data-theme=dark] .library-shell .read-button{border-color:#ffffff1f;box-sha
 @supports not ((mask-composite:exclude) or (-webkit-mask-composite:xor)){.library-shell :is(.library-header-actions,.shelf-navigation,.reading-status,.shelf-action,.shelf)::after{display:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.library-shell :is(.library-header-actions,.shelf-navigation,.reading-status){background:var(--surface)}.library-shell .read-button{background:var(--accent)}}
 @media(prefers-reduced-motion:reduce){.library-shell :is(.library-header-actions,.shelf-navigation,.reading-status,.shelf,.read-button){transition:none!important}}
+
+/* The Library header is one glass pill; its actions have no idle mini-panels. */
+body .library-shell .library-header .library-header-actions{
+ gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;
+ box-shadow:0 5px 16px -10px var(--g-shadow);
+}
+body .library-shell .library-header .library-header-actions::after{content:none;display:none}
+body .library-shell .library-header .library-header-actions .icon-button{
+ width:44px;height:44px;min-width:44px;min-height:44px;flex:none;
+ border:0;background:transparent;box-shadow:none;border-radius:999px;
+}
+body .library-shell .library-header .library-header-actions .icon-button>svg{width:21px;height:21px}
+@media(hover:hover){
+ body .library-shell .library-header .library-header-actions .icon-button:not(:disabled):hover{background:rgba(var(--accent-rgb),.07);box-shadow:none}
+}
+body .library-shell .library-header .library-header-actions .icon-button:not(:disabled):is(:active,[data-pressing=true]){background:rgba(var(--accent-rgb),.12);box-shadow:none}
+body .library-shell .library-header .library-header-actions .icon-button:focus-visible{outline:2px solid var(--g-active-ink,var(--accent));outline-offset:-4px}

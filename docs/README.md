@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Perbaikan ikon refresh/pengaturan dan kapsul header Library di web | [Header Library](library-header-icons-web.md) |
 | Rilis stable 1.2.5: ikon rounded dan tema Sistem | [Android 1.2.5](releases/v1.2.5.md) |
 | Pengelompokan Pengaturan, tema dan reader terbaru di web | [Penataan UI Pengaturan dan reader](ui-settings-redesign.md) |
 | Rilis stable 1.2.4: Publisher dan toast kaca | [Android 1.2.4](releases/v1.2.4.md) |

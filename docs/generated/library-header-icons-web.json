@@ -1,0 +1,99 @@
+{
+  "scope": "Refresh/settings glyphs and Library header capsule; web source only",
+  "status": "passed-targeted-review",
+  "applicationVersion": "1.2.5",
+  "versionCode": 13,
+  "delivery": "web-source-only",
+  "apkVersionUnchanged": true,
+  "androidReleasePublished": false,
+  "checks": {
+    "webBuild": "passed",
+    "syntaxAndModuleGraph": "passed",
+    "fullSuiteRun": false
+  },
+  "browser": {
+    "scope": "Quick Chromium header capsule with local catalog fixture",
+    "physicalDeviceTested": false,
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 320,
+        "height": 568
+      },
+      {
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "capsule": {
+      "width": 98,
+      "height": 52,
+      "border": "1px",
+      "shadow": "rgba(0, 0, 0, 0.467) 0px 5px 16px -10px",
+      "after": "none"
+    },
+    "idleButtons": [
+      {
+        "border": "0px",
+        "shadow": "none",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "width": 44,
+        "height": 44,
+        "iconWidth": 21
+      },
+      {
+        "border": "0px",
+        "shadow": "none",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "width": 44,
+        "height": 44,
+        "iconWidth": 21
+      }
+    ],
+    "bothThemesVerified": true,
+    "glyphs": [
+      {
+        "name": "refresh",
+        "path": "M19.4 15.4A8 8 0 1 1 19.4 8.6l.8 1.4 M16.2 9.3l4 .7.7-4",
+        "bounds": {
+          "x": 4.158452987670898,
+          "y": 3.999999761581421,
+          "width": 16.741548538208008,
+          "height": 16.000001907348633
+        },
+        "stroke": "1.85px",
+        "cap": "round",
+        "join": "round"
+      },
+      {
+        "name": "sliders",
+        "path": "M3.5 7h2 M14.5 7h6 M3.5 17h6 M18.5 17h2 M12.5 7a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0 M16.5 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0",
+        "bounds": {
+          "x": 3.5,
+          "y": 4.5,
+          "width": 17,
+          "height": 15
+        },
+        "stroke": "1.85px",
+        "cap": "round",
+        "join": "round"
+      }
+    ],
+    "refreshWorks": true,
+    "settingsWorks": true,
+    "keyboardFocus": {
+      "outline": "solid",
+      "outlineWidth": "2px"
+    },
+    "errors": []
+  },
+  "localPreviews": [
+    "/workspace/scratch/katakecil-library-header-icons-web-dark.png",
+    "/workspace/scratch/katakecil-library-header-icons-web-light.png"
+  ]
+}
