@@ -1,3 +1,22 @@
-.loading-previews{padding:4px}
-.loading-preview-stage{min-height:150px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-@media(max-height:620px){.loading-preview-stage{min-height:120px}}
+/* One fixed heading/tab row, one content scroller; candidates never change live UI. */
+body .visual-settings-dialog{width:min(460px,100%)}
+.visual-settings{display:grid;gap:16px;padding-top:2px;min-width:0}
+.visual-settings-caption{font-size:12px;line-height:1.6;color:var(--muted);margin:0}
+.visual-choice-grid{display:grid;gap:10px;min-width:0}
+.visual-icon-choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+.visual-loading-choices{grid-template-columns:repeat(3,minmax(0,1fr))}
+.visual-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0;min-height:84px;padding:13px 9px;border:1px solid var(--g-edge);border-radius:14px;background:transparent;color:var(--text);text-align:center;transition:border-color .16s,background-color .16s}
+.visual-choice.is-selected{border-color:var(--g-active-ink,var(--accent));background:rgba(var(--accent-rgb),.08)}
+.visual-icon-sample{display:grid;grid-template-columns:repeat(2,24px);gap:10px;align-items:center;justify-content:center;margin-bottom:2px}
+.visual-icon-sample svg{width:23px;height:23px;color:var(--g-active-ink,var(--accent))}
+.visual-choice-label{font-size:12px;font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.visual-choice-current{font-size:9px;line-height:1.4;color:var(--muted)}
+.visual-choice-current[hidden]{display:none}
+.visual-loading-stage{min-height:134px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:rgba(var(--accent-rgb),.025)}
+.visual-settings-footer{display:grid;gap:8px}
+.visual-settings-status{min-height:18px;font-size:11px;line-height:1.5;color:var(--muted)}
+.visual-settings-actions{display:flex;justify-content:flex-end;gap:10px}
+.visual-settings-actions>button{min-height:44px;min-width:100px}
+@media(max-height:620px){.visual-settings{gap:12px}.visual-loading-stage{min-height:100px}.visual-choice{min-height:70px;padding:10px 8px}.visual-settings-status{min-height:16px}}
+@media(orientation:landscape) and (max-height:480px){.visual-icon-sample{grid-template-columns:repeat(4,23px);gap:10px}.visual-choice{min-height:64px}.visual-loading-stage{min-height:86px}.visual-settings{gap:10px}}
+@media(prefers-reduced-motion:reduce){.visual-choice{transition:none}}

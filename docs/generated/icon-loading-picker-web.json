@@ -1,0 +1,174 @@
+{
+  "scope": "Web Icons & Loading picker on 1.2.5/build13",
+  "status": "passed-targeted-review",
+  "apkBuilt": false,
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "checks": {
+    "helperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModules": "passed",
+    "initialTargetedNodeTests": 36,
+    "nodeFailures": 0,
+    "controllerTestsAfterKeyboardFix": 6,
+    "fullSuiteRun": false
+  },
+  "assets": {
+    "iconPacks": [
+      "katakecil",
+      "lucide"
+    ],
+    "loadingStyles": [
+      "wordmark",
+      "pulse",
+      "dots"
+    ],
+    "defaults": {
+      "iconPack": "katakecil",
+      "loadingStyle": "wordmark"
+    },
+    "lucidePackage": "lucide-static@1.73.0",
+    "officialGlyphs": 52,
+    "lucideSubsetBytes": 9747,
+    "licenseBytes": 3208,
+    "vendorBundledLocally": true,
+    "roundedPathsUnchanged": true,
+    "originalWordmarkArtworkRetained": true
+  },
+  "browser": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "pageErrors": [],
+    "unexpectedNetwork": [],
+    "layouts": [
+      {
+        "width": 320,
+        "height": 568,
+        "icons": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [],
+          "width": 300,
+          "height": 412.578125
+        },
+        "loading": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [
+            "dialog-body"
+          ],
+          "width": 300,
+          "height": 430
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "icons": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [],
+          "width": 390,
+          "height": 441.578125
+        },
+        "loading": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [],
+          "width": 390,
+          "height": 540.1875
+        }
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "icons": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [
+            "dialog-body"
+          ],
+          "width": 460,
+          "height": 309
+        },
+        "loading": {
+          "horizontalOverflow": false,
+          "documentOverflow": false,
+          "scrollers": [
+            "dialog-body"
+          ],
+          "width": 460,
+          "height": 309
+        }
+      }
+    ],
+    "actualLoaders": [
+      {
+        "location": "library",
+        "style": "pulse"
+      },
+      {
+        "location": "reader",
+        "style": "pulse"
+      },
+      {
+        "location": "library",
+        "style": "dots"
+      },
+      {
+        "location": "reader",
+        "style": "dots"
+      }
+    ],
+    "candidateIsolationAndStableSvg": true,
+    "tryDoesNotPersist": true,
+    "crossTabAndReaderPosition": true,
+    "reducedMotionAllPreviews": true,
+    "stableLens": {
+      "icons": {
+        "activeTab": "visual-tab-icons",
+        "centerDelta": 0,
+        "widthDelta": 0,
+        "lensCount": 1
+      },
+      "loading": {
+        "activeTab": "visual-tab-loading",
+        "centerDelta": 0,
+        "widthDelta": 0,
+        "lensCount": 1
+      }
+    },
+    "keyboardFocusAndSelection": true,
+    "backupContainsVisualPreferences": true,
+    "publisherUsesSelectedPack": true,
+    "reloadPersistsAppliedPreferences": true,
+    "hiddenActualLoaderStops": true,
+    "result": "passed-with-targeted-followup",
+    "legacyDefaultsPreserved": true,
+    "bothLanguages": true,
+    "controlsReachableInAllViewports": true
+  },
+  "resolvedFindings": [
+    {
+      "owner": "app_settings",
+      "selector": ".visual-settings-tabs",
+      "problem": "ArrowRight selected Loading but focus remained on Icons; ArrowLeft selected Loading again.",
+      "cause": "Legacy appearance-tabs key handler clicked the target without moving focus.",
+      "fix": "Scoped capture keyboard handler moves selection and focus together and prevents duplicate legacy handling.",
+      "verified": "ArrowRight/Left/Home/End focus and aria-selected in Chromium; stable lens center/width differences 0px."
+    }
+  ],
+  "localScreenshots": [
+    "/workspace/scratch/katakecil-icon-loading-stable-icons-390.png",
+    "/workspace/scratch/katakecil-icon-loading-stable-loading-390.png"
+  ],
+  "limitations": [
+    "Chromium uses local catalog/episode and Publisher auth fixtures; no live account or production publication.",
+    "Loading phases are held at mock HTTP boundaries to inspect real app loaders; no artificial delay is added to production code.",
+    "Viewport checks cover both picker tabs at320x568/390x844/667x375, not an exhaustive theme/device cross product.",
+    "No APK, physical-device, native WebView, audio or performance benchmark test.",
+    "36 targeted Node tests passed before the keyboard correction; the controller subset with its new keyboard regression test then passed6/6."
+  ]
+}

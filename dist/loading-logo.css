@@ -7,8 +7,13 @@
 .loading-dots i{display:block;width:4px;height:4px;border-radius:50%;background:var(--text);animation:loadingTypingDot 1.2s ease-in-out infinite}
 .loading-dots i:nth-child(2){animation-delay:.14s}.loading-dots i:nth-child(3){animation-delay:.28s}
 @keyframes loadingTypingDot{0%,65%,100%{opacity:.22;transform:translateY(0)}32%{opacity:.9;transform:translateY(-1.5px)}}
+.loading-brand[data-loading-style=pulse] .loading-wordmark-pulse{animation:loadingLogoPulse 1.8s ease-in-out infinite;animation-delay:0s}
+@keyframes loadingLogoPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.loading-brand[data-loading-style=dots]{align-items:center;min-height:24px}
+.loading-brand[data-loading-style=dots] .loading-dots{gap:7px;height:16px;margin:0}
+.loading-brand[data-loading-style=dots] .loading-dots i{width:6px;height:6px}
 .reader-loading.hidden :is(.loading-wordmark-piece,.loading-dots i){animation:none}
-@media(prefers-reduced-motion:reduce){.loading-wordmark-piece,.loading-dots i{animation:none;opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.loading-wordmark-piece,.loading-dots i,.loading-brand[data-loading-style=pulse] .loading-wordmark-pulse{animation:none;opacity:1;transform:none}}
 
 /* Native launch reuses this exact loader and releases only after real content is ready. */
 .launch-loading{position:fixed;inset:0;z-index:10000;background:var(--bg,#faf9f5);display:flex;align-items:center;justify-content:center;color:var(--text,#28302b);pointer-events:auto}

@@ -1,5 +1,5 @@
 import {SpeedReader,focusParts,contrast} from './advanced-reader.js?v=17';
-import {icon} from './ui.js?v=14';
+import {icon} from './ui.js?v=15';
 
 export function createSpeedReading(ctx){
  let active=false,focused=false,lastSave=0,fullscreenRoot=null,resizeObserver=null,paletteKey='',sizedWords=null,measuredFont='',maxExtent=0;

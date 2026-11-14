@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Pemilihan Ikon & Loading (14 November 2026)
+
+- Ubah Loading preview menjadi dua tab pemilihan paket ikon dan animasi loading, dengan preview kandidat, Coba dan Gunakan.
+- Sediakan Rounded KataKecil/Lucide resmi serta loading wordmark lama/denyut/titik-titik. Default tetap tampilan lama sampai pilihan diterapkan.
+- Simpan pilihan di perangkat, antartab dan backup; perubahan ikon/loading tidak merender ulang kontrol atau menggeser posisi baca.
+- Sertakan SVG Lucide terpilih beserta lisensi secara lokal, tanpa CDN. [Pengaturan dan hasil uji](docs/icon-loading-picker.md). Tahap ini source web saja; versi APK tetap 1.2.5/build 13.
+
 ## Pengembangan web — Ikon dan kapsul header Library (14 November 2026)
 
 - Sambungkan kepala panah refresh ke jalur melingkar; rapikan knob dan track ikon pengaturan.

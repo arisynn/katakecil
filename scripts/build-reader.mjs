@@ -1,5 +1,6 @@
 import {build} from 'esbuild';
 import {readFile, writeFile, mkdir, access} from 'node:fs/promises';
+import './generate-lucide-icons.mjs';
 await build({entryPoints:['src/reader/index.ts'],outdir:'dist',entryNames:'advanced-reader',bundle:true,format:'esm',platform:'browser',target:'es2022',legalComments:'eof',minify:true,metafile:true}).then(async result=>{
  await mkdir('docs/generated',{recursive:true});
  await writeFile('docs/generated/reader-bundle.json',JSON.stringify({bytes:result.metafile.outputs['dist/advanced-reader.js'].bytes,dependencies:Object.keys(result.metafile.inputs).filter(f=>f.startsWith('node_modules/'))},null,2)+'\n');

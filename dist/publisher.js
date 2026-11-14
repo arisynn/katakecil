@@ -1,4 +1,4 @@
-import {$,escapeHTML as esc,icon} from './ui.js?v=14';
+import {$,escapeHTML as esc,icon} from './ui.js?v=15';
 import {createPublisherClient} from './publisher-client.js?v=1';
 const helpers=()=>import('./publisher-import.js?v=4');
 const publisherIcon=name=>icon(name);

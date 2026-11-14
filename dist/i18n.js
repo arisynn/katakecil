@@ -3,6 +3,13 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Wordmark lama':'Classic wordmark','Denyut lembut':'Soft pulse','Titik-titik':'Dots',
+ 'Ikon & Loading':'Icons & Loading','Ikon':'Icons','Bagian ikon dan loading':'Icon and loading sections',
+ 'Pilihan diterapkan setelah menekan Gunakan.':'Select an option, then press Use.',
+ 'Pilihan paket ikon':'Icon packs','Pilihan loading':'Loading styles','Pratinjau loading':'Loading preview',
+ 'Sedang digunakan':'Currently used','Gunakan':'Use','Coba':'Try',
+ 'Paket ikon diterapkan.':'Icon pack applied.','Animasi loading diterapkan.':'Loading style applied.',
+
  'Pilih satu tema untuk aplikasi dan reader.':'Choose one theme for the app and reader.',
  'Mode tampilan':'Display mode','Palet tambahan':'More palettes','Teks dan latar':'Text and background',
  'Spasi dan paragraf':'Spacing and paragraphs','Margin dan kolom':'Margins and column','Layar':'Screen',

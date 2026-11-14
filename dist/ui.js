@@ -1,3 +1,5 @@
+import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=1';
+import {LUCIDE_ICONS} from './vendor/lucide-icons.js?v=1';
 export const $ = (selector, root=document) => root.querySelector(selector);
 export const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
 export const escapeHTML = (value='') => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -56,7 +58,22 @@ const paths={
  eyeOff:'m3.5 3.5 17 17 M9.5 5.8a10 10 0 0 1 2.5-.3c6.3 0 9.5 6.5 9.5 6.5a18 18 0 0 1-2.7 3.6 M6.1 6.9A19 19 0 0 0 2.5 12s3.2 6.5 9.5 6.5a10 10 0 0 0 5.2-1.5 M9.9 9.9a3 3 0 0 0 4.2 4.2',
  logout:'M10 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h4 M9.5 12H21 M16.5 7.5l3.6 3.6a1.3 1.3 0 0 1 0 1.8l-3.6 3.6',
 };
-export const icon=(name,cls='')=>`<svg fill="none" stroke="currentColor" stroke-width="1.85" style="stroke-width:1.85" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" data-icon="${name}" aria-hidden="true" class="${cls}"><path d="${paths[name]||paths.book}"/></svg>`;
+let currentPack=readVisualPreferences().iconPack;
+const packOf=value=>normalizeVisualPreferences({iconPack:value}).iconPack;
+const graphics=(name,pack)=>pack==='lucide'?(LUCIDE_ICONS[name]||LUCIDE_ICONS.book):`<path d="${paths[name]||paths.book}"/>`;
+export function icon(name,cls='',pack){
+ const preview=arguments.length>=3,selected=preview?packOf(pack):currentPack,stroke=selected==='lucide'?2:1.85;
+ return `<svg fill="none" stroke="currentColor" stroke-width="${stroke}" style="stroke-width:${stroke}" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" data-icon="${name}" data-icon-pack="${selected}"${preview?' data-icon-preview="true"':''} aria-hidden="true" class="${cls}">${graphics(name,selected)}</svg>`;
+}
+export function applyIconPack(pack,root=globalThis.document){
+ currentPack=packOf(pack);
+ const nodes=[...(root?.matches?.('svg[data-icon]')?[root]:[]),...(root?.querySelectorAll?.('svg[data-icon]')||[])];
+ for(const el of nodes){
+  if(el.hasAttribute('data-icon-preview')||el.dataset.iconPack===currentPack)continue;
+  el.innerHTML=graphics(el.dataset.icon,currentPack);el.dataset.iconPack=currentPack;
+  const stroke=currentPack==='lucide'?'2':'1.85';el.setAttribute('stroke-width',stroke);el.style.strokeWidth=stroke;
+ }
+}
 export const actionButton=(action,name,label,extra='')=>`<button class="icon-button ${extra}" data-action="${action}" aria-label="${escapeHTML(label)}" title="${escapeHTML(label)}">${icon(name)}</button>`;
 
 export const brandMark=()=>`<span class="brand-wordmark" role="img" aria-label="KataKecil"></span>`;

@@ -19,6 +19,7 @@
     "esbuild": "0.28.2",
     "fake-indexeddb": "6.2.4",
     "jsdom": "26.1.0",
+    "lucide-static": "1.73.0",
     "typescript": "7.0.2"
   },
   "dependencies": {
