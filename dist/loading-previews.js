@@ -1,10 +1,10 @@
 import {icon} from './ui.js?v=16';
-import {loadingLogo} from './loading-logo.js?v=5';
+import {loadingLogo} from './loading-logo.js?v=6';
 import {normalizeVisualPreferences} from './visual-preferences.js?v=2';
 import {scheduleSheetFit} from './panel-layout.js?v=5';
 
 const ICONS=[['katakecil','Rounded KataKecil'],['lucide','Lucide']];
-const LOADERS=[['wordmark','Wordmark lama'],['pulse','Denyut lembut'],['dots','Titik-titik']];
+const LOADERS=[['wordmark','Wordmark lama'],['pulse','Lembar buku'],['dots','Alur tinta']];
 const FIELDS={icons:'iconPack',loading:'loadingStyle'};
 
 // Selection is a local candidate; only the explicit Use action writes preferences.

@@ -4,7 +4,7 @@ let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
  'Glow halaman baca':'Reading page glow','Mengikuti intensitas Ambient.':'Follows Ambient intensity.',
- 'Wordmark lama':'Classic wordmark','Denyut lembut':'Soft pulse','Titik-titik':'Dots',
+ 'Wordmark lama':'Classic wordmark','Lembar buku':'Turning pages','Alur tinta':'Ink flow',
  'Ikon & Loading':'Icons & Loading','Ikon':'Icons','Bagian ikon dan loading':'Icon and loading sections',
  'Pilihan diterapkan setelah menekan Gunakan.':'Select an option, then press Use.',
  'Pilihan paket ikon':'Icon packs','Pilihan loading':'Loading styles','Pratinjau loading':'Loading preview',

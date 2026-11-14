@@ -3,8 +3,8 @@ let currentStyle=readVisualPreferences().loadingStyle;
 // Reuse the exact logo artwork; the default stagger and dots stay unchanged.
 function loadingContents(style){
  const dots='<span class="loading-dots" aria-hidden="true"><i></i><i></i><i></i></span>';
- if(style==='dots')return dots;
- if(style==='pulse')return '<span class="loading-wordmark" role="img" aria-label="KataKecil"><span class="loading-wordmark-piece loading-wordmark-pulse" aria-hidden="true" style="--cut-left:0%;--cut-right:0%"></span></span>';
+ if(style==='dots')return '<span class="loading-motion loading-ink-flow" aria-hidden="true"><span class="loading-ink"><i class="loading-ink-stroke"></i><i class="loading-ink-stroke"></i><i class="loading-ink-stroke"></i></span></span>';
+ if(style==='pulse')return '<span class="loading-motion loading-pages" aria-hidden="true"><span class="loading-book"><span class="loading-book-cover"></span><span class="loading-book-spine"></span><span class="loading-book-print"></span><i class="loading-turning-page"></i><i class="loading-turning-page"></i></span></span>';
  const cuts=[0,16,28.5,37,50,61,73.3,85.5,90,100];
  return `<span class="loading-wordmark" role="img" aria-label="KataKecil">${cuts.slice(0,-1).map((left,i)=>`<span class="loading-wordmark-piece" aria-hidden="true" style="--cut-left:${left}%;--cut-right:${100-cuts[i+1]}%;--wave-order:${i}"></span>`).join('')}</span>${dots}`;
 }

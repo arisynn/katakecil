@@ -6,6 +6,7 @@ Untuk tugas penataan UI Pengaturan, reader, atau tema, baca skill yang sesuai se
 
 | Peran | Skill |
 | --- | --- |
+| Motion loading (wordmark tetap, dua animasi opsional) | [.agents/skills/katakecil-loading-motion/SKILL.md](.agents/skills/katakecil-loading-motion/SKILL.md) |
 | Agent utama: komando, rencana, prompt dan review | [.agents/skills/katakecil-ui-coordinator/SKILL.md](.agents/skills/katakecil-ui-coordinator/SKILL.md) |
 | Audit dan pengelompokan UI | [.agents/skills/katakecil-ui-audit/SKILL.md](.agents/skills/katakecil-ui-audit/SKILL.md) |
 | Pengaturan aplikasi | [.agents/skills/katakecil-app-settings/SKILL.md](.agents/skills/katakecil-app-settings/SKILL.md) |

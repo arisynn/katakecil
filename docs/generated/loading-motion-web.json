@@ -1,0 +1,77 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "actualLoaders": [
+    {
+      "style": "pulse",
+      "locations": [
+        "library",
+        "reader"
+      ],
+      "hiddenStatic": true
+    },
+    {
+      "style": "dots",
+      "locations": [
+        "library",
+        "reader"
+      ],
+      "hiddenStatic": true
+    }
+  ],
+  "defaultWordmark": true,
+  "reloadKeepsLegacyKey": true,
+  "motionCaptures": [
+    {
+      "style": "pulse",
+      "frameMotion": true,
+      "stableStage": {
+        "x": 143,
+        "y": 618,
+        "width": 104,
+        "height": 64
+      },
+      "reducedMotionStatic": true
+    },
+    {
+      "style": "dots",
+      "frameMotion": true,
+      "stableStage": {
+        "x": 143,
+        "y": 618,
+        "width": 104,
+        "height": 64
+      },
+      "reducedMotionStatic": true
+    }
+  ],
+  "tryNoPersistenceAndUseSaves": true,
+  "lightDark": true,
+  "result": "passed",
+  "date": "2026-11-14",
+  "baseline": "6405f66e57bfd06fc1fe34601f5ff894f8100c8a",
+  "nodeTests": {
+    "passed": 14,
+    "failed": 0,
+    "files": [
+      "visual-renderers",
+      "visual-settings"
+    ]
+  },
+  "syntaxAndModuleGraph": "passed",
+  "workers": [
+    "loading_motion_design",
+    "loading_motion_impl",
+    "loading_motion_qa"
+  ],
+  "apkVersionUnchanged": "1.2.5 / 13",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "mainVisualReview": "Two frames of Turning pages and Ink flow light/reduced screenshots reviewed"
+}

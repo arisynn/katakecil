@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Dua motion loading baru: Lembar buku dan Alur tinta | [Motion loading web](loading-motion-web.md) |
 | Glow halaman baca opsional dan 52 pasang ikon berbeda di web | [Glow reader dan gaya ikon](reader-glow-and-icon-styles-web.md) |
 | Pilih paket ikon dan loading melalui menu Ikon & Loading di web | [Ikon & Loading](icon-loading-picker.md) |
 | Perbaikan ikon refresh/pengaturan dan kapsul header Library di web | [Header Library](library-header-icons-web.md) |

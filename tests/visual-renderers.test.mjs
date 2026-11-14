@@ -49,9 +49,9 @@ test('loader switching preserves its live container and default artwork, never r
  try{
   const live=doc.querySelector('.active .loading-brand'),previews=[...doc.querySelectorAll('[data-loading-preview]')],before=previews.map(el=>el.outerHTML);
   assert.equal(live.querySelectorAll('.loading-wordmark-piece').length,9);assert.equal(live.querySelectorAll('.loading-dots i').length,3);live.dataset.purpose='kept';
-  applyLoadingStyle('pulse',doc);assert.equal(doc.querySelector('.active .loading-brand'),live);assert.equal(live.dataset.purpose,'kept');assert.equal(live.querySelectorAll('.loading-wordmark-pulse').length,1);assert.equal(live.querySelector('.loading-wordmark').getAttribute('aria-label'),'KataKecil');
+  applyLoadingStyle('pulse',doc);assert.equal(doc.querySelector('.active .loading-brand'),live);assert.equal(live.dataset.purpose,'kept');assert.equal(live.querySelectorAll('.loading-turning-page').length,2);assert.equal(live.querySelector('.loading-motion').getAttribute('aria-hidden'),'true');assert.equal(live.querySelector('.loading-wordmark'),null);
   const piece=live.firstElementChild;applyLoadingStyle('pulse',doc);assert.equal(live.firstElementChild,piece,'same style does not restart the animation');
-  applyLoadingStyle('dots',live);assert.equal(live.querySelectorAll('.loading-dots i').length,3);assert.equal(live.querySelector('.loading-wordmark'),null);assert.match(loadingLogo(),/data-loading-style="dots"/);assert.deepEqual(previews.map(el=>el.outerHTML),before);
+  applyLoadingStyle('dots',live);assert.equal(live.querySelectorAll('.loading-ink-stroke').length,3);assert.equal(live.querySelector('.loading-turning-page'),null);assert.equal(live.querySelector('.loading-wordmark'),null);assert.match(loadingLogo(),/data-loading-style="dots"/);assert.deepEqual(previews.map(el=>el.outerHTML),before);
   applyLoadingStyle('wordmark',doc);assert.equal(live.querySelectorAll('.loading-wordmark-piece').length,9);assert.equal(live.querySelectorAll('.loading-dots i').length,3);
  }finally{applyLoadingStyle('wordmark');dom.window.close();}
 });
@@ -74,4 +74,17 @@ test('reader ambient is opt-in and all classic glyphs have independent filled ar
   assert.notEqual(KATAKECIL_ICONS[name],LUCIDE_ICONS[name],name);
   assert.match(KATAKECIL_ICONS[name],/fill="currentColor"|stroke-width="2.8"/,name);
  }
+});
+
+test('optional loading motions have distinct silhouettes while default artwork and cuts stay unchanged',()=>{
+ const dom=new JSDOM('<body>'+loadingLogo('wordmark')+loadingLogo('pulse')+loadingLogo('dots')+'</body>'),doc=dom.window.document;
+ try{
+  const base=doc.querySelector('[data-loading-style=wordmark]'),pages=doc.querySelector('[data-loading-style=pulse]'),ink=doc.querySelector('[data-loading-style=dots]');
+  assert.equal(base.querySelector('.loading-wordmark').getAttribute('aria-label'),'KataKecil');
+  assert.deepEqual([...base.querySelectorAll('.loading-wordmark-piece')].map(el=>el.style.getPropertyValue('--cut-left')),['0%','16%','28.5%','37%','50%','61%','73.3%','85.5%','90%']);
+  assert.equal(base.querySelectorAll('.loading-dots i').length,3);
+  for(const motion of [pages,ink]){assert.equal(motion.querySelectorAll('.loading-wordmark,.loading-wordmark-piece,.loading-dots').length,0);assert.equal(motion.querySelector('.loading-motion').getAttribute('aria-hidden'),'true');}
+  assert.ok(pages.querySelector('.loading-book'));assert.equal(pages.querySelectorAll('.loading-turning-page').length,2);assert.equal(pages.querySelector('.loading-ink'),null);
+  assert.ok(ink.querySelector('.loading-ink'));assert.equal(ink.querySelectorAll('.loading-ink-stroke').length,3);assert.equal(ink.querySelector('.loading-book'),null);
+ }finally{dom.window.close();}
 });

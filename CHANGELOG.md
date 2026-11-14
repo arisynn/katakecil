@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Motion loading (14 November 2026)
+
+- Ganti dua loading opsional Soft pulse/Dots dengan **Lembar buku** dan **Alur tinta**, memakai gerak serta bentuk yang berbeda.
+- Pertahankan Wordmark lama sebagai default, key preferensi/backup, serta alur Coba/Gunakan. Reduced motion menampilkan versi statis dan loader reader tersembunyi menghentikan animasi.
+- Tambahkan skill khusus dan pembagian tiga worker untuk desain, implementasi dan QA. [Catatan web](docs/loading-motion-web.md); versi APK tetap 1.2.5/build 13.
+
 ## Pengembangan web — Glow halaman baca dan gaya ikon (14 November 2026)
 
 - Tambahkan toggle **Glow halaman baca** dalam Tema, default mati. Saat aktif, glow statis mengikuti aksen dan intensitas Ambient; kertas tetap opak, teks/posisi baca tetap.

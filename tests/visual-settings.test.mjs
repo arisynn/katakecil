@@ -4,7 +4,7 @@ import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 import {createVisualSettings} from '../dist/loading-previews.js';
 import {icon,applyIconPack} from '../dist/ui.js?v=16';
-import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=5';
+import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=6';
 import {createBackup,parseBackup} from '../dist/device-backup.js';
 
 function fixture(initial={}){
