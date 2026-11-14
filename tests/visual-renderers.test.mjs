@@ -5,15 +5,16 @@ import {JSDOM} from 'jsdom';
 import {VISUAL_DEFAULTS,normalizeVisualPreferences,readVisualPreferences} from '../dist/visual-preferences.js';
 import {icon,applyIconPack} from '../dist/ui.js';
 import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js';
+import {KATAKECIL_ICONS} from '../dist/katakecil-icons.js';
 import {LUCIDE_ICONS,LUCIDE_ICON_NAMES,LUCIDE_VERSION} from '../dist/vendor/lucide-icons.js';
 
 test('visual preferences safely upgrade legacy or blocked storage and reject unknown choices',()=>{
  assert.deepEqual(normalizeVisualPreferences({glassBlur:34}),VISUAL_DEFAULTS);
  for(const input of [null,{}, {iconPack:false,loadingStyle:12},{iconPack:'remote',loadingStyle:'shimmer'}])assert.deepEqual(normalizeVisualPreferences(input),VISUAL_DEFAULTS);
- assert.deepEqual(normalizeVisualPreferences({iconPack:'lucide',loadingStyle:'dots'}),{iconPack:'lucide',loadingStyle:'dots'});
+ assert.deepEqual(normalizeVisualPreferences({iconPack:'lucide',loadingStyle:'dots'}),{iconPack:'lucide',loadingStyle:'dots',readerAmbientGlow:false});
  assert.deepEqual(readVisualPreferences({getItem(){throw Error('Blocked');}}),VISUAL_DEFAULTS);
  assert.deepEqual(readVisualPreferences({getItem:()=>'{broken'}),VISUAL_DEFAULTS);
- assert.deepEqual(readVisualPreferences({getItem:()=>'{"iconPack":"lucide","loadingStyle":"pulse"}'}),{iconPack:'lucide',loadingStyle:'pulse'});
+ assert.deepEqual(readVisualPreferences({getItem:()=>'{"iconPack":"lucide","loadingStyle":"pulse"}'}),{iconPack:'lucide',loadingStyle:'pulse',readerAmbientGlow:false});
 });
 
 test('Lucide glyphs come from the pinned official SVGs and cover the complete app vocabulary',async()=>{
@@ -62,4 +63,15 @@ test('saved visual choices initialize renderers before any Store or document exi
   const icons=await import('../dist/ui.js?initial-visual-preferences'),loaders=await import('../dist/loading-logo.js?initial-visual-preferences');
   assert.match(icons.icon('systemTheme'),/data-icon-pack="lucide"/);assert.match(loaders.loadingLogo(),/data-loading-style="pulse"/);
  }finally{if(original)Object.defineProperty(globalThis,'localStorage',original);else delete globalThis.localStorage;}
+});
+
+test('reader ambient is opt-in and all classic glyphs have independent filled artwork',()=>{
+ assert.equal(VISUAL_DEFAULTS.readerAmbientGlow,false);
+ for(const value of [undefined,null,false,'true',1,{}])assert.equal(normalizeVisualPreferences({readerAmbientGlow:value}).readerAmbientGlow,false);
+ assert.equal(normalizeVisualPreferences({readerAmbientGlow:true}).readerAmbientGlow,true);
+ assert.deepEqual(Object.keys(KATAKECIL_ICONS),Object.keys(LUCIDE_ICONS));
+ for(const name of Object.keys(KATAKECIL_ICONS)){
+  assert.notEqual(KATAKECIL_ICONS[name],LUCIDE_ICONS[name],name);
+  assert.match(KATAKECIL_ICONS[name],/fill="currentColor"|stroke-width="2.8"/,name);
+ }
 });

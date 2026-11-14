@@ -1,7 +1,7 @@
 import {transitionContent} from './motion.js?v=1';
 import {layoutDialog} from './panel-layout.js?v=5';
 import {makeAnchor,resolveAnchor,migrateLegacyAnchor,readerDefaults,readerSettings,palettes,globalPalette,contrast,spreadEnabled,findPage,findMatches,readingStats,ReadAloud,ReadingWakeLock,dictionaryLookup,translateSelection} from './advanced-reader.js?v=17';
-import {escapeHTML as esc,icon,$,$$} from './ui.js?v=15';
+import {escapeHTML as esc,icon,$,$$} from './ui.js?v=16';
 import {textRange,offsetAtPoint} from './text-selection.js?v=8';
 
 
@@ -142,7 +142,7 @@ export function createReaderExperience(ctx){
   const glyph={light:'sun',dark:'moon',system:'systemTheme',sepia:'sepia',paper:'paper',green:'leaf',custom:'palette'};
   const chip=key=>{const palette=palettes[key]||{background:key==='system'?'linear-gradient(145deg,rgba(var(--accent-rgb),.18),rgba(var(--glass),.18))':d.customBackgroundColor,text:key==='system'?'var(--text)':d.customTextColor};return `<button class="global-theme-chip ${key==='custom'?'global-theme-custom ':''}${selected===key?'active':''}" data-action="app-theme-preset" data-value="${key}" aria-pressed="${selected===key}"><i style="background:${palette.background};color:${palette.text}" aria-hidden="true">${icon(glyph[key])}</i><span class="theme-option-label">${themeName(key)}${key==='custom'?`<small>${tr('Text and background','Teks dan latar')}</small>`:''}</span><span class="theme-choice-check" aria-hidden="true">${selected===key?icon('check'):''}</span></button>`;};
   const group=(id,title,keys)=>`<section class="theme-option-group" role="group" aria-labelledby="${id}"><h3 id="${id}">${title}</h3><div class="global-theme-grid">${keys.map(chip).join('')}</div></section>`;
-  return `<div class="theme-options"><p class="theme-global-caption">${tr('Choose one theme for the app and reader.','Pilih satu tema untuk aplikasi dan reader.')}</p>${group('theme-display-heading',tr('Display mode','Mode tampilan'),['light','dark','system'])}${group('theme-palette-heading',tr('More palettes','Palet tambahan'),['sepia','paper','green'])}${chip('custom')}</div>`;
+  return `<div class="theme-options"><p class="theme-global-caption">${tr('Choose one theme for the app and reader.','Pilih satu tema untuk aplikasi dan reader.')}</p>${group('theme-display-heading',tr('Display mode','Mode tampilan'),['light','dark','system'])}${group('theme-palette-heading',tr('More palettes','Palet tambahan'),['sepia','paper','green'])}${chip('custom')}<label class="reader-ambient-control" for="reader-ambient-glow"><span>${tr('Reading page glow','Glow halaman baca')}<small>${tr('Follows Ambient intensity.','Mengikuti intensitas Ambient.')}</small></span><input id="reader-ambient-glow" type="checkbox" ${ctx.prefs().readerAmbientGlow===true?'checked':''}></label></div>`;
  }
  function customThemeDialog(){
   if(panel!=='custom-theme')themeReturn=panel==='appearance'?'appearance':'global-theme';
@@ -286,6 +286,7 @@ export function createReaderExperience(ctx){
   return false;
  }
  function change(el){
+  if(el.id==='reader-ambient-glow'){ctx.savePreferences({readerAmbientGlow:el.checked});ctx.apply();return true;}
   if(el.dataset.readerPref){const value=el.type==='checkbox'?el.checked:el.type==='range'?Number(el.value):el.value;if(ctx.prefs()[el.dataset.readerPref]!==value)void changePreference(el.dataset.readerPref,value).catch(e=>ctx.toast(e.message));return true;}
   if(el.id==='annotation-episode'||el.id==='annotation-color'){filters[el.id==='annotation-episode'?'episode':'color']=el.value;$('#drawer-content').innerHTML=contentsBody();return true;}
   if(el.id==='tts-language'){ctx.savePreferences({ttsLanguage:el.value});updateVoices();speech.stop();return true;}

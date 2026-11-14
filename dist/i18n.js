@@ -3,6 +3,7 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
+ 'Glow halaman baca':'Reading page glow','Mengikuti intensitas Ambient.':'Follows Ambient intensity.',
  'Wordmark lama':'Classic wordmark','Denyut lembut':'Soft pulse','Titik-titik':'Dots',
  'Ikon & Loading':'Icons & Loading','Ikon':'Icons','Bagian ikon dan loading':'Icon and loading sections',
  'Pilihan diterapkan setelah menekan Gunakan.':'Select an option, then press Use.',

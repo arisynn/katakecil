@@ -4,13 +4,15 @@
 
 ## Pilihan dan perilaku
 
-- **Ikon:** Rounded KataKecil atau Lucide. Card menampilkan contoh refresh, pengaturan, tema Sistem dan buku. Kedua contoh memakai paket eksplisit sehingga tetap berbeda saat paket aplikasi berubah.
+- **Ikon:** Rounded KataKecil (klasik solid/dua nada, artwork mandiri) atau Lucide (outline resmi). Seluruh 52 pasang ikon memiliki geometri berbeda; pergantian bukan sekadar ketebalan garis. Card menampilkan contoh refresh, pengaturan, tema Sistem dan buku. Kedua contoh memakai paket eksplisit sehingga tetap berbeda saat paket aplikasi berubah.
 - **Loading:** Wordmark lama, Denyut lembut, atau Titik-titik. Wordmark lama memakai PNG, pembagian sembilan bagian, wave serta tiga titik yang sudah ada. Denyut memakai artwork yang sama; Titik-titik memakai tiga titik tanpa progress palsu atau shimmer.
 - Memilih card hanya mengubah kandidat. **Coba** memulai ulang pratinjau loading; **Gunakan** menyimpan pilihan pada tab aktif. Menutup sheet membuang kandidat yang belum diterapkan. Label “Sedang digunakan” membedakan pilihan tersimpan dari kandidat.
 - Ikon yang sudah tampil diperbarui pada node SVG yang sama, sehingga class, aria, handler dan kontrol induk tetap. Loader aktif diperbarui pada container `.loading-brand` yang sama; penerapan style yang sama tidak memulai ulang animasi. Pratinjau eksplisit dikecualikan dari perubahan global.
 - Preferensi lokal `iconPack` (`katakecil`/`lucide`) dan `loadingStyle` (`wordmark`/`pulse`/`dots`) disertakan dalam backup. Instalasi lama mendapat default; backup lama tetap diterima tanpa menghapus pilihan lokal yang sudah ada. Nilai lokal yang tidak dikenal dinormalisasi dan nilai backup yang tidak valid ditolak sebelum restore. Reset kenyamanan teks mempertahankan keduanya.
 
 Renderer membaca dua preferensi ini secara aman sebelum Store tersedia, sehingga startup juga mengikuti pilihan tersimpan. Tidak ada impor Store dari renderer atau permintaan ikon melalui CDN. Lucide asli berasal dari `lucide-static@1.73.0`: 52 SVG terpilih menghasilkan modul lokal **9.747 bytes**, dengan lisensi ISC/notice Feather yang disertakan. Geometry upstream dipertahankan. Paket npm hanya alat development; font/library penuh tidak masuk aset aplikasi. [Atribusi](../OPEN_SOURCE_ATTRIBUTIONS.md).
+
+Pembaruan berikutnya menambahkan glow halaman baca opsional dan memperjelas perbedaan seluruh ikon klasik/Lucide; lihat [hasil terbaru](reader-glow-and-icon-styles-web.md).
 
 ## Pemeriksaan singkat
 

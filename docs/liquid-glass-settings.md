@@ -6,12 +6,13 @@ Sheet menyediakan pratinjau ambient dan kaca serta tombol **Kembalikan default**
 
 Ambient terdiri atas dua gradasi radial statis mengikuti warna aksen, tanpa animasi terus-menerus atau filter blur layar penuh. Intensitas 0 mematikan ambient global dan tint ambient di kontrol Reader; glow lokal di sekitar sampul tetap mengikuti warna buku. Pada intensitas maksimum, alpha kedua gradasi dibatasi 0,22/0,10 dalam tema terang dan 0,18/0,08 dalam tema gelap. Panel kontrol Reader mendapat tint lokal yang lebih tipis (maksimum 0,09/0,07).
 
-UI terang memakai Pearl (#EEF2F6, teks #25313B), UI gelap memakai charcoal (#11161C, teks #E6EDF3). Kertas buku tetap memakai #FAF9F5 / #28302B saat terang dan #191D1B / #DDDCD4 saat gelap, opak tanpa gradasi ambient. Sepia, Paper, Green dan warna kustom mempertahankan warna dasar sebelumnya.
+UI terang memakai Pearl (#EEF2F6, teks #25313B), UI gelap memakai charcoal (#11161C, teks #E6EDF3). Kertas buku tetap memakai #FAF9F5 / #28302B saat terang dan #191D1B / #DDDCD4 saat gelap, opak dan polos secara default. Toggle **Glow halaman baca** di Tema dapat menambahkan gradasi ambient statis di atas warna dasar kertas; default mati, mengikuti aksen dan intensitas Ambient, tanpa mengubah opacity teks. Sepia, Paper, Green dan warna kustom mempertahankan warna dasar sebelumnya.
 
 Panel Settings, dialog/picker, kapsul Library/Reader dan tombol Baca menggunakan parameter bersama. Lapisan putih, bevel dan bayangan diperingan; kontrol kecil tidak menambahkan panel putih lagi. Library full-cover/split-stage, warna sampul dan respons tekan terbaru tetap dipertahankan. Teks/ikon tombol Baca memilih warna kontras terhadap komposit tint dan latar tema. Tema kustom memakai warna pilihannya dengan kebeningan yang sama. Browser tanpa backdrop blur memakai permukaan cadangan solid yang terbaca.
 
 ## Preferensi dan kompatibilitas
 
+- `readerAmbientGlow`: boolean, default `false`; toggle berada di Tema dari Pengaturan maupun reader, tersimpan antarsesi/antartab dan di backup. Reset kenyamanan mempertahankannya.
 - `glassTransparency`: angka 0–100, default 75; `glassBlur`: angka 0–40, default 20; `ambientIntensity`: angka 0–100, default 60. Nilai lokal dibulatkan/dijepit; tipe yang salah atau angka non-finite kembali ke default.
 - Instalasi lama mendapat kebeningan 75% bila field baru belum ada. `glassOpacity` lama tidak digunakan untuk renderer karena sebelumnya belum mengendalikan tampilan. Nilai blur lama yang valid, termasuk 34 px, tetap dipertahankan.
 - Pengguna yang sudah mengatur kebeningan/blur mempertahankan nilainya dan mendapat ambient 60% bila belum diatur.
@@ -26,4 +27,4 @@ Chromium dengan katalog/episode mock memeriksa drag slider tanpa mengganti DOM i
 
 Perubahan ambient berbasis `main` setelah `5421463` (1.2.2/build 10). Tidak menaikkan versi, membangun APK, menerbitkan situs/backend atau menjalankan workflow GitHub Actions; APK memerlukan build berikutnya.
 
-Uji pemilik: coba Ambient glow 0/60/100%, ganti aksen dan tema terang/gelap/kustom, lalu tutup dan buka ulang. Coba kebeningan/blur favoritmu dan reset ke 75/20/60. Pastikan tombol Baca terbaca, tiga slider muat pada HP, swipe nyaman, serta halaman buku tetap polos di posisi semula.
+Uji pemilik: coba Ambient glow 0/60/100%, ganti aksen dan tema terang/gelap/kustom, lalu tutup dan buka ulang. Coba kebeningan/blur favoritmu dan reset ke 75/20/60. Pastikan tombol Baca terbaca, tiga slider muat pada HP, swipe nyaman, serta halaman buku tetap di posisi semula. Coba Glow halaman baca mati/aktif; default tetap polos.

@@ -1,0 +1,33 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "defaultOff": true,
+  "toggleOffReloadAndCrossTab": true,
+  "intensityAccentDarkAndPosition": true,
+  "onReloadPersists": true,
+  "distinctIconPairs": 52,
+  "packSwitchKeepsDomAndPosition": true,
+  "staticGlow": true,
+  "result": "passed",
+  "date": "2026-11-14",
+  "baseline": "38a24cfd13f6dc270d6a34af1932cb3f6518c9d8",
+  "nodeTests": {
+    "passed": 26,
+    "failed": 0,
+    "files": [
+      "visual-renderers",
+      "visual-settings",
+      "reader-controls",
+      "backup-store"
+    ]
+  },
+  "build": true,
+  "typecheck": true,
+  "syntaxAndModuleGraph": true,
+  "visualReview": "52 classic/Lucide pairs and light/dark reader screenshots reviewed",
+  "apkVersionUnchanged": "1.2.5 / 13"
+}

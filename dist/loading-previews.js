@@ -1,6 +1,6 @@
-import {icon} from './ui.js?v=15';
-import {loadingLogo} from './loading-logo.js?v=4';
-import {normalizeVisualPreferences} from './visual-preferences.js?v=1';
+import {icon} from './ui.js?v=16';
+import {loadingLogo} from './loading-logo.js?v=5';
+import {normalizeVisualPreferences} from './visual-preferences.js?v=2';
 import {scheduleSheetFit} from './panel-layout.js?v=5';
 
 const ICONS=[['katakecil','Rounded KataKecil'],['lucide','Lucide']];

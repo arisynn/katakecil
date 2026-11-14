@@ -1,6 +1,6 @@
-import {$,escapeHTML as esc,icon} from './ui.js?v=15';
+import {$,escapeHTML as esc,icon} from './ui.js?v=16';
 import {createPublisherClient} from './publisher-client.js?v=1';
-const helpers=()=>import('./publisher-import.js?v=4');
+const helpers=()=>import('./publisher-import.js?v=5');
 const publisherIcon=name=>icon(name);
 export function createPublisher(ctx){
  const api=createPublisherClient();let signedIn=false,busy=false,books=[],draft=null,parts=[],prepared=null,recovery=!!globalThis.location?.hash.includes('type=recovery');

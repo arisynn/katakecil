@@ -27,7 +27,7 @@ Rapikan isi pengaturan reader dan sheet tema yang juga dibuka dari Pengaturan ut
 - File awal: area pengaturan/tema/tools pada `dist/reader-experience.js` dan CSS scoped yang disepakati. Jangan mengedit `dist/app.js`.
 - Jangan mengubah `src/reader/display.ts`, default/key preferensi, parser, pagination, signature reflow, anchor/progres, isi EPUB atau backend.
 - Jangan mengubah mesin TTS/RSVP, ukuran huruf RSVP, penempatan huruf fokus, WPM atau posisi resume. Bila menemukan masalah di luar layout, laporkan secara terpisah.
-- Kertas naskah tetap opak dan polos; palet, kaca/ambient dan toast bersama dipertahankan.
+- Kertas naskah tetap opak dan teks tajam. Glow halaman baca bersifat opsional (default mati), sesuai arahan pengguna terbaru; ketika aktif mengikuti aksen/intensitas Ambient tanpa memengaruhi pagination. Palet, kaca/ambient UI dan toast bersama dipertahankan.
 - Tidak commit/push, menaikkan versi atau menjalankan build/release APK secara mandiri.
 
 ## Selesai bila

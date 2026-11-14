@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 import {createVisualSettings} from '../dist/loading-previews.js';
-import {icon,applyIconPack} from '../dist/ui.js?v=15';
-import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=4';
+import {icon,applyIconPack} from '../dist/ui.js?v=16';
+import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=5';
 import {createBackup,parseBackup} from '../dist/device-backup.js';
 
 function fixture(initial={}){
@@ -78,12 +78,12 @@ test('visual preferences survive reload, old backup restore, comfort reset and c
  w.localStorage.setItem('lumina_device_settings',JSON.stringify({fontSize:24,uiLanguageChosen:true}));
  try{
   const store=await import('../dist/store.js?visual-settings-persist');assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'wordmark');
-  store.updatePreferences({iconPack:'lucide',loadingStyle:'dots'});assert.equal(JSON.parse(w.localStorage.getItem('lumina_device_settings')).iconPack,'lucide');
-  const reload=await import('../dist/store.js?visual-settings-reload');assert.equal(reload.preferences.iconPack,'lucide');assert.equal(reload.preferences.loadingStyle,'dots');
-  store.resetReadingPreferences();assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'dots');assert.equal(store.preferences.fontSize,store.DEFAULTS.fontSize);
+  assert.equal(store.preferences.readerAmbientGlow,false);store.updatePreferences({iconPack:'lucide',loadingStyle:'dots',readerAmbientGlow:true});assert.equal(JSON.parse(w.localStorage.getItem('lumina_device_settings')).iconPack,'lucide');
+  const reload=await import('../dist/store.js?visual-settings-reload');assert.equal(reload.preferences.iconPack,'lucide');assert.equal(reload.preferences.loadingStyle,'dots');assert.equal(reload.preferences.readerAmbientGlow,true);
+  store.resetReadingPreferences();assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'dots');assert.equal(store.preferences.fontSize,store.DEFAULTS.fontSize);assert.equal(store.preferences.readerAmbientGlow,true);
   await store.restoreBackup({annotations:[],progress:[],preferences:{fontSize:22}},{restorePreferences:true});assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'dots');
-  channels[0].onmessage({data:{kind:'preferences',payload:{...store.preferences,iconPack:'untrusted',loadingStyle:17}}});assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'wordmark');
-  const incoming={...store.preferences,iconPack:'lucide',loadingStyle:'pulse'};w.localStorage.setItem('lumina_device_settings',JSON.stringify(incoming));w.dispatchEvent(new w.StorageEvent('storage',{key:'lumina_device_settings',newValue:JSON.stringify(incoming)}));assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'pulse');
+  channels[0].onmessage({data:{kind:'preferences',payload:{...store.preferences,iconPack:'untrusted',loadingStyle:17,readerAmbientGlow:'true'}}});assert.equal(store.preferences.iconPack,'katakecil');assert.equal(store.preferences.loadingStyle,'wordmark');assert.equal(store.preferences.readerAmbientGlow,false);
+  const incoming={...store.preferences,iconPack:'lucide',loadingStyle:'pulse',readerAmbientGlow:true};w.localStorage.setItem('lumina_device_settings',JSON.stringify(incoming));w.dispatchEvent(new w.StorageEvent('storage',{key:'lumina_device_settings',newValue:JSON.stringify(incoming)}));assert.equal(store.preferences.iconPack,'lucide');assert.equal(store.preferences.loadingStyle,'pulse');assert.equal(store.preferences.readerAmbientGlow,true);
  }finally{w.close();for(const [key,descriptor] of Object.entries(previous)){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}}
 });
 
@@ -92,4 +92,13 @@ test('backup roundtrips visual choices, accepts legacy fields and rejects invali
  assert.equal(restored.preferences.iconPack,'lucide');assert.equal(restored.preferences.loadingStyle,'pulse');assert.equal(backup.schemaVersion,2);
  const legacy=parseBackup(JSON.stringify(createBackup({preferences:{fontSize:23},annotations:[],progress:{}})));assert.equal(legacy.preferences.iconPack,undefined);assert.equal(legacy.preferences.loadingStyle,undefined);
  for(const preferences of [{iconPack:'other'},{iconPack:1},{iconPack:true},{loadingStyle:'other'},{loadingStyle:null},{loadingStyle:[]}])assert.throws(()=>createBackup({preferences,annotations:[],progress:{}}),/Invalid/);
+});
+
+test('reader glow backup preserves booleans, accepts old backups and rejects malformed values',()=>{
+ for(const value of [true,false]){
+  const data=createBackup({preferences:{readerAmbientGlow:value},annotations:[],progress:{}});
+  assert.equal(parseBackup(JSON.stringify(data)).preferences.readerAmbientGlow,value);
+ }
+ for(const value of ['true',1,null,{}])assert.throws(()=>createBackup({preferences:{readerAmbientGlow:value},annotations:[],progress:{}}),/Invalid/);
+ assert.equal(parseBackup(JSON.stringify(createBackup({preferences:{},annotations:[],progress:{}}))).preferences.readerAmbientGlow,undefined);
 });

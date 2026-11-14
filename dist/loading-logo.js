@@ -1,4 +1,4 @@
-import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=1';
+import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=2';
 let currentStyle=readVisualPreferences().loadingStyle;
 // Reuse the exact logo artwork; the default stagger and dots stay unchanged.
 function loadingContents(style){

@@ -1,66 +1,12 @@
-import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=1';
+import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=2';
+import {KATAKECIL_ICONS} from './katakecil-icons.js?v=1';
 import {LUCIDE_ICONS} from './vendor/lucide-icons.js?v=1';
 export const $ = (selector, root=document) => root.querySelector(selector);
 export const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
 export const escapeHTML = (value='') => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-// KataKecil ink icons: soft corners, open counters and one rounded stroke family.
-const paths={
- sun:'M12 2.8v1.6 M12 19.6v1.6 M2.8 12h1.6 M19.6 12h1.6 M5.5 5.5l1.1 1.1 M17.4 17.4l1.1 1.1 M5.5 18.5l1.1-1.1 M17.4 6.6l1.1-1.1 M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0',
- moon:'M19.6 14.2A7.8 7.8 0 0 1 9.8 4.4a8.1 8.1 0 1 0 9.8 9.8Z M17 3.2v3 M15.5 4.7h3',
- leaf:'M19.5 4.5c.8 6.7-1.7 14-8.5 14a6 6 0 0 1-6-6c0-6.8 7.3-9.3 14.5-8Z M4 20l10.5-10.5 M9.5 14.5v-4 M9.5 14.5h4',
- paper:'M8 3.5h6.2a2 2 0 0 1 1.4.6l3.3 3.3a2 2 0 0 1 .6 1.4V18a2.5 2.5 0 0 1-2.5 2.5H8A2.5 2.5 0 0 1 5.5 18V6A2.5 2.5 0 0 1 8 3.5Z M13.5 4v3a2 2 0 0 0 2 2h3 M9 12.5h6 M9 16h4',
- sepia:'M5.5 8h11v6.5a5.5 5.5 0 0 1-11 0V8Z M16.5 9h1.2a3.3 3.3 0 0 1 0 6.6h-1.2 M4 21h14 M8.5 3c-1 1 .8 1.8 0 3 M12.5 3c-1 1 .8 1.8 0 3',
- speaker:'M10.9 5.1 6.7 8.5H4.5A1.5 1.5 0 0 0 3 10v4a1.5 1.5 0 0 0 1.5 1.5h2.2l4.2 3.4a.7.7 0 0 0 1.1-.5V5.6a.7.7 0 0 0-1.1-.5Z M15.5 8.5a5 5 0 0 1 0 7 M18.5 5.5a9.2 9.2 0 0 1 0 13',
- play:'M8.2 5.2a1.2 1.2 0 0 1 1.8-1l10 6.8a1.2 1.2 0 0 1 0 2l-10 6.8a1.2 1.2 0 0 1-1.8-1V5.2Z',
- pause:'M7 5.5v13 M17 5.5v13',
- globe:'M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0 M3.8 12h16.4 M12 3.5c4.5 4.7 4.5 12.3 0 17-4.5-4.7-4.5-12.3 0-17Z',
- refresh:'M19.4 15.4A8 8 0 1 1 19.4 8.6l.8 1.4 M16.2 9.3l4 .7.7-4',
- collapse:'M9 3.5v4a1.5 1.5 0 0 1-1.5 1.5h-4 M15 3.5v4a1.5 1.5 0 0 0 1.5 1.5h4 M3.5 15h4A1.5 1.5 0 0 1 9 16.5v4 M20.5 15h-4a1.5 1.5 0 0 0-1.5 1.5v4',
- palette:'M12 3.5a8.5 8.5 0 1 0 0 17h1.2a2.1 2.1 0 0 0 .7-4.1 1.7 1.7 0 0 1 .6-3.3h2.7a3.8 3.8 0 0 0 3.3-3.8c0-3.3-4-5.8-8.5-5.8Z M7.2 10h.1 M10.2 6.8h.1 M15.2 7.3h.1 M6.8 14.5h.1',
- type:'M5 7V5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5V7 M12 4v16 M8.5 20h7',
- textSize:'M3.5 18 8.6 5.7a.7.7 0 0 1 1.3 0L15 18 M5.5 13.5H13 M16.5 10h5 M19 10v8',
- device:'M8.5 3h7A3.5 3.5 0 0 1 19 6.5v11a3.5 3.5 0 0 1-3.5 3.5h-7A3.5 3.5 0 0 1 5 17.5v-11A3.5 3.5 0 0 1 8.5 3Z M10 6h4 M11 17.5h2',
- systemTheme:'M6 4.5h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3Z M12 17.5V21 M8.5 21h7 M15.2 11a3.2 3.2 0 1 1-6.4 0 3.2 3.2 0 0 1 6.4 0 M12 7.8v6.4',
- book:'M7.5 3.5h9A2.5 2.5 0 0 1 19 6v14H7.5a3 3 0 0 1-3-3V6.5a3 3 0 0 1 3-3Z M4.5 17a3 3 0 0 1 3-3H19 M9 3.5v6l2-1.3 2 1.3v-6',
- bookOpen:'M12 6.5C9.3 4.7 6 4.1 3.5 5.3v13.5c2.7-1 5.6-.6 8.5 1.2 2.9-1.8 5.8-2.2 8.5-1.2V5.3C18 4.1 14.7 4.7 12 6.5Z M12 6.5V20 M6.5 8.5l2.2.5 M15.3 9l2.2-.5',
- grid:'M6 3.5h2a2.5 2.5 0 0 1 2.5 2.5v2A2.5 2.5 0 0 1 8 10.5H6A2.5 2.5 0 0 1 3.5 8V6A2.5 2.5 0 0 1 6 3.5Z M16 3.5h2A2.5 2.5 0 0 1 20.5 6v2a2.5 2.5 0 0 1-2.5 2.5h-2A2.5 2.5 0 0 1 13.5 8V6A2.5 2.5 0 0 1 16 3.5Z M6 13.5h2a2.5 2.5 0 0 1 2.5 2.5v2A2.5 2.5 0 0 1 8 20.5H6A2.5 2.5 0 0 1 3.5 18v-2A2.5 2.5 0 0 1 6 13.5Z M16 13.5h2a2.5 2.5 0 0 1 2.5 2.5v2a2.5 2.5 0 0 1-2.5 2.5h-2a2.5 2.5 0 0 1-2.5-2.5v-2a2.5 2.5 0 0 1 2.5-2.5Z',
- notes:'M8 3.5h8A3.5 3.5 0 0 1 19.5 7v10a3.5 3.5 0 0 1-3.5 3.5H8A3.5 3.5 0 0 1 4.5 17V7A3.5 3.5 0 0 1 8 3.5Z M8.5 8h7 M8.5 12h7 M8.5 16h4',
- appearance:'M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0 M12 3.5c-3 2.3-4.5 5.1-4.5 8.5s1.5 6.2 4.5 8.5 M12 12h8.5 M15.5 7.5h.1 M16.5 16.5h.1',
- plus:'M12 5v14 M5 12h14',
- search:'M17.5 10.5a7 7 0 1 1-14 0 7 7 0 0 1 14 0 M16 16l4.5 4.5',
- chevron:'m9 5.5 5.7 5.6a1.3 1.3 0 0 1 0 1.8L9 18.5',
- left:'m15 5.5-5.7 5.6a1.3 1.3 0 0 0 0 1.8l5.7 5.6',
- arrow:'M4.5 12h15 M14 6.5l4.6 4.6a1.3 1.3 0 0 1 0 1.8L14 17.5',
- close:'m6.5 6.5 11 11 M6.5 17.5l11-11',
- check:'m5 12.5 4 4a1 1 0 0 0 1.4 0L19 7',
- shield:'m12 3.5 7.3 2.8a1.5 1.5 0 0 1 1 1.4v4.1c0 4.5-5.5 7.5-7.6 8.5a1.6 1.6 0 0 1-1.4 0c-2.1-1-7.6-4-7.6-8.5V7.7a1.5 1.5 0 0 1 1-1.4L12 3.5Z M8.5 11.8l2.4 2.4 4.6-4.6',
- cloud:'M6.5 17.5H6a4 4 0 0 1-.5-8 6.8 6.8 0 0 1 13-1.6 5 5 0 0 1-.5 9.6h-.5 M12 13v8 M8.5 17.5l2.6 2.6a1.3 1.3 0 0 0 1.8 0l2.6-2.6',
- upload:'M12 16V3.5 M7.5 8l3.6-3.6a1.3 1.3 0 0 1 1.8 0L16.5 8 M4 14.5v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4',
- bookmark:'M8.5 3.5h7A2.5 2.5 0 0 1 18 6v13a.9.9 0 0 1-1.4.8L12 17l-4.6 2.8A.9.9 0 0 1 6 19V6a2.5 2.5 0 0 1 2.5-2.5Z',
- quote:'M9.5 5C5.8 5 3 8.4 3 12.5v4A2.5 2.5 0 0 0 5.5 19H8a2.5 2.5 0 0 0 2.5-2.5V14A2.5 2.5 0 0 0 8 11.5H3 M20.5 5C16.8 5 14 8.4 14 12.5v4a2.5 2.5 0 0 0 2.5 2.5H19a2.5 2.5 0 0 0 2.5-2.5V14a2.5 2.5 0 0 0-2.5-2.5h-5',
- sparkle:'M12 3.5c.8 4.7 3.8 7.7 8.5 8.5-4.7.8-7.7 3.8-8.5 8.5C11.2 15.8 8.2 12.8 3.5 12c4.7-.8 7.7-3.8 8.5-8.5Z',
- list:'M8.5 6h12 M8.5 12h12 M8.5 18h12 M4 6h.1 M4 12h.1 M4 18h.1',
- lock:'M7 10h10a2.5 2.5 0 0 1 2.5 2.5v6A2.5 2.5 0 0 1 17 21H7a2.5 2.5 0 0 1-2.5-2.5v-6A2.5 2.5 0 0 1 7 10Z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3',
- more:'M5 12h.1 M12 12h.1 M19 12h.1',
- download:'M12 3.5V16 M7.5 11.5l3.6 3.6a1.3 1.3 0 0 0 1.8 0l3.6-3.6 M4 16v2.5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V16',
- expand:'M4 9V6a2 2 0 0 1 2-2h3 M15 4h3a2 2 0 0 1 2 2v3 M20 15v3a2 2 0 0 1-2 2h-3 M9 20H6a2 2 0 0 1-2-2v-3',
- edit:'m14.5 5.5 4 4 M4 20l4.8-1.1L19.6 8.1a2.1 2.1 0 0 0 0-3l-.7-.7a2.1 2.1 0 0 0-3 0L5.1 15.2 4 20Z',
- trash:'M4 6.5h16 M9 6.5V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v1.5 M6 6.5l.7 11a3 3 0 0 0 3 2.8h4.6a3 3 0 0 0 3-2.8l.7-11 M10 10.5v5.5 M14 10.5v5.5',
- info:'M12 11v6 M12 7h.1 M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0',
- back:'M20 12H4 M9.5 6.5l-4.6 4.6a1.3 1.3 0 0 0 0 1.8l4.6 4.6',
- sliders:'M3.5 7h2 M14.5 7h6 M3.5 17h6 M18.5 17h2 M12.5 7a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0 M16.5 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0',
- clock:'M12 7.5V12l3 2 M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0',
- single:'M8.5 3.5h7a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-7a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3Z',
- double:'M6.5 3.5h11a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-11a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3Z M12 3.5v17',
- folder:'M3.5 8V6A2.5 2.5 0 0 1 6 3.5h3a2 2 0 0 1 1.4.6L12.8 6H18a2.5 2.5 0 0 1 2.5 2.5V18A2.5 2.5 0 0 1 18 20.5H6A2.5 2.5 0 0 1 3.5 18V8Z M3.5 9h17',
- mail:'M6 4.5h12a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3Z M3.5 7l6.7 5a3 3 0 0 0 3.6 0l6.7-5',
- eye:'M2.5 12s3.2-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.2 6.5-9.5 6.5S2.5 12 2.5 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
- eyeOff:'m3.5 3.5 17 17 M9.5 5.8a10 10 0 0 1 2.5-.3c6.3 0 9.5 6.5 9.5 6.5a18 18 0 0 1-2.7 3.6 M6.1 6.9A19 19 0 0 0 2.5 12s3.2 6.5 9.5 6.5a10 10 0 0 0 5.2-1.5 M9.9 9.9a3 3 0 0 0 4.2 4.2',
- logout:'M10 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h4 M9.5 12H21 M16.5 7.5l3.6 3.6a1.3 1.3 0 0 1 0 1.8l-3.6 3.6',
-};
 let currentPack=readVisualPreferences().iconPack;
 const packOf=value=>normalizeVisualPreferences({iconPack:value}).iconPack;
-const graphics=(name,pack)=>pack==='lucide'?(LUCIDE_ICONS[name]||LUCIDE_ICONS.book):`<path d="${paths[name]||paths.book}"/>`;
+const graphics=(name,pack)=>pack==='lucide'?(LUCIDE_ICONS[name]||LUCIDE_ICONS.book):(KATAKECIL_ICONS[name]||KATAKECIL_ICONS.book);
 export function icon(name,cls='',pack){
  const preview=arguments.length>=3,selected=preview?packOf(pack):currentPack,stroke=selected==='lucide'?2:1.85;
  return `<svg fill="none" stroke="currentColor" stroke-width="${stroke}" style="stroke-width:${stroke}" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" data-icon="${name}" data-icon-pack="${selected}"${preview?' data-icon-preview="true"':''} aria-hidden="true" class="${cls}">${graphics(name,selected)}</svg>`;

@@ -75,3 +75,14 @@ test('comfort defaults uses app confirmation, cancels safely and confirms only o
 test('Custom opens a separate editor, Back cancels and Apply returns to the theme menu',()=>{
  const s=scene(),doc=s.w.document;s.features.appearance('theme');const initial=s.prefs.themeMode;assert.equal(doc.querySelector('.custom-theme-editor'),null);s.features.action({dataset:{action:'app-theme-preset',value:'custom'}});assert.ok(doc.querySelector('.custom-theme-popup'));assert.equal(doc.querySelector('details.custom-theme-editor'),null);assert.equal(s.prefs.themeMode,initial);s.features.action({dataset:{action:'custom-theme-back'}});assert.ok(doc.querySelector('.appearance-tabs'));assert.equal(s.prefs.themeMode,initial);s.features.action({dataset:{action:'app-theme-preset',value:'custom'}});doc.querySelector('#reader-ink').value='#123456';s.features.input(doc.querySelector('#reader-ink'));s.features.action({dataset:{action:'apply-reader-theme'}});assert.equal(s.prefs.themeMode,'custom');assert.equal(s.prefs.customTextColor,'#123456');assert.ok(doc.querySelector('.appearance-tabs'));s.features.leave();s.w.close();
 });
+
+test('reading page glow defaults off, toggles in both theme panels and never repaginates',()=>{
+ const s=scene(),doc=s.w.document;s.features.setPosition({chapterIndex:0,start:3});const text=doc.querySelector('.page-text');
+ try{
+  s.features.themeDialog();let input=doc.querySelector('#reader-ambient-glow');assert.equal(input.checked,false);assert.equal(input.hasAttribute('data-reader-pref'),false);
+  input.checked=true;input.dispatchEvent(new s.w.Event('change',{bubbles:true}));assert.equal(s.prefs.readerAmbientGlow,true);
+  s.features.appearance('theme');input=doc.querySelector('#reader-ambient-glow');assert.equal(input.checked,true);
+  input.checked=false;input.dispatchEvent(new s.w.Event('change',{bubbles:true}));assert.equal(s.prefs.readerAmbientGlow,false);
+  assert.deepEqual(s.reflows,[]);assert.equal(doc.querySelector('.page-text'),text);assert.deepEqual(s.features.position(),{chapterIndex:0,start:3});
+ }finally{s.features.leave();s.w.close();}
+});

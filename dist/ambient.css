@@ -7,7 +7,9 @@ body{
 body[data-theme=dark]{--ambient-primary-alpha:.108;--ambient-secondary-alpha:.048;--ambient-panel-alpha:.042}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--ambient-wash)}
 body .library-shell,body .settings-shell,body .reader-shell,body .reader-shell[data-mode=controls]{background:transparent}
-/* Reader paper stays opaque. Color is added inside floating UI surfaces only. */
+/* Paint the accent wash behind the manuscript, over its opaque reading paper. */
+body[data-reader-ambient=true] .reader-shell .reading-page{background-color:var(--reader-paper,var(--paper));background-image:var(--ambient-wash)}
+/* Floating controls keep their own lighter ambient tint. */
 body :is(.reader-toolbar,.reader-controls,.selection-popover,.tts-mini,.search-navigation).glass,
 body .dialog,body .app-picker{
  background:radial-gradient(ellipse at 12% 0%,rgba(var(--accent-rgb),var(--ambient-panel-alpha)),transparent 72%),linear-gradient(180deg,#ffffff08,transparent 40%),var(--g-panel);

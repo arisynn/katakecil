@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Glow halaman baca dan gaya ikon (14 November 2026)
+
+- Tambahkan toggle **Glow halaman baca** dalam Tema, default mati. Saat aktif, glow statis mengikuti aksen dan intensitas Ambient; kertas tetap opak, teks/posisi baca tetap.
+- Bedakan seluruh 52 ikon Rounded KataKecil dengan artwork solid/dua nada mandiri, sementara Lucide mempertahankan outline resmi. Pemilihan paket tetap di Ikon & Loading.
+- Simpan glow dalam preferensi lokal, antartab dan backup. [Hasil uji web](docs/reader-glow-and-icon-styles-web.md); tanpa APK baru, versi tetap 1.2.5/build 13.
+
 ## Pengembangan web — Pemilihan Ikon & Loading (14 November 2026)
 
 - Ubah Loading preview menjadi dua tab pemilihan paket ikon dan animasi loading, dengan preview kandidat, Coba dan Gunakan.
