@@ -1,0 +1,224 @@
+{
+  "version": "1.2.7",
+  "versionCode": 15,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.7",
+  "baseline": "98189636c7dc16954e069796a075c3a78ab2bab7",
+  "checks": {
+    "webHelperBuild": "passed",
+    "syntaxAndRuntimeModuleGraph": "passed",
+    "targetedNodeTests": 21,
+    "nodeFailures": 0,
+    "testFiles": [
+      "launch-splash.test.mjs",
+      "visual-renderers.test.mjs",
+      "visual-settings.test.mjs"
+    ],
+    "fullSuiteRun": false
+  },
+  "splashBrowser": {
+    "scope": "Isolated launch splash in Chromium; no native device",
+    "apkBuilt": false,
+    "productionWrites": false,
+    "pageErrors": [],
+    "unexpectedNetwork": [],
+    "layouts": [
+      {
+        "width": 390,
+        "height": 844,
+        "theme": "light",
+        "language": "en",
+        "reduced": false,
+        "shot": "light-390",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(238, 242, 246)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 230,
+            "height": 112
+          },
+          "logo": {
+            "width": "230px",
+            "height": "76.6562px",
+            "aspect": "3 / 1",
+            "mask": "url(\"http://127.0.0.1:4196/assets/katakecil-wordmark.png\")",
+            "background": "rgb(37, 49, 59)"
+          },
+          "overflow": false
+        },
+        "motion": "animated",
+        "dismissed": true
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "theme": "dark",
+        "language": "id",
+        "reduced": false,
+        "shot": "dark-320",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(17, 22, 28)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 568
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 230,
+            "height": 112
+          },
+          "logo": {
+            "width": "230px",
+            "height": "76.6562px",
+            "aspect": "3 / 1",
+            "mask": "url(\"http://127.0.0.1:4196/assets/katakecil-wordmark.png\")",
+            "background": "rgb(230, 237, 243)"
+          },
+          "overflow": false
+        },
+        "motion": "animated",
+        "dismissed": true
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "theme": "light",
+        "language": "en",
+        "reduced": true,
+        "shot": "landscape-reduced",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(238, 242, 246)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 375
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 230,
+            "height": 112
+          },
+          "logo": {
+            "width": "230px",
+            "height": "76.6562px",
+            "aspect": "3 / 1",
+            "mask": "url(\"http://127.0.0.1:4196/assets/katakecil-wordmark.png\")",
+            "background": "rgb(37, 49, 59)"
+          },
+          "overflow": false
+        },
+        "motion": "static",
+        "dismissed": true
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "theme": "dark",
+        "language": "id",
+        "reduced": true,
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(17, 22, 28)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 230,
+            "height": 112
+          },
+          "logo": {
+            "width": "230px",
+            "height": "76.6562px",
+            "aspect": "3 / 1",
+            "mask": "url(\"http://127.0.0.1:4196/assets/katakecil-wordmark.png\")",
+            "background": "rgb(230, 237, 243)"
+          },
+          "overflow": false
+        },
+        "motion": "static",
+        "dismissed": true
+      }
+    ],
+    "result": "passed"
+  },
+  "startupHandoff": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "pageErrors": [],
+    "unexpectedNetwork": [],
+    "layouts": [],
+    "actualLoaders": [],
+    "offlineNoStrandedOverlay": true,
+    "result": "passed",
+    "nativeBridge": "mocked in Chromium; not device",
+    "calls": [
+      {
+        "overlay": true,
+        "ready": false
+      },
+      {
+        "overlay": false,
+        "ready": true
+      }
+    ]
+  },
+  "artifact": {
+    "version": "1.2.7",
+    "versionCode": 15,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.7-Karisyono.apk",
+    "apkBytes": 5049511,
+    "apkSha256": "7f610254ea3af2f1253132e37b05c34a0b9ee880beb7929506d568299df43ec0",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 117,
+    "skeletonRemoved": true,
+    "turningPagesDefaultPackaged": true,
+    "aboutWordmarkOnNativeSplash": true,
+    "dedicatedLaunchScenePackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false,
+    "nativeWordmarkPixelsMatchAbout": true
+  },
+  "androidUnitTestsRerun": false,
+  "androidFullLintReleaseRun": false,
+  "physicalDeviceTested": false,
+  "emulatorTested": false
+}

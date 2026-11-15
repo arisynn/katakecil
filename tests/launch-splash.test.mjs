@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {createLaunchSplash,dismissLaunchSplash} from '../dist/launch-splash.js';
 import {applyLoadingStyle} from '../dist/loading-logo.js?v=8';
+import {brandMark,applyIconPack} from '../dist/ui.js?v=17';
 
 function scene(){
  const w=new JSDOM('<body><main id="app"><article class="page-text">Keep this reading place.</article></main></body>',{pretendToBeVisual:true}).window;
@@ -13,16 +14,16 @@ function transition(w,target,type='transitionend',propertyName='opacity'){
  const event=new w.Event(type,{bubbles:true});Object.defineProperty(event,'propertyName',{value:propertyName});target.dispatchEvent(event);
 }
 
-test('splash localizes its status and always uses the explicit turning-pages brand',()=>{
+test('splash localizes its status and uses the exact About logo independently of icon and loader choices',()=>{
  const s=scene();
  try{
   applyLoadingStyle('dots',s.doc);
   for(const [language,label,tagline] of [['en','Loading KataKecil','A little room for great stories'],['id-ID','Memuat KataKecil','Ruang kecil untuk cerita besar']]){
    const splash=createLaunchSplash({language});assert.equal(splash.id,'launch-loading');assert.equal(splash.getAttribute('role'),'status');assert.equal(splash.getAttribute('aria-label'),label);assert.equal(splash.querySelector('.launch-splash-tagline').textContent,tagline);
-   const logo=splash.querySelector('.loading-brand');assert.equal(logo.dataset.loadingStyle,'pulse');assert.equal(logo.dataset.loadingPreview,'true');assert.equal(logo.querySelectorAll('.loading-turning-page').length,3);assert.equal(logo.querySelectorAll('.loading-letter').length,9);assert.equal(logo.querySelector('.loading-pages-wordmark').textContent,'katakecil');
-   s.doc.body.append(splash);applyLoadingStyle('wordmark',s.doc);assert.equal(logo.dataset.loadingStyle,'pulse','launch artwork is independent of the in-app loader setting');splash.remove();
+   const emblem=splash.querySelector('.launch-splash-emblem'),logo=emblem.querySelector('.brand-wordmark');assert.equal(emblem.getAttribute('aria-hidden'),'true');assert.equal(logo.outerHTML,brandMark());assert.equal(splash.querySelectorAll('.loading-brand,.loading-motion,.loading-turning-page,.loading-letter').length,0);
+   s.doc.body.append(splash);applyLoadingStyle('wordmark',s.doc);applyIconPack('lucide',s.doc);assert.equal(emblem.querySelector('.brand-wordmark'),logo,'visual preferences preserve launch logo identity');assert.equal(logo.outerHTML,brandMark());splash.remove();
   }
- }finally{applyLoadingStyle('pulse',s.doc);s.close();}
+ }finally{applyLoadingStyle('pulse',s.doc);applyIconPack('katakecil',s.doc);s.close();}
 });
 
 test('immediate dismissal removes only the splash and preserves the host reader node',async()=>{

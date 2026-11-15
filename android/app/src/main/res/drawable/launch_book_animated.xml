@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/launch_book">
-    <target android:name="turning_page" android:animation="@animator/launch_book_turn" />
-</animated-vector>

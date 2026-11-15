@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.7 Stable — Logo About pada splash (15 November 2026)
+
+- Ganti buku pada starting window Android dan scene splash dengan wordmark KataKecil asli dari About app; pertahankan glow dan transisi.
+- Logo native di dalam APK memiliki piksel identik dengan aset About. 21 tes terarah dan browser mock lulus; signer tetap sama, build 15.
+- [Rilis dan uji HP](docs/releases/v1.2.7.md).
+
 ## 1.2.6 Stable — Splash buku dan preferensi visual (15 November 2026)
 
 - Tambahkan animated vector buku pada starting window Android dan splash khusus buku 3D/wordmark/glow, dengan transisi saat konten siap serta reduced motion.

@@ -7,10 +7,8 @@ import androidx.activity.EdgeToEdge;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import android.provider.Settings;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -30,11 +28,6 @@ public class MainActivity extends BridgeActivity {
         SplashScreen splash=SplashScreen.installSplashScreen(this);
         splash.setOnExitAnimationListener(provider->{
             launchSplash=provider;applyLaunchAppearance();
-            // Android 12+ animates its starting icon; older Android uses the provider.
-            if(android.os.Build.VERSION.SDK_INT<31 && Settings.Global.getFloat(getContentResolver(),Settings.Global.ANIMATOR_DURATION_SCALE,1f)>0f && provider.getIconView() instanceof ImageView){
-                Drawable icon=((ImageView)provider.getIconView()).getDrawable();
-                if(icon instanceof Animatable)((Animatable)icon).start();
-            }
             if(launchReady)finishLaunch();else launchHandler.postDelayed(launchFallback,8000);
         });
         registerPlugin(KataKecilDevicePlugin.class);
@@ -57,20 +50,16 @@ public class MainActivity extends BridgeActivity {
             launchSplash.getView().setBackgroundColor(background);
             if(launchSplash.getIconView() instanceof ImageView){
                 Drawable icon=((ImageView)launchSplash.getIconView()).getDrawable();
-                if(icon!=null)icon.mutate().setTint(Color.parseColor(prefs.getString("accent","#54756c")));
+                if(icon!=null)icon.mutate().setTint(Color.parseColor(dark?"#e6edf3":"#25313b"));
             }
         }
     }
 
-    // The animated OS book bridges to the dedicated web launch scene.
+    // The OS uses the same wordmark artwork as About and the web launch scene.
     // The web overlay remains until the catalog or resumed reading page has been rendered.
     public void finishLaunch(){
         launchReady=true;launchHandler.removeCallbacks(launchFallback);
         if(launchSplash!=null){
-            if(launchSplash.getIconView() instanceof ImageView){
-                Drawable icon=((ImageView)launchSplash.getIconView()).getDrawable();
-                if(icon instanceof Animatable)((Animatable)icon).stop();
-            }
             launchSplash.remove();launchSplash=null;
         }
     }

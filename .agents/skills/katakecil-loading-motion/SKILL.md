@@ -35,3 +35,7 @@ Check sintaks/module graph; tes renderer/controller terarah; browser viewport mo
 ## Splash Android 1.2.6
 
 Splash khusus memakai `launch-splash.js/css`, independen dari pilihan loader. Pertahankan canvas opak sejak first paint, scene Turning pages, glow aksen dan exit setelah real readiness; tanpa delay minimum. Starting window memakai animated vector buku, signer/package tetap. Jangan menghapus jalur cleanup/fallback, reduced motion atau perlindungan posisi baca. Rilis Android hanya dilakukan bila pengguna mengizinkan; catat batas QA browser/mock dan uji HP fisik terpisah.
+
+## Logo splash Android 1.2.7 (arahan terbaru)
+
+Pengguna mengganti logo buku dengan logo yang dipakai About app. Splash web memakai `brandMark()`/mask wordmark asli, sedangkan starting window memakai salinan PNG yang sama dalam padded layer; jangan kembalikan buku/wordmark ketikan ke splash. Halo, entrance/exit, reduced motion dan cleanup tetap. Loading di dalam app, termasuk Turning pages/default, terpisah dan tidak berubah. Bagian ini menggantikan pilihan artwork splash1.2.6 di atas.
