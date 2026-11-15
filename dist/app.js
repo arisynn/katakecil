@@ -1,4 +1,4 @@
-import {createLaunchSplash,dismissLaunchSplash} from './launch-splash.js?v=2';
+import {createLaunchSplash,dismissLaunchSplash} from './launch-splash.js?v=1';
 import {createGlassSettings} from './glass-settings.js?v=2';
 import {applyGlassAppearance} from './glass-preferences.js?v=2';
 import {installPressFeedback} from './press-feedback.js?v=3';
@@ -12,7 +12,7 @@ import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
 import {layoutDialog,installAccordionReveal,scheduleSheetFit} from './panel-layout.js?v=5';
-import {APP_INFO} from './app-info.js?v=12';
+import {APP_INFO} from './app-info.js?v=11';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=10';
 import {installAppPopups} from './app-popups.js?v=20';

@@ -1,4 +1,4 @@
-import {brandMark} from './ui.js?v=17';
+import {loadingLogo} from './loading-logo.js?v=8';
 
 const dismissals=new WeakMap();
 
@@ -10,7 +10,7 @@ export function createLaunchSplash({language='en'}={}){
  element.className='launch-loading launch-splash';
  element.setAttribute('role','status');
  element.setAttribute('aria-label',indonesian?'Memuat KataKecil':'Loading KataKecil');
- element.innerHTML=`<div class="launch-splash-scene"><span class="launch-splash-halo" aria-hidden="true"></span><div class="launch-splash-emblem" aria-hidden="true">${brandMark()}</div><p class="launch-splash-tagline">${indonesian?'Ruang kecil untuk cerita besar':'A little room for great stories'}</p></div>`;
+ element.innerHTML=`<div class="launch-splash-scene"><span class="launch-splash-halo" aria-hidden="true"></span><div class="launch-splash-emblem">${loadingLogo('pulse')}</div><p class="launch-splash-tagline">${indonesian?'Ruang kecil untuk cerita besar':'A little room for great stories'}</p></div>`;
  return element;
 }
 

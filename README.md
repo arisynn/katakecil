@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.7">Unduh rilis</a> ·
+  <a href="https://github.com/arisynn/katakecil/releases/tag/v1.2.6">Unduh rilis</a> ·
   <a href="docs/android-release.md">Panduan Android</a> ·
   <a href="CHANGELOG.md">Catatan perubahan</a> ·
   <a href="https://github.com/arisynn/katakecil/issues/new/choose">Laporkan masalah</a>
@@ -24,7 +24,7 @@
 
 ## Pasang di Android
 
-**Rilis stable terbaru: [1.2.7](https://github.com/arisynn/katakecil/releases/tag/v1.2.7)**, sesuai persetujuan pemilik. Memakai logo About pada splash Android, pilihan ikon klasik/Lucide dan tiga loading, serta glow halaman baca opsional (default mati). [Catatan rilis](docs/releases/v1.2.7.md).
+**Rilis stable terbaru: [1.2.6](https://github.com/arisynn/katakecil/releases/tag/v1.2.6)**, sesuai persetujuan pemilik. Memuat splash buku 3D baru, pilihan ikon klasik/Lucide dan tiga loading, serta glow halaman baca opsional (default mati). [Catatan rilis](docs/releases/v1.2.6.md).
 
 **Status Play Protect:** pemilik mengonfirmasi pada 9 November 2026 bahwa blokir sudah teratasi pada pengujiannya. Status ini berasal dari laporan pemilik; tidak ada uji ulang HP atau keputusan Google yang diperiksa pada sesi ini. [Riwayat pemeriksaan](docs/play-protect-review.md).
 
@@ -34,11 +34,11 @@
 | Sistem | Android 7.0 / API 24 atau lebih baru |
 | Komponen web | Android System WebView 113 atau lebih baru |
 | Ukuran APK | Sekitar 5,0 MB |
-| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.7` · build `15` |
+| Identitas aplikasi | `id.karisyono.katakecil` · versi `1.2.6` · build `14` |
 | Penandatanganan | `CN=Karisyono` · APK Signature Scheme v2/v3 |
 | Jaringan | Diperlukan untuk membuka buku server, kamus, terjemahan, dan suara online |
 
-**Status terbaru:** 1.2.7 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
+**Status terbaru:** 1.2.6 diterbitkan pada kanal stable pemilik melalui GitHub. Ini bukan publikasi Play Store atau sertifikasi keamanan. QA HP lanjutan ditangani pemilik; hasil uji cepat dan batasnya dicatat pada rilis.
 
 ## Yang bisa dilakukan
 
@@ -147,9 +147,9 @@ docs/             Panduan, catatan rilis, audit, dan bukti pengujian
 ## Dokumentasi dan kontribusi
 
 - [Indeks dokumentasi](docs/README.md)
-- [Catatan rilis Android stable terbaru](docs/releases/v1.2.7.md)
+- [Catatan rilis Android stable terbaru](docs/releases/v1.2.6.md)
 - [Panduan kontribusi](CONTRIBUTING.md)
-- [Hasil pemeriksaan APK](docs/generated/1.2.7-stable-validation.json)
+- [Hasil pemeriksaan APK](docs/generated/1.2.6-stable-validation.json)
 - [Atribusi open-source](OPEN_SOURCE_ATTRIBUTIONS.md)
 
 Manifest hosting yang sudah ada tetap dipertahankan. Update repo dan rilis APK tidak menerbitkan ulang situs atau backend. Perubahan backend baru tetap memerlukan rollout terpisah; protokol episode yang sudah terpasang dan batas perlindungannya dijelaskan pada [keamanan konten Reader](docs/reader-content-security.md).
