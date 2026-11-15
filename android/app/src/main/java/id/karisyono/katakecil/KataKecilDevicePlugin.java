@@ -52,7 +52,7 @@ public class KataKecilDevicePlugin extends Plugin {
 
     @PluginMethod
     public void rememberAppearance(PluginCall call) {
-        String mode=call.getString("mode","light"),background=call.getString("background","#faf9f5"),accent=call.getString("accent","#54756c");
+        String mode=call.getString("mode","light"),background=call.getString("background","#eef2f6"),accent=call.getString("accent","#54756c");
         if(!mode.matches("light|dark|system|sepia|paper|green|custom")||!background.matches("#[0-9a-fA-F]{6}")||!accent.matches("#[0-9a-fA-F]{6}")){call.reject("Invalid appearance");return;}
         boolean dark=Boolean.TRUE.equals(call.getBoolean("dark",false));
         android.content.SharedPreferences settings=getContext().getSharedPreferences("katakecil_appearance",0);

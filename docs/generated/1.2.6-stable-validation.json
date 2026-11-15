@@ -1,0 +1,212 @@
+{
+  "version": "1.2.6",
+  "versionCode": 14,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.6",
+  "workerCount": 2,
+  "checks": {
+    "webHelperBuild": "passed",
+    "typecheck": "passed",
+    "syntaxAndRuntimeModuleGraph": "passed",
+    "targetedNodeTests": 21,
+    "nodeFailures": 0,
+    "testFiles": [
+      "launch-splash.test.mjs",
+      "visual-renderers.test.mjs",
+      "visual-settings.test.mjs"
+    ],
+    "fullSuiteRun": false
+  },
+  "splashBrowser": {
+    "scope": "Isolated launch splash in Chromium; no native device",
+    "apkBuilt": false,
+    "productionWrites": false,
+    "pageErrors": [],
+    "unexpectedNetwork": [],
+    "layouts": [
+      {
+        "width": 390,
+        "height": 844,
+        "theme": "light",
+        "language": "en",
+        "reduced": false,
+        "shot": "light-390",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(238, 242, 246)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 176,
+            "height": 140
+          },
+          "stage": {
+            "width": "104px",
+            "height": "64px"
+          },
+          "overflow": false
+        },
+        "motion": "animated",
+        "dismissed": true
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "theme": "dark",
+        "language": "id",
+        "reduced": false,
+        "shot": "dark-320",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(17, 22, 28)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 568
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 176,
+            "height": 140
+          },
+          "stage": {
+            "width": "104px",
+            "height": "64px"
+          },
+          "overflow": false
+        },
+        "motion": "animated",
+        "dismissed": true
+      },
+      {
+        "width": 667,
+        "height": 375,
+        "theme": "light",
+        "language": "en",
+        "reduced": true,
+        "shot": "landscape-reduced",
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(238, 242, 246)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 667,
+            "height": 375
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 176,
+            "height": 140
+          },
+          "stage": {
+            "width": "104px",
+            "height": "64px"
+          },
+          "overflow": false
+        },
+        "motion": "static",
+        "dismissed": true
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "theme": "dark",
+        "language": "id",
+        "reduced": true,
+        "initial": {
+          "opacity": "1",
+          "background": "rgb(17, 22, 28)",
+          "rootAnimation": "none",
+          "position": "fixed"
+        },
+        "layout": {
+          "root": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "sceneFits": true,
+          "emblem": {
+            "width": 176,
+            "height": 140
+          },
+          "stage": {
+            "width": "104px",
+            "height": "64px"
+          },
+          "overflow": false
+        },
+        "motion": "static",
+        "dismissed": true
+      }
+    ],
+    "result": "passed"
+  },
+  "startupHandoff": {
+    "scope": "Quick Chromium with local catalog/episode fixtures",
+    "physicalDeviceTested": false,
+    "productionWrites": false,
+    "apkBuilt": false,
+    "pageErrors": [],
+    "unexpectedNetwork": [],
+    "layouts": [],
+    "actualLoaders": [],
+    "offlineNoStrandedOverlay": true,
+    "result": "passed",
+    "nativeBridge": "mocked in Chromium; not device",
+    "calls": [
+      {
+        "overlay": true,
+        "ready": false
+      },
+      {
+        "overlay": false,
+        "ready": true
+      }
+    ]
+  },
+  "artifact": {
+    "version": "1.2.6",
+    "versionCode": 14,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.6-Karisyono.apk",
+    "apkBytes": 4955359,
+    "apkSha256": "1c392d74011b8b4b0423bb9a17fc07db7246088c4908b3f79bd9fed101dddb83",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 117,
+    "skeletonRemoved": true,
+    "turningPagesDefaultPackaged": true,
+    "nativeAnimatedBookPackaged": true,
+    "dedicatedLaunchScenePackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false
+  },
+  "androidUnitTestsRerun": false,
+  "androidFullLintReleaseRun": false,
+  "physicalDeviceTested": false,
+  "emulatorTested": false
+}

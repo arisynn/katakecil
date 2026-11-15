@@ -5,7 +5,7 @@ description: Rancang dan implementasikan dua motion loading KataKecil yang berbe
 
 # Motion loading KataKecil
 
-Gunakan untuk pekerjaan loading saat ini. Pengguna telah meminta pembuatan skill, pembagian beberapa worker dan penggantian dua loading opsional. Implementasi diizinkan; tidak perlu konfirmasi tambahan. Jangan build APK atau release. Instruksi pengguna terbaru mengungguli batas skill ini.
+Gunakan untuk pekerjaan loading saat ini. Pengguna telah meminta pembuatan skill, pembagian beberapa worker dan penggantian dua loading opsional. Implementasi diizinkan; tidak perlu konfirmasi tambahan. Untuk tugas web jangan build APK/release tanpa instruksi pengguna. Pengguna kini meminta pembaruan APK dengan splash baru; build dan distribusi Android dalam cakupan ini diizinkan. Instruksi pengguna terbaru mengungguli batas skill ini.
 
 ## Hasil yang diminta
 
@@ -31,3 +31,7 @@ Pengguna kemudian memberikan `katakecil-turning-pages.html` dan meminta memakain
 ## Verifikasi cukup
 
 Check sintaks/module graph; tes renderer/controller terarah; browser viewport mobile terang/gelap dan reduced motion. Lihat frame berbeda untuk membuktikan gerak dan stage stabil. Pakai fixture lokal, bukan data Publisher produksi. Tidak perlu suite penuh, audit backend atau build Android. Catat hasil nyata dan daftar uji singkat pemilik.
+
+## Splash Android 1.2.6
+
+Splash khusus memakai `launch-splash.js/css`, independen dari pilihan loader. Pertahankan canvas opak sejak first paint, scene Turning pages, glow aksen dan exit setelah real readiness; tanpa delay minimum. Starting window memakai animated vector buku, signer/package tetap. Jangan menghapus jalur cleanup/fallback, reduced motion atau perlindungan posisi baca. Rilis Android hanya dilakukan bila pengguna mengizinkan; catat batas QA browser/mock dan uji HP fisik terpisah.

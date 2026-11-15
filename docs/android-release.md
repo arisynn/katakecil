@@ -1,6 +1,6 @@
 # KataKecil Android dan source web bersama
 
-Pembaruan terbaru: [1.2.5 Stable](releases/v1.2.5.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
+Pembaruan terbaru: [1.2.6 Stable](releases/v1.2.6.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
 
 Versi pertama: **1.0.0**, versionCode **1**, application ID
 `id.karisyono.katakecil`. Branch: `feat/android-app`, dari `85eb4e6`.
@@ -100,3 +100,11 @@ Logo PNG sumber dipertahankan utuh; drawable launcher memberi inset6dp agar kuti
 Android system theme kini dibaca lewat UiModeManager/konfigurasi sistem melalui plugin; perubahan native dilaporkan ke web dan mode AppCompat diperbarui saat pilihan tema berubah. Pembacaan tidak bergantung hanya pada prefers-color-scheme milik WebView yang bisa mengikuti tema aplikasi sendiri. Loader pagination memperoleh frame paint sebelum perhitungan dan sesudah pemulihan anchor, tanpa timer tunggu tambahan. Resize keyboard saat editor aktif tetap ditunda untuk menjaga input.
 
 Build memakai `--skip-qa` sesuai instruksi pengguna; tidak menjalankan suite atau browser/HP. Pemilik melakukan QA lanjutan. Setelah push frontend, sinkronkan origin preview exact dari deployment berhasil repo ke konfigurasi fungsi Reader; konfigurasi ini bersifat spesifik deployment dan tidak memerlukan perubahan policy/database.
+
+## Splash 1.2.6
+
+Starting window memakai animated vector buku (siklus buka lembar 680 ms), tanpa durasi minimum. Android 12+ mengelola animasi ikon sistem; Android sebelumnya menjalankan drawable ketika provider tersedia, mengikuti animator duration scale. Icon mask tetap aman dengan inset; launcher tidak diganti. Saat callback tersedia, native mengikuti aksen/warna tersimpan. Resource frame OS pertama memakai Pearl/charcoal default; tema kustom diterapkan setelah callback tersedia.
+
+Overlay web khusus `launch-splash` memakai buku 3D dan wordmark Turning pages, glow lokal serta tagline ID/EN; terpisah dari pilihan loading di dalam app. Canvas opak sejak frame pertama. Native dilepas setelah frame overlay digambar; overlay baru ditutup setelah Library/error atau bacaan resume dirender (dan decode sampul selesai/batas decode lama tercapai). Exit 200 ms memiliki fallback 260 ms, dan langsung selesai untuk reduced motion/dokumen hidden. Bootstrap fatal tetap menghapus overlay. Tidak ada penantian satu siklus animasi atau timer minimum. Fallback native lama 8 detik dipertahankan.
+
+Build 1.2.6/14 memakai signer yang sama. QA singkat mencakup Chromium dan bridge native mock, kompilasi/resource Android serta verifikasi paket. Tidak ada emulator/HP fisik; starting window, pergantian tema OS, safe area, offline/resume dan pemeliharaan data perlu dicoba pemilik. [Catatan rilis dan daftar uji](releases/v1.2.6.md).

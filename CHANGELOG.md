@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.6 Stable — Splash buku dan preferensi visual (15 November 2026)
+
+- Tambahkan animated vector buku pada starting window Android dan splash khusus buku 3D/wordmark/glow, dengan transisi saat konten siap serta reduced motion.
+- Sertakan seluruh perubahan web sejak 1.2.5: dua paket ikon berbeda, tiga loading, default Turning pages dan glow halaman baca opsional.
+- APK build 14 dengan signer yang sama; 21 tes terarah dan browser fixture lulus. [Rilis dan uji HP](docs/releases/v1.2.6.md).
+
 ## Pengembangan web — Default Turning pages (14 November 2026)
 
 - Jadikan Turning pages default loading untuk perangkat/preferensi yang belum memiliki pilihan valid, termasuk fallback startup. Pilihan tersimpan tetap digunakan.

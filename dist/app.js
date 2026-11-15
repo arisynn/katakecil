@@ -1,3 +1,4 @@
+import {createLaunchSplash,dismissLaunchSplash} from './launch-splash.js?v=1';
 import {createGlassSettings} from './glass-settings.js?v=2';
 import {applyGlassAppearance} from './glass-preferences.js?v=2';
 import {installPressFeedback} from './press-feedback.js?v=3';
@@ -11,7 +12,7 @@ import {installPageScrubber} from './page-scrubber.js?v=1';
 import {enterSheet,leaveSheet,animateIcon} from './motion.js?v=1';
 import {createReaderZoom} from './reader-zoom.js?v=1';
 import {layoutDialog,installAccordionReveal,scheduleSheetFit} from './panel-layout.js?v=5';
-import {APP_INFO} from './app-info.js?v=10';
+import {APP_INFO} from './app-info.js?v=11';
 import {installGlassTabs} from './glass-tabs.js?v=3';
 import {createAppUpdater} from './app-updates.js?v=10';
 import {installAppPopups} from './app-popups.js?v=20';
@@ -594,12 +595,12 @@ syncVisibleViewport();
 function paintFrame(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
 function showLaunchLoading(){
  if(!isNativeApp)return;
- const splash=document.createElement('div');splash.id='launch-loading';splash.className='launch-loading';splash.setAttribute('role','status');splash.setAttribute('aria-label',p().uiLanguage==='id'?'Menyiapkan bacaan':'Preparing reading');splash.innerHTML=loadingLogo();document.body.append(splash);
+ document.body.append(createLaunchSplash({language:p().uiLanguage}));
 }
 async function hideLaunchLoading(){
  const cover=view==='library'?document.querySelector('.shelf-book.is-current .book-cover'):null;
  if(cover&&!cover.complete&&cover.decode){let deadline;try{await Promise.race([cover.decode().catch(()=>{}),new Promise(resolve=>{deadline=setTimeout(resolve,5000);})]);}finally{clearTimeout(deadline);}}
- await paintFrame();document.getElementById('launch-loading')?.remove();await finishNativeLaunch().catch(()=>{});
+ await paintFrame();await dismissLaunchSplash(document.getElementById('launch-loading'));await finishNativeLaunch().catch(()=>{});
 }
 async function init(){
  await initializeNativeTheme(()=>{applyPreferences();}).catch(()=>{});

@@ -1,0 +1,38 @@
+/* A dedicated native launch canvas; in-app loading choices remain independent. */
+.launch-loading{
+ position:fixed;inset:0;z-index:10000;box-sizing:border-box;
+ display:grid;place-items:center;overflow:hidden;
+ padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
+ background:radial-gradient(ellipse at 50% 42%,rgba(var(--accent-rgb),.1),transparent 62%),var(--bg,#eef2f6);
+ color:var(--text,#25313b);opacity:1;pointer-events:auto;
+ transition:opacity .2s ease;
+}
+.launch-loading .launch-splash-scene{
+ position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;
+ gap:16px;width:min(248px,100%);text-align:center;
+ animation:launchSplashRise .36s cubic-bezier(.2,.7,.2,1) both;
+}
+.launch-loading .launch-splash-halo{
+ position:absolute;z-index:-1;left:50%;top:-32px;width:224px;height:224px;
+ margin-left:-112px;pointer-events:none;border-radius:50%;
+ background:radial-gradient(closest-side,rgba(var(--accent-rgb),.15),rgba(var(--accent-rgb),.04) 58%,transparent);
+ animation:launchSplashHalo 5.2s ease-in-out infinite;
+}
+.launch-loading .launch-splash-emblem{
+ display:flex;align-items:center;justify-content:center;flex:none;width:176px;height:140px;
+}
+.launch-loading .launch-splash-emblem>.loading-brand{transform:scale(1.18);transform-origin:center}
+.launch-loading .launch-splash-tagline{
+ margin:0;font-size:11px;font-weight:400;line-height:1.6;letter-spacing:.04em;
+ color:var(--muted,var(--text));text-wrap:balance;
+}
+.launch-loading.is-leaving{animation:none;opacity:0;pointer-events:none}
+@keyframes launchSplashRise{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes launchSplashHalo{0%,100%{opacity:.65;transform:scale(.96)}50%{opacity:1;transform:scale(1.05)}}
+@media(orientation:landscape) and (max-height:400px){
+ .launch-loading .launch-splash-scene{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .launch-loading{animation:none;transition:none}
+ .launch-loading .launch-splash-scene,.launch-loading .launch-splash-halo{animation:none;opacity:1;transform:none}
+}
