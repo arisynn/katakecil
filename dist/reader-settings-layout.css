@@ -57,3 +57,22 @@
  .reading-tools .reader-tools-group{gap:6px}
  .reading-tools .reading-tool-list>button{min-height:60px}
 }
+
+/* Custom palette and the existing glow checkbox share one compact row. */
+.theme-extra-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
+.theme-options .theme-extra-row>.global-theme-custom{grid-column:auto;min-height:64px;padding:10px;gap:8px}
+.theme-extra-row .global-theme-custom small{display:none}
+.theme-extra-row .global-theme-chip i{width:30px;height:30px;flex:none}
+.theme-extra-row .theme-option-label{flex:1}
+.theme-options .theme-extra-row .reader-ambient-control{min-width:0;min-height:64px;padding:9px 10px;margin:0;gap:8px;border:1px solid var(--line);border-radius:13px;font-size:11px;line-height:1.35}
+.theme-extra-row .reader-ambient-control:has(input:checked){border-color:var(--g-active-ink,var(--accent));background:rgba(var(--accent-rgb),.07)}
+@media(orientation:landscape) and (max-height:480px){.theme-options>.theme-extra-row{grid-column:1/-1}}
+@media(max-height:620px){
+ .theme-options{gap:5px}
+ .theme-options>.theme-global-caption{font-size:10px;line-height:1.4}
+ .theme-option-group>h3{margin-bottom:5px}
+ .theme-options .global-theme-chip{min-height:56px;padding:6px 4px;gap:4px;font-size:10px}
+ .theme-options .global-theme-chip i{width:26px;height:26px}
+ .theme-options .global-theme-chip i>svg{width:20px;height:20px}
+ .theme-options .theme-extra-row>.global-theme-custom,.theme-options .theme-extra-row .reader-ambient-control{min-height:50px;padding:8px;gap:7px}
+}

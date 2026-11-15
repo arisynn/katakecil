@@ -101,3 +101,10 @@ test('optional loading motions have distinct silhouettes while classic artwork a
   assert.ok(ink.querySelector('.loading-ink'));assert.equal(ink.querySelectorAll('.loading-ink-stroke').length,3);assert.equal(ink.querySelector('.loading-book'),null);
  }finally{dom.window.close();}
 });
+
+test('Lembar is the default icon family before Store and respects saved pack choices',async()=>{
+ assert.equal(VISUAL_DEFAULTS.iconPack,'katakecil-lembar');assert.equal(readVisualPreferences({getItem:()=>null}).iconPack,'katakecil-lembar');
+ for(const iconPack of ['katakecil','lucide','katakecil-new','katakecil-lembar'])assert.equal(normalizeVisualPreferences({iconPack}).iconPack,iconPack);
+ const original=Object.getOwnPropertyDescriptor(globalThis,'localStorage');
+ try{Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:()=>null}});const fresh=await import('../dist/ui.js?default-lembar-icons');assert.match(fresh.icon('play'),/data-icon-pack="katakecil-lembar"/);}finally{if(original)Object.defineProperty(globalThis,'localStorage',original);else delete globalThis.localStorage;}
+});

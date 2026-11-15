@@ -2,6 +2,13 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Default Lembar dan baris Glow (15 November 2026)
+
+- Perbaiki play, pause dan kutipan Lembar menjadi outline saat normal; varian solid tetap untuk ditekan/dipilih.
+- Jadikan Lembar default bagi preferensi yang belum memiliki pilihan valid; pilihan tersimpan tetap digunakan.
+- Letakkan Glow halaman baca di sebelah Kustom pada Tema Pengaturan dan reader, dengan layout padat untuk layar pendek.
+- Build/check, 33 tes terarah dan browser fixture lulus; [hasil web](docs/lembar-default-glow-web.md). Tanpa APK baru.
+
 ## Pengembangan web — Lentera dan Lembar (15 November 2026)
 
 - Namai paket ZIP sebelumnya Lentera; pertahankan seluruh aset dan ID preferensinya.

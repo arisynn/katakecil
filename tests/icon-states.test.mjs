@@ -34,8 +34,8 @@ test('new pack selection preserves SVG nodes, button state, listeners and explic
  }finally{applyIconPack('katakecil');dom.window.close();}
 });
 
-test('new pack is an explicit preference and survives backup without changing existing defaults',()=>{
- assert.equal(VISUAL_DEFAULTS.iconPack,'katakecil');for(const iconPack of ['katakecil','lucide','katakecil-new'])assert.equal(normalizeVisualPreferences({iconPack}).iconPack,iconPack);
+test('icon choices survive backup and preserve the configured Lembar default',()=>{
+ assert.equal(VISUAL_DEFAULTS.iconPack,'katakecil-lembar');for(const iconPack of ['katakecil','lucide','katakecil-new'])assert.equal(normalizeVisualPreferences({iconPack}).iconPack,iconPack);
  const backup=createBackup({preferences:{iconPack:'katakecil-new'},annotations:[],progress:{}});assert.equal(parseBackup(JSON.stringify(backup)).preferences.iconPack,'katakecil-new');
 });
 
@@ -63,4 +63,12 @@ test('Lembar has a complete independent outline/solid family and keeps all four 
    if(variant==='solid')assert.equal(expected.getAttribute('fill'),'currentColor');
   }finally{source.window.close();rendered.window.close();}
  }
+});
+
+test('Lembar main outline shapes remain unfilled while small semantic dots stay visible',()=>{
+ for(const name of ['play','pause','quote']){
+  const dom=new JSDOM(icon(name,'','katakecil-lembar'));
+  try{const group=dom.window.document.querySelector('[data-icon-state=outline]');assert.equal(group.querySelector('[fill="currentColor"]'),null,name);assert.equal(group.querySelector('g').getAttribute('fill'),'none');assert.ok(dom.window.document.querySelector('[data-icon-state=solid] [fill="currentColor"]'),name);}finally{dom.window.close();}
+ }
+ const eye=new JSDOM(icon('eye','','katakecil-lembar'));assert.ok(eye.window.document.querySelector('[data-icon-state=outline] circle[fill="currentColor"]'));eye.window.close();
 });

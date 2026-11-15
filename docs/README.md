@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Default Lembar, perbaikan outline dan Glow sejajar Kustom | [Lembar dan tata letak Glow](lembar-default-glow-web.md) |
 | Empat pilihan ikon: Rounded, Lucide, Lentera dan Lembar | [Empat koleksi ikon](icon-collections-web.md) |
 | Paket SVG Lentera: outline normal, solid saat ditekan atau aktif | [Ikon outline/solid web](icon-solid-states-web.md) |
 | Pemulihan tampilan/fungsi v1.2.6 untuk perangkat yang sudah memasang v1.2.7 | [Android 1.2.8](releases/v1.2.8.md) |

@@ -9,13 +9,13 @@
 | Lentera | `katakecil-new` | ZIP pengguna sebelumnya: 52 outline dan 52 solid asli |
 | Lembar | `katakecil-lembar` | ZIP baru: 52 outline asli, dilengkapi 52 solid buatan baru |
 
-Lentera adalah nama baru untuk pilihan yang dahulu berlabel KataKecil baru. ID dan seluruh 104 SVG sumbernya tetap; pilihan pengguna tidak hilang. Lembar ditambahkan sebagai koleksi keempat, bukan menggantikan koleksi lain. Pilih card lalu **Gunakan** untuk menerapkan.
+Lentera adalah nama baru untuk pilihan yang dahulu berlabel KataKecil baru. ID dan seluruh 104 SVG sumbernya tetap; pilihan pengguna tidak hilang. Lembar ditambahkan sebagai koleksi keempat, bukan menggantikan koleksi lain. Pilih card lalu **Gunakan** untuk menerapkan. **Lembar kini menjadi default** bila belum ada pilihan valid tersimpan; pilihan pengguna yang sudah valid tetap digunakan. [Perbaikan outline dan tata letak glow](lembar-default-glow-web.md).
 
 Lentera/Lembar memakai outline saat normal, solid saat ditekan atau pilihan aktif. State mengikuti mouse, sentuhan, keyboard dan atribut/class pilihan yang dipakai kontrol aplikasi. Hover saja tidak mengubah state. Setelah pelepasan atau cancel, ikon kembali mengikuti status pilihan; disabled dan reduced motion tetap ditangani. Dua varian memakai satu SVG dan ukuran yang sama. Preferensi/backup menerima keempat ID.
 
 ## SVG Lembar
 
-Semua outline disalin persis dari `katakecil-icons _1_.zip`, termasuk elemen ellipse pada globe. Solid dibuat dari geometri sumber: badan diisi, detail seperti jarum jam, lipatan halaman, pupil, tanda informasi dan lubang kunci dijadikan potongan transparan, sementara garis terbuka menjadi bentuk tertutup rounded. Tidak menggunakan raster, warna latar tiruan, ID/mask bersama atau dependensi jaringan. Semua 52 bentuk solid berada dalam viewBox 24×24.
+Outline berasal dari `katakecil-icons _1_.zip`, termasuk elemen ellipse pada globe. Play, pause dan kutipan diperbaiki menjadi garis tanpa isi saat normal; detail kecil seperti pupil dan titik informasi tetap berisi sesuai maknanya. Solid dibuat dari geometri sumber: badan diisi, detail seperti jarum jam, lipatan halaman, pupil, tanda informasi dan lubang kunci dijadikan potongan transparan, sementara garis terbuka menjadi bentuk tertutup rounded. Tidak menggunakan raster, warna latar tiruan, ID/mask bersama atau dependensi jaringan. Semua 52 bentuk solid berada dalam viewBox 24×24.
 
 Sumber: `dist/assets/icons/katakecil-lembar/{outline,solid}`. Generator runtime `scripts/generate-katakecil-new-icons.mjs` memvalidasi dan membangun dua koleksi berpasangan saat `npm run build`. Helper authoring opsional `scripts/create-lembar-solid.py` menggunakan fonttools/skia-pathops untuk operasi bentuk; tidak dijalankan build normal dan tidak diperlukan di aplikasi.
 

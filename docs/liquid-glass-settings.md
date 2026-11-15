@@ -12,7 +12,7 @@ Panel Settings, dialog/picker, kapsul Library/Reader dan tombol Baca menggunakan
 
 ## Preferensi dan kompatibilitas
 
-- `readerAmbientGlow`: boolean, default `false`; toggle berada di Tema dari Pengaturan maupun reader, tersimpan antarsesi/antartab dan di backup. Reset kenyamanan mempertahankannya.
+- `readerAmbientGlow`: boolean, default `false`; toggle berada **di sebelah Kustom** pada Tema dari Pengaturan maupun reader, tersimpan antarsesi/antartab dan di backup. Baris dipadatkan untuk layar pendek agar tidak perlu scroll pada ukuran yang diuji; [hasil terbaru](lembar-default-glow-web.md). Reset kenyamanan mempertahankannya.
 - `glassTransparency`: angka 0–100, default 75; `glassBlur`: angka 0–40, default 20; `ambientIntensity`: angka 0–100, default 60. Nilai lokal dibulatkan/dijepit; tipe yang salah atau angka non-finite kembali ke default.
 - Instalasi lama mendapat kebeningan 75% bila field baru belum ada. `glassOpacity` lama tidak digunakan untuk renderer karena sebelumnya belum mengendalikan tampilan. Nilai blur lama yang valid, termasuk 34 px, tetap dipertahankan.
 - Pengguna yang sudah mengatur kebeningan/blur mempertahankan nilainya dan mendapat ambient 60% bila belum diatur.

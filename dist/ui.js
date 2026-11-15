@@ -1,8 +1,8 @@
-import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=5';
+import {normalizeVisualPreferences,readVisualPreferences} from './visual-preferences.js?v=6';
 import {KATAKECIL_ICONS} from './katakecil-icons.js?v=1';
 import {LUCIDE_ICONS} from './vendor/lucide-icons.js?v=1';
 import {KATAKECIL_NEW_OUTLINE,KATAKECIL_NEW_SOLID} from './katakecil-new-icons.js?v=1';
-import {KATAKECIL_LEMBAR_OUTLINE,KATAKECIL_LEMBAR_SOLID} from './katakecil-lembar-icons.js?v=1';
+import {KATAKECIL_LEMBAR_OUTLINE,KATAKECIL_LEMBAR_SOLID} from './katakecil-lembar-icons.js?v=2';
 export const $ = (selector, root=document) => root.querySelector(selector);
 export const $$ = (selector, root=document) => Array.from(root.querySelectorAll(selector));
 export const escapeHTML = (value='') => String(value).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

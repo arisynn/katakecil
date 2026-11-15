@@ -1,0 +1,186 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "layouts": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "language": "en",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 759,
+        "bottom": 823
+      },
+      "body": {
+        "top": 485.9375,
+        "bottom": 839
+      }
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "language": "en",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 487,
+        "bottom": 537
+      },
+      "body": {
+        "top": 290.21875,
+        "bottom": 553
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "language": "en",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 231.4375,
+        "bottom": 281.4375
+      },
+      "body": {
+        "top": 117.546875,
+        "bottom": 297.4375
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "language": "id",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 759,
+        "bottom": 823
+      },
+      "body": {
+        "top": 485.9375,
+        "bottom": 839
+      }
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "language": "id",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 487,
+        "bottom": 537
+      },
+      "body": {
+        "top": 290.21875,
+        "bottom": 553
+      }
+    },
+    {
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "language": "id",
+      "context": "settings",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 231.4375,
+        "bottom": 281.4375
+      },
+      "body": {
+        "top": 117.546875,
+        "bottom": 297.4375
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "context": "reader",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 759,
+        "bottom": 823
+      },
+      "body": {
+        "top": 453.9375,
+        "bottom": 839
+      }
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "context": "reader",
+      "sameRow": true,
+      "nonOverlapping": true,
+      "noScrollNeeded": true,
+      "horizontalOverflow": false,
+      "glow": {
+        "top": 487,
+        "bottom": 537
+      },
+      "body": {
+        "top": 258.21875,
+        "bottom": 553
+      }
+    }
+  ],
+  "actualLoaders": [],
+  "glowBothLanguagesAndPersistence": true,
+  "readerGlowAndPosition": true,
+  "normalOutlineFixes": [
+    "play",
+    "pause",
+    "quote"
+  ],
+  "result": "passed",
+  "automatedChecks": {
+    "build": "passed",
+    "check": "passed",
+    "diffWhitespace": "passed",
+    "targetedTests": {
+      "passed": 33,
+      "failed": 0
+    }
+  }
+}

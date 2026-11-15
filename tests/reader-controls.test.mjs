@@ -86,3 +86,10 @@ test('reading page glow defaults off, toggles in both theme panels and never rep
   assert.deepEqual(s.reflows,[]);assert.equal(doc.querySelector('.page-text'),text);assert.deepEqual(s.features.position(),{chapterIndex:0,start:3});
  }finally{s.features.leave();s.w.close();}
 });
+
+test('Custom and reading page glow share one theme row from both entry points',()=>{
+ const s=scene(),doc=s.w.document;
+ try{for(const open of [()=>s.features.themeDialog(),()=>s.features.appearance('theme')]){
+  open();const row=doc.querySelector('.theme-extra-row');assert.ok(row);assert.ok(row.querySelector('[data-action=app-theme-preset][data-value=custom]'));assert.ok(row.querySelector('#reader-ambient-glow'));assert.equal(row.querySelector('[data-action=loading-previews]'),null);assert.equal(doc.querySelectorAll('#reader-ambient-glow').length,1);
+ }assert.deepEqual(s.reflows,[]);}finally{s.features.leave();s.w.close();}
+});
