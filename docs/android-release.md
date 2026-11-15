@@ -1,6 +1,6 @@
 # KataKecil Android dan source web bersama
 
-Pembaruan terbaru: [1.2.6 Stable](releases/v1.2.6.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
+Pembaruan terbaru: [1.2.8 — Pemulihan v1.2.6](releases/v1.2.8.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
 
 Versi pertama: **1.0.0**, versionCode **1**, application ID
 `id.karisyono.katakecil`. Branch: `feat/android-app`, dari `85eb4e6`.
@@ -108,3 +108,7 @@ Starting window memakai animated vector buku (siklus buka lembar 680 ms), tanpa 
 Overlay web khusus `launch-splash` memakai buku 3D dan wordmark Turning pages, glow lokal serta tagline ID/EN; terpisah dari pilihan loading di dalam app. Canvas opak sejak frame pertama. Native dilepas setelah frame overlay digambar; overlay baru ditutup setelah Library/error atau bacaan resume dirender (dan decode sampul selesai/batas decode lama tercapai). Exit 200 ms memiliki fallback 260 ms, dan langsung selesai untuk reduced motion/dokumen hidden. Bootstrap fatal tetap menghapus overlay. Tidak ada penantian satu siklus animasi atau timer minimum. Fallback native lama 8 detik dipertahankan.
 
 Build 1.2.6/14 memakai signer yang sama. QA singkat mencakup Chromium dan bridge native mock, kompilasi/resource Android serta verifikasi paket. Tidak ada emulator/HP fisik; starting window, pergantian tema OS, safe area, offline/resume dan pemeliharaan data perlu dicoba pemilik. [Catatan rilis dan daftar uji](releases/v1.2.6.md).
+
+## Pemulihan 1.2.8
+
+Pengguna membatalkan perubahan logo About pada1.2.7. Source kembali ke 1.2.6, dengan metadata 1.2.8/build 16 agar Android dapat memasangnya di atas 1.2.7/build 15. Android source dan 114 aset runtime identik dengan 1.2.6; tiga file hanya beda versi/referensi cache. Signer/package tetap. Rilis 1.2.7 menjadi draft agar tidak ditawarkan updater; 1.2.8 adalah paket pemulihan yang kompatibel sebagai upgrade. [Panduan pasang](releases/v1.2.8.md).

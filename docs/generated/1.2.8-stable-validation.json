@@ -1,0 +1,53 @@
+{
+  "version": "1.2.8",
+  "versionCode": 16,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.8",
+  "purpose": "Restore v1.2.6 runtime with an upgrade-compatible version for installed v1.2.7",
+  "checks": {
+    "webHelperBuild": "passed",
+    "syntaxAndRuntimeModuleGraph": "passed",
+    "targetedNodeTests": 6,
+    "nodeFailures": 0,
+    "testFiles": [
+      "launch-splash.test.mjs"
+    ],
+    "fullSuiteRun": false
+  },
+  "sourceComparison": {
+    "restoredFrom": "v1.2.6",
+    "baseline": "98189636c7dc16954e069796a075c3a78ab2bab7",
+    "matchingRuntimeAssets": 114,
+    "metadataExceptions": [
+      "dist/app-info.js",
+      "dist/app.js",
+      "dist/index.html"
+    ],
+    "androidSourceIdentical": true
+  },
+  "onlyCacheReferencesChangedInAppAndIndex": true,
+  "artifact": {
+    "version": "1.2.8",
+    "versionCode": 16,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.8-Karisyono.apk",
+    "apkBytes": 4955359,
+    "apkSha256": "9af4acc23ca5060f1477faeab1dad98e063c5eaf08f622f05bd75df6834c51a8",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 117,
+    "skeletonRemoved": true,
+    "turningPagesDefaultPackaged": true,
+    "nativeAnimatedBookPackaged": true,
+    "dedicatedLaunchScenePackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false
+  },
+  "androidUnitTestsRerun": false,
+  "androidFullLintReleaseRun": false,
+  "browserRerun": false,
+  "physicalDeviceTested": false
+}

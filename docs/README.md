@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Pemulihan tampilan/fungsi v1.2.6 untuk perangkat yang sudah memasang v1.2.7 | [Android 1.2.8](releases/v1.2.8.md) |
 | Rilis stable 1.2.6: splash Android, pemilihan ikon/loading dan glow naskah | [Android 1.2.6](releases/v1.2.6.md) |
 | Dua motion loading baru: Lembar buku dan Alur tinta | [Motion loading web](loading-motion-web.md) |
 | Glow halaman baca opsional dan 52 pasang ikon berbeda di web | [Glow reader dan gaya ikon](reader-glow-and-icon-styles-web.md) |

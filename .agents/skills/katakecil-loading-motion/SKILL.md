@@ -35,3 +35,7 @@ Check sintaks/module graph; tes renderer/controller terarah; browser viewport mo
 ## Splash Android 1.2.6
 
 Splash khusus memakai `launch-splash.js/css`, independen dari pilihan loader. Pertahankan canvas opak sejak first paint, scene Turning pages, glow aksen dan exit setelah real readiness; tanpa delay minimum. Starting window memakai animated vector buku, signer/package tetap. Jangan menghapus jalur cleanup/fallback, reduced motion atau perlindungan posisi baca. Rilis Android hanya dilakukan bila pengguna mengizinkan; catat batas QA browser/mock dan uji HP fisik terpisah.
+
+## Pemulihan v1.2.6 (arahan terbaru)
+
+Pengguna membatalkan logo About pada splash dan meminta kembali ke v1.2.6. Pertahankan splash buku OS/scene3D versi 1.2.6. APK pemulihan bernomor 1.2.8/build 16 hanya untuk menerima update dari 1.2.7/build 15 tanpa downgrade; jangan memasukkan kembali perubahan logo About. Rilis 1.2.7 menjadi draft.

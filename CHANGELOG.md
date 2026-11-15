@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.8 — Pemulihan v1.2.6 (15 November 2026)
+
+- Batalkan perubahan logo splash v1.2.7; kembalikan seluruh runtime/source Android v1.2.6.
+- Gunakan build 16 dan signer yang sama agar dapat dipasang di atas v1.2.7 tanpa uninstall. Rilis 1.2.7 ditarik ke draft.
+- Enam tes splash, check dan verifikasi APK lulus; [rincian pemulihan](docs/releases/v1.2.8.md).
+
 ## 1.2.6 Stable — Splash buku dan preferensi visual (15 November 2026)
 
 - Tambahkan animated vector buku pada starting window Android dan splash khusus buku 3D/wordmark/glow, dengan transisi saat konten siap serta reduced motion.
