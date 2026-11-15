@@ -1,6 +1,6 @@
 # KataKecil Android dan source web bersama
 
-Pembaruan terbaru: [1.2.8 — Pemulihan v1.2.6](releases/v1.2.8.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
+Pembaruan terbaru: [1.2.9 — Ikon Lembar dan Tema ringkas](releases/v1.2.9.md), [pengaturan kaca dan ambient](liquid-glass-settings.md). Catatan versi pertama berikut dipertahankan sebagai riwayat.
 
 Versi pertama: **1.0.0**, versionCode **1**, application ID
 `id.karisyono.katakecil`. Branch: `feat/android-app`, dari `85eb4e6`.

@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## 1.2.9 Stable — Ikon Lembar dan Tema ringkas (15 November 2026)
+
+- Paketkan empat koleksi ikon, default Lembar serta perbaikan outline play/pause/kutipan.
+- Sertakan baris Glow halaman baca di sebelah Kustom pada Tema Pengaturan dan reader.
+- Build 17 memakai signer/package yang sama; enam tes splash, check dan verifikasi 328 aset APK lulus. [Rilis dan uji HP](docs/releases/v1.2.9.md).
+
 ## Pengembangan web — Default Lembar dan baris Glow (15 November 2026)
 
 - Perbaiki play, pause dan kutipan Lembar menjadi outline saat normal; varian solid tetap untuk ditekan/dipilih.

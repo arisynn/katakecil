@@ -1,0 +1,47 @@
+{
+  "version": "1.2.9",
+  "versionCode": 17,
+  "status": "verified-release-artifact",
+  "releaseTag": "v1.2.9",
+  "webSourceBaseline": "31dcd831556f91ad78b0e211338cfbea00b772df",
+  "checks": {
+    "webHelperBuild": "passed",
+    "syntaxAndRuntimeModuleGraph": "passed",
+    "targetedNodeTests": 6,
+    "nodeFailures": 0,
+    "testFiles": [
+      "launch-splash.test.mjs"
+    ],
+    "fullSuiteRun": false,
+    "previousWebValidation": "lembar-default-glow-web.json"
+  },
+  "artifact": {
+    "version": "1.2.9",
+    "versionCode": 17,
+    "apkBuilt": true,
+    "applicationId": "id.karisyono.katakecil",
+    "apkFile": "KataKecil-1.2.9-Karisyono.apk",
+    "apkBytes": 5092141,
+    "apkSha256": "b23d2a31edeeb4a878c3dda9359208e664117c9dea21f1afd712732a492502fb",
+    "signingCertificateSha256": "a79f2655964c3aa2261fc0da33230e83d3518e2232d1f2d5c4f875f5c55c2bba",
+    "signatureV2": true,
+    "signatureV3": true,
+    "zipAlignment": "4-byte and 16KB native-page check passed",
+    "packagedWebAssetsMatched": 328,
+    "skeletonRemoved": true,
+    "turningPagesDefaultPackaged": true,
+    "nativeAnimatedBookPackaged": true,
+    "dedicatedLaunchScenePackaged": true,
+    "buildMode": "--skip-qa",
+    "physicalDeviceTested": false
+  },
+  "packagedChanges": {
+    "lembarDefault": true,
+    "themeGlowBesideCustom": true,
+    "fourIconCollections": true
+  },
+  "androidUnitTestsRerun": false,
+  "androidFullLintReleaseRun": false,
+  "browserRerun": false,
+  "physicalDeviceTested": false
+}
