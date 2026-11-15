@@ -1,4 +1,4 @@
-import {loadingLogo} from './loading-logo.js?v=8';
+import {loadingLogo} from './loading-logo.js?v=9';
 
 const dismissals=new WeakMap();
 

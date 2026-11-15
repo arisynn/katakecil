@@ -1,0 +1,72 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "layouts": [
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [
+        "dialog-body"
+      ],
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "dialogWidth": 300,
+      "dialogHeight": 430
+    },
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dialogWidth": 390,
+      "dialogHeight": 495.953125
+    },
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [
+        "dialog-body"
+      ],
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "dialogWidth": 460,
+      "dialogHeight": 309
+    }
+  ],
+  "pickerUseReload": true,
+  "readerStableAndThemeActive": true,
+  "pressMouseTouchKeyboardCancelDisabled": true,
+  "stableSvgAndReducedMotion": true,
+  "completePairs": 52,
+  "result": "passed",
+  "date": "2026-11-15",
+  "baseline": "68f3ca8f60e7936983c02d061538be188c42fbea",
+  "sourceArchive": "KataKecil-icons-solid.zip",
+  "nodeTests": {
+    "passed": 25,
+    "failed": 0,
+    "files": [
+      "icon-states",
+      "visual-renderers",
+      "visual-settings",
+      "launch-splash"
+    ]
+  },
+  "build": true,
+  "typecheck": true,
+  "syntaxAndModuleGraph": "passed",
+  "nativeDeviceTested": false,
+  "apkVersionUnchanged": "1.2.8 / 16",
+  "mainVisualReview": "All 52 supplied pairs, picker and selected theme screenshots reviewed"
+}

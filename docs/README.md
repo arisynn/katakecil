@@ -4,6 +4,7 @@ Mulai dari [README utama](../README.md) untuk instalasi APK dan gambaran fitur.
 
 | Kebutuhan | Dokumen |
 | --- | --- |
+| Paket SVG KataKecil baru: outline normal, solid saat ditekan atau aktif | [Ikon outline/solid web](icon-solid-states-web.md) |
 | Pemulihan tampilan/fungsi v1.2.6 untuk perangkat yang sudah memasang v1.2.7 | [Android 1.2.8](releases/v1.2.8.md) |
 | Rilis stable 1.2.6: splash Android, pemilihan ikon/loading dan glow naskah | [Android 1.2.6](releases/v1.2.6.md) |
 | Dua motion loading baru: Lembar buku dan Alur tinta | [Motion loading web](loading-motion-web.md) |

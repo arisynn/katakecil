@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {indexedDB} from 'fake-indexeddb';
 import {createVisualSettings} from '../dist/loading-previews.js';
-import {icon,applyIconPack} from '../dist/ui.js?v=17';
-import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=8';
+import {icon,applyIconPack} from '../dist/ui.js?v=18';
+import {loadingLogo,applyLoadingStyle} from '../dist/loading-logo.js?v=9';
 import {createBackup,parseBackup} from '../dist/device-backup.js';
 
 function fixture(initial={}){

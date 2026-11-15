@@ -1,0 +1,8 @@
+/* Both shapes share one SVG and one button; interaction never replaces controls. */
+svg[data-icon-pack=katakecil-new]{--kk-icon-solid:0}
+svg[data-icon-pack=katakecil-new]>[data-icon-state]{transition:opacity .12s ease-out;pointer-events:none}
+svg[data-icon-pack=katakecil-new]>[data-icon-state=outline]{opacity:calc(1 - var(--kk-icon-solid))}
+svg[data-icon-pack=katakecil-new]>[data-icon-state=solid]{opacity:var(--kk-icon-solid)}
+:where(button,a[href],[role=button],summary):not(:disabled):not([aria-disabled=true]):is(:active,[data-pressing=true],.active,.selected,.is-selected,[aria-pressed=true],[aria-selected=true],[aria-expanded=true],[aria-current]:not([aria-current=false])) svg[data-icon-pack=katakecil-new],
+details[open]>summary:not([aria-disabled=true]) svg[data-icon-pack=katakecil-new]{--kk-icon-solid:1}
+@media(prefers-reduced-motion:reduce){svg[data-icon-pack=katakecil-new]>[data-icon-state]{transition:none}}

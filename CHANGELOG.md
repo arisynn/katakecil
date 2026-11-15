@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Ikon outline/solid dari ZIP (15 November 2026)
+
+- Tambahkan KataKecil baru sebagai pilihan ketiga di Ikon & Loading, dengan 52 pasangan SVG dari pengguna.
+- Outline saat normal, solid saat ditekan atau pilihan aktif; ukuran/node SVG tetap, disabled/reduced motion ditangani.
+- Simpan pilihan dalam preferensi dan backup. Build/check, 25 tes terarah dan browser fixture lulus; [hasil web](docs/icon-solid-states-web.md). Tidak membangun APK; versi tetap 1.2.8/build 16.
+
 ## 1.2.8 — Pemulihan v1.2.6 (15 November 2026)
 
 - Batalkan perubahan logo splash v1.2.7; kembalikan seluruh runtime/source Android v1.2.6.
