@@ -45,8 +45,7 @@
   "browserRerun": false,
   "physicalDeviceTested": false,
   "publication": {
-    "published": false,
-    "pushed": false,
-    "blockedBy": "GitHub token rejected with HTTP 401 Unauthorized"
+    "status": "prepared-for-publication",
+    "releaseUrl": "https://github.com/arisynn/katakecil/releases/tag/v1.2.9"
   }
 }
