@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
 import {createLaunchSplash,dismissLaunchSplash} from '../dist/launch-splash.js';
-import {applyLoadingStyle} from '../dist/loading-logo.js?v=9';
+import {applyLoadingStyle} from '../dist/loading-logo.js?v=10';
 
 function scene(){
  const w=new JSDOM('<body><main id="app"><article class="page-text">Keep this reading place.</article></main></body>',{pretendToBeVisual:true}).window;

@@ -1,0 +1,76 @@
+{
+  "scope": "Quick Chromium with local catalog/episode fixtures",
+  "physicalDeviceTested": false,
+  "productionWrites": false,
+  "apkBuilt": false,
+  "pageErrors": [],
+  "unexpectedNetwork": [],
+  "layouts": [
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [
+        "dialog-body"
+      ],
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "dialogWidth": 300,
+      "dialogHeight": 430
+    },
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dialogWidth": 390,
+      "dialogHeight": 618.75
+    },
+    {
+      "horizontalOverflow": false,
+      "documentOverflow": false,
+      "scrollers": [
+        "dialog-body"
+      ],
+      "viewport": {
+        "width": 667,
+        "height": 375
+      },
+      "dialogWidth": 460,
+      "dialogHeight": 309
+    }
+  ],
+  "pickerUseReload": true,
+  "readerStableAndThemeActive": true,
+  "pressMouseTouchKeyboardCancelDisabled": true,
+  "stableSvgAndReducedMotion": true,
+  "completePairs": 52,
+  "result": "passed",
+  "date": "2026-11-15",
+  "baseline": "5711e2df8f4ba2cbb6daaeb3c25e5dbf134d08c2",
+  "collections": [
+    "Rounded KataKecil",
+    "Lucide",
+    "Lentera",
+    "Lembar"
+  ],
+  "lenteraSourceFilesUnchanged": 104,
+  "lembarOriginalOutlinesUnchanged": 52,
+  "lembarAuthoredSolids": 52,
+  "allSolidShapesInsideViewBox": true,
+  "nodeTests": {
+    "passed": 26,
+    "failed": 0,
+    "followupIconTestsPassedAfterSlidersPolish": 5
+  },
+  "build": "passed",
+  "typecheck": "passed",
+  "syntaxAndModuleGraph": "passed",
+  "apkVersionUnchanged": "1.2.8 / 16",
+  "visualReview": "Lembar 52 paired SVGs, final solid sliders, and four-card picker reviewed",
+  "downloadZipSha256": "6ff2f9d54082463560552cec974c6026982722214fee5683dbaffdf977e9d568"
+}

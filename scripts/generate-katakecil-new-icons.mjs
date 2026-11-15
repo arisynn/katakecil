@@ -2,11 +2,12 @@ import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {KATAKECIL_ICONS} from '../dist/katakecil-icons.js';
 const base=new URL('../',import.meta.url),names=Object.keys(KATAKECIL_ICONS);
-const tags=new Set(['path','circle','rect','line','polyline','polygon']);
+const tags=new Set(['path','circle','rect','line','polyline','polygon','ellipse']);
 const attributes=new Set(['fill','stroke','stroke-width','stroke-linecap','stroke-linejoin','cx','cy','r','d','x1','y1','x2','y2','points','x','y','width','height','rx','ry']);
+async function generateCollection({id,file,source,outlineExport,solidExport}){
 const packs={};
 for(const variant of ['outline','solid']){
- const directory=new URL(`dist/assets/icons/katakecil-new/${variant}/`,base);
+ const directory=new URL(`dist/assets/icons/${id}/${variant}/`,base);
  const files=await readdir(directory);
  if(files.length!==names.length||names.some(name=>!files.includes(name+'.svg')))throw Error('Incomplete icon variant: '+variant);
  packs[variant]={};
@@ -31,4 +32,7 @@ for(const variant of ['outline','solid']){
   }finally{dom.window.close();}
  }
 }
-await writeFile(new URL('dist/katakecil-new-icons.js',base),'// Generated from the user-supplied KataKecil-icons-solid.zip. Original SVGs are in assets/icons/katakecil-new/.\nexport const KATAKECIL_NEW_OUTLINE=Object.freeze('+JSON.stringify(packs.outline)+');\nexport const KATAKECIL_NEW_SOLID=Object.freeze('+JSON.stringify(packs.solid)+');\n');
+await writeFile(new URL('dist/'+file,base),'// Generated from '+source+'. Original SVGs: assets/icons/'+id+'/.\nexport const '+outlineExport+'=Object.freeze('+JSON.stringify(packs.outline)+');\nexport const '+solidExport+'=Object.freeze('+JSON.stringify(packs.solid)+');\n');
+}
+await generateCollection({id:'katakecil-new',file:'katakecil-new-icons.js',source:'the user-supplied KataKecil-icons-solid.zip',outlineExport:'KATAKECIL_NEW_OUTLINE',solidExport:'KATAKECIL_NEW_SOLID'});
+await generateCollection({id:'katakecil-lembar',file:'katakecil-lembar-icons.js',source:'the user-supplied katakecil-icons _1_.zip (outline) and authored solid counterparts',outlineExport:'KATAKECIL_LEMBAR_OUTLINE',solidExport:'KATAKECIL_LEMBAR_SOLID'});

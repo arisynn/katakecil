@@ -1,6 +1,6 @@
 # Ikon outline/solid dari ZIP — web
 
-**Pengaturan → Lanjutan → Ikon & Loading → Ikon → KataKecil baru → Gunakan** menambahkan pilihan ketiga dari ZIP pengguna. Dua pilihan Rounded KataKecil dan Lucide serta default sebelumnya tetap tersedia. Memilih card hanya mengubah kandidat; Gunakan menerapkan pilihan.
+**Pengaturan → Lanjutan → Ikon & Loading → Ikon → Lentera → Gunakan** memakai ZIP pengguna sebelumnya. Pilihan ini dahulu bernama KataKecil baru. Sekarang ada empat koleksi; lihat [Lentera dan Lembar](icon-collections-web.md). Dua pilihan Rounded KataKecil dan Lucide serta default sebelumnya tetap tersedia. Memilih card hanya mengubah kandidat; Gunakan menerapkan pilihan.
 
 Paket memiliki **52 pasangan outline/solid**. Normal dan hover memakai outline. Saat tombol ditekan dengan mouse, sentuhan atau keyboard, pasangan solid tampil. Solid tetap tampil pada pilihan aktif (`aria-pressed`, `aria-selected`, `aria-current`, `aria-expanded`, class active/selected/is-selected dan summary terbuka). Pelepasan/batal tekan kembali mengikuti status pilihan; tombol disabled tidak mendapat state tekan/aktif solid.
 
@@ -18,6 +18,6 @@ Source web saja, tanpa build/release APK baru atau uji HP fisik. APK 1.2.8/build
 
 ## Coba sendiri
 
-1. Pilih KataKecil baru lalu Gunakan. Tahan tombol untuk melihat solid, lepas dan bandingkan.
+1. Pilih Lentera lalu Gunakan. Tahan tombol untuk melihat solid, lepas dan bandingkan.
 2. Di Tema/Tampilan baca, pindah pilihan/tab; pilihan aktif tetap solid.
 3. Coba reload dan kembali ke Rounded/Lucide melalui menu yang sama.

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {icon,applyIconPack} from '../dist/ui.js';
+import {KATAKECIL_LEMBAR_OUTLINE,KATAKECIL_LEMBAR_SOLID} from '../dist/katakecil-lembar-icons.js';
 import {KATAKECIL_ICONS} from '../dist/katakecil-icons.js';
 import {KATAKECIL_NEW_OUTLINE,KATAKECIL_NEW_SOLID} from '../dist/katakecil-new-icons.js';
 import {normalizeVisualPreferences,VISUAL_DEFAULTS} from '../dist/visual-preferences.js';
@@ -43,7 +44,23 @@ test('picker exposes the new family as a candidate and applies it only on Use',(
  const sheet=createVisualSettings({document:doc,prefs:()=>prefs,heading:title=>'<h2>'+title+'</h2>',show:html=>doc.querySelector('#overlay').innerHTML='<section class="dialog">'+html+'</section>',save:change=>{writes.push(change);prefs={...prefs,...change};},apply:()=>applyIconPack(prefs.iconPack,doc)});
  const action=(name,value,key)=>sheet.action({dataset:{action:name,value,visualKey:key}});
  try{
-  action('loading-previews');assert.equal(doc.querySelectorAll('[data-visual-key=iconPack]').length,3);action('visual-candidate','katakecil-new','iconPack');assert.deepEqual(writes,[]);assert.equal(doc.querySelector('.live').dataset.iconPack,'katakecil');
+  action('loading-previews');assert.equal(doc.querySelectorAll('[data-visual-key=iconPack]').length,4);action('visual-candidate','katakecil-new','iconPack');assert.deepEqual(writes,[]);assert.equal(doc.querySelector('.live').dataset.iconPack,'katakecil');
   action('visual-use');assert.deepEqual(writes,[{iconPack:'katakecil-new'}]);assert.equal(doc.querySelector('.live').dataset.iconPack,'katakecil-new');assert.equal(prefs.loadingStyle,'pulse');assert.equal(doc.querySelector('[data-value=katakecil-new]').getAttribute('aria-pressed'),'true');
  }finally{applyIconPack('katakecil');dom.window.close();}
+});
+
+test('Lembar has a complete independent outline/solid family and keeps all four preference IDs',async()=>{
+ assert.deepEqual(Object.keys(KATAKECIL_LEMBAR_OUTLINE),Object.keys(KATAKECIL_ICONS));assert.deepEqual(Object.keys(KATAKECIL_LEMBAR_SOLID),Object.keys(KATAKECIL_ICONS));
+ for(const iconPack of ['katakecil','lucide','katakecil-new','katakecil-lembar'])assert.equal(normalizeVisualPreferences({iconPack}).iconPack,iconPack);
+ const restored=parseBackup(JSON.stringify(createBackup({preferences:{iconPack:'katakecil-lembar'},annotations:[],progress:{}})));assert.equal(restored.preferences.iconPack,'katakecil-lembar');
+ for(const name of Object.keys(KATAKECIL_ICONS))for(const variant of ['outline','solid']){
+  const svg=await readFile(new URL('../dist/assets/icons/katakecil-lembar/'+variant+'/'+name+'.svg',import.meta.url),'utf8');
+  const source=new JSDOM(svg,{contentType:'image/svg+xml'}),rendered=new JSDOM(icon(name,'','katakecil-lembar'));
+  try{
+   const expected=source.window.document.documentElement,group=rendered.window.document.querySelector('[data-icon-state='+variant+']>g');
+   assert.equal(group.getAttribute('fill'),expected.getAttribute('fill'),name);assert.equal(group.getAttribute('stroke'),expected.getAttribute('stroke')||'none',name);
+   assert.equal(group.children.length,expected.children.length,name);assert.ok([...group.children].every((node,i)=>node.isEqualNode(expected.children[i])),name+' '+variant);
+   if(variant==='solid')assert.equal(expected.getAttribute('fill'),'currentColor');
+  }finally{source.window.close();rendered.window.close();}
+ }
 });

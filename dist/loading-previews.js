@@ -1,9 +1,9 @@
-import {icon} from './ui.js?v=18';
-import {loadingLogo} from './loading-logo.js?v=9';
-import {normalizeVisualPreferences} from './visual-preferences.js?v=4';
+import {icon} from './ui.js?v=19';
+import {loadingLogo} from './loading-logo.js?v=10';
+import {normalizeVisualPreferences} from './visual-preferences.js?v=5';
 import {scheduleSheetFit} from './panel-layout.js?v=5';
 
-const ICONS=[['katakecil','Rounded KataKecil'],['lucide','Lucide'],['katakecil-new','KataKecil baru']];
+const ICONS=[['katakecil','Rounded KataKecil'],['lucide','Lucide'],['katakecil-new','Lentera'],['katakecil-lembar','Lembar']];
 const LOADERS=[['wordmark','Wordmark lama'],['pulse','Lembar buku'],['dots','Alur tinta']];
 const FIELDS={icons:'iconPack',loading:'loadingStyle'};
 
@@ -12,7 +12,7 @@ export function createVisualSettings(ctx){
  const doc=ctx.document;let draft=null,tab='icons',dirty={iconPack:false,loadingStyle:false};
  const current=()=>normalizeVisualPreferences(ctx.prefs());
  function choices(key,options,value){return options.map(([id,title])=>`<button type="button" class="visual-choice${id===value?' is-selected':''}" data-action="visual-candidate" data-visual-key="${key}" data-value="${id}" aria-pressed="${id===value}">${key==='iconPack'?`<span class="visual-icon-sample" aria-hidden="true">${['refresh','sliders','systemTheme','bookOpen'].map(symbol=>icon(symbol,'',id)).join('')}</span>`:''}<span class="visual-choice-label">${title}</span><span class="visual-choice-current" data-visual-current="${id}" hidden>Sedang digunakan</span></button>`).join('');}
- function panel(value){return `<p class="visual-settings-caption">Pilihan diterapkan setelah menekan Gunakan.</p>${tab==='icons'?'<p class="visual-settings-caption">KataKecil baru: outline saat biasa, solid saat ditekan atau dipilih.</p>':''}<div class="visual-choice-grid ${tab==='icons'?'visual-icon-choices':'visual-loading-choices'}" role="group" aria-label="${tab==='icons'?'Pilihan paket ikon':'Pilihan loading'}">${choices(FIELDS[tab],tab==='icons'?ICONS:LOADERS,value[FIELDS[tab]])}</div>${tab==='loading'?`<div class="visual-loading-stage loading-preview-stage" aria-label="Pratinjau loading">${loadingLogo(value.loadingStyle)}</div>`:''}<div class="visual-settings-footer"><p class="visual-settings-status" role="status" aria-live="polite"></p><div class="visual-settings-actions">${tab==='loading'?'<button type="button" class="secondary" data-action="visual-try">Coba</button>':''}<button type="button" class="primary" data-action="visual-use" disabled>Gunakan</button></div></div>`;}
+ function panel(value){return `<p class="visual-settings-caption">Pilihan diterapkan setelah menekan Gunakan.</p>${tab==='icons'?'<p class="visual-settings-caption">Lentera dan Lembar: outline saat biasa, solid saat ditekan atau dipilih.</p>':''}<div class="visual-choice-grid ${tab==='icons'?'visual-icon-choices':'visual-loading-choices'}" role="group" aria-label="${tab==='icons'?'Pilihan paket ikon':'Pilihan loading'}">${choices(FIELDS[tab],tab==='icons'?ICONS:LOADERS,value[FIELDS[tab]])}</div>${tab==='loading'?`<div class="visual-loading-stage loading-preview-stage" aria-label="Pratinjau loading">${loadingLogo(value.loadingStyle)}</div>`:''}<div class="visual-settings-footer"><p class="visual-settings-status" role="status" aria-live="polite"></p><div class="visual-settings-actions">${tab==='loading'?'<button type="button" class="secondary" data-action="visual-try">Coba</button>':''}<button type="button" class="primary" data-action="visual-use" disabled>Gunakan</button></div></div>`;}
  function paint(){
   const body=doc.querySelector('#visual-settings-body');if(!draft||!body)return;
   const key=FIELDS[tab],saved=current();

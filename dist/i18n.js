@@ -3,7 +3,7 @@ export const LANGUAGES=['id','en'];
 let language='en',observer,onUpdate=()=>{};
 const sourceNodes=new WeakMap(),sourceAttributes=new WeakMap();
 const english={
- 'KataKecil baru':'New KataKecil','KataKecil baru: outline saat biasa, solid saat ditekan atau dipilih.':'New KataKecil: outline normally, solid when pressed or selected.',
+ 'Lentera dan Lembar: outline saat biasa, solid saat ditekan atau dipilih.':'Lentera and Lembar: outline normally, solid when pressed or selected.',
  'Glow halaman baca':'Reading page glow','Mengikuti intensitas Ambient.':'Follows Ambient intensity.',
  'Wordmark lama':'Classic wordmark','Lembar buku':'Turning pages','Alur tinta':'Ink flow',
  'Ikon & Loading':'Icons & Loading','Ikon':'Icons','Bagian ikon dan loading':'Icon and loading sections',

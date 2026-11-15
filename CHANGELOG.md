@@ -2,6 +2,12 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
+## Pengembangan web — Lentera dan Lembar (15 November 2026)
+
+- Namai paket ZIP sebelumnya Lentera; pertahankan seluruh aset dan ID preferensinya.
+- Tambahkan Lembar sebagai koleksi keempat, dengan 52 outline dari ZIP baru dan 52 solid yang dibuat khusus. Keduanya mendukung solid saat ditekan/dipilih.
+- Build/check, 26 tes terarah dan browser fixture lulus; [koleksi dan preview](docs/icon-collections-web.md). Source web saja, tanpa APK baru.
+
 ## Pengembangan web — Ikon outline/solid dari ZIP (15 November 2026)
 
 - Tambahkan KataKecil baru sebagai pilihan ketiga di Ikon & Loading, dengan 52 pasangan SVG dari pengguna.
