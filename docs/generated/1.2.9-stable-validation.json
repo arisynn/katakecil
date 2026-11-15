@@ -45,7 +45,32 @@
   "browserRerun": false,
   "physicalDeviceTested": false,
   "publication": {
-    "status": "prepared-for-publication",
-    "releaseUrl": "https://github.com/arisynn/katakecil/releases/tag/v1.2.9"
+    "tag": "v1.2.9",
+    "latest": true,
+    "draft": false,
+    "sourceRevision": "4cace45a3c7c06fcd3b5e5f660b6d9265b11f78c",
+    "releaseUrl": "https://github.com/arisynn/katakecil/releases/tag/v1.2.9",
+    "apkUrl": "https://github.com/arisynn/katakecil/releases/download/v1.2.9/KataKecil-1.2.9-Karisyono.apk",
+    "apkSha256": "b23d2a31edeeb4a878c3dda9359208e664117c9dea21f1afd712732a492502fb",
+    "assets": [
+      {
+        "name": "KataKecil-1.2.9-Karisyono.apk",
+        "bytes": 5092141,
+        "digest": "sha256:b23d2a31edeeb4a878c3dda9359208e664117c9dea21f1afd712732a492502fb"
+      },
+      {
+        "name": "KataKecil-1.2.9-Karisyono.apk.sha256",
+        "bytes": 96,
+        "digest": "sha256:bd8eeb5d37fbc501c17dc54c5c2802cef45c9ae6924f6e3867c5799dc778fa9b"
+      },
+      {
+        "name": "KataKecil-release-info.json",
+        "bytes": 500,
+        "digest": "sha256:d43f8ad0fa92707bbeb38aff420de33a4e23122f8faf6fe4ae7312aa1bd215e4"
+      }
+    ],
+    "publicDownloadsVerified": true,
+    "published": true,
+    "pushed": true
   }
 }

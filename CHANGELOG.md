@@ -2,7 +2,7 @@
 
 Perubahan dicatat per rilis. Status dan cakupan QA dijelaskan pada catatan masing-masing versi.
 
-## 1.2.9 — Build lokal, belum diterbitkan — Ikon Lembar dan Tema ringkas (15 November 2026)
+## 1.2.9 Stable — Ikon Lembar dan Tema ringkas (15 November 2026)
 
 - Paketkan empat koleksi ikon, default Lembar serta perbaikan outline play/pause/kutipan.
 - Sertakan baris Glow halaman baca di sebelah Kustom pada Tema Pengaturan dan reader.
