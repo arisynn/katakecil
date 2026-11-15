@@ -43,5 +43,10 @@
   "androidUnitTestsRerun": false,
   "androidFullLintReleaseRun": false,
   "browserRerun": false,
-  "physicalDeviceTested": false
+  "physicalDeviceTested": false,
+  "publication": {
+    "published": false,
+    "pushed": false,
+    "blockedBy": "GitHub token rejected with HTTP 401 Unauthorized"
+  }
 }
